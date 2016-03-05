@@ -47,6 +47,8 @@ direction_t
 change_direction(direction_t current, rotation_t turn);
 
 // initialises a spiral_t struct from an array pointer to unsigned bytes
+// this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
+// instructions which are then used to build the pattern.
 spiral_t
 init_spiral(uint8_t * buffer, size_t size);
 
