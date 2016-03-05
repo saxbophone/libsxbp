@@ -9,7 +9,7 @@ extern "C"{
 // will be faced when turning in the rotational direction specified by turn.
 direction_t
 change_direction(direction_t current, rotation_t turn) {
-    return (current + turn) % 4;
+    return (current + turn) % 4U;
 }
 
 #ifdef __cplusplus

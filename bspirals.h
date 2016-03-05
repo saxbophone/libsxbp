@@ -1,31 +1,37 @@
 #ifndef SAXBOPHONE_BSPIRALS_H
 #define SAXBOPHONE_BSPIRALS_H
 
-// includes go here
+#include "stdint.h"
 
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-// enum for representing the four cartesian directions
-typedef enum direction_t {
-    UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3,
-} direction_t;
+// type for representing a cartesian direction
+typedef int8_t direction_t;
 
-// enum for representing a clockwise or an anti-clockwise turn
-typedef enum rotation_t {
-    CLOCKWISE = 1, ANTI_CLOCKWISE = -1,
-} rotation_t;
+// cartesian direction constants
+#define UP 0
+#define RIGHT 1
+#define DOWN 2
+#define LEFT 3
+
+// type for representing a rotational direction
+typedef int8_t rotation_t;
+
+// rotational direction constants
+#define CLOCKWISE 1
+#define ANTI_CLOCKWISE -1
+
+typedef struct spiral_t {
+    // currently unused, TODO: Use!
+} spiral_t;
 
 // when facing the direction specified by current, return the direction that
 // will be faced when turning in the rotational direction specified by turn.
 direction_t
 change_direction(direction_t current, rotation_t turn);
-
-typedef struct spiral_t {
-    //
-} spiral_t;
 
 #ifdef __cplusplus
 } // extern "C"
