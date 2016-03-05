@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "bspirals.h"
@@ -17,9 +18,43 @@ change_direction(direction_t current, rotation_t turn) {
 // initialises a spiral_t struct from an array pointer to unsigned bytes
 spiral_t
 init_spiral(uint8_t * buffer, size_t size) {
+    // number of lines is number of bits of the data
     size_t line_count = size * 8;
+    // create spiral_t struct
     spiral_t result = { .size = line_count, };
+    // allocate enough memory for a line_t struct for each bit
     result.lines = calloc(sizeof(line_t), line_count);
+    // variable for storing the current direction
+    direction_t current;
+    // first direction is a one-off, pre-prepare the stored direction for this
+    // if first bit is 0, then first direction is UP, else if 1 then it's RIGHT
+    if((buffer[0] & 0b10000000) == 0) {
+        current = LEFT; // the direction that gets to UP by moving clockwise
+    } else {
+        current = DOWN; // the direction that gets to RIGHT by moving anti-clockwise
+    }
+    // now, iterate over all the bits in the data and convert to directions
+    // that make the spiral pattern, storing these directions in the result lines
+    for(size_t s = 0; s < size; s++) {
+        // byte-level loop
+        for(size_t b = 0; b < 8; b++) {
+            // bit level loop
+            uint8_t e = 7-b; // which power of two to use with bit mask
+            uint8_t bit = (buffer[s] & (1 << e)) >> e; // the currently accessed bit
+            size_t index = (s*8) + b; // line index
+            rotation_t rotation; // the rotation we're going to make
+            // set rotation direction based on the current bit
+            if(bit == 0) {
+                rotation = CLOCKWISE;
+            } else {
+                rotation = ANTI_CLOCKWISE;
+            }
+            // calculate the change of direction
+            current = change_direction(current, rotation);
+            // store direction in result struct
+            result.lines[index].direction = current;
+        }
+    }
     return result;
 }
 
