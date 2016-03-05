@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -58,6 +59,74 @@ init_spiral(uint8_t * buffer, size_t size) {
         }
     }
     return result;
+}
+
+// private function, returns a dynamically allocated array of co_ord_t structs
+// that represent all the points in cartesian space occupied by the given spiral
+static co_ord_t * spiral_points(spiral_t spiral, size_t limit) {
+    //
+}
+
+// private function, given a spiral struct, check if any of its lines would
+// collide given their current directions and jump sizes, checking up to limit
+// number of lines
+static bool spiral_collides(spiral_t spiral, size_t limit) {
+    return false;
+}
+
+// private function, given a spiral struct, the index of one of it's lines and
+// a target length to set that line to, attempt to set the target line to that
+// length, recursively calling self to resize the previous line if that is not
+// possible.
+static spiral_t
+resize_spiral(spiral_t input, size_t index, uint32_t length) {
+    // TODO: Clean these up!
+    // printf(".");
+    // fflush(stdout);
+    // allocate new struct as copy of input struct
+    spiral_t output = { .size = input.size, };
+    output.lines = calloc(sizeof(line_t), output.size);
+    // copy across line directions and lengths
+    for(size_t i = 0; i < output.size; i++) {
+        output.lines[i].direction = input.lines[i].direction;
+        output.lines[i].length = input.lines[i].length;
+    }
+    // first, set the target line to the target length
+    output.lines[index].length = length;
+    // now, check for collisions (NOT IMPLEMENTED YET)
+    bool collides = spiral_collides(output, index);
+    if(collides) {
+        // there were collisions, so reset the target line to 1
+        output.lines[index].length = 1;
+        while(collides) {
+            // recursively call resize_spiral(), increasing the size of the
+            // previous line until we get something that doesn't collide
+            output = resize_spiral(
+                output, index-1, output.lines[index-1].length+1
+            );
+            collides = spiral_collides(output, index);
+        }
+    }
+    return output;
+}
+
+// given a spiral for which the length of all its lines are not yet known,
+// calculate the length needed for each line in the spiral (to avoid line overlap)
+// and store these in a spiral struct and return that
+spiral_t
+plot_spiral(spiral_t input) {
+    // allocate new struct as copy of input struct
+    spiral_t output = { .size = input.size, };
+    output.lines = calloc(sizeof(line_t), output.size);
+    // copy across line directions
+    for(size_t i = 0; i < output.size; i++) {
+        output.lines[i].direction = input.lines[i].direction;
+    }
+    // calculate the length of each line
+    for(size_t i = 0; i < output.size; i++) {
+        output = resize_spiral(output, i, 1);
+    }
+    return output;
 }
 
 #ifdef __cplusplus

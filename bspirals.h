@@ -41,6 +41,20 @@ typedef struct spiral_t {
     line_t * lines;
 } spiral_t;
 
+typedef struct tuple_t {
+    int64_t x;
+    int64_t y;
+} tuple_t;
+
+typedef tuple_t vector_t;
+typedef tuple_t co_ord_t;
+
+// vector direction constants
+static const vector_t VECTOR_UP = { 0, 1, };
+static const vector_t VECTOR_RIGHT = { 1, 0, };
+static const vector_t VECTOR_DOWN = { 0, -1, };
+static const vector_t VECTOR_LEFT = { -1, 0, };
+
 // when facing the direction specified by current, return the direction that
 // will be faced when turning in the rotational direction specified by turn.
 direction_t
@@ -51,6 +65,12 @@ change_direction(direction_t current, rotation_t turn);
 // instructions which are then used to build the pattern.
 spiral_t
 init_spiral(uint8_t * buffer, size_t size);
+
+// given a spiral for which the length of all its lines are not yet known,
+// calculate the length needed for each line in the spiral (to avoid line overlap)
+// and store these in a spiral struct and return that
+spiral_t
+plot_spiral(spiral_t spiral);
 
 #ifdef __cplusplus
 } // extern "C"
