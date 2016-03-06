@@ -59,8 +59,8 @@ init_spiral(uint8_t * buffer, size_t size) {
 static co_ord_array_t
 spiral_points(spiral_t spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
-    size_t size = 0;
-    for(size_t i = 0; i < limit+1; i++) {
+    size_t size = 1;
+    for(size_t i = 0; i < limit; i++) {
         size += spiral.lines[i].length;
     }
     // allocate enough memory to store these
@@ -73,7 +73,7 @@ spiral_points(spiral_t spiral, size_t limit) {
     result.items[0].y = current.y;
     size_t result_index = 0; // maintain independent index for co-ords array
     // iterate over all lines and add the co-ords
-    for(size_t i = 0; i < limit+1; i++) {
+    for(size_t i = 0; i < limit; i++) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines legth
@@ -81,14 +81,11 @@ spiral_points(spiral_t spiral, size_t limit) {
         for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
-            result.items[result_index].x = current.x;
-            result.items[result_index].y = current.y;
-            // printf("(%li, %li) ", result.items[result_index].x, result.items[result_index].y);
+            result.items[result_index+1].x = current.x;
+            result.items[result_index+1].y = current.y;
             result_index++;
         }
     }
-    printf("%zi, %zi\n", size, result_index);
-    // printf("\n");
     return result;
 }
 
@@ -99,7 +96,7 @@ static bool
 spiral_collides(spiral_t spiral, size_t limit) {
     co_ord_array_t co_ords = spiral_points(spiral, limit);
     // check for duplicates
-    // printf("%zi\n", co_ords.size);
+    // false if there are not.
     bool duplicates = false;
     for(size_t i = 0; i < co_ords.size; i++) {
         for(size_t j = 0; j < co_ords.size; j++) {
@@ -108,12 +105,6 @@ spiral_collides(spiral_t spiral, size_t limit) {
                     (co_ords.items[i].x == co_ords.items[j].x)
                     && (co_ords.items[i].y == co_ords.items[j].y)
                 ) {
-                    printf(
-                        "(%li, %li) == (%li, %li) [%zi, %zi]",
-                        co_ords.items[i].x, co_ords.items[i].y,
-                        co_ords.items[j].x, co_ords.items[j].y,
-                        i, j
-                    );
                     duplicates = true;
                     break;
                 }
@@ -123,7 +114,6 @@ spiral_collides(spiral_t spiral, size_t limit) {
             break;
         }
     }
-    // false if there are not.
     free(co_ords.items);
     return duplicates;
 }
@@ -133,45 +123,38 @@ spiral_collides(spiral_t spiral, size_t limit) {
 // length, recursively calling self to resize the previous line if that is not
 // possible.
 static spiral_t
-resize_spiral(spiral_t input, size_t index, uint32_t length) {
-    // TODO: Clean these up!
-    printf(".");
-    // fflush(stdout);
-    // allocate new struct as copy of input struct
-    spiral_t output = { .size = input.size, };
-    output.lines = calloc(sizeof(line_t), output.size);
-    // copy across line directions and lengths
-    for(size_t i = 0; i < output.size; i++) {
-        output.lines[i].direction = input.lines[i].direction;
-        output.lines[i].length = input.lines[i].length;
-    }
-    free(input.lines);
+resize_spiral(spiral_t output, size_t index, uint32_t length) {
+    // // allocate new struct as copy of input struct
+    // spiral_t output = { .size = input.size, };
+    // output.lines = calloc(sizeof(line_t), output.size);
+    // // copy across line directions and lengths
+    // for(size_t i = 0; i < output.size; i++) {
+    //     output.lines[i].direction = input.lines[i].direction;
+    //     output.lines[i].length = input.lines[i].length;
+    // }
+    // free(input.lines);
     // first, set the target line to the target length
     output.lines[index].length = length;
-    // now, check for collisions (NOT IMPLEMENTED YET)
-    bool collides = spiral_collides(output, index);
-    // printf("Checked\n");
+    // now, check for collisions
+    bool collides = spiral_collides(output, index+1);
     if(collides) {
         // there were collisions, so reset the target line to 1
         output.lines[index].length = 1;
         while(collides) {
-            // printf("Checking\n");
             // recursively call resize_spiral(), increasing the size of the
             // previous line until we get something that doesn't collide
-            // printf("%zi\n", index-1);
-            spiral_t workon = resize_spiral(
+            output = resize_spiral(
                 output, index-1, output.lines[index-1].length+1
             );
-            // free(output.lines);
-            output.lines = calloc(sizeof(line_t), workon.size);
-            // copy across line directions and lengths
-            for(size_t i = 0; i < workon.size; i++) {
-                output.lines[i].direction = workon.lines[i].direction;
-                output.lines[i].length = workon.lines[i].length;
-            }
-            free(workon.lines);
-            // printf("Resized\n");
-            collides = spiral_collides(output, index);
+            // // free(output.lines);
+            // output.lines = calloc(sizeof(line_t), workon.size);
+            // // copy across line directions and lengths
+            // for(size_t i = 0; i < workon.size; i++) {
+            //     output.lines[i].direction = workon.lines[i].direction;
+            //     output.lines[i].length = workon.lines[i].length;
+            // }
+            // free(workon.lines);
+            collides = spiral_collides(output, index+1);
         }
     }
     return output;
