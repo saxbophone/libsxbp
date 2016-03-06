@@ -27,15 +27,9 @@ init_spiral(uint8_t * buffer, size_t size) {
     spiral_t result = { .size = line_count, };
     // allocate enough memory for a line_t struct for each bit
     result.lines = calloc(sizeof(line_t), line_count);
-    // variable for storing the current direction
-    direction_t current;
     // first direction is a one-off, pre-prepare the stored direction for this
     // if first bit is 0, then first direction is UP, else if 1 then it's RIGHT
-    if((buffer[0] & 0b10000000) == 0) {
-        current = LEFT; // the direction that gets to UP by moving clockwise
-    } else {
-        current = DOWN; // the direction that gets to RIGHT by moving anti-clockwise
-    }
+    direction_t current = ((buffer[0] & 0b10000000) == 0) ? LEFT : DOWN;
     // now, iterate over all the bits in the data and convert to directions
     // that make the spiral pattern, storing these directions in the result lines
     for(size_t s = 0; s < size; s++) {
@@ -64,7 +58,8 @@ init_spiral(uint8_t * buffer, size_t size) {
 // private function, returns a dynamically allocated array of co_ord_t structs
 // that represent all the points in cartesian space occupied by the given spiral
 static co_ord_t * spiral_points(spiral_t spiral, size_t limit) {
-    //
+    co_ord_t current = { 0, 0, };
+    // TODO: rest of function...
 }
 
 // private function, given a spiral struct, check if any of its lines would

@@ -60,48 +60,6 @@ test_init_spiral() {
 }
 
 bool
-test_spiral_points() {
-    // success / failure variable
-    bool result = true;
-    // build spiral_t struct
-    spiral_t spiral = { .size = 16, };
-    spiral.lines = calloc(sizeof(line_t), 16);
-    direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
-    };
-    length_t lengths[16] = {
-        1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
-    };
-    for(uint8_t i = 0; i < 16; i++) {
-        spiral.lines[i].direction = directions[i];
-        spiral.lines[i].length = lengths[i];
-    }
-    // build expected co-ords
-    co_ord_t expected[17] = {
-        { 0, 0, }, { 0, 1, }, { -1, 1, }, { -1, 0, }, { -2, 0, }, { -2, -1, },
-        { -1, -1, }, { -1, 0, }, { 0, 0, }, { 0, 0, }, { 0, 0, }, { 0, 0, },
-        { 0, 0, }, { 0, 0, }, { 0, 0, }, { 0, 0, }, { 0, 0, },
-    };
-
-    // call init_spiral with buffer and store result
-    co_ord_t * output = spiral_points(spiral, 12);
-
-    // compare with expected co-ords
-    for(uint8_t i = 0; i < 16; i++) {
-        if((output[i].x != expected[i].x) || (output[i].y != expected[i].y)) {
-            result = false;
-        }
-    }
-
-    // free memory
-    free(spiral.lines);
-    free(output);
-
-    return result;
-}
-
-bool
 test_plot_spiral() {
     // success / failure variable
     bool result = true;
