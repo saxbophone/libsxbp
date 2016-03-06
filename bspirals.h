@@ -50,10 +50,10 @@ typedef tuple_t vector_t;
 typedef tuple_t co_ord_t;
 
 // vector direction constants
-static const vector_t VECTOR_UP = { 0, 1, };
-static const vector_t VECTOR_RIGHT = { 1, 0, };
-static const vector_t VECTOR_DOWN = { 0, -1, };
-static const vector_t VECTOR_LEFT = { -1, 0, };
+static const vector_t VECTOR_DIRECTIONS[4] = {
+    // UP       RIGHT       DOWN        LEFT
+    { 0, 1, }, { 1, 0, }, { 0, -1, }, { -1, 0, },
+};
 
 // when facing the direction specified by current, return the direction that
 // will be faced when turning in the rotational direction specified by turn.

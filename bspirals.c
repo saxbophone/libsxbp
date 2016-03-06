@@ -41,15 +41,13 @@ init_spiral(uint8_t * buffer, size_t size) {
             size_t index = (s*8) + b; // line index
             rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
-            if(bit == 0) {
-                rotation = CLOCKWISE;
-            } else {
-                rotation = ANTI_CLOCKWISE;
-            }
+            rotation = (bit == 0) ? CLOCKWISE : ANTI_CLOCKWISE;
             // calculate the change of direction
             current = change_direction(current, rotation);
             // store direction in result struct
             result.lines[index].direction = current;
+            // set length to 1 initially
+            result.lines[index].length = 1;
         }
     }
     return result;
@@ -57,15 +55,43 @@ init_spiral(uint8_t * buffer, size_t size) {
 
 // private function, returns a dynamically allocated array of co_ord_t structs
 // that represent all the points in cartesian space occupied by the given spiral
+// TODO: Change this to return a struct, including the count of items!
 static co_ord_t * spiral_points(spiral_t spiral, size_t limit) {
+    // the amount of space needed is the sum of all line lengths:
+    size_t size = 0;
+    for(size_t i = 0; i < limit+1; i++) {
+        size += spiral.lines[i].length;
+    }
+    // allocate enough memory to store these
+    co_ord_t * result = calloc(sizeof(co_ord_t), size+1);
+    // start at (0, 0) as origin
     co_ord_t current = { 0, 0, };
-    // TODO: rest of function...
+    result[0] = current;
+    size_t result_index = 1; // maintain independent index for co-ords array
+    // iterate over all lines and add the co-ords
+    for(size_t i = 0; i < limit; i++) {
+        // get current direction
+        vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        // make as many jumps in this direction as this lines legth
+        for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
+            current.x += direction.x;
+            current.y += direction.y;
+            result[result_index+1] = current;
+            result_index++;
+        }
+    }
+    return result;
 }
 
 // private function, given a spiral struct, check if any of its lines would
 // collide given their current directions and jump sizes, checking up to limit
 // number of lines
 static bool spiral_collides(spiral_t spiral, size_t limit) {
+    // TODO: change spiral_points() to return a struct that includes the count of items!
+    co_ord_t * co_ords = spiral_points(spiral, limit);
+    // TODO: check if there are any duplicates in the array, return true if there are,
+    // false if there are not.
+    free(co_ords);
     return false;
 }
 
@@ -113,9 +139,10 @@ plot_spiral(spiral_t input) {
     // allocate new struct as copy of input struct
     spiral_t output = { .size = input.size, };
     output.lines = calloc(sizeof(line_t), output.size);
-    // copy across line directions
+    // copy across line directions and lengths
     for(size_t i = 0; i < output.size; i++) {
         output.lines[i].direction = input.lines[i].direction;
+        output.lines[i].length = input.lines[i].length;
     }
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
