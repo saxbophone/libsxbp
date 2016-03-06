@@ -55,7 +55,6 @@ init_spiral(uint8_t * buffer, size_t size) {
 
 // private function, returns a dynamically allocated array of co_ord_t structs
 // that represent all the points in cartesian space occupied by the given spiral
-// TODO: Change this to return a struct, including the count of items!
 static co_ord_array_t
 spiral_points(spiral_t spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
@@ -77,7 +76,6 @@ spiral_points(spiral_t spiral, size_t limit) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines legth
-        // printf("%i\n", spiral.lines[i].length);
         for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
@@ -123,41 +121,25 @@ spiral_collides(spiral_t spiral, size_t limit) {
 // length, recursively calling self to resize the previous line if that is not
 // possible.
 static spiral_t
-resize_spiral(spiral_t output, size_t index, uint32_t length) {
-    // // allocate new struct as copy of input struct
-    // spiral_t output = { .size = input.size, };
-    // output.lines = calloc(sizeof(line_t), output.size);
-    // // copy across line directions and lengths
-    // for(size_t i = 0; i < output.size; i++) {
-    //     output.lines[i].direction = input.lines[i].direction;
-    //     output.lines[i].length = input.lines[i].length;
-    // }
-    // free(input.lines);
+resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
     // first, set the target line to the target length
-    output.lines[index].length = length;
+    spiral.lines[index].length = length;
     // now, check for collisions
-    bool collides = spiral_collides(output, index+1);
+    bool collides = spiral_collides(spiral, index+1);
     if(collides) {
         // there were collisions, so reset the target line to 1
-        output.lines[index].length = 1;
+        spiral.lines[index].length = 1;
         while(collides) {
             // recursively call resize_spiral(), increasing the size of the
             // previous line until we get something that doesn't collide
-            output = resize_spiral(
-                output, index-1, output.lines[index-1].length+1
+            spiral = resize_spiral(
+                spiral, index-1, spiral.lines[index-1].length+1
             );
-            // // free(output.lines);
-            // output.lines = calloc(sizeof(line_t), workon.size);
-            // // copy across line directions and lengths
-            // for(size_t i = 0; i < workon.size; i++) {
-            //     output.lines[i].direction = workon.lines[i].direction;
-            //     output.lines[i].length = workon.lines[i].length;
-            // }
-            // free(workon.lines);
-            collides = spiral_collides(output, index+1);
+            // check if it still collides
+            collides = spiral_collides(spiral, index+1);
         }
     }
-    return output;
+    return spiral;
 }
 
 // given a spiral for which the length of all its lines are not yet known,
