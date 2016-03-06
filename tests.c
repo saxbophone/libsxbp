@@ -77,6 +77,7 @@ test_plot_spiral() {
     };
     for(uint8_t i = 0; i < 16; i++) {
         input.lines[i].direction = directions[i];
+        input.lines[i].length = 1;
         expected.lines[i].direction = directions[i];
         expected.lines[i].length = lengths[i];
     }
@@ -86,6 +87,7 @@ test_plot_spiral() {
 
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
+        printf("(%i ?= %i) ", output.lines[i].length, expected.lines[i].length);
         if(output.lines[i].length != expected.lines[i].length) {
             result = false;
         }

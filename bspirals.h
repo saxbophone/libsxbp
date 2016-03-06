@@ -49,6 +49,11 @@ typedef struct tuple_t {
 typedef tuple_t vector_t;
 typedef tuple_t co_ord_t;
 
+typedef struct co_ord_array_t {
+    co_ord_t * items;
+    size_t size;
+} co_ord_array_t;
+
 // vector direction constants
 static const vector_t VECTOR_DIRECTIONS[4] = {
     // UP       RIGHT       DOWN        LEFT
