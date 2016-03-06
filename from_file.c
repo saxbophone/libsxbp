@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "bspirals.h"
@@ -29,12 +30,42 @@ main(int argc, char const * argv[]) {
             // seek to start again
             fseek(file_handle, 0L, SEEK_SET);
             // print message to let user know how many bytes and lines these will create
-            printf("File size is %zi bytes - This generates a spiral with %zi lines\n", file_size, file_size*8);
-            // TODO: Read in file data to a buffer
+            printf(
+                "File size is %zi bytes - This generates a spiral with %zi lines\n",
+                file_size, file_size*8
+            );
+            // allocate memory buffer to store file data
+            uint8_t * buffer = malloc(file_size);
+            // read in file data to buffer
+            size_t bytes_read = fread(buffer, 1, file_size, file_handle);
             // close file handle, because we're polite :)
             fclose(file_handle);
-            // TODO: Generate the spiral from the file data
-            return 0;
+            // check we read in the correct number of bytes (whole file)
+            if(bytes_read == file_size) {
+                printf("Preparing Spiral structure from file data...\n");
+                // prepare spiral struct from file data
+                spiral_t spiral = init_spiral(buffer, file_size);
+                printf("Plotting Spiral (THIS MAY TAKE A VERY LONG TIME)...\n");
+                // generate the spiral from the file data
+                spiral = plot_spiral(spiral);
+                // print out a representation of the final spiral
+                printf("Directions:\n[");
+                for(size_t i = 0; i < spiral.size; i++) {
+                    printf("%i, ", spiral.lines[i].direction);
+                }
+                printf("]\nLengths:\n[");
+                for(size_t i = 0; i < spiral.size; i++) {
+                    printf("%i, ", spiral.lines[i].length);
+                }
+                printf("]\n");
+                return 0;
+            } else {
+                fprintf(
+                    stderr, "Expected to read %zi bytes, actually read %zi\n",
+                    file_size, bytes_read
+                );
+                return 1;
+            }
         }
     }
 }

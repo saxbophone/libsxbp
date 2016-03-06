@@ -116,12 +116,24 @@ spiral_collides(spiral_t spiral, size_t limit) {
     return duplicates;
 }
 
+static void
+update_progress(size_t index, size_t total) {
+    static size_t last_seen = 0;
+    if(last_seen == 0) {
+        printf("%3zi%%", (100*index)/(total));
+    } else if((last_seen % 10) == 0) {
+        printf("\b\b\b\b%3zi%%", (100*index)/(total));
+    }
+    last_seen++;
+}
+
 // private function, given a spiral struct, the index of one of it's lines and
 // a target length to set that line to, attempt to set the target line to that
 // length, recursively calling self to resize the previous line if that is not
 // possible.
 static spiral_t
 resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
+    update_progress(index, spiral.size);
     // first, set the target line to the target length
     spiral.lines[index].length = length;
     // now, check for collisions
@@ -159,6 +171,7 @@ plot_spiral(spiral_t input) {
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
     }
+    printf("\n");
     return output;
 }
 
