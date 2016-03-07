@@ -176,6 +176,14 @@ plot_spiral(spiral_t input) {
 // returns a spiral of length 0 if the data could not be interpreted correctly
 spiral_t
 load_spiral(buffer_t buffer) {
+    // TODO: Add checks for buffer size (must be at least the size of the header)
+    // TODO: Add checks for magic number
+    /*
+    version_t data_version = {
+        buffer.bytes[12], buffer.bytes[13], buffer.bytes[13],
+    };
+     */
+    // TODO: Add checks for buffer data version compatibility
     spiral_t output = { .size = 0, };
     output.lines = calloc(sizeof(line_t), output.size);
     return output;
