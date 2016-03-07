@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "bspirals.h"
+#include "saxbospiral.h"
 
 
 bool

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "bspirals.h"
+#include "saxbospiral.h"
 
 
 int

@@ -1,5 +1,5 @@
-#ifndef SAXBOPHONE_BSPIRALS_H
-#define SAXBOPHONE_BSPIRALS_H
+#ifndef SAXBOPHONE_SAXBOSPIRAL_H
+#define SAXBOPHONE_SAXBOSPIRAL_H
 
 #include <stdint.h>
 #include <stdlib.h>
