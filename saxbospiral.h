@@ -55,10 +55,7 @@ typedef struct co_ord_array_t {
 } co_ord_array_t;
 
 // vector direction constants
-static const vector_t VECTOR_DIRECTIONS[4] = {
-    // UP       RIGHT       DOWN        LEFT
-    { 0, 1, }, { 1, 0, }, { 0, -1, }, { -1, 0, },
-};
+extern const vector_t VECTOR_DIRECTIONS[4];
 
 // when facing the direction specified by current, return the direction that
 // will be faced when turning in the rotational direction specified by turn.
