@@ -9,6 +9,10 @@
 extern "C"{
 #endif
 
+const version_t VERSION = {
+    .major = 0, .minor = 1, .patch = 0,
+};
+
 // vector direction constants
 const vector_t VECTOR_DIRECTIONS[4] = {
     // UP       RIGHT       DOWN        LEFT
@@ -166,6 +170,21 @@ plot_spiral(spiral_t input) {
         output = resize_spiral(output, i, 1);
     }
     return output;
+}
+
+// given a buffer, return a spiral represented by the data in the struct
+// returns a spiral of length 0 if the data could not be interpreted correctly
+spiral_t
+load_spiral(buffer_t buffer) {
+    spiral_t output = { .size = 0, };
+    output.lines = calloc(sizeof(line_t), output.size);
+    return output;
+}
+
+// given a spiral, return a buffer of the raw bytes used to represent and store it
+buffer_t
+dump_spiral(spiral_t spiral) {
+    // TODO...
 }
 
 #ifdef __cplusplus

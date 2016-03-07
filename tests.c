@@ -107,13 +107,37 @@ test_load_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 26, };
+    buffer_t buffer = { .size = 89, };
     buffer.bytes = malloc(buffer.size);
-    0b01101101, 0b11000111,
-    buffer.bytes = (uint8_t[28]){
-        "SAXBOSPIRAL\n\x00\x01\x00\x00\n\x00\x00\x00\x00\x00\x00\x00\x10\n"
-        "\x6D\xC7"
+    // construct data header
+    sprintf(
+        buffer.bytes,
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
+    );
+    // construct data section
+    uint8_t data[64] = {
+        0b00000000, 0b00000000, 0b00000000, 0b00000001,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000001,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000010,
+        0b00000000, 0b00000000, 0b00000000, 0b00000100,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0b00000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000010,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000001,
+        0b00000000, 0b00000000, 0b00000000, 0b00000010,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
     };
+    // write data to buffer
+    for(size_t i = 0; i < 64; i++) {
+        buffer.bytes[i+24] = data[i];
+    }
     // build expected output struct
     spiral_t expected = { .size = 16, };
     expected.lines = calloc(sizeof(line_t), 16);
@@ -132,13 +156,17 @@ test_load_spiral() {
     // call load_spiral with buffer and store result
     spiral_t output = load_spiral(buffer);
 
-    // compare with expected struct
-    for(uint8_t i = 0; i < 16; i++) {
-        if(
-            (output.lines[i].direction != expected.lines[i].direction) ||
-            (output.lines[i].length != expected.lines[i].length)
-        ) {
-            result = false;
+    if(output.size != expected.size) {
+        result = false; 
+    } else {
+        // compare with expected struct
+        for(uint8_t i = 0; i < 16; i++) {
+            if(
+                (output.lines[i].direction != expected.lines[i].direction) ||
+                (output.lines[i].length != expected.lines[i].length)
+            ) {
+                result = false;
+            }
         }
     }
 
