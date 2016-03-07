@@ -54,6 +54,11 @@ typedef struct co_ord_array_t {
     size_t size;
 } co_ord_array_t;
 
+typedef struct buffer_t {
+    uint8_t * bytes;
+    size_t size;
+} buffer_t;
+
 // vector direction constants
 extern const vector_t VECTOR_DIRECTIONS[4];
 
@@ -66,13 +71,22 @@ change_direction(direction_t current, rotation_t turn);
 // this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
 // instructions which are then used to build the pattern.
 spiral_t
-init_spiral(uint8_t * buffer, size_t size);
+init_spiral(buffer_t buffer);
 
 // given a spiral for which the length of all its lines are not yet known,
 // calculate the length needed for each line in the spiral (to avoid line overlap)
 // and store these in a spiral struct and return that
 spiral_t
 plot_spiral(spiral_t spiral);
+
+// given a buffer, return a spiral represented by the data in the struct
+// returns a spiral of length 0 if the data could not be interpreted correctly
+spiral_t
+load_spiral(buffer_t buffer);
+
+// given a spiral, return a buffer of the raw bytes used to represent and store it
+buffer_t
+dump_spiral(spiral_t spiral);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -30,7 +30,10 @@ test_init_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    uint8_t buffer[] = { 0b01101101, 0b11000111 };
+    buffer_t buffer = { .size = 2, };
+    buffer.bytes = malloc(buffer.size);
+    buffer.bytes[0] = 0b01101101;
+    buffer.bytes[1] = 0b11000111;
     // build expected output struct
     spiral_t expected = { .size = 16, };
     expected.lines = calloc(sizeof(line_t), 16);
@@ -43,7 +46,7 @@ test_init_spiral() {
     }
 
     // call init_spiral with buffer and store result
-    spiral_t output = init_spiral(buffer, 2);
+    spiral_t output = init_spiral(buffer);
 
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
