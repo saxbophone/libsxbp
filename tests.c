@@ -162,8 +162,8 @@ test_load_spiral() {
         // compare with expected struct
         for(uint8_t i = 0; i < 16; i++) {
             if(
-                (output.lines[i].direction != expected.lines[i].direction) // ||
-                // (output.lines[i].length != expected.lines[i].length)
+                (output.lines[i].direction != expected.lines[i].direction) ||
+                (output.lines[i].length != expected.lines[i].length)
             ) {
                 result = false;
             }

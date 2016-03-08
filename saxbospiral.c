@@ -195,7 +195,7 @@ load_spiral(buffer_t buffer) {
     // get size of spiral object contained in buffer
     size_t spiral_size = 0;
     for(size_t i = 0; i < 8; i++) {
-        spiral_size |= ((uint64_t)buffer.bytes[16+i]) << (8*(7-i));
+        spiral_size |= (buffer.bytes[16+i]) << (8*(7-i));
     }
     // TODO: Check that the file data section is large enough for the spiral size
     // init spiral struct
@@ -206,8 +206,14 @@ load_spiral(buffer_t buffer) {
     for(size_t i = 0; i < spiral_size; i++) {
         // direction is stored in 2 most significant bits of each 32-bit sequence
         output.lines[i].direction = (buffer.bytes[24+(i*4)] >> 6);
-        // output.lines[i].length = ?; TODO: Get length
-        printf("%d ", output.lines[i].length);
+        // length is stored as 30 least significant bits, so we have to unpack it
+        // handle first byte on it's own as we only need least 6 bits of it
+        // bit mask and shift 3 bytes to left
+        output.lines[i].length = (buffer.bytes[24+(i*4)] & 0b00111111) << 24;
+        // handle remaining 3 bytes in loop
+        for(uint8_t j = 0; j < 3; j++) {
+            output.lines[i].length |= (buffer.bytes[24+(i*4)+1+j]) << (8*(2-j));
+        }
     }
     return output;
 }
