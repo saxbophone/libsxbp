@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "saxbospiral.h"
 
@@ -179,13 +180,37 @@ load_spiral(buffer_t buffer) {
     // TODO: Add checks for buffer size (must be at least the size of the header)
     // TODO: Add checks for magic number
     /*
+    if(strncmp(buffer.bytes, "SAXBOSPIRAL", 11) == 0) {
+        // good to go
+    } else {
+        // magic number not at start of buffer
+    }
+    */
+    // TODO: Add checks for buffer data version compatibility
+    /*
     version_t data_version = {
         buffer.bytes[12], buffer.bytes[13], buffer.bytes[13],
     };
-     */
-    // TODO: Add checks for buffer data version compatibility
-    spiral_t output = { .size = 0, };
+    */
+    // get size of spiral object contained in buffer
+    size_t spiral_size;
+    for(size_t i = 0; i < 8; i++) {
+        spiral_size |= (((uint64_t)buffer.bytes[16+i]) << (8*(7-i)));
+    }
+    // init spiral struct
+    spiral_t output = { .size = spiral_size, };
+    // allocate memory
     output.lines = calloc(sizeof(line_t), output.size);
+    // convert each serialised line segment in buffer into a line_t struct
+    printf("%zi\n", output.size);
+    // ARGH! THIS FOR LOOP CHANGES spiral_size and output.lines :(
+    for(size_t i = 0; i < spiral_size; i++) {
+        // printf("%d ", (24+(i*4)));
+        (void)0;
+        // direction is stored in 2 most significant bits of each 32-bit sequence
+        // output.lines[i].direction = (buffer.bytes[25+(i*4)] >> 6);
+        // output.lines[i].length = ?;
+    }
     return output;
 }
 
