@@ -193,23 +193,21 @@ load_spiral(buffer_t buffer) {
     };
     */
     // get size of spiral object contained in buffer
-    size_t spiral_size;
+    size_t spiral_size = 0;
     for(size_t i = 0; i < 8; i++) {
-        spiral_size |= (((uint64_t)buffer.bytes[16+i]) << (8*(7-i)));
+        spiral_size |= ((uint64_t)buffer.bytes[16+i]) << (8*(7-i));
     }
+    // TODO: Check that the file data section is large enough for the spiral size
     // init spiral struct
     spiral_t output = { .size = spiral_size, };
     // allocate memory
     output.lines = calloc(sizeof(line_t), output.size);
     // convert each serialised line segment in buffer into a line_t struct
-    printf("%zi\n", output.size);
-    // ARGH! THIS FOR LOOP CHANGES spiral_size and output.lines :(
     for(size_t i = 0; i < spiral_size; i++) {
-        // printf("%d ", (24+(i*4)));
-        (void)0;
         // direction is stored in 2 most significant bits of each 32-bit sequence
-        // output.lines[i].direction = (buffer.bytes[25+(i*4)] >> 6);
-        // output.lines[i].length = ?;
+        output.lines[i].direction = (buffer.bytes[24+(i*4)] >> 6);
+        // output.lines[i].length = ?; TODO: Get length
+        printf("%d ", output.lines[i].length);
     }
     return output;
 }

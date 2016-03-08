@@ -107,7 +107,7 @@ test_load_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 89, };
+    buffer_t buffer = { .size = 88, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
