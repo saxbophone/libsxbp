@@ -177,41 +177,60 @@ test_load_spiral() {
     return result;
 }
 
+bool
+test_load_spiral_rejects_missing_magic_number() {
+    // success / failure variable
+    bool result = true;
+    // build buffer of bytes for input data
+    buffer_t buffer = { .size = 36, };
+    buffer.bytes = calloc(1, buffer.size);
+    // construct data header
+    buffer.bytes = "not the header you were looking for";
+
+    // call load_spiral with buffer and store result
+    spiral_t output = load_spiral(buffer);
+
+    if(output.size != 0) {
+        result = false;
+    }
+
+    return result;
+}
+
+// this function takes a bool containing the test suite status,
+// a function pointer to a test case function, and a string containing the
+// test case's name. it will run the test case function and return the success
+// or failure status, which should be stored in the test suite status bool.
+bool
+run_test_case(
+    bool test_suite_state, bool (*test_case_func)(), char * test_case_name
+) {
+    printf("%s: ", test_case_name);
+    fflush(stdout);
+    bool test_result = (*test_case_func)();
+    printf("%s\n", (test_result ? "PASS" : "FAIL"));
+    return test_suite_state && test_result;
+}
+
 int
 main(int argc, char const *argv[]) {
     // run tests
-    int result = 0;
-    printf("test_change_direction: ");
-    fflush(stdout);
-    if(!test_change_direction()) {
-        printf("FAIL\n");
-        result = 1;
-    } else {
-        printf("PASS\n");
-    }
-    printf("test_init_spiral: ");
-    fflush(stdout);
-    if(!test_init_spiral()) {
-        printf("FAIL\n");
-        result = 1;
-    } else {
-        printf("PASS\n");
-    }
-    printf("test_plot_spiral: ");
-    fflush(stdout);
-    if(!test_plot_spiral()) {
-        printf("FAIL\n");
-        result = 1;
-    } else {
-        printf("PASS\n");
-    }
-    printf("test_load_spiral: ");
-    fflush(stdout);
-    if(!test_load_spiral()) {
-        printf("FAIL\n");
-        result = 1;
-    } else {
-        printf("PASS\n");
-    }
-    return result;
+    // set up test suite status flag
+    bool result = true;
+    // set up test case function pointer
+    bool (*test_case)();
+    // for each test case, re-assign function pointer and call run_test_case()
+    test_case = test_change_direction;
+    result = run_test_case(result, test_case, "test_change_direction");
+    test_case = test_init_spiral;
+    result = run_test_case(result, test_case, "test_init_spiral");
+    test_case = test_plot_spiral;
+    result = run_test_case(result, test_case, "test_plot_spiral");
+    test_case = test_load_spiral;
+    result = run_test_case(result, test_case, "test_load_spiral");
+    test_case = test_load_spiral_rejects_missing_magic_number;
+    result = run_test_case(
+        result, test_case, "test_load_spiral_rejects_missing_magic_number"
+    );
+    return result ? 0 : 1;
 }
