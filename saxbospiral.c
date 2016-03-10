@@ -177,9 +177,11 @@ plot_spiral(spiral_t input) {
 // returns a spiral of length 0 if the data could not be interpreted correctly
 spiral_t
 load_spiral(buffer_t buffer) {
-    // TODO: Add checks for buffer size (must be at least the size of the header)
+    // create initial output spiral, a spiral of length 0 (shows failure)
+    spiral_t output = { .size = 0, };
+    // Check for buffer size (must be at least the size of the header)
     // Check for magic number
-    if(strncmp(buffer.bytes, "SAXBOSPIRAL", 11) == 0) {
+    if((strncmp(buffer.bytes, "SAXBOSPIRAL", 11) == 0) && (buffer.size >= 26)) {
         // good to go
         // TODO: Add checks for buffer data version compatibility
         /*
@@ -194,7 +196,7 @@ load_spiral(buffer_t buffer) {
         }
         // TODO: Check that the file data section is large enough for the spiral size
         // init spiral struct
-        spiral_t output = { .size = spiral_size, };
+        output.size = spiral_size;
         // allocate memory
         output.lines = calloc(sizeof(line_t), output.size);
         // convert each serialised line segment in buffer into a line_t struct
@@ -213,8 +215,7 @@ load_spiral(buffer_t buffer) {
         return output;
     } else {
         // magic number not at start of buffer, return a spiral with length 0
-        spiral_t result = { .size = 0, };
-        return result;
+        return output;
     }
 }
 

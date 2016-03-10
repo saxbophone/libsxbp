@@ -197,6 +197,26 @@ test_load_spiral_rejects_missing_magic_number() {
     return result;
 }
 
+bool
+test_load_spiral_rejects_too_small_for_header() {
+    // success / failure variable
+    bool result = true;
+    // build buffer of bytes for input data - should be smaller than 26
+    buffer_t buffer = { .size = 12, };
+    buffer.bytes = calloc(1, buffer.size);
+    // construct data header
+    buffer.bytes = "SAXBOSPIRAL";
+
+    // call load_spiral with buffer and store result
+    spiral_t output = load_spiral(buffer);
+
+    if(output.size != 0) {
+        result = false;
+    }
+
+    return result;
+}
+
 // this function takes a bool containing the test suite status,
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
@@ -224,6 +244,10 @@ main(int argc, char const *argv[]) {
     result = run_test_case(
         result, test_load_spiral_rejects_missing_magic_number,
         "test_load_spiral_rejects_missing_magic_number"
+    );
+    result = run_test_case(
+        result, test_load_spiral_rejects_too_small_for_header,
+        "test_load_spiral_rejects_too_small_for_header"
     );
     return result ? 0 : 1;
 }
