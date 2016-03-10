@@ -214,23 +214,16 @@ run_test_case(
 
 int
 main(int argc, char const *argv[]) {
-    // run tests
     // set up test suite status flag
     bool result = true;
-    // set up test case function pointer
-    bool (*test_case)();
-    // for each test case, re-assign function pointer and call run_test_case()
-    test_case = test_change_direction;
-    result = run_test_case(result, test_case, "test_change_direction");
-    test_case = test_init_spiral;
-    result = run_test_case(result, test_case, "test_init_spiral");
-    test_case = test_plot_spiral;
-    result = run_test_case(result, test_case, "test_plot_spiral");
-    test_case = test_load_spiral;
-    result = run_test_case(result, test_case, "test_load_spiral");
-    test_case = test_load_spiral_rejects_missing_magic_number;
+    // call run_test_case() for each test case
+    result = run_test_case(result, test_change_direction, "test_change_direction");
+    result = run_test_case(result, test_init_spiral, "test_init_spiral");
+    result = run_test_case(result, test_plot_spiral, "test_plot_spiral");
+    result = run_test_case(result, test_load_spiral, "test_load_spiral");
     result = run_test_case(
-        result, test_case, "test_load_spiral_rejects_missing_magic_number"
+        result, test_load_spiral_rejects_missing_magic_number,
+        "test_load_spiral_rejects_missing_magic_number"
     );
     return result ? 0 : 1;
 }
