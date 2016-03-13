@@ -181,7 +181,7 @@ load_spiral(buffer_t buffer) {
     spiral_t output = { .size = 0, };
     // Check for buffer size (must be at least the size of the header)
     // Check for magic number
-    if((strncmp(buffer.bytes, "SAXBOSPIRAL", 11) == 0) && (buffer.size >= 26)) {
+    if((strncmp(buffer.bytes, "SAXBOSPIRAL", 11) == 0) && (buffer.size >= 29)) {
         // good to go
         // TODO: Add checks for buffer data version compatibility
         /*
@@ -194,7 +194,11 @@ load_spiral(buffer_t buffer) {
         for(size_t i = 0; i < 8; i++) {
             spiral_size |= (buffer.bytes[16+i]) << (8*(7-i));
         }
-        // TODO: Check that the file data section is large enough for the spiral size
+        // Check that the file data section is large enough for the spiral size
+        if((buffer.size-25) != (sizeof(line_t)*spiral_size)) {
+            // this check failed, so return it as it is
+            return output;
+        }
         // init spiral struct
         output.size = spiral_size;
         // allocate memory
