@@ -310,10 +310,8 @@ test_dump_spiral() {
     } else {
         // compare with expected buffer
         for(size_t i = 0; i < expected.size; i++) {
-            printf("%zi: %d ?+ %d\n", i, output.bytes[i], expected.bytes[i]);
             if(output.bytes[i] != expected.bytes[i]) {
                 result = false;
-                break;
             }
         }
     }
