@@ -216,11 +216,10 @@ load_spiral(buffer_t buffer) {
                 output.lines[i].length |= (buffer.bytes[24+(i*4)+1+j]) << (8*(2-j));
             }
         }
-        return output;
-    } else {
-        // magic number not at start of buffer, return a spiral with length 0
-        return output;
     }
+    // return the output struct, this will be a struct of size 0 if the magic
+    // number check failed, else it will be a valid spiral
+    return output;
 }
 
 // given a spiral, return a buffer of the raw bytes used to represent and store it
