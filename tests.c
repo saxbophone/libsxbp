@@ -217,6 +217,40 @@ test_load_spiral_rejects_too_small_for_header() {
     return result;
 }
 
+bool
+test_load_spiral_rejects_too_small_data_section() {
+    // success / failure variable
+    bool result = true;
+    // build buffer of bytes for input data
+    buffer_t buffer = { .size = 41, };
+    buffer.bytes = calloc(1, buffer.size);
+    // construct data header
+    sprintf(
+        buffer.bytes,
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
+    );
+    // construct data section - make it deliberately too short
+    uint8_t data[16] = {
+        0b00000000, 0b00000000, 0b00000000, 0b00000000,
+        0b00000000, 0b00000000, 0b00000000, 0b00000000,
+        0b00000000, 0b00000000, 0b00000000, 0b00000000,
+        0b00000000, 0b00000000, 0b00000000, 0b00000000,
+    };
+    // write data to buffer
+    for(size_t i = 0; i < 16; i++) {
+        buffer.bytes[i+24] = data[i];
+    }
+    // call load_spiral with buffer and store result
+    spiral_t output = load_spiral(buffer);
+
+    if(output.size != 0) {
+        result = false;
+    }
+
+    return result;
+}
+
 // this function takes a bool containing the test suite status,
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
@@ -248,6 +282,10 @@ main(int argc, char const *argv[]) {
     result = run_test_case(
         result, test_load_spiral_rejects_too_small_for_header,
         "test_load_spiral_rejects_too_small_for_header"
+    );
+    result = run_test_case(
+        result, test_load_spiral_rejects_too_small_data_section,
+        "test_load_spiral_rejects_too_small_data_section"
     );
     return result ? 0 : 1;
 }
