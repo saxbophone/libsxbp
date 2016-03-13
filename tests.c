@@ -251,6 +251,79 @@ test_load_spiral_rejects_too_small_data_section() {
     return result;
 }
 
+bool
+test_dump_spiral() {
+    // success / failure variable
+    bool result = true;
+    // build input struct
+    spiral_t input = { .size = 16, };
+    input.lines = calloc(sizeof(line_t), 16);
+    direction_t directions[16] = {
+        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
+        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+    };
+    length_t lengths[16] = {
+        1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
+    };
+    for(uint8_t i = 0; i < 16; i++) {
+        input.lines[i].direction = directions[i];
+        input.lines[i].length = lengths[i];
+    }
+    // build buffer of bytes for expected output data
+    buffer_t expected = { .size = 89, };
+    expected.bytes = calloc(1, expected.size);
+    // construct expected data header
+    sprintf(
+        expected.bytes,
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
+    );
+    // construct expected data section
+    uint8_t data[64] = {
+        0b00000000, 0b00000000, 0b00000000, 0b00000001,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000001,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000010,
+        0b00000000, 0b00000000, 0b00000000, 0b00000100,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0b00000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000010,
+        0b10000000, 0b00000000, 0b00000000, 0b00000001,
+        0b01000000, 0b00000000, 0b00000000, 0b00000001,
+        0b00000000, 0b00000000, 0b00000000, 0b00000010,
+        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+    };
+    // write data to expected buffer
+    for(size_t i = 0; i < 64; i++) {
+        expected.bytes[i+24] = data[i];
+    }
+
+    // call dump_spiral with spiral and store result
+    buffer_t output = dump_spiral(input);
+
+    if(output.size != expected.size) {
+        result = false;
+    } else {
+        // compare with expected buffer
+        for(uint8_t i = 0; i < expected.size; i++) {
+            if(output.bytes[i] != expected.bytes[i]) {
+                result = false;
+            }
+        }
+    }
+
+    // free memory
+    free(input.lines);
+    free(expected.bytes);
+    free(output.bytes);
+
+    return result;
+}
+
 // this function takes a bool containing the test suite status,
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
@@ -287,5 +360,6 @@ main(int argc, char const *argv[]) {
         result, test_load_spiral_rejects_too_small_data_section,
         "test_load_spiral_rejects_too_small_data_section"
     );
+    result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
     return result ? 0 : 1;
 }

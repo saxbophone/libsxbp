@@ -225,7 +225,8 @@ load_spiral(buffer_t buffer) {
 // given a spiral, return a buffer of the raw bytes used to represent and store it
 buffer_t
 dump_spiral(spiral_t spiral) {
-    // TODO...
+    buffer_t output = { .size = 0, };
+    return output;
 }
 
 #ifdef __cplusplus
