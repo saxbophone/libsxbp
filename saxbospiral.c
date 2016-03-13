@@ -57,8 +57,8 @@ init_spiral(buffer_t buffer) {
             current = change_direction(current, rotation);
             // store direction in result struct
             result.lines[index].direction = current;
-            // set length to 1 initially
-            result.lines[index].length = 1;
+            // set length to 0 initially
+            result.lines[index].length = 0;
         }
     }
     return result;

@@ -79,7 +79,7 @@ test_plot_spiral() {
     };
     for(uint8_t i = 0; i < 16; i++) {
         input.lines[i].direction = directions[i];
-        input.lines[i].length = 1;
+        input.lines[i].length = 0;
         expected.lines[i].direction = directions[i];
         expected.lines[i].length = lengths[i];
     }
