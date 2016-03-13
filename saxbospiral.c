@@ -206,14 +206,14 @@ load_spiral(buffer_t buffer) {
         // convert each serialised line segment in buffer into a line_t struct
         for(size_t i = 0; i < spiral_size; i++) {
             // direction is stored in 2 most significant bits of each 32-bit sequence
-            output.lines[i].direction = (buffer.bytes[24+(i*4)] >> 6);
+            output.lines[i].direction = (buffer.bytes[25+(i*4)] >> 6);
             // length is stored as 30 least significant bits, so we have to unpack it
             // handle first byte on it's own as we only need least 6 bits of it
             // bit mask and shift 3 bytes to left
-            output.lines[i].length = (buffer.bytes[24+(i*4)] & 0b00111111) << 24;
+            output.lines[i].length = (buffer.bytes[25+(i*4)] & 0b00111111) << 24;
             // handle remaining 3 bytes in loop
             for(uint8_t j = 0; j < 3; j++) {
-                output.lines[i].length |= (buffer.bytes[24+(i*4)+1+j]) << (8*(2-j));
+                output.lines[i].length |= (buffer.bytes[25+(i*4)+1+j]) << (8*(2-j));
             }
         }
     }
@@ -225,7 +225,34 @@ load_spiral(buffer_t buffer) {
 // given a spiral, return a buffer of the raw bytes used to represent and store it
 buffer_t
 dump_spiral(spiral_t spiral) {
-    buffer_t output = { .size = 0, };
+    // build output buffer struct, base size on header + spiral size
+    buffer_t output = { .size = (25 + (sizeof(line_t)*spiral.size)), };
+    // allocate memory
+    output.bytes = calloc(1, output.size);
+    // write first part of data header (magic number and version info)
+    sprintf(
+        output.bytes, "SAXBOSPIRAL\n%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch
+    );
+    // write second part of data header (spiral size as 64 bit uint)
+    for(uint8_t i = 0; i < 8; i++) {
+        uint8_t shift = (8*(7-i));
+        output.bytes[16+i] = (uint8_t)(((uint64_t)spiral.size & (0xff << shift)) >> shift);
+    }
+    // write final newline at end of header
+    output.bytes[24] = '\n';
+    // now write the data section
+    for(size_t i = 0; i < spiral.size; i++) {
+        // serialise each line in the spiral to 4 bytes, handle first byte first
+        // map direction to 2 most significant bits
+        output.bytes[25+(i*4)] = (spiral.lines[i].direction << 6);
+        // handle first 6 bits of the length
+        output.bytes[25+(i*4)] |= (spiral.lines[i].length >> 24);
+        // handle remaining 3 bytes in a loop
+        for(uint8_t j = 0; j < 3; j++) {
+            output.bytes[25+(i*4)+1+j] = (uint8_t)(spiral.lines[i].length >> (8*(2-j)));
+        }
+    }
     return output;
 }
 

@@ -136,7 +136,7 @@ test_load_spiral() {
     };
     // write data to buffer
     for(size_t i = 0; i < 64; i++) {
-        buffer.bytes[i+24] = data[i];
+        buffer.bytes[i+25] = data[i];
     }
     // build expected output struct
     spiral_t expected = { .size = 16, };
@@ -239,7 +239,7 @@ test_load_spiral_rejects_too_small_data_section() {
     };
     // write data to buffer
     for(size_t i = 0; i < 16; i++) {
-        buffer.bytes[i+24] = data[i];
+        buffer.bytes[i+25] = data[i];
     }
     // call load_spiral with buffer and store result
     spiral_t output = load_spiral(buffer);
@@ -299,7 +299,7 @@ test_dump_spiral() {
     };
     // write data to expected buffer
     for(size_t i = 0; i < 64; i++) {
-        expected.bytes[i+24] = data[i];
+        expected.bytes[i+25] = data[i];
     }
 
     // call dump_spiral with spiral and store result
@@ -309,9 +309,11 @@ test_dump_spiral() {
         result = false;
     } else {
         // compare with expected buffer
-        for(uint8_t i = 0; i < expected.size; i++) {
+        for(size_t i = 0; i < expected.size; i++) {
+            printf("%zi: %d ?+ %d\n", i, output.bytes[i], expected.bytes[i]);
             if(output.bytes[i] != expected.bytes[i]) {
                 result = false;
+                break;
             }
         }
     }
