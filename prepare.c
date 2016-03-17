@@ -14,6 +14,12 @@ show_usage(FILE * stream) {
     );
 }
 
+// prints out error message when unable to read given file
+static void
+file_open_error(char * filename) {
+    fprintf(stderr, "Cannot open file '%s'\n", filename);
+}
+
 // returns size of file associated with given file handle
 static size_t
 file_size(FILE * file_handle) {
@@ -41,10 +47,10 @@ main(int argc, char * argv[]) {
         FILE * write_file_handle = fopen(write_file_path, "wb");
         // check that read file can be read, and write file can be written
         if(read_file_handle == NULL) {
-            fprintf(stderr, "Cannot open input file '%s'\n", read_file_path);
+            file_open_error(read_file_path);
         }
         if(write_file_handle == NULL) {
-            fprintf(stderr, "Cannot open output file '%s'\n", write_file_path);
+            file_open_error(write_file_path);
         }
         if((read_file_handle == NULL) || (write_file_handle == NULL)) {
             // couldn't read or write, fail
