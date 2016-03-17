@@ -1,4 +1,5 @@
 .DEFAULT_GOAL := all
+.PHONY: test build clean all
 
 CC=gcc
 CFLAGS=-std=c99
