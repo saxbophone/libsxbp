@@ -1,32 +1,35 @@
-.DEFAULT_GOAL := build
+.DEFAULT_GOAL := all
 
 CC=gcc
 CFLAGS=-std=c99
-LIBRARY=saxbospiral.c
-TESTS=tests.c
-COMMANDS=prepare.c generate.c
-SILENT=@
 
-compile-library:
-	$(SILENT)$(CC) $(CFLAGS) -c $(LIBRARY)
+saxbospiral.o: saxbospiral.c saxbospiral.h
+	$(CC) $(CFLAGS) -c saxbospiral.c
 
-compile-tests:
-	$(SILENT)$(CC) $(CFLAGS) -c $(TESTS)
+tests.o: tests.c
+	$(CC) $(CFLAGS) -c tests.c
 
-tests: compile-library compile-tests
-	$(SILENT)$(CC) -g -o test saxbospiral.o tests.o
+tests: saxbospiral.o tests.o
+	$(CC) -g -o tests saxbospiral.o tests.o
 
-compile-commands:
-	$(SILENT)$(CC) $(CFLAGS) -c $(COMMANDS)
+prepare.o: prepare.c
+	$(CC) $(CFLAGS) -c prepare.c
 
-commands: compile-library compile-commands
-	$(SILENT)$(CC) -g -o prepare saxbospiral.o prepare.o
-	$(SILENT)$(CC) -g -o generate saxbospiral.o generate.o
+prepare: saxbospiral.o prepare.o
+	$(CC) -g -o prepare saxbospiral.o prepare.o
+
+generate.o: generate.c
+	$(CC) $(CFLAGS) -c generate.c
+
+generate: saxbospiral.o generate.o
+	$(CC) -g -o generate saxbospiral.o generate.o
 
 test: tests
-	$(SILENT)./test
+	./tests
+
+build: prepare generate
 
 clean:
-	$(SILENT)rm *.o
+	rm -f *.o
 
-build: test commands
+all: test build

@@ -32,6 +32,6 @@
 *.dSYM/
 
 # Custom executables using names used in Makefile
-test
+tests
 prepare
 generate
