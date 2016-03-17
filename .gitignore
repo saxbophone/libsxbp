@@ -30,3 +30,8 @@
 
 # Debug files
 *.dSYM/
+
+# Custom executables using names used in Makefile
+test
+prepare
+generate
