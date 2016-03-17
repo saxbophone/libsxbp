@@ -11,19 +11,19 @@ tests.o: tests.c
 	$(CC) $(CFLAGS) -c tests.c
 
 tests: saxbospiral.o tests.o
-	$(CC) -g -o tests saxbospiral.o tests.o
+	$(CC) $(CFLAGS) -g -o tests saxbospiral.o tests.o
 
 prepare.o: prepare.c
 	$(CC) $(CFLAGS) -c prepare.c
 
 prepare: saxbospiral.o prepare.o
-	$(CC) -g -o prepare saxbospiral.o prepare.o
+	$(CC) $(CFLAGS) -g -o prepare saxbospiral.o prepare.o
 
 generate.o: generate.c
 	$(CC) $(CFLAGS) -c generate.c
 
 generate: saxbospiral.o generate.o
-	$(CC) -g -o generate saxbospiral.o generate.o
+	$(CC) $(CFLAGS) -g -o generate saxbospiral.o generate.o
 
 test: tests
 	./tests
