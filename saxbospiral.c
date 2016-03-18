@@ -11,7 +11,7 @@ extern "C"{
 #endif
 
 const version_t VERSION = {
-    .major = 0, .minor = 1, .patch = 0,
+    .major = 0, .minor = 2, .patch = 0,
 };
 
 // vector direction constants
