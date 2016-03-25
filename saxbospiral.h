@@ -60,7 +60,7 @@ typedef struct co_ord_array_t {
 typedef struct spiral_t {
     size_t size;
     line_t * lines;
-    co_ord_array_t * co_ords;
+    co_ord_array_t co_ord_cache;
 } spiral_t;
 
 typedef struct buffer_t {
