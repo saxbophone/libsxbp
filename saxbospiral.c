@@ -66,6 +66,8 @@ init_spiral(buffer_t buffer) {
 
 // private function, returns a dynamically allocated array of co_ord_t structs
 // that represent all the points in cartesian space occupied by the given spiral
+// if any previously calculated points exist in the spiral's co_ord_cache, then
+// these are used first before calculating any others
 static co_ord_array_t
 spiral_points(spiral_t spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
@@ -103,16 +105,16 @@ spiral_points(spiral_t spiral, size_t limit) {
 // number of lines
 static bool
 spiral_collides(spiral_t spiral, size_t limit) {
-    co_ord_array_t co_ords = spiral_points(spiral, limit);
+    spiral.co_ord_cache = spiral_points(spiral, limit);
     // check for duplicates
     // false if there are not.
     bool duplicates = false;
-    for(size_t i = 0; i < co_ords.size; i++) {
-        for(size_t j = 0; j < co_ords.size; j++) {
+    for(size_t i = 0; i < spiral.co_ord_cache.size; i++) {
+        for(size_t j = 0; j < spiral.co_ord_cache.size; j++) {
             if(i != j) {
                 if(
-                    (co_ords.items[i].x == co_ords.items[j].x)
-                    && (co_ords.items[i].y == co_ords.items[j].y)
+                    (spiral.co_ord_cache.items[i].x == spiral.co_ord_cache.items[j].x)
+                    && (spiral.co_ord_cache.items[i].y == spiral.co_ord_cache.items[j].y)
                 ) {
                     duplicates = true;
                     break;
@@ -123,7 +125,6 @@ spiral_collides(spiral_t spiral, size_t limit) {
             break;
         }
     }
-    free(co_ords.items);
     return duplicates;
 }
 
@@ -169,6 +170,11 @@ plot_spiral(spiral_t input) {
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
+    }
+    // free the co_ord_cache member's dynamic memory
+    if(output.co_ord_cache.size > 0) {
+        free(output.co_ord_cache.items);
+        output.co_ord_cache.size = 0;
     }
     return output;
 }
