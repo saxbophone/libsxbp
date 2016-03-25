@@ -44,11 +44,6 @@ typedef struct line_t {
     length_t length : 30; // use 30 bits for the length, nice and long
 } line_t;
 
-typedef struct spiral_t {
-    size_t size;
-    line_t * lines;
-} spiral_t;
-
 typedef struct tuple_t {
     int64_t x;
     int64_t y;
@@ -61,6 +56,12 @@ typedef struct co_ord_array_t {
     co_ord_t * items;
     size_t size;
 } co_ord_array_t;
+
+typedef struct spiral_t {
+    size_t size;
+    line_t * lines;
+    co_ord_array_t * co_ords;
+} spiral_t;
 
 typedef struct buffer_t {
     uint8_t * bytes;
