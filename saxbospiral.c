@@ -68,36 +68,46 @@ init_spiral(buffer_t buffer) {
 // that represent all the points in cartesian space occupied by the given spiral
 // if any previously calculated points exist in the spiral's co_ord_cache, then
 // these are used first before calculating any others
-static co_ord_array_t
-spiral_points(spiral_t spiral, size_t limit) {
+void
+spiral_points(spiral_t * spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
     size_t size = 1;
     for(size_t i = 0; i < limit; i++) {
-        size += spiral.lines[i].length;
+        size += spiral->lines[i].length;
     }
-    // allocate enough memory to store these
-    co_ord_array_t result;
-    result.size = size;
-    result.items = calloc(sizeof(co_ord_t), result.size);
+    // allocate / reallocate memory
+    if(spiral->co_ord_cache.co_ords.size == 0) {
+        // if no memory has been allocated for the co-ords yet, then do this now
+        // allocate enough memory to store these
+        spiral->co_ord_cache.co_ords.items = calloc(sizeof(co_ord_t), size);
+    } else if(spiral->co_ord_cache.co_ords.size != size) {
+        // re-allocate memory instead
+        spiral->co_ord_cache.co_ords.items = realloc(
+            spiral->co_ord_cache.co_ords.items, sizeof(co_ord_t) * size
+        );
+    }
+    spiral->co_ord_cache.co_ords.size = size;
+    // TODO: Change this to only calculate the lines it needs, using the data in
+    // the co-ord cache where valid.
+    // NOTE: Implementation goes here!
     // start at (0, 0) as origin
     co_ord_t current = { 0, 0, };
-    result.items[0].x = current.x;
-    result.items[0].y = current.y;
+    spiral->co_ord_cache.co_ords.items[0].x = current.x;
+    spiral->co_ord_cache.co_ords.items[0].y = current.y;
     size_t result_index = 0; // maintain independent index for co-ords array
     // iterate over all lines and add the co-ords
     for(size_t i = 0; i < limit; i++) {
         // get current direction
-        vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        vector_t direction = VECTOR_DIRECTIONS[spiral->lines[i].direction];
         // make as many jumps in this direction as this lines legth
-        for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
+        for(uint32_t j = 0; j < spiral->lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
-            result.items[result_index+1].x = current.x;
-            result.items[result_index+1].y = current.y;
+            spiral->co_ord_cache.co_ords.items[result_index+1].x = current.x;
+            spiral->co_ord_cache.co_ords.items[result_index+1].y = current.y;
             result_index++;
         }
     }
-    return result;
 }
 
 // private function, given a spiral struct, check if any of its lines would
@@ -105,16 +115,17 @@ spiral_points(spiral_t spiral, size_t limit) {
 // number of lines
 static bool
 spiral_collides(spiral_t * spiral, size_t limit) {
-    spiral->co_ord_cache = spiral_points(*spiral, limit);
+    // update the spiral's co-ord cache
+    spiral_points(spiral, limit);
     // check for duplicates
     // false if there are not.
     bool duplicates = false;
-    for(size_t i = 0; i < spiral->co_ord_cache.size; i++) {
-        for(size_t j = 0; j < spiral->co_ord_cache.size; j++) {
+    for(size_t i = 0; i < spiral->co_ord_cache.co_ords.size; i++) {
+        for(size_t j = 0; j < spiral->co_ord_cache.co_ords.size; j++) {
             if(i != j) {
                 if(
-                    (spiral->co_ord_cache.items[i].x == spiral->co_ord_cache.items[j].x)
-                    && (spiral->co_ord_cache.items[i].y == spiral->co_ord_cache.items[j].y)
+                    (spiral->co_ord_cache.co_ords.items[i].x == spiral->co_ord_cache.co_ords.items[j].x)
+                    && (spiral->co_ord_cache.co_ords.items[i].y == spiral->co_ord_cache.co_ords.items[j].y)
                 ) {
                     duplicates = true;
                     break;
@@ -172,9 +183,9 @@ plot_spiral(spiral_t input) {
         output = resize_spiral(output, i, 1);
     }
     // free the co_ord_cache member's dynamic memory
-    if(output.co_ord_cache.size > 0) {
-        free(output.co_ord_cache.items);
-        output.co_ord_cache.size = 0;
+    if(output.co_ord_cache.co_ords.size > 0) {
+        free(output.co_ord_cache.co_ords.items);
+        output.co_ord_cache.co_ords.size = 0;
     }
     return output;
 }

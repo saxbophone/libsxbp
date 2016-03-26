@@ -57,10 +57,15 @@ typedef struct co_ord_array_t {
     size_t size;
 } co_ord_array_t;
 
+typedef struct co_ord_cache_t {
+    co_ord_array_t co_ords;
+    size_t validity;
+} co_ord_cache_t;
+
 typedef struct spiral_t {
     size_t size;
     line_t * lines;
-    co_ord_array_t co_ord_cache;
+    co_ord_cache_t co_ord_cache;
 } spiral_t;
 
 typedef struct buffer_t {
