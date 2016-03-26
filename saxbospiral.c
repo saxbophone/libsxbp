@@ -104,17 +104,17 @@ spiral_points(spiral_t spiral, size_t limit) {
 // collide given their current directions and jump sizes, checking up to limit
 // number of lines
 static bool
-spiral_collides(spiral_t spiral, size_t limit) {
-    spiral.co_ord_cache = spiral_points(spiral, limit);
+spiral_collides(spiral_t * spiral, size_t limit) {
+    spiral->co_ord_cache = spiral_points(*spiral, limit);
     // check for duplicates
     // false if there are not.
     bool duplicates = false;
-    for(size_t i = 0; i < spiral.co_ord_cache.size; i++) {
-        for(size_t j = 0; j < spiral.co_ord_cache.size; j++) {
+    for(size_t i = 0; i < spiral->co_ord_cache.size; i++) {
+        for(size_t j = 0; j < spiral->co_ord_cache.size; j++) {
             if(i != j) {
                 if(
-                    (spiral.co_ord_cache.items[i].x == spiral.co_ord_cache.items[j].x)
-                    && (spiral.co_ord_cache.items[i].y == spiral.co_ord_cache.items[j].y)
+                    (spiral->co_ord_cache.items[i].x == spiral->co_ord_cache.items[j].x)
+                    && (spiral->co_ord_cache.items[i].y == spiral->co_ord_cache.items[j].y)
                 ) {
                     duplicates = true;
                     break;
@@ -137,7 +137,7 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
     // first, set the target line to the target length
     spiral.lines[index].length = length;
     // now, check for collisions
-    bool collides = spiral_collides(spiral, index+1);
+    bool collides = spiral_collides(&spiral, index+1);
     if(collides) {
         // there were collisions, so reset the target line to 1
         spiral.lines[index].length = 1;
@@ -148,7 +148,7 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
                 spiral, index-1, spiral.lines[index-1].length+1
             );
             // check if it still collides
-            collides = spiral_collides(spiral, index+1);
+            collides = spiral_collides(&spiral, index+1);
         }
     }
     return spiral;
