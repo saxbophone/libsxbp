@@ -87,16 +87,26 @@ spiral_points(spiral_t * spiral, size_t limit) {
         );
     }
     spiral->co_ord_cache.co_ords.size = size;
-    // TODO: Change this to only calculate the lines it needs, using the data in
-    // the co-ord cache where valid.
-    // NOTE: Implementation goes here!
     // start at (0, 0) as origin
     co_ord_t current = { 0, 0, };
     spiral->co_ord_cache.co_ords.items[0].x = current.x;
     spiral->co_ord_cache.co_ords.items[0].y = current.y;
     size_t result_index = 0; // maintain independent index for co-ords array
+    // if we're not going to re-calculate the whole array, skip forward the index
+    size_t smallest = (
+        limit < spiral->co_ord_cache.validity
+    ) ? limit : spiral->co_ord_cache.validity;
+    if(spiral->co_ord_cache.validity != 0) {
+        for(size_t i = 0; i < smallest; i++) {
+            result_index += spiral->lines[i].length;
+        }
+        // update current to be at latest known co-ord
+        current.x = spiral->co_ord_cache.co_ords.items[result_index].x;
+        current.y = spiral->co_ord_cache.co_ords.items[result_index].y;
+    }
     // iterate over all lines and add the co-ords
-    for(size_t i = 0; i < limit; i++) {
+    // start at the highest known good co-ord in cache
+    for(size_t i = spiral->co_ord_cache.validity; i < limit; i++) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral->lines[i].direction];
         // make as many jumps in this direction as this lines legth
@@ -107,7 +117,9 @@ spiral_points(spiral_t * spiral, size_t limit) {
             spiral->co_ord_cache.co_ords.items[result_index+1].y = current.y;
             result_index++;
         }
+        // update validity
     }
+    spiral->co_ord_cache.validity = limit;
 }
 
 // private function, given a spiral struct, check if any of its lines would
@@ -147,6 +159,11 @@ static spiral_t
 resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
     // first, set the target line to the target length
     spiral.lines[index].length = length;
+    // also, set cache validity to this index so we invalidate any invalid
+    // entries in the co-ord cache
+    spiral.co_ord_cache.validity = (
+        index < spiral.co_ord_cache.validity
+    ) ? index : spiral.co_ord_cache.validity;
     // now, check for collisions
     bool collides = spiral_collides(&spiral, index+1);
     if(collides) {
