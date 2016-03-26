@@ -89,8 +89,6 @@ spiral_points(spiral_t * spiral, size_t limit) {
     spiral->co_ord_cache.co_ords.size = size;
     // start at (0, 0) as origin
     co_ord_t current = { 0, 0, };
-    spiral->co_ord_cache.co_ords.items[0].x = current.x;
-    spiral->co_ord_cache.co_ords.items[0].y = current.y;
     size_t result_index = 0; // maintain independent index for co-ords array
     // if we're not going to re-calculate the whole array, skip forward the index
     size_t smallest = (
@@ -103,6 +101,10 @@ spiral_points(spiral_t * spiral, size_t limit) {
         // update current to be at latest known co-ord
         current.x = spiral->co_ord_cache.co_ords.items[result_index].x;
         current.y = spiral->co_ord_cache.co_ords.items[result_index].y;
+    } else {
+        // otherwise, start at 0
+        spiral->co_ord_cache.co_ords.items[0].x = current.x;
+        spiral->co_ord_cache.co_ords.items[0].y = current.y;
     }
     // iterate over all lines and add the co-ords
     // start at the highest known good co-ord in cache
@@ -198,6 +200,8 @@ plot_spiral(spiral_t input) {
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
+        printf(".");
+        fflush(stdout);
     }
     // free the co_ord_cache member's dynamic memory
     if(output.co_ord_cache.co_ords.size > 0) {
