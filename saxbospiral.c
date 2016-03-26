@@ -121,9 +121,11 @@ spiral_points(spiral_t * spiral, size_t limit) {
             spiral->co_ord_cache.co_ords.items[result_index+1].y = current.y;
             result_index++;
         }
-        // update validity
     }
-    spiral->co_ord_cache.validity = limit;
+    // set validity to the largest of limit and current validity
+    spiral->co_ord_cache.validity = (
+        limit > spiral->co_ord_cache.validity
+    ) ? limit : spiral->co_ord_cache.validity;
 }
 
 // private function, given a spiral struct, check if any of its lines would
