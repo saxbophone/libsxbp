@@ -87,6 +87,15 @@ change_direction(direction_t current, rotation_t turn);
 spiral_t
 init_spiral(buffer_t buffer);
 
+// given a pointer to a spiral struct an limit, which is the index of the last
+// line to use, calculate and store the co-ordinates of all line segments that
+// would make up the spiral if the current lengths and directions were used.
+// each line segment is only one unit long, meaning multiple ones are needed for
+// lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
+// member and are re-used if they are still valid
+void
+spiral_points(spiral_t * spiral, size_t limit);
+
 // given a spiral for which the length of all its lines are not yet known,
 // calculate the length needed for each line in the spiral (to avoid line overlap)
 // and store these in a spiral struct and return that

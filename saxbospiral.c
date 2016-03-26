@@ -64,10 +64,12 @@ init_spiral(buffer_t buffer) {
     return result;
 }
 
-// private function, returns a dynamically allocated array of co_ord_t structs
-// that represent all the points in cartesian space occupied by the given spiral
-// if any previously calculated points exist in the spiral's co_ord_cache, then
-// these are used first before calculating any others
+// given a pointer to a spiral struct an limit, which is the index of the last
+// line to use, calculate and store the co-ordinates of all line segments that
+// would make up the spiral if the current lengths and directions were used.
+// each line segment is only one unit long, meaning multiple ones are needed for
+// lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
+// member and are re-used if they are still valid
 void
 spiral_points(spiral_t * spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
@@ -76,12 +78,12 @@ spiral_points(spiral_t * spiral, size_t limit) {
         size += spiral->lines[i].length;
     }
     // allocate / reallocate memory
-    if(spiral->co_ord_cache.co_ords.size == 0) {
+    if(spiral->co_ord_cache.co_ords.items == NULL) {
         // if no memory has been allocated for the co-ords yet, then do this now
         // allocate enough memory to store these
         spiral->co_ord_cache.co_ords.items = calloc(sizeof(co_ord_t), size);
     } else if(spiral->co_ord_cache.co_ords.size != size) {
-        // re-allocate memory instead
+        // if there isn't enough memory allocated, re-allocate memory instead
         spiral->co_ord_cache.co_ords.items = realloc(
             spiral->co_ord_cache.co_ords.items, sizeof(co_ord_t) * size
         );
@@ -200,8 +202,6 @@ plot_spiral(spiral_t input) {
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
-        printf(".");
-        fflush(stdout);
     }
     // free the co_ord_cache member's dynamic memory
     if(output.co_ord_cache.co_ords.size > 0) {

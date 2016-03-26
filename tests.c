@@ -324,6 +324,12 @@ test_dump_spiral() {
     return result;
 }
 
+bool
+test_spiral_points() {
+    // TODO: Implement this test case
+    return false;
+}
+
 // this function takes a bool containing the test suite status,
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
@@ -361,5 +367,7 @@ main(int argc, char const *argv[]) {
         "test_load_spiral_rejects_too_small_data_section"
     );
     result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
+    // TODO: Run this test case
+    // result = run_test_case(result, test_spiral_points, "test_spiral_points");
     return result ? 0 : 1;
 }
