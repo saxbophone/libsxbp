@@ -258,7 +258,7 @@ load_spiral(buffer_t buffer) {
     spiral_t output = { .size = 0, };
     // Check for buffer size (must be at least the size of the header)
     // Check for magic number
-    if((strncmp(buffer.bytes, "SAXBOSPIRAL", 11) == 0) && (buffer.size >= 29)) {
+    if((strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0) && (buffer.size >= 29)) {
         // good to go
         // TODO: Add checks for buffer data version compatibility
         /*
@@ -308,7 +308,7 @@ dump_spiral(spiral_t spiral) {
     output.bytes = calloc(1, output.size);
     // write first part of data header (magic number and version info)
     sprintf(
-        output.bytes, "SAXBOSPIRAL\n%c%c%c\n",
+        (char *)output.bytes, "SAXBOSPIRAL\n%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch
     );
     // write second part of data header (spiral size as 64 bit uint)

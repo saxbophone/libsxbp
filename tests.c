@@ -219,7 +219,7 @@ test_load_spiral() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        buffer.bytes,
+        (char *)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
     );
@@ -293,7 +293,7 @@ test_load_spiral_rejects_missing_magic_number() {
     buffer_t buffer = { .size = 36, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = "not the header you were looking for";
+    buffer.bytes = (uint8_t *)"not the header you were looking for";
 
     // call load_spiral with buffer and store result
     spiral_t output = load_spiral(buffer);
@@ -313,7 +313,7 @@ test_load_spiral_rejects_too_small_for_header() {
     buffer_t buffer = { .size = 12, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = "SAXBOSPIRAL";
+    buffer.bytes = (uint8_t *)"SAXBOSPIRAL";
 
     // call load_spiral with buffer and store result
     spiral_t output = load_spiral(buffer);
@@ -334,7 +334,7 @@ test_load_spiral_rejects_too_small_data_section() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        buffer.bytes,
+        (char *)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
     );
@@ -382,7 +382,7 @@ test_dump_spiral() {
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
-        expected.bytes,
+        (char *)expected.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
     );
