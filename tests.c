@@ -62,6 +62,114 @@ test_init_spiral() {
 }
 
 bool
+test_spiral_points() {
+    // success variable
+    bool success = true;
+    // prepare input spiral struct
+    spiral_t input = {
+        .size = 16,
+        .lines = calloc(sizeof(line_t), 16),
+    };
+    direction_t directions[16] = {
+        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
+        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+    };
+    length_t lengths[16] = {
+        1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
+    };
+    for(size_t i = 0; i < 16; i++) {
+        input.lines[i].direction = directions[i];
+        input.lines[i].length = lengths[i];
+    }
+    // prepare expected output data
+    co_ord_t expected[23] = {
+        {  0,  0, }, {  0,  1, }, { -1,  1, }, { -1,  0, }, { -2,  0, },
+        { -2, -1, }, { -1, -1, }, { -1, -2, }, {  0, -2, }, {  1, -2, },
+        {  1, -1, }, {  1,  0, }, {  1,  1, }, {  1,  2, }, {  0,  2, },
+        {  0,  3, }, {  1,  3, }, {  2,  3, }, {  2,  2, }, {  3,  2, },
+        {  3,  3, }, {  3,  4, }, {  2,  4, }
+    };
+
+    // call spiral_points on struct with start point and maximum limit
+    co_ord_array_t results = spiral_points(input, expected[0], 0, 16);
+
+    // validate data
+    if(results.size != 23) {
+        success = false;
+    } else {
+        for(size_t i = 0; i < 23; i++) {
+            if(
+                (results.items[i].x != expected[i].x)
+                || (results.items[i].y != expected[i].y)
+            ) {
+                success = false;
+                // break;
+            }
+        }
+    }
+
+    // clean up
+    free(input.lines);
+    free(results.items);
+    return success;
+}
+
+bool
+test_cache_spiral_points_blank() {
+    // success variable
+    bool success = true;
+    // prepare input spiral struct
+    spiral_t input = {
+        .size = 16,
+        .lines = calloc(sizeof(line_t), 16),
+    };
+    direction_t directions[16] = {
+        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
+        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+    };
+    length_t lengths[16] = {
+        1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
+    };
+    for(size_t i = 0; i < 16; i++) {
+        input.lines[i].direction = directions[i];
+        input.lines[i].length = lengths[i];
+    }
+    // prepare expected output data
+    co_ord_t expected[23] = {
+        {  0,  0, }, {  0,  1, }, { -1,  1, }, { -1,  0, }, { -2,  0, },
+        { -2, -1, }, { -1, -1, }, { -1, -2, }, {  0, -2, }, {  1, -2, },
+        {  1, -1, }, {  1,  0, }, {  1,  1, }, {  1,  2, }, {  0,  2, },
+        {  0,  3, }, {  1,  3, }, {  2,  3, }, {  2,  2, }, {  3,  2, },
+        {  3,  3, }, {  3,  4, }, {  2,  4, }
+    };
+
+    // call spiral_points on struct with maximum limit
+    cache_spiral_points(&input, 16);
+
+    // validate data
+    if(input.co_ord_cache.co_ords.size != 23) {
+        success = false;
+    } else if(input.co_ord_cache.validity != 16) {
+        success = false;
+    } else {
+        for(size_t i = 0; i < 23; i++) {
+            if(
+                (input.co_ord_cache.co_ords.items[i].x != expected[i].x)
+                || (input.co_ord_cache.co_ords.items[i].y != expected[i].y)
+            ) {
+                success = false;
+                // break;
+            }
+        }
+    }
+
+    // clean up
+    free(input.lines);
+    free(input.co_ord_cache.co_ords.items);
+    return success;
+}
+
+bool
 test_plot_spiral() {
     // success / failure variable
     bool result = true;
@@ -322,114 +430,6 @@ test_dump_spiral() {
     free(output.bytes);
 
     return result;
-}
-
-bool
-test_spiral_points() {
-    // success variable
-    bool success = true;
-    // prepare input spiral struct
-    spiral_t input = {
-        .size = 16,
-        .lines = calloc(sizeof(line_t), 16),
-    };
-    direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
-    };
-    length_t lengths[16] = {
-        1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
-    };
-    for(size_t i = 0; i < 16; i++) {
-        input.lines[i].direction = directions[i];
-        input.lines[i].length = lengths[i];
-    }
-    // prepare expected output data
-    co_ord_t expected[23] = {
-        {  0,  0, }, {  0,  1, }, { -1,  1, }, { -1,  0, }, { -2,  0, },
-        { -2, -1, }, { -1, -1, }, { -1, -2, }, {  0, -2, }, {  1, -2, },
-        {  1, -1, }, {  1,  0, }, {  1,  1, }, {  1,  2, }, {  0,  2, },
-        {  0,  3, }, {  1,  3, }, {  2,  3, }, {  2,  2, }, {  3,  2, },
-        {  3,  3, }, {  3,  4, }, {  2,  4, }
-    };
-
-    // call spiral_points on struct with start point and maximum limit
-    co_ord_array_t results = spiral_points(input, expected[0], 0, 16);
-
-    // validate data
-    if(results.size != 23) {
-        success = false;
-    } else {
-        for(size_t i = 0; i < 23; i++) {
-            if(
-                (results.items[i].x != expected[i].x)
-                || (results.items[i].y != expected[i].y)
-            ) {
-                success = false;
-                // break;
-            }
-        }
-    }
-
-    // clean up
-    free(input.lines);
-    free(results.items);
-    return success;
-}
-
-bool
-test_cache_spiral_points_blank() {
-    // success variable
-    bool success = true;
-    // prepare input spiral struct
-    spiral_t input = {
-        .size = 16,
-        .lines = calloc(sizeof(line_t), 16),
-    };
-    direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
-    };
-    length_t lengths[16] = {
-        1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
-    };
-    for(size_t i = 0; i < 16; i++) {
-        input.lines[i].direction = directions[i];
-        input.lines[i].length = lengths[i];
-    }
-    // prepare expected output data
-    co_ord_t expected[23] = {
-        {  0,  0, }, {  0,  1, }, { -1,  1, }, { -1,  0, }, { -2,  0, },
-        { -2, -1, }, { -1, -1, }, { -1, -2, }, {  0, -2, }, {  1, -2, },
-        {  1, -1, }, {  1,  0, }, {  1,  1, }, {  1,  2, }, {  0,  2, },
-        {  0,  3, }, {  1,  3, }, {  2,  3, }, {  2,  2, }, {  3,  2, },
-        {  3,  3, }, {  3,  4, }, {  2,  4, }
-    };
-
-    // call spiral_points on struct with maximum limit
-    cache_spiral_points(&input, 16);
-
-    // validate data
-    if(input.co_ord_cache.co_ords.size != 23) {
-        success = false;
-    } else if(input.co_ord_cache.validity != 16) {
-        success = false;
-    } else {
-        for(size_t i = 0; i < 23; i++) {
-            if(
-                (input.co_ord_cache.co_ords.items[i].x != expected[i].x)
-                || (input.co_ord_cache.co_ords.items[i].y != expected[i].y)
-            ) {
-                success = false;
-                // break;
-            }
-        }
-    }
-
-    // clean up
-    free(input.lines);
-    free(input.co_ord_cache.co_ords.items);
-    return success;
 }
 
 // this function takes a bool containing the test suite status,
