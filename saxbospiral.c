@@ -137,6 +137,7 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     co_ord_t current = { 0, 0, };
     size_t result_index = 0; // maintain independent index for co-ords array
     // if we're not going to re-calculate the whole array, skip forward the index
+    // find the smallest of limit and the spirals' cache validity
     size_t smallest = (
         limit < spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
@@ -152,19 +153,12 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
         spiral->co_ord_cache.co_ords.items[0].x = current.x;
         spiral->co_ord_cache.co_ords.items[0].y = current.y;
     }
-    // iterate over all lines and add the co-ords
-    // start at the highest known good co-ord in cache
-    for(size_t i = spiral->co_ord_cache.validity; i < limit; i++) {
-        // get current direction
-        vector_t direction = VECTOR_DIRECTIONS[spiral->lines[i].direction];
-        // make as many jumps in this direction as this lines legth
-        for(uint32_t j = 0; j < spiral->lines[i].length; j++) {
-            current.x += direction.x;
-            current.y += direction.y;
-            spiral->co_ord_cache.co_ords.items[result_index+1].x = current.x;
-            spiral->co_ord_cache.co_ords.items[result_index+1].y = current.y;
-            result_index++;
-        }
+    // calculate the missing co-ords
+    co_ord_array_t missing = spiral_points(*spiral, current, smallest, limit);
+    // add the missing co-ords to the cache
+    for(size_t i = result_index; i < size; i++) {
+        spiral->co_ord_cache.co_ords.items[i].x = missing.items[i-result_index].x;
+        spiral->co_ord_cache.co_ords.items[i].y = missing.items[i-result_index].y;
     }
     // set validity to the largest of limit and current validity
     spiral->co_ord_cache.validity = (

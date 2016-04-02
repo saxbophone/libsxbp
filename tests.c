@@ -454,6 +454,12 @@ main(int argc, char const *argv[]) {
     // call run_test_case() for each test case
     result = run_test_case(result, test_change_direction, "test_change_direction");
     result = run_test_case(result, test_init_spiral, "test_init_spiral");
+    result = run_test_case(
+        result, test_spiral_points, "test_spiral_points"
+    );
+    result = run_test_case(
+        result, test_cache_spiral_points_blank, "test_cache_spiral_points_blank"
+    );
     result = run_test_case(result, test_plot_spiral, "test_plot_spiral");
     result = run_test_case(result, test_load_spiral, "test_load_spiral");
     result = run_test_case(
@@ -469,11 +475,5 @@ main(int argc, char const *argv[]) {
         "test_load_spiral_rejects_too_small_data_section"
     );
     result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
-    result = run_test_case(
-        result, test_cache_spiral_points_blank, "test_cache_spiral_points_blank"
-    );
-    result = run_test_case(
-        result, test_spiral_points, "test_spiral_points"
-    );
     return result ? 0 : 1;
 }
