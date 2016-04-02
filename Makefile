@@ -32,6 +32,6 @@ test: tests
 build: prepare generate
 
 clean:
-	rm -f *.o
+	rm -f *.o tests prepare generate
 
 all: test build
