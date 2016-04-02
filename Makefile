@@ -26,12 +26,18 @@ generate.o: $(LIB) generate.c
 generate: saxbospiral.o generate.o
 	$(CC) $(CFLAGS) -g -o generate saxbospiral.o generate.o
 
+render.o: $(LIB) render.c
+	$(CC) $(CFLAGS) -c render.c
+
+render: saxbospiral.o render.o
+	$(CC) $(CFLAGS) -g -o render saxbospiral.o render.o
+
 test: tests
 	./tests
 
-build: prepare generate
+build: prepare generate render
 
 clean:
-	rm -f *.o tests prepare generate
+	rm -f *.o tests prepare generate render
 
 all: test build
