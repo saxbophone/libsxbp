@@ -94,7 +94,7 @@ init_spiral(buffer_t buffer);
 // lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
 // member and are re-used if they are still valid
 void
-spiral_points(spiral_t * spiral, size_t limit);
+cache_spiral_points(spiral_t * spiral, size_t limit);
 
 // given a spiral for which the length of all its lines are not yet known,
 // calculate the length needed for each line in the spiral (to avoid line overlap)

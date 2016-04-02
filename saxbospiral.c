@@ -71,7 +71,7 @@ init_spiral(buffer_t buffer) {
 // lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
 // member and are re-used if they are still valid
 void
-spiral_points(spiral_t * spiral, size_t limit) {
+cache_spiral_points(spiral_t * spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
     size_t size = 1;
     for(size_t i = 0; i < limit; i++) {
@@ -129,21 +129,18 @@ spiral_points(spiral_t * spiral, size_t limit) {
 }
 
 // private function, given a spiral struct, check if any of its lines would
-// collide given their current directions and jump sizes, checking up to limit
-// number of lines
+// collide given their current directions and jump sizes (using co-ords stored in cache)
 static bool
-spiral_collides(spiral_t * spiral, size_t limit) {
-    // update the spiral's co-ord cache
-    spiral_points(spiral, limit);
+spiral_collides(spiral_t spiral) {
     // check for duplicates
     // false if there are not.
     bool duplicates = false;
-    for(size_t i = 0; i < spiral->co_ord_cache.co_ords.size; i++) {
-        for(size_t j = 0; j < spiral->co_ord_cache.co_ords.size; j++) {
+    for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
+        for(size_t j = 0; j < spiral.co_ord_cache.co_ords.size; j++) {
             if(i != j) {
                 if(
-                    (spiral->co_ord_cache.co_ords.items[i].x == spiral->co_ord_cache.co_ords.items[j].x)
-                    && (spiral->co_ord_cache.co_ords.items[i].y == spiral->co_ord_cache.co_ords.items[j].y)
+                    (spiral.co_ord_cache.co_ords.items[i].x == spiral.co_ord_cache.co_ords.items[j].x)
+                    && (spiral.co_ord_cache.co_ords.items[i].y == spiral.co_ord_cache.co_ords.items[j].y)
                 ) {
                     duplicates = true;
                     break;
@@ -170,20 +167,22 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
     spiral.co_ord_cache.validity = (
         index < spiral.co_ord_cache.validity
     ) ? index : spiral.co_ord_cache.validity;
+    // update the spiral's co-ord cache
+    cache_spiral_points(&spiral, index+1);
     // now, check for collisions
-    bool collides = spiral_collides(&spiral, index+1);
-    if(collides) {
+    if(spiral_collides(spiral)) {
         // there were collisions, so reset the target line to 1
         spiral.lines[index].length = 1;
-        while(collides) {
+        do {
             // recursively call resize_spiral(), increasing the size of the
             // previous line until we get something that doesn't collide
             spiral = resize_spiral(
                 spiral, index-1, spiral.lines[index-1].length+1
             );
+            // update the spiral's co-ord cache
+            cache_spiral_points(&spiral, index+1);
             // check if it still collides
-            collides = spiral_collides(&spiral, index+1);
-        }
+        } while(spiral_collides(spiral));
     }
     return spiral;
 }

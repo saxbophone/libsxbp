@@ -325,7 +325,7 @@ test_dump_spiral() {
 }
 
 bool
-test_spiral_points_blank() {
+test_cache_spiral_points_blank() {
     // success variable
     bool success = true;
     // prepare input spiral struct
@@ -354,7 +354,7 @@ test_spiral_points_blank() {
     };
 
     // call spiral_points on struct with maximum limit
-    spiral_points(&input, 16);
+    cache_spiral_points(&input, 16);
 
     // validate data
     if(input.co_ord_cache.co_ords.size != 23) {
@@ -417,7 +417,7 @@ main(int argc, char const *argv[]) {
     );
     result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
     result = run_test_case(
-        result, test_spiral_points_blank, "test_spiral_points_blank"
+        result, test_cache_spiral_points_blank, "test_cache_spiral_points_blank"
     );
     return result ? 0 : 1;
 }
