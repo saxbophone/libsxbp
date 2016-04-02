@@ -64,6 +64,50 @@ init_spiral(buffer_t buffer) {
     return result;
 }
 
+// given a spiral_t struct, a pair of co-ords specifying the start point and
+// indexes of the lowest and highest line segments to use, return a
+// co_ord_array_t struct containing all the co-ordinates of the line segments of
+// the struct according to the current directions and lengths of the lines in
+// the spiral.
+// each line segment is only one unit long, meaning multiple ones are needed for
+// lines longer than one unit.
+co_ord_array_t
+spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
+    // the amount of space needed is the sum of all line lengths:
+    size_t size = 1;
+    for(size_t i = start; i < end; i++) {
+        size += spiral.lines[i].length;
+    }
+    // allocate memory
+    co_ord_array_t results = {
+        .items = calloc(sizeof(co_ord_t), size),
+        .size = size,
+    };
+    // start current co-ordinate at the given start point
+    co_ord_t current = {
+        .x = start_point.x,
+        .y = start_point.y,
+    };
+    // initialise independent result index
+    size_t result_index = 0;
+    results.items[result_index].x = current.x;
+    results.items[result_index].y = current.y;
+    // calculate all the specified co-ords
+    for(size_t i = start; i < end; i++) {
+        // get current direction
+        vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        // make as many jumps in this direction as this lines length
+        for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
+            current.x += direction.x;
+            current.y += direction.y;
+            results.items[result_index+1].x = current.x;
+            results.items[result_index+1].y = current.y;
+            result_index++;
+        }
+    }
+    return results;
+}
+
 // given a pointer to a spiral struct an limit, which is the index of the last
 // line to use, calculate and store the co-ordinates of all line segments that
 // would make up the spiral if the current lengths and directions were used.
