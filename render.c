@@ -46,7 +46,10 @@ file_size(FILE * file_handle) {
 // for the corners of the square needed to contain the points.
 static co_ord_array_t
 get_bounds(spiral_t spiral) {
-    int64_t min_x, min_y, max_x, max_y;
+    int64_t min_x = 0;
+    int64_t min_y = 0;
+    int64_t max_x = 0;
+    int64_t max_y = 0;
     for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
         if(spiral.co_ord_cache.co_ords.items[i].x < min_x) {
             min_x = spiral.co_ord_cache.co_ords.items[i].x;
@@ -106,7 +109,7 @@ render_spiral(spiral_t spiral) {
         top_left.x, top_left.y,
         bottom_right.x, bottom_right.y
     );
-    // initialise output bitmap
+    // initialise output bitmap - image dimensions are twice the size + 1
     bitmap_t output = {
         .width = ((bottom_right.x+1) * 2) + 1,
         .height = ((bottom_right.y+1) * 2) + 1,
