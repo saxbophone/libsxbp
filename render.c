@@ -157,12 +157,30 @@ write_png_image(FILE * file_handle, bitmap_t bitmap) {
         8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE
     );
-    // Set title
-    png_text title_text;
-    title_text.compression = PNG_TEXT_COMPRESSION_NONE;
-    title_text.key = "Title";
-    title_text.text = "Saxbospiral test image";
-    png_set_text(png_ptr, info_ptr, &title_text, 1);
+    // Set image metadata
+    png_text metadata[5]; // Author, Description, Copyright, Software, Comment
+    metadata[0].key = "Author";
+    metadata[0].text = "Joshua Saxby (https://github.com/saxbophone)";
+    metadata[1].key = "Description";
+    metadata[1].text = "Experimental generation of 2D spiralling lines based on input binary data";
+    metadata[2].key = "Copyright";
+    metadata[2].text = "Copyright Joshua Saxby";
+    metadata[3].key = "Software";
+    // can't sprintf directly to the text attribute
+    char software[25];
+    sprintf(
+        software, "SAXBOSPIRAL v%i.%i.%i",
+        VERSION.major, VERSION.minor, VERSION.patch
+    );
+    metadata[3].text = software;
+    metadata[4].key = "Comment";
+    metadata[4].text = "https://github.com/saxbophone/saxbospiral";
+    // set compression of each metadata key
+    for(size_t i = 0; i < 5; i++) {
+        metadata[i].compression = PNG_TEXT_COMPRESSION_NONE;
+    }
+    // write metadata
+    png_set_text(png_ptr, info_ptr, metadata, 5);
     png_write_info(png_ptr, info_ptr);
     // Allocate memory for one row (3 bytes per pixel - RGB)
     row = (png_bytep) malloc(3 * bitmap.width * sizeof(png_byte));
