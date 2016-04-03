@@ -85,11 +85,6 @@ render_spiral(spiral_t spiral) {
     cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
     co_ord_array_t bounds = get_bounds(spiral);
-    printf(
-        "(%li, %li), (%li, %li)\n",
-        bounds.items[0].x, bounds.items[0].y,
-        bounds.items[1].x, bounds.items[1].y
-    );
     // get the normalisation vector needed to make all values unsigned
     tuple_t normalisation_vector = {
         .x = -bounds.items[0].x,
@@ -104,17 +99,11 @@ render_spiral(spiral_t spiral) {
         .x = bounds.items[1].x + normalisation_vector.x,
         .y = bounds.items[1].y + normalisation_vector.y,
     };
-    printf(
-        "(%li, %li), (%li, %li)\n",
-        top_left.x, top_left.y,
-        bottom_right.x, bottom_right.y
-    );
     // initialise output bitmap - image dimensions are twice the size + 1
     bitmap_t output = {
         .width = ((bottom_right.x+1) * 2) + 1,
         .height = ((bottom_right.y+1) * 2) + 1,
     };
-    printf("(%lu, %lu)\n", output.width, output.height);
     // allocate dynamic memory - 2D array of bools
     output.pixels = malloc(output.width * sizeof(bool*));
     for(size_t i = 0; i < output.width; i++) {
@@ -140,13 +129,67 @@ render_spiral(spiral_t spiral) {
             current.y += direction.y;
         }
     }
-    for(size_t y = 0; y < output.height; y++) {
-        for(size_t x = 0; x < output.width; x++) {
-            printf((output.pixels[x][y]) ? "\u2588" : " ");
-        }
-        printf("\n");
-    }
     return output;
+}
+
+// given a file handle and a bitmap_t struct, write the bitmap data as a PNG
+// image to the file, using libpng
+static void
+write_png_image(FILE * file_handle, bitmap_t bitmap) {
+    // init libpng stuff
+    png_structp png_ptr = NULL;
+    png_infop info_ptr = NULL;
+    png_bytep row = NULL;
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (png_ptr == NULL) {
+      fprintf(stderr, "Could not allocate write struct\n");
+      return;
+    }
+    info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == NULL) {
+      fprintf(stderr, "Could not allocate info struct\n");
+      return;
+    }
+    png_init_io(png_ptr, file_handle);
+    // Write header (8 bit colour depth)
+    png_set_IHDR(
+        png_ptr, info_ptr, bitmap.width, bitmap.height,
+        8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+        PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE
+    );
+    // Set title
+    png_text title_text;
+    title_text.compression = PNG_TEXT_COMPRESSION_NONE;
+    title_text.key = "Title";
+    title_text.text = "Saxbospiral test image";
+    png_set_text(png_ptr, info_ptr, &title_text, 1);
+    png_write_info(png_ptr, info_ptr);
+    // Allocate memory for one row (3 bytes per pixel - RGB)
+    row = (png_bytep) malloc(3 * bitmap.width * sizeof(png_byte));
+    // Write image data
+    for (size_t y = 0 ; y < bitmap.height; y++) {
+       for (size_t x = 0; x < bitmap.width; x++) {
+            if(bitmap.pixels[x][y] == true) {
+                // set to black
+                row[(x*3)+0] = 0x00;
+                row[(x*3)+1] = 0x00;
+                row[(x*3)+2] = 0x00;
+            } else {
+                // set to white
+                row[(x*3)+0] = 0xff;
+                row[(x*3)+1] = 0xff;
+                row[(x*3)+2] = 0xff;
+            }
+       }
+       png_write_row(png_ptr, row);
+    }
+    // End write
+    png_write_end(png_ptr, NULL);
+    // cleanup
+    if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+    if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+    if (row != NULL) free(row);
+    return;
 }
 
 int
@@ -216,8 +259,7 @@ main(int argc, char * argv[]) {
         }
         printf("Saving rendered image to output file... ");
         // now write PNG image data to file with libpng
-        // TODO: Implement this step!
-        // #error Image rendering not implemented
+        write_png_image(output_file_handle, image);
         printf("[DONE]\n");
         // close output file handle
         fclose(output_file_handle);

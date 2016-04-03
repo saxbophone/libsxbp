@@ -30,7 +30,7 @@ render.o: $(LIB) render.c
 	$(CC) $(CFLAGS) -c render.c
 
 render: saxbospiral.o render.o
-	$(CC) $(CFLAGS) -g -o render saxbospiral.o render.o
+	$(CC) $(CFLAGS) -g -o render saxbospiral.o render.o -lpng
 
 test: tests
 	./tests
