@@ -108,8 +108,8 @@ render_spiral(spiral_t spiral) {
     );
     // initialise output bitmap
     bitmap_t output = {
-        .width = (bottom_right.x * 2) + 3,
-        .height = (bottom_right.y * 2) + 3,
+        .width = (bottom_right.x * 3) + 2,
+        .height = (bottom_right.y * 3) + 2,
     };
     printf("(%lu, %lu)\n", output.width, output.height);
     // allocate dynamic memory - 2D array of bools
@@ -128,12 +128,8 @@ render_spiral(spiral_t spiral) {
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
         for(uint64_t j = 0; j < spiral.lines[i].length*2; j++) {
-            int64_t x_pos = current.x+normalisation_vector.x+1;
-            int64_t y_pos = current.y+normalisation_vector.y+1;
-            if(x_pos < 0) { break; }
-            if(x_pos >= output.width) { break; }
-            if(y_pos < 0) { break; }
-            if(y_pos >= output.height) { break; }
+            int64_t x_pos = current.x+normalisation_vector.x+bottom_right.x;
+            int64_t y_pos = current.y+normalisation_vector.y+bottom_right.y;
             // printf("(%li, %li)\n", x_pos, y_pos);
             output.pixels[x_pos][y_pos] = true;
             current.x += direction.x;
