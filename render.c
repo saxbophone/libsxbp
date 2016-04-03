@@ -54,10 +54,10 @@ get_bounds(spiral_t spiral) {
         if(spiral.co_ord_cache.co_ords.items[i].y < min_y) {
             min_y = spiral.co_ord_cache.co_ords.items[i].y;
         }
-        if(spiral.co_ord_cache.co_ords.items[i].x > min_x) {
+        if(spiral.co_ord_cache.co_ords.items[i].x > max_x) {
             max_x = spiral.co_ord_cache.co_ords.items[i].x;
         }
-        if(spiral.co_ord_cache.co_ords.items[i].y > min_y) {
+        if(spiral.co_ord_cache.co_ords.items[i].y > max_y) {
             max_y = spiral.co_ord_cache.co_ords.items[i].y;
         }
     }
@@ -108,13 +108,44 @@ render_spiral(spiral_t spiral) {
     );
     // initialise output bitmap
     bitmap_t output = {
-        .width = (bottom_right.x * 2) + 2,
-        .height = (bottom_right.y * 2) + 2,
+        .width = (bottom_right.x * 2) + 3,
+        .height = (bottom_right.y * 2) + 3,
     };
+    printf("(%lu, %lu)\n", output.width, output.height);
     // allocate dynamic memory - 2D array of bools
     output.pixels = malloc(output.width * sizeof(bool*));
     for(size_t i = 0; i < output.width; i++) {
-        output.pixels[i] = malloc(output.height * sizeof(bool));
+        output.pixels[i] = calloc(output.height, sizeof(bool));
+    }
+    // set 'current point' co-ordinate
+    co_ord_t current = {
+        .x = 0,
+        .y = 0,
+    };
+    // plot the lines of the spiral as points
+    for(size_t i = 0; i < spiral.size; i++) {
+        // get current direction
+        vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        // make as many jumps in this direction as this lines length
+        for(uint64_t j = 0; j < spiral.lines[i].length*2; j++) {
+            int64_t x_pos = current.x+normalisation_vector.x+1;
+            int64_t y_pos = current.y+normalisation_vector.y+1;
+            if(x_pos < 0) { break; }
+            if(x_pos >= output.width) { break; }
+            if(y_pos < 0) { break; }
+            if(y_pos >= output.height) { break; }
+            // printf("(%li, %li)\n", x_pos, y_pos);
+            output.pixels[x_pos][y_pos] = true;
+            current.x += direction.x;
+            current.y += direction.y;
+        }
+    }
+    printf("\n");
+    for(size_t y = 0; y < output.height; y++) {
+        for(size_t x = 0; x < output.width; x++) {
+            printf((output.pixels[x][y]) ? "\u2588" : " ");
+        }
+        printf("\n");
     }
     return output;
 }
