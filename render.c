@@ -151,12 +151,16 @@ write_png_image(FILE * file_handle, bitmap_t bitmap) {
       return;
     }
     png_init_io(png_ptr, file_handle);
-    // Write header (8 bit colour depth)
+    // Write header - specify a 1-bit grayscale image with adam7 interlacing
     png_set_IHDR(
         png_ptr, info_ptr, bitmap.width, bitmap.height,
-        8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+        1, PNG_COLOR_TYPE_GRAY, PNG_INTERLACE_NONE,
         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE
     );
+    // configure bit packing - 1 bit gray channel
+    png_color_8 sig_bit;
+    sig_bit.gray = 1;
+    png_set_sBIT(png_ptr, info_ptr, &sig_bit);
     // Set image metadata
     png_text metadata[5]; // Author, Description, Copyright, Software, Comment
     metadata[0].key = "Author";
@@ -182,22 +186,17 @@ write_png_image(FILE * file_handle, bitmap_t bitmap) {
     // write metadata
     png_set_text(png_ptr, info_ptr, metadata, 5);
     png_write_info(png_ptr, info_ptr);
-    // Allocate memory for one row (3 bytes per pixel - RGB)
-    row = (png_bytep) malloc(3 * bitmap.width * sizeof(png_byte));
+    // set bit shift - TODO: Check if this is acutally needed
+    png_set_shift(png_ptr, &sig_bit);
+    // set bit packing - NOTE: I'm pretty sure this bit is needed but worth checking
+    png_set_packing(png_ptr);
+    // Allocate memory for one row (1 byte per pixel - RGB)
+    row = (png_bytep) malloc(bitmap.width * sizeof(png_byte));
     // Write image data
     for (size_t y = 0 ; y < bitmap.height; y++) {
        for (size_t x = 0; x < bitmap.width; x++) {
-            if(bitmap.pixels[x][y] == true) {
-                // set to black
-                row[(x*3)+0] = 0x00;
-                row[(x*3)+1] = 0x00;
-                row[(x*3)+2] = 0x00;
-            } else {
-                // set to white
-                row[(x*3)+0] = 0xff;
-                row[(x*3)+1] = 0xff;
-                row[(x*3)+2] = 0xff;
-            }
+            // set to black if there is a point here, white if not
+            row[x] = (bitmap.pixels[x][y] == true) ? 0 : 1;
        }
        png_write_row(png_ptr, row);
     }
