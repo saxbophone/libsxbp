@@ -123,8 +123,11 @@ render_spiral(spiral_t spiral) {
             // get output co-ords
             int64_t x_pos = current.x+(normalisation_vector.x*2)+1;
             int64_t y_pos = current.y+(normalisation_vector.y*2)+1;
-            // flip the y-axis otherwise they appear vertically mirrored
-            output.pixels[x_pos][output.height-1-y_pos] = true;
+            // skip the second pixel of the first line
+            if(!((i == 0) && (j == 1))) {
+                // flip the y-axis otherwise they appear vertically mirrored
+                output.pixels[x_pos][output.height-1-y_pos] = true;
+            }
             current.x += direction.x;
             current.y += direction.y;
         }
