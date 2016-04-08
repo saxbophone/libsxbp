@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-.PHONY: test build clean all
+.PHONY: test-unit test-func build clean all
 
 CC=gcc
 CFLAGS=-std=c99
@@ -33,12 +33,21 @@ render.o: $(LIB) render.c
 render: saxbospiral.o render.o
 	$(CC) $(CFLAGS) $(OPTIMISE) -g -o render saxbospiral.o render.o -lpng
 
-test: tests
+test-unit: tests
 	./tests
+
+test-func: prepare generate render
+	@echo "Running Functional Test"
+	@echo -n "saxbospiral `git describe --abbrev=0`" > message.hex
+	@./prepare message.hex message.sxp.hex
+	@./generate message.sxp.hex
+	@./render message.sxp.hex saxbospiral_test.png
+	@diff saxbospiral.png saxbospiral_test.png
+	@rm saxbospiral_test.png message.hex message.sxp.hex
 
 build: prepare generate render
 
 clean:
 	rm -f *.o tests prepare generate render
 
-all: test build
+all: test-unit test-func build
