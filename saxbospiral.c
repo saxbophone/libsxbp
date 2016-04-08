@@ -84,14 +84,10 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
         .size = size,
     };
     // start current co-ordinate at the given start point
-    co_ord_t current = {
-        .x = start_point.x,
-        .y = start_point.y,
-    };
+    co_ord_t current = start_point;
     // initialise independent result index
     size_t result_index = 0;
-    results.items[result_index].x = current.x;
-    results.items[result_index].y = current.y;
+    results.items[result_index] = current;
     // calculate all the specified co-ords
     for(size_t i = start; i < end; i++) {
         // get current direction
@@ -100,8 +96,7 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
         for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
-            results.items[result_index+1].x = current.x;
-            results.items[result_index+1].y = current.y;
+            results.items[result_index+1] = current;
             result_index++;
         }
     }
@@ -146,19 +141,16 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
             result_index += spiral->lines[i].length;
         }
         // update current to be at latest known co-ord
-        current.x = spiral->co_ord_cache.co_ords.items[result_index].x;
-        current.y = spiral->co_ord_cache.co_ords.items[result_index].y;
+        current = spiral->co_ord_cache.co_ords.items[result_index];
     } else {
         // otherwise, start at 0
-        spiral->co_ord_cache.co_ords.items[0].x = current.x;
-        spiral->co_ord_cache.co_ords.items[0].y = current.y;
+        spiral->co_ord_cache.co_ords.items[0] = current;
     }
     // calculate the missing co-ords
     co_ord_array_t missing = spiral_points(*spiral, current, smallest, limit);
     // add the missing co-ords to the cache
     for(size_t i = result_index; i < size; i++) {
-        spiral->co_ord_cache.co_ords.items[i].x = missing.items[i-result_index].x;
-        spiral->co_ord_cache.co_ords.items[i].y = missing.items[i-result_index].y;
+        spiral->co_ord_cache.co_ords.items[i] = missing.items[i-result_index];
     }
     // set validity to the largest of limit and current validity
     spiral->co_ord_cache.validity = (
@@ -233,16 +225,15 @@ plot_spiral(spiral_t input) {
     // allocate new struct as copy of input struct
     spiral_t output = { .size = input.size, };
     output.lines = calloc(sizeof(line_t), output.size);
-    // copy across line directions and lengths
+    // copy across the spiral lines
     for(size_t i = 0; i < output.size; i++) {
-        output.lines[i].direction = input.lines[i].direction;
-        output.lines[i].length = input.lines[i].length;
+        output.lines[i] = input.lines[i];
     }
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
     }
-    // free the co_ord_cache member's dynamic memory
+    // free the co_ord_cache member's dynamic memory if required
     if(output.co_ord_cache.co_ords.size > 0) {
         free(output.co_ord_cache.co_ords.items);
         output.co_ord_cache.co_ords.size = 0;
