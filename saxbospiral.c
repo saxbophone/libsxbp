@@ -64,6 +64,16 @@ init_spiral(buffer_t buffer) {
     return result;
 }
 
+// return the sum of all line lengths within the given indexes
+static size_t
+sum_lines(spiral_t spiral, size_t start, size_t end) {
+    size_t size = 1;
+    for(size_t i = start; i < end; i++) {
+        size += spiral.lines[i].length;
+    }
+    return size;
+}
+
 // given a spiral_t struct, a pair of co-ords specifying the start point and
 // indexes of the lowest and highest line segments to use, return a
 // co_ord_array_t struct containing all the co-ordinates of the line segments of
@@ -74,10 +84,7 @@ init_spiral(buffer_t buffer) {
 co_ord_array_t
 spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
     // the amount of space needed is the sum of all line lengths:
-    size_t size = 1;
-    for(size_t i = start; i < end; i++) {
-        size += spiral.lines[i].length;
-    }
+    size_t size = sum_lines(spiral, start, end);
     // allocate memory
     co_ord_array_t results = {
         .items = calloc(sizeof(co_ord_t), size),
@@ -112,10 +119,7 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
 void
 cache_spiral_points(spiral_t * spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
-    size_t size = 1;
-    for(size_t i = 0; i < limit; i++) {
-        size += spiral->lines[i].length;
-    }
+    size_t size = sum_lines(*spiral, 0, limit);
     // allocate / reallocate memory
     if(spiral->co_ord_cache.co_ords.items == NULL) {
         // if no memory has been allocated for the co-ords yet, then do this now
