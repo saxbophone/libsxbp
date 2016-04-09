@@ -141,9 +141,8 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
         limit < spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
     if(spiral->co_ord_cache.validity != 0) {
-        for(size_t i = 0; i < smallest; i++) {
-            result_index += spiral->lines[i].length;
-        }
+        // get index of the latest known co-ord
+        result_index += (sum_lines(*spiral, 0, smallest)-1);
         // update current to be at latest known co-ord
         current = spiral->co_ord_cache.co_ords.items[result_index];
     } else {
