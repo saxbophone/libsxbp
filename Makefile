@@ -3,7 +3,7 @@
 
 CC=gcc
 CFLAGS=-std=c99
-OPTIMISE=
+OPTIMISE=-O0
 LIB=saxbospiral.h
 
 saxbospiral.o: saxbospiral.c $(LIB)
