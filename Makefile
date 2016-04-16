@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-.PHONY: test-unit test-func build clean all
+.PHONY: test-unit test-func logo build clean all
 
 CC=gcc
 CFLAGS=-std=c99
@@ -44,6 +44,14 @@ test-func: prepare generate render
 	@./render message.sxp.hex saxbospiral_test.png
 	@diff saxbospiral.png saxbospiral_test.png
 	@rm saxbospiral_test.png message.hex message.sxp.hex
+
+logo: prepare generate render
+	@echo "Generating logo"
+	@echo -n "saxbospiral `git describe --abbrev=0`" > saxbospiral.hex
+	@./prepare saxbospiral.hex saxbospiral.sxp
+	@./generate saxbospiral.sxp
+	@./render saxbospiral.sxp saxbospiral.png
+	@rm saxbospiral.hex saxbospiral.sxp
 
 build: prepare generate render
 
