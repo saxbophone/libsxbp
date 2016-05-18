@@ -11,7 +11,7 @@ extern "C"{
 #endif
 
 const version_t VERSION = {
-    .major = 0, .minor = 5, .patch = 4,
+    .major = 0, .minor = 5, .patch = 5,
 };
 
 // vector direction constants
@@ -165,26 +165,32 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
 // collide given their current directions and jump sizes (using co-ords stored in cache)
 static bool
 spiral_collides(spiral_t spiral) {
-    // check for duplicates
-    // false if there are not.
-    bool duplicates = false;
-    for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
-        for(size_t j = 0; j < spiral.co_ord_cache.co_ords.size; j++) {
-            if(i != j) {
+    // if there are less than 4 lines in the spiral, then there's no way it
+    // can collide, so return false early
+    if (spiral.co_ord_cache.co_ords.size < 4) {
+        return false;
+    } else {
+        // check all combinations of co-ords against each other, iterating
+        // this way avoids repeating checks on the same co-ords
+        for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
+            for(size_t j = 0; j < i; j++) {
                 if(
-                    (spiral.co_ord_cache.co_ords.items[i].x == spiral.co_ord_cache.co_ords.items[j].x)
-                    && (spiral.co_ord_cache.co_ords.items[i].y == spiral.co_ord_cache.co_ords.items[j].y)
+                    (
+                        spiral.co_ord_cache.co_ords.items[i].x ==
+                        spiral.co_ord_cache.co_ords.items[j].x
+                    )
+                    &&
+                    (
+                        spiral.co_ord_cache.co_ords.items[i].y ==
+                        spiral.co_ord_cache.co_ords.items[j].y
+                    )
                 ) {
-                    duplicates = true;
-                    break;
+                    return true;
                 }
             }
         }
-        if(duplicates) {
-            break;
-        }
+        return false;
     }
-    return duplicates;
 }
 
 // private function, given a spiral struct, the index of one of it's lines and
