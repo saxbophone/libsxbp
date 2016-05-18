@@ -170,7 +170,6 @@ spiral_collides(spiral_t spiral) {
     if (spiral.co_ord_cache.co_ords.size < 4) {
         return false;
     } else {
-        bool duplicates = false;
         // check all combinations of co-ords against each other, iterating
         // this way avoids repeating checks on the same co-ords
         for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
@@ -186,12 +185,11 @@ spiral_collides(spiral_t spiral) {
                         spiral.co_ord_cache.co_ords.items[j].y
                     )
                 ) {
-                    duplicates = true;
-                    break;
+                    return true;
                 }
             }
         }
-        return duplicates;
+        return false;
     }
 }
 
