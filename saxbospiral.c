@@ -161,8 +161,11 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     ) ? limit : spiral->co_ord_cache.validity;
 }
 
-// private function, given a spiral struct, check if any of its lines would
-// collide given their current directions and jump sizes (using co-ords stored in cache)
+// private function, given a spiral struct, check if the latest line would
+// collide with any of the others, given their current directions and jump sizes
+// (using co-ords stored in cache).
+// NOTE: This assumes that all co-ords except the most recent are valid and
+// don't collide
 static bool
 spiral_collides(spiral_t spiral) {
     // if there are less than 4 lines in the spiral, then there's no way it
@@ -170,23 +173,21 @@ spiral_collides(spiral_t spiral) {
     if (spiral.co_ord_cache.co_ords.size < 4) {
         return false;
     } else {
-        // check all combinations of co-ords against each other, iterating
-        // this way avoids repeating checks on the same co-ords
-        for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
-            for(size_t j = 0; j < i; j++) {
-                if(
-                    (
-                        spiral.co_ord_cache.co_ords.items[i].x ==
-                        spiral.co_ord_cache.co_ords.items[j].x
-                    )
-                    &&
-                    (
-                        spiral.co_ord_cache.co_ords.items[i].y ==
-                        spiral.co_ord_cache.co_ords.items[j].y
-                    )
-                ) {
-                    return true;
-                }
+        // check the last co-ord in the array against all the others
+        size_t last = spiral.co_ord_cache.co_ords.size-1;
+        for(size_t i = 0; i < last; i++) {
+            if(
+                (
+                    spiral.co_ord_cache.co_ords.items[i].x ==
+                    spiral.co_ord_cache.co_ords.items[last].x
+                )
+                &&
+                (
+                    spiral.co_ord_cache.co_ords.items[i].y ==
+                    spiral.co_ord_cache.co_ords.items[last].y
+                )
+            ) {
+                return true;
             }
         }
         return false;
