@@ -278,7 +278,7 @@ load_spiral(buffer_t buffer) {
             spiral_size |= (buffer.bytes[16 + i]) << (8 * (7 - i));
         }
         // Check that the file data section is large enough for the spiral size
-        if((buffer.size-FILE_HEADER_SIZE) != (sizeof(line_t)*spiral_size)) {
+        if((buffer.size - FILE_HEADER_SIZE) != (sizeof(line_t) * spiral_size)) {
             // this check failed, so return it as it is
             return output;
         }
