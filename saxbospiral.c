@@ -10,6 +10,9 @@
 extern "C"{
 #endif
 
+size_t max_recursion = 0;
+size_t total_calls = 0;
+
 const version_t VERSION = {
     .major = 0, .minor = 5, .patch = 6,
 };
@@ -199,7 +202,14 @@ spiral_collides(spiral_t spiral) {
 // length, recursively calling self to resize the previous line if that is not
 // possible.
 static spiral_t
-resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
+resize_spiral(spiral_t spiral, size_t index, uint32_t length, size_t r) {
+    total_calls++;
+    if(total_calls == 0) {
+        fprintf(stderr, "%s\n", "Arrrrgh! Wrap-around of function call count!");
+        abort();
+    }
+    r++;
+    max_recursion = (r > max_recursion) ? r : max_recursion;
     // first, set the target line to the target length
     spiral.lines[index].length = length;
     // also, set cache validity to this index so we invalidate any invalid
@@ -217,7 +227,7 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
             // recursively call resize_spiral(), increasing the size of the
             // previous line until we get something that doesn't collide
             spiral = resize_spiral(
-                spiral, index-1, spiral.lines[index-1].length+1
+                spiral, index-1, spiral.lines[index-1].length+1, r
             );
             // update the spiral's co-ord cache
             cache_spiral_points(&spiral, index+1);
@@ -241,8 +251,9 @@ plot_spiral(spiral_t input) {
     }
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
-        output = resize_spiral(output, i, 1);
+        output = resize_spiral(output, i, 1, 0);
     }
+    printf("Max Recursion: %zi\nTotal Calls: %zi\n", max_recursion, total_calls);
     // free the co_ord_cache member's dynamic memory if required
     if(output.co_ord_cache.co_ords.size > 0) {
         free(output.co_ord_cache.co_ords.items);
