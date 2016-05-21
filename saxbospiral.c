@@ -11,8 +11,10 @@ extern "C"{
 #endif
 
 const version_t VERSION = {
-    .major = 0, .minor = 5, .patch = 6,
+    .major = 0, .minor = 5, .patch = 7,
 };
+
+const size_t FILE_HEADER_SIZE = 25;
 
 // vector direction constants
 const vector_t VECTOR_DIRECTIONS[4] = {
@@ -47,9 +49,9 @@ init_spiral(buffer_t buffer) {
         // byte-level loop
         for(size_t b = 0; b < 8; b++) {
             // bit level loop
-            uint8_t e = 7-b; // which power of two to use with bit mask
+            uint8_t e = 7 - b; // which power of two to use with bit mask
             uint8_t bit = (buffer.bytes[s] & (1 << e)) >> e; // the currently accessed bit
-            size_t index = (s*8) + b; // line index
+            size_t index = (s * 8) + b; // line index
             rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
             rotation = (bit == 0) ? CLOCKWISE : ANTI_CLOCKWISE;
@@ -103,7 +105,7 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
         for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
-            results.items[result_index+1] = current;
+            results.items[result_index + 1] = current;
             result_index++;
         }
     }
@@ -142,7 +144,7 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     ) ? limit : spiral->co_ord_cache.validity;
     if(spiral->co_ord_cache.validity != 0) {
         // get index of the latest known co-ord
-        result_index += (sum_lines(*spiral, 0, smallest)-1);
+        result_index += (sum_lines(*spiral, 0, smallest) - 1);
         // update current to be at latest known co-ord
         current = spiral->co_ord_cache.co_ords.items[result_index];
     } else {
@@ -154,6 +156,10 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     // add the missing co-ords to the cache
     for(size_t i = result_index; i < size; i++) {
         spiral->co_ord_cache.co_ords.items[i] = missing.items[i-result_index];
+    }
+    // free dynamically allocated memory, if any was allocated
+    if(missing.items != NULL) {
+        free(missing.items);
     }
     // set validity to the largest of limit and current validity
     spiral->co_ord_cache.validity = (
@@ -174,7 +180,7 @@ spiral_collides(spiral_t spiral) {
         return false;
     } else {
         // check the last co-ord in the array against all the others
-        size_t last = spiral.co_ord_cache.co_ords.size-1;
+        size_t last = spiral.co_ord_cache.co_ords.size - 1;
         for(size_t i = 0; i < last; i++) {
             if(
                 (
@@ -208,7 +214,7 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
         index < spiral.co_ord_cache.validity
     ) ? index : spiral.co_ord_cache.validity;
     // update the spiral's co-ord cache
-    cache_spiral_points(&spiral, index+1);
+    cache_spiral_points(&spiral, index + 1);
     // now, check for collisions
     if(spiral_collides(spiral)) {
         // there were collisions, so reset the target line to 1
@@ -217,10 +223,10 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
             // recursively call resize_spiral(), increasing the size of the
             // previous line until we get something that doesn't collide
             spiral = resize_spiral(
-                spiral, index-1, spiral.lines[index-1].length+1
+                spiral, index - 1, spiral.lines[index - 1].length + 1
             );
             // update the spiral's co-ord cache
-            cache_spiral_points(&spiral, index+1);
+            cache_spiral_points(&spiral, index + 1);
             // check if it still collides
         } while(spiral_collides(spiral));
     }
@@ -257,9 +263,12 @@ spiral_t
 load_spiral(buffer_t buffer) {
     // create initial output spiral, a spiral of length 0 (shows failure)
     spiral_t output = { .size = 0, };
-    // Check for buffer size (must be at least the size of the header)
-    // Check for magic number
-    if((strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0) && (buffer.size >= 29)) {
+    // Check for buffer size (must be at least the size of the header + amount
+    // of space needed for one line). Also, check for magic number
+    if(
+        (strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0)
+        && (buffer.size >= FILE_HEADER_SIZE + 4)
+    ) {
         // good to go
         // TODO: Add checks for buffer data version compatibility
         /*
@@ -270,10 +279,10 @@ load_spiral(buffer_t buffer) {
         // get size of spiral object contained in buffer
         size_t spiral_size = 0;
         for(size_t i = 0; i < 8; i++) {
-            spiral_size |= (buffer.bytes[16+i]) << (8*(7-i));
+            spiral_size |= (buffer.bytes[16 + i]) << (8 * (7 - i));
         }
         // Check that the file data section is large enough for the spiral size
-        if((buffer.size-25) != (sizeof(line_t)*spiral_size)) {
+        if((buffer.size - FILE_HEADER_SIZE) != (sizeof(line_t) * spiral_size)) {
             // this check failed, so return it as it is
             return output;
         }
@@ -284,14 +293,20 @@ load_spiral(buffer_t buffer) {
         // convert each serialised line segment in buffer into a line_t struct
         for(size_t i = 0; i < spiral_size; i++) {
             // direction is stored in 2 most significant bits of each 32-bit sequence
-            output.lines[i].direction = (buffer.bytes[25+(i*4)] >> 6);
+            output.lines[i].direction = (
+                buffer.bytes[FILE_HEADER_SIZE + (i * sizeof(line_t))] >> 6
+            );
             // length is stored as 30 least significant bits, so we have to unpack it
             // handle first byte on it's own as we only need least 6 bits of it
             // bit mask and shift 3 bytes to left
-            output.lines[i].length = (buffer.bytes[25+(i*4)] & 0b00111111) << 24;
+            output.lines[i].length = (
+                buffer.bytes[FILE_HEADER_SIZE + (i * sizeof(line_t))] & 0b00111111
+            ) << 24;
             // handle remaining 3 bytes in loop
             for(uint8_t j = 0; j < 3; j++) {
-                output.lines[i].length |= (buffer.bytes[25+(i*4)+1+j]) << (8*(2-j));
+                output.lines[i].length |= (
+                    buffer.bytes[FILE_HEADER_SIZE + (i * sizeof(line_t)) + 1 + j]
+                ) << (8 * (2 - j));
             }
         }
     }
@@ -304,7 +319,9 @@ load_spiral(buffer_t buffer) {
 buffer_t
 dump_spiral(spiral_t spiral) {
     // build output buffer struct, base size on header + spiral size
-    buffer_t output = { .size = (25 + (sizeof(line_t)*spiral.size)), };
+    buffer_t output = {
+        .size = (FILE_HEADER_SIZE + (sizeof(line_t) * spiral.size)),
+    };
     // allocate memory
     output.bytes = calloc(1, output.size);
     // write first part of data header (magic number and version info)
@@ -314,8 +331,10 @@ dump_spiral(spiral_t spiral) {
     );
     // write second part of data header (spiral size as 64 bit uint)
     for(uint8_t i = 0; i < 8; i++) {
-        uint8_t shift = (8*(7-i));
-        output.bytes[16+i] = (uint8_t)(((uint64_t)spiral.size & (0xff << shift)) >> shift);
+        uint8_t shift = (8 * (7 - i));
+        output.bytes[16 + i] = (uint8_t)(
+            ((uint64_t)spiral.size & (0xff << shift)) >> shift
+        );
     }
     // write final newline at end of header
     output.bytes[24] = '\n';
@@ -323,12 +342,18 @@ dump_spiral(spiral_t spiral) {
     for(size_t i = 0; i < spiral.size; i++) {
         // serialise each line in the spiral to 4 bytes, handle first byte first
         // map direction to 2 most significant bits
-        output.bytes[25+(i*4)] = (spiral.lines[i].direction << 6);
+        output.bytes[
+            FILE_HEADER_SIZE + (i * sizeof(line_t))
+        ] = (spiral.lines[i].direction << 6);
         // handle first 6 bits of the length
-        output.bytes[25+(i*4)] |= (spiral.lines[i].length >> 24);
+        output.bytes[
+            FILE_HEADER_SIZE + (i * sizeof(line_t))
+        ] |= (spiral.lines[i].length >> 24);
         // handle remaining 3 bytes in a loop
         for(uint8_t j = 0; j < 3; j++) {
-            output.bytes[25+(i*4)+1+j] = (uint8_t)(spiral.lines[i].length >> (8*(2-j)));
+            output.bytes[
+                FILE_HEADER_SIZE + (i * sizeof(line_t)) + 1 + j
+            ] = (uint8_t)(spiral.lines[i].length >> (8 * (2 - j)));
         }
     }
     return output;

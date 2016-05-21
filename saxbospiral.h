@@ -17,6 +17,8 @@ typedef struct version_t {
 
 extern const version_t VERSION;
 
+extern const size_t FILE_HEADER_SIZE;
+
 // type for representing a cartesian direction
 typedef uint8_t direction_t;
 
