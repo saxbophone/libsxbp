@@ -157,6 +157,10 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     for(size_t i = result_index; i < size; i++) {
         spiral->co_ord_cache.co_ords.items[i] = missing.items[i-result_index];
     }
+    // free dynamically allocated memory, if any was allocated
+    if(missing.items != NULL) {
+        free(missing.items);
+    }
     // set validity to the largest of limit and current validity
     spiral->co_ord_cache.validity = (
         limit > spiral->co_ord_cache.validity
