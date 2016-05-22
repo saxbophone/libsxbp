@@ -11,7 +11,7 @@ extern "C"{
 #endif
 
 const version_t VERSION = {
-    .major = 0, .minor = 5, .patch = 7,
+    .major = 0, .minor = 5, .patch = 8,
 };
 
 const size_t FILE_HEADER_SIZE = 25;
