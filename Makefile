@@ -10,7 +10,7 @@ CFLAGS=$(STANDARD) $(OPTIMISE) $(DEBUG) $(INCLUDES)
 LIBPNG=-lpng
 LIB=saxbospiral.h
 OS_NAME=
-EXE_SUFFIX=
+EXE_SUFFIX=.out
 
 saxbospiral.o: saxbospiral.c $(LIB)
 	$(CC) $(CFLAGS) -o saxbospiral$(OS_NAME).o -c saxbospiral.c
