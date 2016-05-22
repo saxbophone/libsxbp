@@ -9,33 +9,35 @@ INCLUDES=
 CFLAGS=$(STANDARD) $(OPTIMISE) $(DEBUG) $(INCLUDES)
 LIBPNG=-lpng
 LIB=saxbospiral.h
+OS_NAME=
+EXE_SUFFIX=
 
 saxbospiral.o: saxbospiral.c $(LIB)
-	$(CC) $(CFLAGS) -c saxbospiral.c
+	$(CC) $(CFLAGS) -o saxbospiral$(OS_NAME).o -c saxbospiral.c
 
 tests.o: $(LIB) tests.c
-	$(CC) $(CFLAGS) -c tests.c
+	$(CC) $(CFLAGS) -o tests$(OS_NAME).o -c tests.c
 
 tests: saxbospiral.o tests.o
-	$(CC) $(CFLAGS) -o tests saxbospiral.o tests.o
+	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o tests$(OS_NAME).o
 
 prepare.o: $(LIB) prepare.c
-	$(CC) $(CFLAGS) -c prepare.c
+	$(CC) $(CFLAGS) -o prepare$(OS_NAME).o -c prepare.c
 
 prepare: saxbospiral.o prepare.o
-	$(CC) $(CFLAGS) -o prepare saxbospiral.o prepare.o
+	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o prepare$(OS_NAME).o
 
 generate.o: $(LIB) generate.c
-	$(CC) $(CFLAGS) -c generate.c
+	$(CC) $(CFLAGS) -o generate$(OS_NAME).o -c generate.c
 
 generate: saxbospiral.o generate.o
-	$(CC) $(CFLAGS) -o generate saxbospiral.o generate.o
+	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o generate$(OS_NAME).o
 
 render.o: $(LIB) render.c
-	$(CC) $(CFLAGS) -c render.c
+	$(CC) $(CFLAGS) -o render$(OS_NAME).o -c render.c
 
 render: saxbospiral.o render.o
-	$(CC) $(CFLAGS) -o render saxbospiral.o render.o $(LIBPNG)
+	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o render$(OS_NAME).o $(LIBPNG)
 
 test-unit: tests
 	./tests
