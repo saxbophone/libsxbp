@@ -40,28 +40,28 @@ render: saxbospiral.o render.o
 	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o render$(OS_NAME).o $(LIBPNG)
 
 test-unit: tests
-	./tests
+	./tests$(OS_NAME)$(EXE_SUFFIX)
 
 test-func: prepare generate render
 	@echo "Running Functional Test"
 	@echo -n "saxbospiral `git describe --abbrev=0`" > message.hex
-	@./prepare message.hex message.sxp.hex
-	@./generate message.sxp.hex
-	@./render message.sxp.hex saxbospiral_test.png
+	@./prepare$(OS_NAME)$(EXE_SUFFIX) message.hex message.sxp.hex
+	@./generate$(OS_NAME)$(EXE_SUFFIX) message.sxp.hex
+	@./render$(OS_NAME)$(EXE_SUFFIX) message.sxp.hex saxbospiral_test.png
 	@diff saxbospiral.png saxbospiral_test.png
 	@rm saxbospiral_test.png message.hex message.sxp.hex
 
 logo: prepare generate render
 	@echo "Generating logo"
 	@echo -n "saxbospiral `git describe --abbrev=0`" > saxbospiral.hex
-	@./prepare saxbospiral.hex saxbospiral.sxp
-	@./generate saxbospiral.sxp
-	@./render saxbospiral.sxp saxbospiral.png
+	@./prepare$(OS_NAME)$(EXE_SUFFIX) saxbospiral.hex saxbospiral.sxp
+	@./generate$(OS_NAME)$(EXE_SUFFIX) saxbospiral.sxp
+	@./render$(OS_NAME)$(EXE_SUFFIX) saxbospiral.sxp saxbospiral.png
 	@rm saxbospiral.hex saxbospiral.sxp
 
 build: prepare generate render
 
 clean:
-	rm -f *.o tests prepare generate render
+	rm -f *.o *.out *.exe
 
 all: test-unit test-func build
