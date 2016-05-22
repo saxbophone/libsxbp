@@ -5,7 +5,9 @@ CC=gcc
 STANDARD=-std=c99
 OPTIMISE=-O0
 DEBUG=-g
-CFLAGS=$(STANDARD) $(OPTIMISE) $(DEBUG)
+INCLUDES=
+CFLAGS=$(STANDARD) $(OPTIMISE) $(DEBUG) $(INCLUDES)
+LIBPNG=-lpng
 LIB=saxbospiral.h
 
 saxbospiral.o: saxbospiral.c $(LIB)
@@ -33,7 +35,7 @@ render.o: $(LIB) render.c
 	$(CC) $(CFLAGS) -c render.c
 
 render: saxbospiral.o render.o
-	$(CC) $(CFLAGS) -o render saxbospiral.o render.o -lpng
+	$(CC) $(CFLAGS) -o render saxbospiral.o render.o $(LIBPNG)
 
 test-unit: tests
 	./tests
