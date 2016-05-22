@@ -14,7 +14,9 @@ const version_t VERSION = {
     .major = 0, .minor = 5, .patch = 8,
 };
 
+// constants related to how spiral data is packed in files - measured in bytes
 const size_t FILE_HEADER_SIZE = 25;
+const size_t LINE_T_PACK_SIZE = 4;
 
 // vector direction constants
 const vector_t VECTOR_DIRECTIONS[4] = {
@@ -287,7 +289,7 @@ load_spiral(buffer_t buffer) {
             spiral_size |= (buffer.bytes[16 + i]) << (8 * (7 - i));
         }
         // Check that the file data section is large enough for the spiral size
-        if((buffer.size - FILE_HEADER_SIZE) != (sizeof(line_t) * spiral_size)) {
+        if((buffer.size - FILE_HEADER_SIZE) != (LINE_T_PACK_SIZE * spiral_size)) {
             // this check failed, so return it as it is
             return output;
         }
@@ -299,18 +301,18 @@ load_spiral(buffer_t buffer) {
         for(size_t i = 0; i < spiral_size; i++) {
             // direction is stored in 2 most significant bits of each 32-bit sequence
             output.lines[i].direction = (
-                buffer.bytes[FILE_HEADER_SIZE + (i * sizeof(line_t))] >> 6
+                buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] >> 6
             );
             // length is stored as 30 least significant bits, so we have to unpack it
             // handle first byte on it's own as we only need least 6 bits of it
             // bit mask and shift 3 bytes to left
             output.lines[i].length = (
-                buffer.bytes[FILE_HEADER_SIZE + (i * sizeof(line_t))] & 0b00111111
+                buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] & 0b00111111
             ) << 24;
             // handle remaining 3 bytes in loop
             for(uint8_t j = 0; j < 3; j++) {
                 output.lines[i].length |= (
-                    buffer.bytes[FILE_HEADER_SIZE + (i * sizeof(line_t)) + 1 + j]
+                    buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE) + 1 + j]
                 ) << (8 * (2 - j));
             }
         }
@@ -325,7 +327,7 @@ buffer_t
 dump_spiral(spiral_t spiral) {
     // build output buffer struct, base size on header + spiral size
     buffer_t output = {
-        .size = (FILE_HEADER_SIZE + (sizeof(line_t) * spiral.size)),
+        .size = (FILE_HEADER_SIZE + (LINE_T_PACK_SIZE * spiral.size)),
     };
     // allocate memory
     output.bytes = calloc(1, output.size);
@@ -348,16 +350,16 @@ dump_spiral(spiral_t spiral) {
         // serialise each line in the spiral to 4 bytes, handle first byte first
         // map direction to 2 most significant bits
         output.bytes[
-            FILE_HEADER_SIZE + (i * sizeof(line_t))
+            FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)
         ] = (spiral.lines[i].direction << 6);
         // handle first 6 bits of the length
         output.bytes[
-            FILE_HEADER_SIZE + (i * sizeof(line_t))
+            FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)
         ] |= (spiral.lines[i].length >> 24);
         // handle remaining 3 bytes in a loop
         for(uint8_t j = 0; j < 3; j++) {
             output.bytes[
-                FILE_HEADER_SIZE + (i * sizeof(line_t)) + 1 + j
+                FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE) + 1 + j
             ] = (uint8_t)(spiral.lines[i].length >> (8 * (2 - j)));
         }
     }
