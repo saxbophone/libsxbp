@@ -17,7 +17,9 @@ typedef struct version_t {
 
 extern const version_t VERSION;
 
+// constants related to how spiral data is packed in files - measured in bytes
 extern const size_t FILE_HEADER_SIZE;
+extern const size_t LINE_T_PACK_SIZE;
 
 // type for representing a cartesian direction
 typedef uint8_t direction_t;
