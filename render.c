@@ -101,8 +101,8 @@ render_spiral(spiral_t spiral) {
     };
     // initialise output bitmap - image dimensions are twice the size + 1
     bitmap_t output = {
-        .width = ((bottom_right.x+1) * 2) + 1,
-        .height = ((bottom_right.y+1) * 2) + 1,
+        .width = ((bottom_right.x + 1) * 2) + 1,
+        .height = ((bottom_right.y + 1) * 2) + 1,
     };
     // allocate dynamic memory - 2D array of bools
     output.pixels = malloc(output.width * sizeof(bool*));
@@ -119,17 +119,20 @@ render_spiral(spiral_t spiral) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
-        for(uint64_t j = 0; j < spiral.lines[i].length*2; j++) {
+        for(uint64_t j = 0; j < (spiral.lines[i].length * 2) + 1; j++) {
             // get output co-ords
-            int64_t x_pos = current.x+(normalisation_vector.x*2)+1;
-            int64_t y_pos = current.y+(normalisation_vector.y*2)+1;
+            int64_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
+            int64_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
             // skip the second pixel of the first line
             if(!((i == 0) && (j == 1))) {
                 // flip the y-axis otherwise they appear vertically mirrored
-                output.pixels[x_pos][output.height-1-y_pos] = true;
+                output.pixels[x_pos][output.height - 1 - y_pos] = true;
             }
-            current.x += direction.x;
-            current.y += direction.y;
+            if(j != (spiral.lines[i].length * 2)) {
+                // if we're not on the last line, advance the marker along
+                current.x += direction.x;
+                current.y += direction.y;
+            }
         }
     }
     return output;
