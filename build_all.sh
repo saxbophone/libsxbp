@@ -3,11 +3,11 @@
 # NOTE: This file assumes you are running linux and have installed cross-compilers for Windows and OSX.
 # I used w64-mingw32-gcc and OSXCROSS (https://github.com/tpoechtrager/osxcross) respectively. 
 
-$POSIX_EXTENSION='';
-if [[ $USE_POSIX_EXTENSIONS ]]; then
-    $POSIX_EXTENSION='.out';
-fi
+OPTIMISE="-O3";
 
-make OS_NAME=_linux_x86_64 EXE_SUFFIX=$POSIX_EXTENSION; # linux 64-bit target
-make build tests OPTIMISE=-O3 CC=o64-clang OS_NAME=_macosx_x86_64 EXE_SUFFIX=$POSIX_EXTENSION; # osx 64-bit target
-make prepare generate tests OPTIMISE=-O3 CC=x86_64-w64-mingw32-gcc OS_NAME=_windows_x86_64 EXE_SUFFIX=.exe; # windows 64-bit target
+# build and run everything for linux
+make OPTIMISE=$OPTIMISE OS_NAME=_linux_x86_64 EXE_SUFFIX=$POSIX_EXTENSION; # linux 64-bit target
+# build everything but don't run anything for osx
+make build tests OPTIMISE=$OPTIMISE CC=o64-clang OS_NAME=_macosx_x86_64 EXE_SUFFIX=$POSIX_EXTENSION; # osx 64-bit target
+# build everything except render and run the unit tests for windows
+make prepare generate tests test-unit OPTIMISE=$OPTIMISE CC=x86_64-w64-mingw32-gcc OS_NAME=_windows_x86_64 EXE_SUFFIX=.exe; # windows 64-bit target
