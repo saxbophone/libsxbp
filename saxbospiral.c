@@ -11,7 +11,7 @@ extern "C"{
 #endif
 
 const version_t VERSION = {
-    .major = 0, .minor = 5, .patch = 10,
+    .major = 0, .minor = 5, .patch = 11,
 };
 
 // constants related to how spiral data is packed in files - measured in bytes
@@ -178,7 +178,7 @@ static bool
 spiral_collides(spiral_t spiral) {
     // if there are less than 4 lines in the spiral, then there's no way it
     // can collide, so return false early
-    if (spiral.co_ord_cache.co_ords.size < 4) {
+    if (spiral.size < 4) {
         return false;
     } else {
         // check the last co-ord in the array against all the others
