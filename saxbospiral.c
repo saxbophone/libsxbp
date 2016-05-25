@@ -11,7 +11,7 @@ extern "C"{
 #endif
 
 const version_t VERSION = {
-    .major = 0, .minor = 5, .patch = 10,
+    .major = 0, .minor = 5, .patch = 11,
 };
 
 // constants related to how spiral data is packed in files - measured in bytes
