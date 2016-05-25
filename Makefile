@@ -8,39 +8,39 @@ DEBUG=-g
 INCLUDES=
 CFLAGS=$(STANDARD) $(OPTIMISE) $(DEBUG) $(INCLUDES)
 LIBPNG=-lpng
-LIB=saxbospiral.h
+LIB=saxbospiral/saxbospiral.h
 OS_NAME=
 EXE_SUFFIX=.out
 
-saxbospiral.o: saxbospiral.c $(LIB)
-	$(CC) $(CFLAGS) -o saxbospiral$(OS_NAME).o -c saxbospiral.c
+saxbospiral/saxbospiral.o: saxbospiral/saxbospiral.c $(LIB)
+	$(CC) $(CFLAGS) -o saxbospiral/saxbospiral$(OS_NAME).o -c saxbospiral/saxbospiral.c
 
-serialise.o: serialise.c $(LIB)
-	$(CC) $(CFLAGS) -o serialise$(OS_NAME).o -c serialise.c
+saxbospiral/serialise.o: saxbospiral/serialise.c $(LIB)
+	$(CC) $(CFLAGS) -o saxbospiral/serialise$(OS_NAME).o -c saxbospiral/serialise.c
 
 tests.o: $(LIB) tests.c
 	$(CC) $(CFLAGS) -o tests$(OS_NAME).o -c tests.c
 
-tests: saxbospiral.o serialise.o tests.o
-	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o serialise$(OS_NAME).o tests$(OS_NAME).o
+tests: saxbospiral/saxbospiral.o saxbospiral/serialise.o tests.o
+	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) saxbospiral/saxbospiral$(OS_NAME).o saxbospiral/serialise$(OS_NAME).o tests$(OS_NAME).o
 
 prepare.o: $(LIB) prepare.c
 	$(CC) $(CFLAGS) -o prepare$(OS_NAME).o -c prepare.c
 
-prepare: saxbospiral.o serialise.o prepare.o
-	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o serialise$(OS_NAME).o prepare$(OS_NAME).o
+prepare: saxbospiral/saxbospiral.o saxbospiral/serialise.o prepare.o
+	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) saxbospiral/saxbospiral$(OS_NAME).o saxbospiral/serialise$(OS_NAME).o prepare$(OS_NAME).o
 
 generate.o: $(LIB) generate.c
 	$(CC) $(CFLAGS) -o generate$(OS_NAME).o -c generate.c
 
-generate: saxbospiral.o serialise.o generate.o
-	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o serialise$(OS_NAME).o generate$(OS_NAME).o
+generate: saxbospiral/saxbospiral.o saxbospiral/serialise.o generate.o
+	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) saxbospiral/saxbospiral$(OS_NAME).o saxbospiral/serialise$(OS_NAME).o generate$(OS_NAME).o
 
 render.o: $(LIB) render.c
 	$(CC) $(CFLAGS) -o render$(OS_NAME).o -c render.c
 
-render: saxbospiral.o serialise.o render.o
-	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) saxbospiral$(OS_NAME).o serialise$(OS_NAME).o render$(OS_NAME).o $(LIBPNG)
+render: saxbospiral/saxbospiral.o saxbospiral/serialise.o render.o
+	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) saxbospiral/saxbospiral$(OS_NAME).o saxbospiral/serialise$(OS_NAME).o render$(OS_NAME).o $(LIBPNG)
 
 test-unit: tests
 	./tests$(OS_NAME)$(EXE_SUFFIX)

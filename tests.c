@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "saxbospiral.h"
-#include "serialise.h"
+#include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/serialise.h"
 
 
 bool
