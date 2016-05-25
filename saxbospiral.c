@@ -178,7 +178,7 @@ static bool
 spiral_collides(spiral_t spiral) {
     // if there are less than 4 lines in the spiral, then there's no way it
     // can collide, so return false early
-    if (spiral.co_ord_cache.co_ords.size < 4) {
+    if (spiral.size < 4) {
         return false;
     } else {
         // check the last co-ord in the array against all the others
