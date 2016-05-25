@@ -1,5 +1,5 @@
-#ifndef SAXBOPHONE_SAXBOSPIRAL_H
-#define SAXBOPHONE_SAXBOSPIRAL_H
+#ifndef SAXBOPHONE_SAXBOSPIRAL_SAXBOSPIRAL_H
+#define SAXBOPHONE_SAXBOSPIRAL_SAXBOSPIRAL_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -16,10 +16,6 @@ typedef struct version_t {
 } version_t;
 
 extern const version_t VERSION;
-
-// constants related to how spiral data is packed in files - measured in bytes
-extern const size_t FILE_HEADER_SIZE;
-extern const size_t LINE_T_PACK_SIZE;
 
 // type for representing a cartesian direction
 typedef uint8_t direction_t;
@@ -115,15 +111,6 @@ cache_spiral_points(spiral_t * spiral, size_t limit);
 // and store these in a spiral struct and return that
 spiral_t
 plot_spiral(spiral_t spiral);
-
-// given a buffer, return a spiral represented by the data in the struct
-// returns a spiral of length 0 if the data could not be interpreted correctly
-spiral_t
-load_spiral(buffer_t buffer);
-
-// given a spiral, return a buffer of the raw bytes used to represent and store it
-buffer_t
-dump_spiral(spiral_t spiral);
 
 #ifdef __cplusplus
 } // extern "C"

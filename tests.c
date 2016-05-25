@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "saxbospiral.h"
+#include "serialise.h"
 
 
 bool

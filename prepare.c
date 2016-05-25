@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "saxbospiral.h"
+#include "serialise.h"
 
 
 // prints out usage information to a given FILE handle
