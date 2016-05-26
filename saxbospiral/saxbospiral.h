@@ -106,12 +106,6 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end);
 void
 cache_spiral_points(spiral_t * spiral, size_t limit);
 
-// given a spiral for which the length of all its lines are not yet known,
-// calculate the length needed for each line in the spiral (to avoid line overlap)
-// and store these in a spiral struct and return that
-spiral_t
-plot_spiral(spiral_t spiral);
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

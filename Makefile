@@ -12,36 +12,40 @@ OS_NAME=
 EXE_SUFFIX=.out
 LIB=saxbospiral/
 SAXBOSPIRAL=$(LIB)saxbospiral
+SOLVE=$(LIB)solve
 SERIALISE=$(LIB)serialise
 
 $(SAXBOSPIRAL)$(OS_NAME).o: $(SAXBOSPIRAL).c $(LIB)
 	$(CC) $(CFLAGS) -o $(SAXBOSPIRAL)$(OS_NAME).o -c $(SAXBOSPIRAL).c
 
+$(SOLVE)$(OS_NAME).o: $(SOLVE).c $(LIB)
+	$(CC) $(CFLAGS) -o $(SOLVE)$(OS_NAME).o -c $(SOLVE).c
+
 $(SERIALISE)$(OS_NAME).o: $(SERIALISE).c $(LIB)
 	$(CC) $(CFLAGS) -o $(SERIALISE)$(OS_NAME).o -c $(SERIALISE).c
 
-tests.o: $(LIB) tests.c
+tests$(OS_NAME).o: $(LIB) tests.c
 	$(CC) $(CFLAGS) -o tests$(OS_NAME).o -c tests.c
 
-tests: $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o tests.o
-	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o tests$(OS_NAME).o
+tests: $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o tests$(OS_NAME).o
+	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o tests$(OS_NAME).o
 
-prepare.o: $(LIB) prepare.c
+prepare$(OS_NAME).o: $(LIB) prepare.c
 	$(CC) $(CFLAGS) -o prepare$(OS_NAME).o -c prepare.c
 
-prepare: $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o prepare.o
+prepare: $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o prepare$(OS_NAME).o
 	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o prepare$(OS_NAME).o
 
-generate.o: $(LIB) generate.c
+generate$(OS_NAME).o: $(LIB) generate.c
 	$(CC) $(CFLAGS) -o generate$(OS_NAME).o -c generate.c
 
-generate: $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o generate.o
-	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o generate$(OS_NAME).o
+generate: $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o generate$(OS_NAME).o
+	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o generate$(OS_NAME).o
 
-render.o: $(LIB) render.c
+render$(OS_NAME).o: $(LIB) render.c
 	$(CC) $(CFLAGS) -o render$(OS_NAME).o -c render.c
 
-render: $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o render.o
+render: $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o render$(OS_NAME).o
 	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o render$(OS_NAME).o $(LIBPNG)
 
 test-unit: tests
