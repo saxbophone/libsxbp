@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "saxbospiral.h"
 #include "solve.h"
 
 
