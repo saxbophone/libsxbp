@@ -14,11 +14,15 @@ EXE_SUFFIX=
 LIB=saxbospiral/
 
 SAXBOSPIRAL=$(LIB)saxbospiral
+PLOT=$(LIB)plot
 SOLVE=$(LIB)solve
 SERIALISE=$(LIB)serialise
 
 $(SAXBOSPIRAL).o: $(SAXBOSPIRAL).c $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(SAXBOSPIRAL).o -c $(SAXBOSPIRAL).c
+
+$(PLOT).o: $(PLOT).c $(PLOT).h $(SAXBOSPIRAL).h
+	$(CC) $(CFLAGS) -o $(PLOT).o -c $(PLOT).c
 
 $(SOLVE).o: $(SOLVE).c $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(SOLVE).o -c $(SOLVE).c
@@ -29,8 +33,8 @@ $(SERIALISE).o: $(SERIALISE).c $(SAXBOSPIRAL).h
 tests.o: $(SAXBOSPIRAL).h tests.c
 	$(CC) $(CFLAGS) -o tests.o -c tests.c
 
-tests: $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o tests.o
-	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o tests.o
+tests: $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o tests.o
+	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o tests.o
 
 prepare.o: $(SAXBOSPIRAL).h prepare.c
 	$(CC) $(CFLAGS) -o prepare.o -c prepare.c
@@ -38,17 +42,17 @@ prepare.o: $(SAXBOSPIRAL).h prepare.c
 prepare: $(SAXBOSPIRAL).o $(SERIALISE).o prepare.o
 	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SERIALISE).o prepare.o
 
-generate.o: $(SAXBOSPIRAL).h generate.c
+generate.o: $(SAXBOSPIRAL).h $(PLOT).h generate.c
 	$(CC) $(CFLAGS) -o generate.o -c generate.c
 
-generate: $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o generate.o
-	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o generate.o
+generate: $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o generate.o
+	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o generate.o
 
-render.o: $(SAXBOSPIRAL).h render.c
+render.o: $(SAXBOSPIRAL).h $(PLOT).h render.c
 	$(CC) $(CFLAGS) -o render.o -c render.c
 
-render: $(SAXBOSPIRAL).o $(SERIALISE).o render.o
-	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SERIALISE).o render.o $(LIBPNG)
+render: $(SAXBOSPIRAL).o $(PLOT).o $(SERIALISE).o render.o
+	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(SERIALISE).o render.o $(LIBPNG)
 
 test-unit: tests
 	./tests$(OS_NAME)$(EXE_SUFFIX)

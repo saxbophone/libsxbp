@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "saxbospiral.h"
+#include "plot.h"
 #include "solve.h"
 
 

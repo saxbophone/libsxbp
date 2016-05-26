@@ -6,6 +6,7 @@
 #include <png.h>
 
 #include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/plot.h"
 #include "saxbospiral/serialise.h"
 
 
