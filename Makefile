@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := all
-.PHONY: test-unit test-func logo build clean all
+.PHONY: test-unit test-func logo build clean-objects clean-executables clean all
 
 CC=gcc
 STANDARD=-std=c99
@@ -9,7 +9,7 @@ INCLUDES=
 CFLAGS=$(STANDARD) $(OPTIMISE) $(DEBUG) $(INCLUDES)
 LIBPNG=-lpng
 OS_NAME=
-EXE_SUFFIX=.out
+EXE_SUFFIX=
 
 LIB=saxbospiral/
 
@@ -17,48 +17,43 @@ SAXBOSPIRAL=$(LIB)saxbospiral
 SOLVE=$(LIB)solve
 SERIALISE=$(LIB)serialise
 
-TESTS=tests$(OS_NAME)$(EXE_SUFFIX)
-PREPARE=prepare$(OS_NAME)$(EXE_SUFFIX)
-GENERATE=generate$(OS_NAME)$(EXE_SUFFIX)
-RENDER=render$(OS_NAME)$(EXE_SUFFIX)
+$(SAXBOSPIRAL).o: $(SAXBOSPIRAL).c $(SAXBOSPIRAL).h
+	$(CC) $(CFLAGS) -o $(SAXBOSPIRAL).o -c $(SAXBOSPIRAL).c
 
-$(SAXBOSPIRAL)$(OS_NAME).o: $(SAXBOSPIRAL).c $(SAXBOSPIRAL).h
-	$(CC) $(CFLAGS) -o $(SAXBOSPIRAL)$(OS_NAME).o -c $(SAXBOSPIRAL).c
+$(SOLVE).o: $(SOLVE).c $(SAXBOSPIRAL).h
+	$(CC) $(CFLAGS) -o $(SOLVE).o -c $(SOLVE).c
 
-$(SOLVE)$(OS_NAME).o: $(SOLVE).c $(SAXBOSPIRAL).h
-	$(CC) $(CFLAGS) -o $(SOLVE)$(OS_NAME).o -c $(SOLVE).c
+$(SERIALISE).o: $(SERIALISE).c $(SAXBOSPIRAL).h
+	$(CC) $(CFLAGS) -o $(SERIALISE).o -c $(SERIALISE).c
 
-$(SERIALISE)$(OS_NAME).o: $(SERIALISE).c $(SAXBOSPIRAL).h
-	$(CC) $(CFLAGS) -o $(SERIALISE)$(OS_NAME).o -c $(SERIALISE).c
+tests.o: $(SAXBOSPIRAL).h tests.c
+	$(CC) $(CFLAGS) -o tests.o -c tests.c
 
-tests$(OS_NAME).o: $(SAXBOSPIRAL).h tests.c
-	$(CC) $(CFLAGS) -o tests$(OS_NAME).o -c tests.c
+tests: $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o tests.o
+	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o tests.o
 
-$(TESTS): $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o tests$(OS_NAME).o
-	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o tests$(OS_NAME).o
+prepare.o: $(SAXBOSPIRAL).h prepare.c
+	$(CC) $(CFLAGS) -o prepare.o -c prepare.c
 
-prepare$(OS_NAME).o: $(SAXBOSPIRAL).h prepare.c
-	$(CC) $(CFLAGS) -o prepare$(OS_NAME).o -c prepare.c
+prepare: $(SAXBOSPIRAL).o $(SERIALISE).o prepare.o
+	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SERIALISE).o prepare.o
 
-$(PREPARE): $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o prepare$(OS_NAME).o
-	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o prepare$(OS_NAME).o
+generate.o: $(SAXBOSPIRAL).h generate.c
+	$(CC) $(CFLAGS) -o generate.o -c generate.c
 
-generate$(OS_NAME).o: $(SAXBOSPIRAL).h generate.c
-	$(CC) $(CFLAGS) -o generate$(OS_NAME).o -c generate.c
+generate: $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o generate.o
+	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SOLVE).o $(SERIALISE).o generate.o
 
-$(GENERATE): $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o generate$(OS_NAME).o
-	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SOLVE)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o generate$(OS_NAME).o
+render.o: $(SAXBOSPIRAL).h render.c
+	$(CC) $(CFLAGS) -o render.o -c render.c
 
-render$(OS_NAME).o: $(SAXBOSPIRAL).h render.c
-	$(CC) $(CFLAGS) -o render$(OS_NAME).o -c render.c
+render: $(SAXBOSPIRAL).o $(SERIALISE).o render.o
+	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SERIALISE).o render.o $(LIBPNG)
 
-$(RENDER): $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o render$(OS_NAME).o
-	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL)$(OS_NAME).o $(SERIALISE)$(OS_NAME).o render$(OS_NAME).o $(LIBPNG)
-
-test-unit: $(TESTS)
+test-unit: tests
 	./tests$(OS_NAME)$(EXE_SUFFIX)
 
-test-func: $(PREPARE) $(GENERATE) $(RENDER)
+test-func: prepare generate render
 	@echo "Running Functional Test"
 	@echo -n "saxbospiral `git describe --abbrev=0`" > message.hex
 	@./prepare$(OS_NAME)$(EXE_SUFFIX) message.hex message.sxp.hex
@@ -67,7 +62,7 @@ test-func: $(PREPARE) $(GENERATE) $(RENDER)
 	@diff saxbospiral.png saxbospiral_test.png
 	@rm saxbospiral_test.png message.hex message.sxp.hex
 
-logo: $(PREPARE) $(GENERATE) $(RENDER)
+logo: prepare generate render
 	@echo "Generating logo"
 	@echo -n "saxbospiral `git describe --abbrev=0`" > saxbospiral.hex
 	@./prepare$(OS_NAME)$(EXE_SUFFIX) saxbospiral.hex saxbospiral.sxp
@@ -75,9 +70,14 @@ logo: $(PREPARE) $(GENERATE) $(RENDER)
 	@./render$(OS_NAME)$(EXE_SUFFIX) saxbospiral.sxp saxbospiral.png
 	@rm saxbospiral.hex saxbospiral.sxp
 
-build: $(PREPARE) $(GENERATE) $(RENDER)
+build: prepare generate render
 
-clean:
-	rm -rf *.o *.out *.exe
+clean-objects:
+	rm -rf *.o saxbospiral/*.o
+
+clean-executables:
+	rm -rf *.out *.exe tests prepare generate render
+
+clean: clean-objects clean-executables
 
 all: test-unit test-func build
