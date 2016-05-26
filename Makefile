@@ -76,7 +76,7 @@ clean-objects:
 	rm -rf *.o saxbospiral/*.o
 
 clean-executables:
-	rm -rf *.out *.exe tests prepare generate render
+	rm -rf *.out *.exe *.x86_64 tests prepare generate render
 
 clean: clean-objects clean-executables
 
