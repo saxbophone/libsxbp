@@ -19,13 +19,15 @@ sum_lines(spiral_t spiral, size_t start, size_t end) {
     return size;
 }
 
-// given a spiral_t struct, a pair of co-ords specifying the start point and
-// indexes of the lowest and highest line segments to use, return a
-// co_ord_array_t struct containing all the co-ordinates of the line segments of
-// the struct according to the current directions and lengths of the lines in
-// the spiral.
-// each line segment is only one unit long, meaning multiple ones are needed for
-// lines longer than one unit.
+/*
+ * given a spiral_t struct, a pair of co-ords specifying the start point and
+ * indexes of the lowest and highest line segments to use, return a
+ * co_ord_array_t struct containing all the co-ordinates of the line segments of
+ * the struct according to the current directions and lengths of the lines in
+ * the spiral.
+ * each line segment is only one unit long, meaning multiple ones are needed for
+ * lines longer than one unit.
+ */
 co_ord_array_t
 spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
     // the amount of space needed is the sum of all line lengths:
@@ -55,20 +57,24 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
     return results;
 }
 
-// given a pointer to a spiral struct an limit, which is the index of the last
-// line to use, calculate and store the co-ordinates of all line segments that
-// would make up the spiral if the current lengths and directions were used.
-// each line segment is only one unit long, meaning multiple ones are needed for
-// lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
-// member and are re-used if they are still valid
+/*
+ * given a pointer to a spiral struct an limit, which is the index of the last
+ * line to use, calculate and store the co-ordinates of all line segments that
+ * would make up the spiral if the current lengths and directions were used.
+ * each line segment is only one unit long, meaning multiple ones are needed for
+ * lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
+ * member and are re-used if they are still valid
+ */
 void
 cache_spiral_points(spiral_t * spiral, size_t limit) {
     // the amount of space needed is the sum of all line lengths:
     size_t size = sum_lines(*spiral, 0, limit);
     // allocate / reallocate memory
     if(spiral->co_ord_cache.co_ords.items == NULL) {
-        // if no memory has been allocated for the co-ords yet, then do this now
-        // allocate enough memory to store these
+        /*
+         * if no memory has been allocated for the co-ords yet, then do this now
+         * allocate enough memory to store these
+         */
         spiral->co_ord_cache.co_ords.items = calloc(sizeof(co_ord_t), size);
     } else if(spiral->co_ord_cache.co_ords.size != size) {
         // if there isn't enough memory allocated, re-allocate memory instead
@@ -80,8 +86,10 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     // start at (0, 0) as origin
     co_ord_t current = { 0, 0, };
     size_t result_index = 0; // maintain independent index for co-ords array
-    // if we're not going to re-calculate the whole array, skip forward the index
-    // find the smallest of limit and the spirals' cache validity
+    /*
+     * if we're not going to re-calculate the whole array, skip forward the index
+     * find the smallest of limit and the spirals' cache validity
+     */
     size_t smallest = (
         limit < spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
