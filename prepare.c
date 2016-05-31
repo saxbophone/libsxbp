@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "saxbospiral.h"
+#include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/initialise.h"
+#include "saxbospiral/serialise.h"
 
 
 // prints out usage information to a given FILE handle

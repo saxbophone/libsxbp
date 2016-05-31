@@ -5,7 +5,9 @@
 
 #include <png.h>
 
-#include "saxbospiral.h"
+#include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/plot.h"
+#include "saxbospiral/serialise.h"
 
 
 typedef struct bitmap_t {
