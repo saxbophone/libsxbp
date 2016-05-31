@@ -19,16 +19,20 @@ const vector_t VECTOR_DIRECTIONS[4] = {
     { 0, 1, }, { 1, 0, }, { 0, -1, }, { -1, 0, },
 };
 
-// when facing the direction specified by current, return the direction that
-// will be faced when turning in the rotational direction specified by turn.
+/*
+ * when facing the direction specified by current, return the direction that
+ * will be faced when turning in the rotational direction specified by turn.
+ */
 direction_t
 change_direction(direction_t current, rotation_t turn) {
     return (current + turn) % 4U;
 }
 
-// initialises a spiral_t struct from an array pointer to unsigned bytes
-// this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
-// instructions which are then used to build the pattern.
+/*
+ * initialises a spiral_t struct from an array pointer to unsigned bytes
+ * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
+ * instructions which are then used to build the pattern.
+ */
 spiral_t
 init_spiral(buffer_t buffer) {
     // number of lines is number of bits of the data
@@ -37,11 +41,15 @@ init_spiral(buffer_t buffer) {
     spiral_t result = { .size = line_count, };
     // allocate enough memory for a line_t struct for each bit
     result.lines = calloc(sizeof(line_t), line_count);
-    // first direction is a one-off, pre-prepare the stored direction for this
-    // if first bit is 0, then first direction is UP, else if 1 then it's RIGHT
+    /*
+     * first direction is a one-off, pre-prepare the stored direction for this
+     * if first bit is 0, then first direction is UP, else if 1 then it's RIGHT
+     */
     direction_t current = ((buffer.bytes[0] & 0b10000000) == 0) ? LEFT : DOWN;
-    // now, iterate over all the bits in the data and convert to directions
-    // that make the spiral pattern, storing these directions in the result lines
+    /*
+     * now, iterate over all the bits in the data and convert to directions
+     * that make the spiral pattern, storing these directions in the result lines
+     */
     for(size_t s = 0; s < buffer.size; s++) {
         // byte-level loop
         for(size_t b = 0; b < 8; b++) {

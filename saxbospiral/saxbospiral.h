@@ -36,9 +36,11 @@ typedef int8_t rotation_t;
 // type for representing the length of a line segment of a spiral
 typedef uint32_t length_t;
 
-// struct for representing one line segment in the spiral structure, including
-// the direction of the line and it's length (initially set to 0)
-// the whole struct uses bitfields to occupy 32 bits of memory
+/* 
+ * struct for representing one line segment in the spiral structure, including 
+ * the direction of the line and it's length (initially set to 0) 
+ * the whole struct uses bitfields to occupy 32 bits of memory
+ */
 typedef struct line_t {
     direction_t direction : 2; // as there are only 4 directions, use 2 bits
     length_t length : 30; // use 30 bits for the length, nice and long
@@ -76,14 +78,18 @@ typedef struct buffer_t {
 // vector direction constants
 extern const vector_t VECTOR_DIRECTIONS[4];
 
-// when facing the direction specified by current, return the direction that
-// will be faced when turning in the rotational direction specified by turn.
+/*
+ * when facing the direction specified by current, return the direction that
+ * will be faced when turning in the rotational direction specified by turn.
+ */
 direction_t
 change_direction(direction_t current, rotation_t turn);
 
-// initialises a spiral_t struct from an array pointer to unsigned bytes
-// this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
-// instructions which are then used to build the pattern.
+/*
+ * initialises a spiral_t struct from an array pointer to unsigned bytes
+ * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
+ * instructions which are then used to build the pattern.
+ */
 spiral_t
 init_spiral(buffer_t buffer);
 
