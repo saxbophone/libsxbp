@@ -8,9 +8,11 @@
 extern "C"{
 #endif
 
-// given a spiral for which the length of all its lines are not yet known,
-// calculate the length needed for each line in the spiral (to avoid line overlap)
-// and store these in a spiral struct and return that
+/*
+ * given a spiral for which the length of all its lines are not yet known,
+ * calculate the length needed for each line in the spiral (to avoid line overlap)
+ * and store these in a spiral struct and return that
+ */
 spiral_t
 plot_spiral(spiral_t spiral);
 
