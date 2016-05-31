@@ -15,8 +15,10 @@ extern "C"{
 extern const size_t FILE_HEADER_SIZE;
 extern const size_t LINE_T_PACK_SIZE;
 
-// given a buffer, return a spiral represented by the data in the struct
-// returns a spiral of length 0 if the data could not be interpreted correctly
+/*
+ * given a buffer, return a spiral represented by the data in the struct
+ * returns a spiral of length 0 if the data could not be interpreted correctly
+ */
 spiral_t
 load_spiral(buffer_t buffer);
 

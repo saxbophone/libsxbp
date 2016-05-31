@@ -14,14 +14,18 @@ extern "C"{
 const size_t FILE_HEADER_SIZE = 25;
 const size_t LINE_T_PACK_SIZE = 4;
 
-// given a buffer, return a spiral represented by the data in the struct
-// returns a spiral of length 0 if the data could not be interpreted correctly
+/*
+ * given a buffer, return a spiral represented by the data in the struct
+ * returns a spiral of length 0 if the data could not be interpreted correctly
+ */
 spiral_t
 load_spiral(buffer_t buffer) {
     // create initial output spiral, a spiral of length 0 (shows failure)
     spiral_t output = { .size = 0, };
-    // Check for buffer size (must be at least the size of the header + amount
-    // of space needed for one line). Also, check for magic number
+    /*
+     * Check for buffer size (must be at least the size of the header + amount
+     * of space needed for one line). Also, check for magic number
+     */
     if(
         (strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0)
         && (buffer.size >= FILE_HEADER_SIZE + 4)
@@ -53,9 +57,11 @@ load_spiral(buffer_t buffer) {
             output.lines[i].direction = (
                 buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] >> 6
             );
-            // length is stored as 30 least significant bits, so we have to unpack it
-            // handle first byte on it's own as we only need least 6 bits of it
-            // bit mask and shift 3 bytes to left
+            /*
+             * length is stored as 30 least significant bits, so we have to unpack it
+             * handle first byte on it's own as we only need least 6 bits of it
+             * bit mask and shift 3 bytes to left
+             */
             output.lines[i].length = (
                 buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] & 0b00111111
             ) << 24;
@@ -67,8 +73,10 @@ load_spiral(buffer_t buffer) {
             }
         }
     }
-    // return the output struct, this will be a struct of size 0 if the magic
-    // number check failed, else it will be a valid spiral
+    /*
+     * return the output struct, this will be a struct of size 0 if the magic
+     * number check failed, else it will be a valid spiral
+     */
     return output;
 }
 
@@ -97,8 +105,10 @@ dump_spiral(spiral_t spiral) {
     output.bytes[24] = '\n';
     // now write the data section
     for(size_t i = 0; i < spiral.size; i++) {
-        // serialise each line in the spiral to 4 bytes, handle first byte first
-        // map direction to 2 most significant bits
+        /*
+         * serialise each line in the spiral to 4 bytes, handle first byte first
+         * map direction to 2 most significant bits
+         */
         output.bytes[
             FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)
         ] = (spiral.lines[i].direction << 6);
