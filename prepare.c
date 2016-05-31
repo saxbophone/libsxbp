@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/initialise.h"
 #include "saxbospiral/serialise.h"
 
 

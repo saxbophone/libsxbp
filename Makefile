@@ -14,12 +14,16 @@ EXE_SUFFIX=
 LIB=saxbospiral/
 
 SAXBOSPIRAL=$(LIB)saxbospiral
+INITIALISE=$(LIB)initialise
 PLOT=$(LIB)plot
 SOLVE=$(LIB)solve
 SERIALISE=$(LIB)serialise
 
 $(SAXBOSPIRAL).o: $(SAXBOSPIRAL).c $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(SAXBOSPIRAL).o -c $(SAXBOSPIRAL).c
+
+$(INITIALISE).o: $(INITIALISE).c $(INITIALISE).h $(SAXBOSPIRAL).h
+	$(CC) $(CFLAGS) -o $(INITIALISE).o -c $(INITIALISE).c
 
 $(PLOT).o: $(PLOT).c $(PLOT).h $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(PLOT).o -c $(PLOT).c
@@ -33,14 +37,14 @@ $(SERIALISE).o: $(SERIALISE).c $(SAXBOSPIRAL).h
 tests.o: $(SAXBOSPIRAL).h tests.c
 	$(CC) $(CFLAGS) -o tests.o -c tests.c
 
-tests: $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o tests.o
-	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o tests.o
+tests: $(SAXBOSPIRAL).o $(INITIALISE).o $(PLOT).o $(SOLVE).o $(SERIALISE).o tests.o
+	$(CC) $(CFLAGS) -o tests$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(INITIALISE).o $(PLOT).o $(SOLVE).o $(SERIALISE).o tests.o
 
 prepare.o: $(SAXBOSPIRAL).h prepare.c
 	$(CC) $(CFLAGS) -o prepare.o -c prepare.c
 
-prepare: $(SAXBOSPIRAL).o $(SERIALISE).o prepare.o
-	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(SERIALISE).o prepare.o
+prepare: $(SAXBOSPIRAL).o $(INITIALISE).o $(SERIALISE).o prepare.o
+	$(CC) $(CFLAGS) -o prepare$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(INITIALISE).o $(SERIALISE).o prepare.o
 
 generate.o: $(SAXBOSPIRAL).h $(PLOT).h generate.c
 	$(CC) $(CFLAGS) -o generate.o -c generate.c
