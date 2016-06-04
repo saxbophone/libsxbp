@@ -16,6 +16,7 @@ LIB=saxbospiral/
 SAXBOSPIRAL=$(LIB)saxbospiral
 INITIALISE=$(LIB)initialise
 PLOT=$(LIB)plot
+RENDER=$(LIB)render
 SOLVE=$(LIB)solve
 SERIALISE=$(LIB)serialise
 
@@ -27,6 +28,9 @@ $(INITIALISE).o: $(INITIALISE).c $(INITIALISE).h $(SAXBOSPIRAL).h
 
 $(PLOT).o: $(PLOT).c $(PLOT).h $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(PLOT).o -c $(PLOT).c
+
+$(RENDER).o: $(RENDER).c $(RENDER).h $(SAXBOSPIRAL).h
+	$(CC) $(CFLAGS) -o $(RENDER).o -c $(RENDER).c
 
 $(SOLVE).o: $(SOLVE).c $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(SOLVE).o -c $(SOLVE).c
@@ -52,39 +56,39 @@ generate.o: $(SAXBOSPIRAL).h $(PLOT).h generate.c
 generate: $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o generate.o
 	$(CC) $(CFLAGS) -o generate$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o generate.o
 
-render.o: $(SAXBOSPIRAL).h $(PLOT).h render.c
-	$(CC) $(CFLAGS) -o render.o -c render.c
+renderer.o: $(SAXBOSPIRAL).h $(PLOT).h renderer.c
+	$(CC) $(CFLAGS) -o renderer.o -c renderer.c
 
-render: $(SAXBOSPIRAL).o $(PLOT).o $(SERIALISE).o render.o
-	$(CC) $(CFLAGS) -o render$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(SERIALISE).o render.o $(LIBPNG)
+renderer: $(SAXBOSPIRAL).o $(PLOT).o $(RENDER).o $(SERIALISE).o renderer.o
+	$(CC) $(CFLAGS) -o renderer$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(RENDER).o $(SERIALISE).o renderer.o $(LIBPNG)
 
 test-unit: tests
 	./tests$(OS_NAME)$(EXE_SUFFIX)
 
-test-func: prepare generate render
+test-func: prepare generate renderer
 	@echo "Running Functional Test"
 	@echo -n "saxbospiral `git describe --abbrev=0`" > message.hex
 	@./prepare$(OS_NAME)$(EXE_SUFFIX) message.hex message.sxp.hex
 	@./generate$(OS_NAME)$(EXE_SUFFIX) message.sxp.hex
-	@./render$(OS_NAME)$(EXE_SUFFIX) message.sxp.hex saxbospiral_test.png
+	@./renderer$(OS_NAME)$(EXE_SUFFIX) message.sxp.hex saxbospiral_test.png
 	@diff saxbospiral.png saxbospiral_test.png
 	@rm saxbospiral_test.png message.hex message.sxp.hex
 
-logo: prepare generate render
+logo: prepare generate renderer
 	@echo "Generating logo"
 	@echo -n "saxbospiral `git describe --abbrev=0`" > saxbospiral.hex
 	@./prepare$(OS_NAME)$(EXE_SUFFIX) saxbospiral.hex saxbospiral.sxp
 	@./generate$(OS_NAME)$(EXE_SUFFIX) saxbospiral.sxp
-	@./render$(OS_NAME)$(EXE_SUFFIX) saxbospiral.sxp saxbospiral.png
+	@./renderer$(OS_NAME)$(EXE_SUFFIX) saxbospiral.sxp saxbospiral.png
 	@rm saxbospiral.hex saxbospiral.sxp
 
-build: prepare generate render
+build: prepare generate renderer
 
 clean-objects:
 	rm -rf *.o saxbospiral/*.o
 
 clean-executables:
-	rm -rf *.out *.exe *.x86_64 tests prepare generate render
+	rm -rf *.out *.exe *.x86_64 tests prepare generate renderer
 
 clean: clean-objects clean-executables
 

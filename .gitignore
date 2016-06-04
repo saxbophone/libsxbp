@@ -31,7 +31,7 @@
 tests
 prepare
 generate
-render
+renderer
 
 # Debug files
 *.dSYM/

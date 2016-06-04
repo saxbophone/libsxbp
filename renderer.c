@@ -7,6 +7,7 @@
 
 #include "saxbospiral/saxbospiral.h"
 #include "saxbospiral/plot.h"
+#include "saxbospiral/render.h"
 #include "saxbospiral/serialise.h"
 
 
