@@ -1,8 +1,6 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_INITIALISE_H
 #define SAXBOPHONE_SAXBOSPIRAL_INITIALISE_H
 
-#include <stdint.h>
-
 #include "saxbospiral.h"
 
 

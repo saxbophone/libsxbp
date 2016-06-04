@@ -1,7 +1,7 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_PLOT_H
 #define SAXBOPHONE_SAXBOSPIRAL_PLOT_H
 
-#include <stdint.h>
+#include <stddef.h>
 
 #include "saxbospiral.h"
 

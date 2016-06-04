@@ -1,8 +1,7 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_SERIALISE_H
 #define SAXBOPHONE_SAXBOSPIRAL_SERIALISE_H
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 #include "saxbospiral.h"
 
