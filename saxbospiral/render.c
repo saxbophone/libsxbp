@@ -11,8 +11,10 @@
 extern "C"{
 #endif
 
-// given a spiral struct with co-ords in it's cache, find and return the co-ords
-// for the corners of the square needed to contain the points.
+/*
+ * given a spiral struct with co-ords in it's cache, find and return the co-ords
+ * for the corners of the square needed to contain the points.
+ */
 static co_ord_array_t
 get_bounds(spiral_t spiral) {
     int64_t min_x = 0;
@@ -46,8 +48,10 @@ get_bounds(spiral_t spiral) {
     return bounds;
 }
 
-// given a spiral struct, returns a bitmap_t representing a monochromatic image
-// of the rendered spiral
+/*
+ * given a spiral struct, returns a bitmap_t representing a monochromatic image
+ * of the rendered spiral
+ */
 bitmap_t
 render_spiral(spiral_t spiral) {
     // plot co-ords of spiral into it's cache
