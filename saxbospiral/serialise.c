@@ -1,6 +1,6 @@
 // sanity check for support of 64-bit integers
 #if __SIZEOF_SIZE_T__ < 8
-#warning "Please compile this code for a target supporting 64 bits or greater."
+#warning "Please compile this code for a target with 64-bit words or greater."
 #endif
 
 #include <stdio.h>
