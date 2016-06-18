@@ -12,6 +12,7 @@ OS_NAME=
 EXE_SUFFIX=
 
 LIB=saxbospiral/
+RENDER_BACKENDs=render_backends/
 
 SAXBOSPIRAL=$(LIB)saxbospiral
 INITIALISE=$(LIB)initialise
@@ -19,6 +20,7 @@ PLOT=$(LIB)plot
 RENDER=$(LIB)render
 SOLVE=$(LIB)solve
 SERIALISE=$(LIB)serialise
+PNG_BACKEND=$(LIB)$(RENDER_BACKENDs)png_backend
 
 $(SAXBOSPIRAL).o: $(SAXBOSPIRAL).c $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(SAXBOSPIRAL).o -c $(SAXBOSPIRAL).c
@@ -37,6 +39,9 @@ $(SOLVE).o: $(SOLVE).c $(SAXBOSPIRAL).h
 
 $(SERIALISE).o: $(SERIALISE).c $(SAXBOSPIRAL).h
 	$(CC) $(CFLAGS) -o $(SERIALISE).o -c $(SERIALISE).c
+
+$(PNG_BACKEND).o: $(PNG_BACKEND).c $(RENDER).h
+	$(CC) $(CFLAGS) -o $(PNG_BACKEND).o -c $(PNG_BACKEND).c
 
 tests.o: $(SAXBOSPIRAL).h tests.c
 	$(CC) $(CFLAGS) -o tests.o -c tests.c
@@ -59,8 +64,8 @@ generate: $(SAXBOSPIRAL).o $(PLOT).o $(SOLVE).o $(SERIALISE).o generate.o
 renderer.o: $(SAXBOSPIRAL).h $(PLOT).h renderer.c
 	$(CC) $(CFLAGS) -o renderer.o -c renderer.c
 
-renderer: $(SAXBOSPIRAL).o $(PLOT).o $(RENDER).o $(SERIALISE).o renderer.o
-	$(CC) $(CFLAGS) -o renderer$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PLOT).o $(RENDER).o $(SERIALISE).o renderer.o $(LIBPNG)
+renderer: $(SAXBOSPIRAL).o $(PLOT).o $(PNG_BACKEND).o $(RENDER).o $(SERIALISE).o renderer.o
+	$(CC) $(CFLAGS) -o renderer$(OS_NAME)$(EXE_SUFFIX) $(SAXBOSPIRAL).o $(PNG_BACKEND).o $(PLOT).o $(RENDER).o $(SERIALISE).o renderer.o $(LIBPNG)
 
 test-unit: tests
 	./tests$(OS_NAME)$(EXE_SUFFIX)
