@@ -3,7 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "saxbospiral.h"
+#include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/initialise.h"
+#include "saxbospiral/plot.h"
+#include "saxbospiral/solve.h"
+#include "saxbospiral/serialise.h"
 
 
 bool

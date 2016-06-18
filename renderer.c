@@ -1,10 +1,9 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "saxbospiral/saxbospiral.h"
-#include "saxbospiral/plot.h"
-#include "saxbospiral/solve.h"
+#include "saxbospiral/render_backends/png_backend.h"
+#include "saxbospiral/render.h"
 #include "saxbospiral/serialise.h"
 
 
@@ -14,7 +13,7 @@ show_usage(FILE * stream) {
     fprintf(
         stream, "%s\n%s\n",
         "Usage:",
-        "./generate <input_file.saxbospiral> <optional_output_file.saxbospiral>"
+        "./render <input_file.saxbospiral> <output_file.png>"
     );
 }
 
@@ -38,15 +37,14 @@ file_size(FILE * file_handle) {
 
 int
 main(int argc, char * argv[]) {
-    if(argc < 2) {
+    if(argc < 3) {
         // not enough arguments, print usage information
         show_usage(stderr);
         return 1;
     } else {
         // otherwise, read in arguments
         char * input_file_path = argv[1];
-        // output file path is same if no other path given, else use other path
-        char * output_file_path = (argc < 3) ? input_file_path : argv[2];
+        char * output_file_path = argv[2];
         printf(
             "Attempting to load spiral from input file: '%s'... ", input_file_path
         );
@@ -68,7 +66,7 @@ main(int argc, char * argv[]) {
         size_t bytes_read = fread(
             input_buffer.bytes, 1, input_file_size, input_file_handle
         );
-        // close input file handle, we might need to re-open for writing later
+        // close input file handle
         fclose(input_file_handle);
         // check we read in the correct number of bytes (whole file)
         if(bytes_read != input_file_size) {
@@ -90,10 +88,10 @@ main(int argc, char * argv[]) {
             return 1;
         }
         printf("[DONE]\n");
-        printf("Calculating the lengths of all the lines in the spiral... ");
+        printf("Rendering image... ");
         fflush(stdout);
-        // if file was ok, then calculate the lengths of all the lines in the spiral
-        spiral = plot_spiral(spiral);
+        // if file was ok, then render the spiral to a monochrome bitmap
+        bitmap_t image = render_spiral(spiral);
         printf("[DONE]\n");
         // try and open output file for writing
         FILE * output_file_handle = fopen(output_file_path, "wb");
@@ -102,17 +100,9 @@ main(int argc, char * argv[]) {
             file_open_error(output_file_path);
             return 1;
         }
-        // dump spiral data
-        buffer_t output_buffer = dump_spiral(spiral);
-        printf("Saving final finished spiral data to output file... ");
-        // now output the final result to the output file
-        size_t bytes_written = fwrite(
-            output_buffer.bytes, 1, output_buffer.size, output_file_handle
-        );
-        if(bytes_written != output_buffer.size) {
-            fprintf(stderr, "%s\n", "ERROR - Didn't write whole file.");
-            return 1;
-        }
+        printf("Saving rendered image to output file... ");
+        // now write PNG image data to file with libpng
+        write_png_image(output_file_handle, image);
         printf("[DONE]\n");
         // close output file handle
         fclose(output_file_handle);
