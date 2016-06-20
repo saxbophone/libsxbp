@@ -22,10 +22,10 @@ extern "C"{
  */
 static co_ord_array_t
 get_bounds(spiral_t spiral) {
-    int64_t min_x = 0;
-    int64_t min_y = 0;
-    int64_t max_x = 0;
-    int64_t max_y = 0;
+    tuple_item_t min_x = 0;
+    tuple_item_t min_y = 0;
+    tuple_item_t max_x = 0;
+    tuple_item_t max_y = 0;
     for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
         if(spiral.co_ord_cache.co_ords.items[i].x < min_x) {
             min_x = spiral.co_ord_cache.co_ords.items[i].x;
@@ -99,8 +99,8 @@ render_spiral(spiral_t spiral) {
         // make as many jumps in this direction as this lines length
         for(uint64_t j = 0; j < (spiral.lines[i].length * 2) + 1; j++) {
             // get output co-ords
-            int64_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
-            int64_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
+            tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
+            tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
             // skip the second pixel of the first line
             if(!((i == 0) && (j == 1))) {
                 // flip the y-axis otherwise they appear vertically mirrored
