@@ -51,9 +51,12 @@ typedef struct line_t {
     length_t length : 30; // use 30 bits for the length, nice and long
 } line_t;
 
+// type for representing the range of one tuple item
+typedef int64_t tuple_item_t;
+
 typedef struct tuple_t {
-    int64_t x;
-    int64_t y;
+    tuple_item_t x;
+    tuple_item_t y;
 } tuple_t;
 
 typedef tuple_t vector_t;
