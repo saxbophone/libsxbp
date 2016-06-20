@@ -49,11 +49,11 @@ spiral_collides(spiral_t spiral) {
 }
 
 /*
- * private function, given a spiral struct, the index of one of it's lines and
- * a target length to set that line to, attempt to set the target line to that
- * length, back-tacking to resize the previous line if it collides.
+ * given a spiral struct, the index of one of it's lines and a target length to
+ * set that line to, attempt to set the target line to that length,
+ * back-tracking to resize the previous line if it collides.
  */
-static spiral_t
+spiral_t
 resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
     /*
      * setup state variables, these are used in place of recursion for managing
