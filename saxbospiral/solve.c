@@ -62,7 +62,7 @@ spiral_collides(spiral_t spiral) {
  */
 static length_t suggest_resize(spiral_t spiral, size_t index) {
     // TODO: Rewrite dummy implementation with proper version.
-    return spiral.lines[index].length + 1; // Preserves existing behaviour
+    return spiral.lines[index - 1].length + 1; // Preserves existing behaviour
 }
 
 /*
@@ -96,8 +96,8 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
              * function to get the suggested length to resize the previous
              * segment to
              */
-            current_index--;
             current_length = suggest_resize(spiral, current_index);
+            current_index--;
         } else if(current_index != index) {
             /*
              * if we didn't cause a collision but we're not on the top-most
