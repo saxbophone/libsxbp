@@ -49,18 +49,35 @@ spiral_collides(spiral_t spiral) {
 }
 
 /*
+ * given a spiral struct that is known to collide and the index of the 'last'
+ * segment in the spiral (i.e. the one that was found to be colliding), return
+ * a suggested length to set the segment before this line to.
+ *
+ * NOTE: This function is not guaranteed to make suggestions that will not
+ * collide. Every suggestion that is followed should then have the spiral
+ * re-evaluated for collisions before doing any more work.
+ *
+ * NOTE: This function does not *need* to be called with spirals that collide,
+ * but it is pointless to call this function with a spiral that does not collide
+ */
+static length_t suggest_resize(spiral_t spiral, size_t index) {
+    // TODO: Rewrite dummy implementation with proper version.
+    return spiral.lines[index].length + 1; // Preserves existing behaviour
+}
+
+/*
  * given a spiral struct, the index of one of it's lines and a target length to
  * set that line to, attempt to set the target line to that length,
  * back-tracking to resize the previous line if it collides.
  */
 spiral_t
-resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
+resize_spiral(spiral_t spiral, size_t index, length_t length) {
     /*
      * setup state variables, these are used in place of recursion for managing
      * state of which line is being resized, and what size it should be.
      */
     size_t current_index = index;
-    size_t current_length = length;
+    length_t current_length = length;
     while(true) {
         // set the target line to the target length
         spiral.lines[current_index].length = current_length;
@@ -75,11 +92,12 @@ resize_spiral(spiral_t spiral, size_t index, uint32_t length) {
         cache_spiral_points(&spiral, current_index + 1);
         if(spiral_collides(spiral)) {
             /*
-             * if we've caused a collision, we should back-track
-             * and increase the size of the previous line segment
+             * if we've caused a collision, we need to call the suggest_resize()
+             * function to get the suggested length to resize the previous
+             * segment to
              */
             current_index--;
-            current_length = spiral.lines[current_index].length + 1;
+            current_length = suggest_resize(spiral, current_index);
         } else if(current_index != index) {
             /*
              * if we didn't cause a collision but we're not on the top-most
