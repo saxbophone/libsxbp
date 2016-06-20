@@ -47,7 +47,7 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
-        for(uint32_t j = 0; j < spiral.lines[i].length; j++) {
+        for(length_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
             results.items[result_index + 1] = current;
