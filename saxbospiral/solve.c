@@ -48,11 +48,66 @@ spiral_collides(spiral_t spiral) {
     }
 }
 
-/*
- * given two lines ab and cd, return true if the lines they make up intersect
- */
+// returns true if a and b are parallel directions (on the same axis)
 static bool
-segments_intersect(co_ord_t a, co_ord_t b, co_ord_t c, co_ord_t d) {
+parallel(direction_t a, direction_t b) {
+    // NOTE: This works because direction constants are ordered radially
+    return ((a % 2) == (b % 2)) ? true : false;
+}
+
+/*
+ * given two lines ab and cd, along with their directions,
+ * return true if the lines they make up intersect
+ */
+bool
+segments_intersect(
+    co_ord_t a, co_ord_t b, direction_t ab_direction,
+    co_ord_t c, co_ord_t d, direction_t cd_direction
+) {
+    // TODO: TEST ME!!!
+    // check if they're the same direction first
+    bool are_same = (ab_direction == cd_direction) ? true : false;
+    // if they are the same then they're parallel, if not they might be
+    bool are_parallel = (are_same) ? true : parallel(ab_direction, cd_direction);
+    if(are_same) {
+        switch(ab_direction) {
+            case UP:
+                return (
+                    (a.x == c.x) && (
+                        ((b.y <= c.y) && (b.y >= d.y))
+                        ||
+                        ((a.y >= d.y) && (a.y <= c.y))
+                    )
+                );
+            case DOWN:
+                return (
+                    (a.x == c.x) && (
+                        ((b.y >= c.y) && (b.y <= d.y))
+                        ||
+                        ((a.y <= d.y) && (a.y >= c.y))
+                    )
+                );
+            case LEFT:
+                return (
+                    (a.y == c.y) && (
+                        ((b.x >= c.x) && (b.x <= d.x))
+                        ||
+                        ((a.x <= d.x) && (a.x >= c.x))
+                    )
+                );
+            case RIGHT:
+                return (
+                    (a.y == c.y) && (
+                        ((b.x <= c.x) && (b.x >= d.x))
+                        ||
+                        ((a.x >= d.x) && (a.x <= c.x))
+                    )
+                );
+            default:
+                // SHOULD NOT REACH HERE!
+                abort();
+        }
+    }
     return false;
 }
 
@@ -70,6 +125,7 @@ segments_intersect(co_ord_t a, co_ord_t b, co_ord_t c, co_ord_t d) {
  */
 static length_t
 suggest_resize(spiral_t spiral, size_t index) {
+    // NOTE: Get the co-ordinates out by jumping each line's length along co-ord cache
     /*
      * TODO: For every segment up to and excluding the one at index, check if
      * it intersects with the segment at index, using segments_intersect()

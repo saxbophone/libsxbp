@@ -1,12 +1,24 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_SOLVE_H
 #define SAXBOPHONE_SAXBOSPIRAL_SOLVE_H
 
+#include <stdbool.h>
+
 #include "saxbospiral.h"
 
 
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+/*
+ * given two lines ab and cd, along with their directions,
+ * return true if the lines they make up intersect
+ */
+bool
+segments_intersect(
+    co_ord_t a, co_ord_t b, direction_t ab_direction,
+    co_ord_t c, co_ord_t d, direction_t cd_direction
+);
 
 /*
  * given a spiral for which the length of all its lines are not yet known,
