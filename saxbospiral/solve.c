@@ -49,6 +49,14 @@ spiral_collides(spiral_t spiral) {
 }
 
 /*
+ * given two lines ab and cd, return true if the lines they make up intersect
+ */
+static bool
+segments_intersect(co_ord_t a, co_ord_t b, co_ord_t c, co_ord_t d) {
+    return false;
+}
+
+/*
  * given a spiral struct that is known to collide and the index of the 'last'
  * segment in the spiral (i.e. the one that was found to be colliding), return
  * a suggested length to set the segment before this line to.
@@ -60,8 +68,20 @@ spiral_collides(spiral_t spiral) {
  * NOTE: This function does not *need* to be called with spirals that collide,
  * but it is pointless to call this function with a spiral that does not collide
  */
-static length_t suggest_resize(spiral_t spiral, size_t index) {
-    // TODO: Rewrite dummy implementation with proper version.
+static length_t
+suggest_resize(spiral_t spiral, size_t index) {
+    /*
+     * TODO: For every segment up to and excluding the one at index, check if
+     * it intersects with the segment at index, using segments_intersect()
+     * break from loop when the two that intersect have been found, and store
+     * the index. NOTE: Ignore the 2 segments before the one at index, as these
+     * cannot intersect with it (and it would break the algorithm if we tested
+     * them, as they will appear to intersect with it).
+     */
+    /*
+     * TODO: Apply the rules mentioned in collision_resolution_rules.txt to
+     * calculate the correct length to set the previous line to. Return this.
+     */
     return spiral.lines[index - 1].length + 1; // Preserves existing behaviour
 }
 
