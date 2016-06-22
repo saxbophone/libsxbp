@@ -64,48 +64,77 @@ segments_intersect(
     co_ord_t a, co_ord_t b, direction_t ab_direction,
     co_ord_t c, co_ord_t d, direction_t cd_direction
 ) {
-    // TODO: TEST ME!!!
     // check if they're the same direction first
     bool are_same = (ab_direction == cd_direction) ? true : false;
     // if they are the same then they're parallel, if not they might be
     bool are_parallel = (are_same) ? true : parallel(ab_direction, cd_direction);
-    if(are_same) {
-        switch(ab_direction) {
-            case UP:
-                return (
-                    (a.x == c.x) && (
-                        ((b.y <= c.y) && (b.y >= d.y))
-                        ||
-                        ((a.y >= d.y) && (a.y <= c.y))
-                    )
-                );
-            case DOWN:
-                return (
-                    (a.x == c.x) && (
-                        ((b.y >= c.y) && (b.y <= d.y))
-                        ||
-                        ((a.y <= d.y) && (a.y >= c.y))
-                    )
-                );
-            case LEFT:
-                return (
-                    (a.y == c.y) && (
-                        ((b.x >= c.x) && (b.x <= d.x))
-                        ||
-                        ((a.x <= d.x) && (a.x >= c.x))
-                    )
-                );
-            case RIGHT:
-                return (
-                    (a.y == c.y) && (
-                        ((b.x <= c.x) && (b.x >= d.x))
-                        ||
-                        ((a.x >= d.x) && (a.x <= c.x))
-                    )
-                );
-            default:
-                // SHOULD NOT REACH HERE!
-                abort();
+    if(!are_parallel) {
+        /*
+         * if they're not parallel then they're at right angles, so we need to
+         * find out the horizontal and vertical extremities
+         */
+        co_ord_t
+        horizontal_lower, horizontal_higher, vertical_lower, vertical_higher;
+        // find out which way round each line is first
+        if((ab_direction % 2) == 0) {
+            // AB is vertical and CD is horizontal
+            // distinguish which way round the line AB is
+            if(ab_direction == UP) {
+                vertical_lower = b;
+                vertical_higher = a;
+            } else if(ab_direction == DOWN) {
+                vertical_lower = a;
+                vertical_higher = b;
+            }
+            // distinguish which way round the line CD is
+            if(cd_direction == RIGHT) {
+                horizontal_lower = c;
+                horizontal_higher = d;
+            } else if(cd_direction == LEFT) {
+                horizontal_lower = d;
+                horizontal_higher = c;
+            }
+        } else {
+            // CD is vertical and AB is horizontal
+            // distinguish which way round the line CD is
+            if(cd_direction == UP) {
+                vertical_lower = d;
+                vertical_higher = c;
+            } else if(cd_direction == DOWN) {
+                vertical_lower = c;
+                vertical_higher = d;
+            }
+            // distinguish which way round the line AB is
+            if(ab_direction == RIGHT) {
+                horizontal_lower = a;
+                horizontal_higher = b;
+            } else if(ab_direction == LEFT) {
+                horizontal_lower = b;
+                horizontal_higher = a;
+            }
+        }
+        // do some sanity checking
+        if(vertical_higher.x != vertical_lower.x) { abort(); }
+        if(horizontal_higher.y != horizontal_lower.y) { abort(); }
+        // now, do some simple comparisons between our four numbers
+        if(
+            (
+                (vertical_higher.x >= horizontal_lower.x)
+                &&
+                (vertical_higher.x <= horizontal_higher.x)
+            )
+            &&
+            (
+                (horizontal_lower.y >= vertical_lower.y)
+                &&
+                (horizontal_lower.y <= vertical_higher.y)
+            )
+        ) {
+            printf("intersect\n");
+            return true;
+        } else {
+            printf("Not intersect\n");
+            return false;
         }
     }
     return false;

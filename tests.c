@@ -436,6 +436,42 @@ test_dump_spiral() {
     return result;
 }
 
+bool test_segments_intersect_helper(
+    tuple_item_t ax, tuple_item_t ay, tuple_item_t bx, tuple_item_t by,
+    direction_t ab, tuple_item_t cx, tuple_item_t cy, tuple_item_t dx,
+    tuple_item_t dy, direction_t cd
+) {
+    // helper function the packs arguments into structs
+    co_ord_t a = { .x = ax, .y = ay, };
+    co_ord_t b = { .x = bx, .y = by, };
+    co_ord_t c = { .x = cx, .y = cy, };
+    co_ord_t d = { .x = dx, .y = dy, };
+
+    return segments_intersect(a, b, ab, c, d, cd);
+}
+
+bool test_segments_intersect() {
+    // success / failure variable
+    if(
+        // lines at right angles that are nowhere near eachother
+        test_segments_intersect_helper(0, 0, 5, 0, RIGHT, 3, 2, 3, 1, UP)
+    ) {
+        return false;
+    } else if(
+        // lines at right angles that intersect
+        !test_segments_intersect_helper(2, 0, 2, 5, DOWN, 3, 2, 0, 2, LEFT)
+    ) {
+        return false;
+    } else if(
+        // lines at right angles that intersect (in negative co-ord area)
+        !test_segments_intersect_helper(-2, -1, 3, -1, RIGHT, -1, -3, -1, 2, DOWN)
+    ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 // this function takes a bool containing the test suite status,
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
@@ -479,5 +515,8 @@ main(int argc, char const *argv[]) {
         "test_load_spiral_rejects_too_small_data_section"
     );
     result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
+    result = run_test_case(
+        result, test_segments_intersect, "test_segments_intersect"
+    );
     return result ? 0 : 1;
 }
