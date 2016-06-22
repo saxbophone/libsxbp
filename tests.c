@@ -467,6 +467,16 @@ bool test_segments_intersect() {
         !test_segments_intersect_helper(-2, -1, 3, -1, RIGHT, -1, -3, -1, 2, DOWN)
     ) {
         return false;
+    } else if(
+        // lines that are completely parallel but do not intersect
+        test_segments_intersect_helper(0, 0, 5, 0, LEFT, 0, 1, 5, 1, LEFT)
+    ) {
+        return false;
+    } else if(
+        // lines that are completely the same
+        !test_segments_intersect_helper(0, 0, 5, 0, LEFT, 0, 0, 5, 0, LEFT)
+    ) {
+        return false;
     } else {
         return true;
     }

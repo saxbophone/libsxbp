@@ -64,6 +64,8 @@ segments_intersect(
     co_ord_t a, co_ord_t b, direction_t ab_direction,
     co_ord_t c, co_ord_t d, direction_t cd_direction
 ) {
+    // TODO: Refactor this function, as it's a total mess!
+    // ***************************************************
     // check if they're the same direction first
     bool are_same = (ab_direction == cd_direction) ? true : false;
     // if they are the same then they're parallel, if not they might be
@@ -130,10 +132,94 @@ segments_intersect(
                 (horizontal_lower.y <= vertical_higher.y)
             )
         ) {
-            printf("intersect\n");
             return true;
         } else {
-            printf("Not intersect\n");
+            return false;
+        }
+    } else {
+        // compare lines for overlap in the axis opposite to their common direction
+        if((ab_direction % 2) == 0) {
+            // both lines are vertical, so check horizontal correlation
+            if((a.x != c.x) || (b.x != d.x)) {
+                return false;
+            }
+        } else {
+            // both lines are horizontal, so check vertical correlation
+            if((a.y != c.y) || (b.y != d.y)) {
+                return false;
+            }
+        }
+        /*
+         * we only need to compare one axis, depending on orientation of the
+         * lines, so only store one of x or y for each co-ord
+         */
+        // get the highest and lowest point of each line
+        tuple_item_t ab_lowest, ab_highest, cd_lowest, cd_highest;
+        switch(ab_direction) {
+            case UP:
+                ab_lowest = a.y;
+                ab_highest = b.y;
+                break;
+            case RIGHT:
+                ab_lowest = a.x;
+                ab_highest = b.x;
+                break;
+            case DOWN:
+                ab_lowest = b.y;
+                ab_highest = a.y;
+                break;
+            case LEFT:
+                ab_lowest = b.x;
+                ab_highest = a.x;
+                break;
+            default:
+                // should not reach here!
+                abort();
+        }
+        switch(cd_direction) {
+            case UP:
+                cd_lowest = c.y;
+                cd_highest = d.y;
+                break;
+            case RIGHT:
+                cd_lowest = c.x;
+                cd_highest = d.x;
+                break;
+            case DOWN:
+                cd_lowest = d.y;
+                cd_highest = c.y;
+                break;
+            case LEFT:
+                cd_lowest = d.x;
+                cd_highest = c.x;
+                break;
+            default:
+                // should not reach here!
+                abort();
+        }
+        // now work out which line is 'further' than the other
+        tuple_item_t lowest_lower, highest_lower, lowest_higher, highest_higher;
+        if((ab_highest > cd_highest) || (cd_lowest < ab_lowest)) {
+            highest_higher = ab_highest;
+            lowest_higher = ab_lowest;
+            highest_lower = cd_highest;
+            lowest_lower = cd_lowest;
+        } else if((cd_highest > ab_highest) || (ab_lowest < cd_lowest)) {
+            highest_higher = cd_highest;
+            lowest_higher = cd_lowest;
+            highest_lower = ab_highest;
+            lowest_lower = ab_lowest;
+        } else {
+            // they definitely collide!
+            return true;
+        }
+        // now finally, check if they collide!
+        if(
+            (lowest_lower <= lowest_higher) && (lowest_higher <= highest_lower) &&
+            (highest_lower <= highest_higher) // this last one probably not needed
+        ) {
+            return true;
+        } else {
             return false;
         }
     }
