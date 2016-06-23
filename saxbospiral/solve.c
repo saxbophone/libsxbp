@@ -249,11 +249,95 @@ suggest_resize(spiral_t spiral, size_t index) {
      * cannot intersect with it (and it would break the algorithm if we tested
      * them, as they will appear to intersect with it).
      */
-    /*
-     * TODO: Apply the rules mentioned in collision_resolution_rules.txt to
-     * calculate the correct length to set the previous line to. Return this.
-     */
-    return spiral.lines[index - 1].length + 1; // Preserves existing behaviour
+    // grab co-ords of last line (one that is the collider)
+    co_ord_t a = spiral.co_ord_cache.co_ords.items[
+        spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length
+    ];
+    co_ord_t b = spiral.co_ord_cache.co_ords.items[
+        spiral.co_ord_cache.co_ords.size - 1
+    ];
+    // grab co-ords of the start of the previous line
+    co_ord_t e = spiral.co_ord_cache.co_ords.items[
+        spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length -
+        spiral.lines[index - 1].length
+    ];
+    // reserved names for storing the currently tested line
+    co_ord_t c, d;
+    size_t cache_index = spiral.co_ord_cache.co_ords.size - 1;
+    size_t i;
+    for(i = (index); i > -1; i--) {
+        // skip the last two as these definitely don't collide
+        if(i > (index - 2)) {
+            cache_index -= spiral.lines[i].length;
+            continue;
+        } else {
+            // grab co-ords of currently tested line
+            c = spiral.co_ord_cache.co_ords.items[
+                cache_index - spiral.lines[i].length
+            ];
+            d = spiral.co_ord_cache.co_ords.items[
+                cache_index
+            ];
+            if(
+                segments_intersect(
+                    a, b, spiral.lines[index].direction,
+                    c, d, spiral.lines[i].direction
+                )
+            ) {
+                // if they collide, then quit the loop
+                break;
+            }
+            cache_index -= spiral.lines[i].length;
+        }
+    }
+    // now, size_t i stores the index of the line that collided
+    if(i > -1) {
+        /*
+         * TODO: Apply the rules mentioned in collision_resolution_rules.txt to
+         * calculate the correct length to set the previous line to. Return this.
+         */
+        if(spiral.lines[index - 1].direction != spiral.lines[i].direction) {
+            // if directions are not equal they might still be parallel
+            if(
+                parallel(
+                    spiral.lines[index - 1].direction, spiral.lines[i].direction
+                )
+            ) {
+                // for each of these clauses, the other line will be opposite direction
+                switch(spiral.lines[i].direction) {
+                    case UP:
+                        return (e.y - d.y) + 1;
+                    case DOWN:
+                        return (d.y - e.y) + 1;
+                    case LEFT:
+                        return (e.x - d.x) + 1;
+                    case RIGHT:
+                        return (d.x - e.x) + 1;
+                }
+            } else {
+                return spiral.lines[index - 1].length + 1;
+            }
+        } else {
+            printf("DIRECTIONS EQUAL\n");
+            switch(spiral.lines[i].direction) {
+                case UP:
+                    return (e.y - d.y) + 1;
+                case DOWN:
+                    return (d.y - e.y) + 1;
+                case LEFT:
+                    return (e.x - d.x) + 1;
+                case RIGHT:
+                    return (d.x - e.x) + 1;
+            }
+        }
+    } else {
+        /*
+         * If we got here, then i is -1 which means that no collisions could be
+         * found, which means we don't have to extend the previous segment.
+         */
+        // TODO: Change this block to return the same size
+        return spiral.lines[index - 1].length + 1; // couldn't work it out :/
+    }
 }
 
 /*
