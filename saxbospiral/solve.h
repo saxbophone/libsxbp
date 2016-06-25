@@ -11,14 +11,11 @@ extern "C"{
 #endif
 
 /*
- * given two lines ab and cd, along with their directions,
+ * given two lines ab and cd, given as co-ords a+b and c+d,
  * return true if the lines they make up intersect
  */
 bool
-segments_intersect(
-    co_ord_t a, co_ord_t b, direction_t ab_direction,
-    co_ord_t c, co_ord_t d, direction_t cd_direction
-);
+segments_intersect(co_ord_t a, co_ord_t b, co_ord_t c, co_ord_t d);
 
 /*
  * given a spiral for which the length of all its lines are not yet known,
