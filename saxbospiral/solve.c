@@ -75,100 +75,27 @@ parallel(direction_t a, direction_t b) {
  */
 static length_t
 suggest_resize(spiral_t spiral, size_t index) {
-    // NOTE: Get the co-ordinates out by jumping each line's length along co-ord cache
-    /*
-     * TODO: For every segment up to and excluding the one at index, check if
-     * it intersects with the segment at index, using segments_intersect()
-     * break from loop when the two that intersect have been found, and store
-     * the index. NOTE: Ignore the 2 segments before the one at index, as these
-     * cannot intersect with it (and it would break the algorithm if we tested
-     * them, as they will appear to intersect with it).
-     */
-    // grab co-ords of the start of the last line (one that is the collider)
-    co_ord_t ca = spiral.co_ord_cache.co_ords.items[
-        spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length
-    ];
-    // grab co-ords of the previous line
-    co_ord_t pa = spiral.co_ord_cache.co_ords.items[
-        spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length -
-        spiral.lines[index - 1].length
-    ];
-    co_ord_t pb = spiral.co_ord_cache.co_ords.items[
-        spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length
-    ];
-    // reserved name for storing currently-tested line
-    co_ord_t ra, rb;
-    size_t cache_index = spiral.co_ord_cache.co_ords.size - 1;
-    size_t i;
-    for(i = (index); i > -1; i--) {
-        // skip the last two as these definitely don't collide
-        if(i > (index - 2)) {
-            cache_index -= spiral.lines[i].length;
-            continue;
-        } else {
-            // grab co-ords of currently tested line
-            ra = spiral.co_ord_cache.co_ords.items[
-                cache_index - spiral.lines[i].length
-            ];
-            rb = spiral.co_ord_cache.co_ords.items[cache_index];
-            if(
-                segments_intersect(
-                    ra, spiral.lines[i].length, spiral.lines[i].direction,
-                    ca, spiral.lines[index].length, spiral.lines[index].direction
-                )
-            ) {
-                // if they collide, then quit the loop
-                break;
-            }
-            cache_index -= spiral.lines[i].length;
-        }
-    }
-    // now, size_t i stores the index of the line that collided
-    if(i > -1) {
+    // check if collides or not, return same size if no collision
+    if(spiral.collides != -1) {
+        // store the 'previous' and 'rigid' lines.
+        line_t previous = spiral.lines[index - 1];
+        line_t rigid = spiral.lines[spiral.collides];
+        /*
+         * We need to grab the start and end co-ords of the line previous to the
+         * colliding line, and the rigid line that it collided with.
+         */
+        // TODO: Loop over co-ord cache and grab the start and end co-ords
         /*
          * TODO: Apply the rules mentioned in collision_resolution_rules.txt to
          * calculate the correct length to set the previous line to. Return this.
          */
-        if(spiral.lines[index - 1].direction != spiral.lines[i].direction) {
-            // if directions are not equal they might still be parallel
-            if(
-                parallel(
-                    spiral.lines[index - 1].direction, spiral.lines[i].direction
-                )
-            ) {
-                // for each of these clauses, the other line will be opposite direction
-                switch(spiral.lines[i].direction) {
-                    case UP:
-                        return (pa.y - rb.y) + 1;
-                    case DOWN:
-                        return (rb.y - pa.y) + 1;
-                    case LEFT:
-                        return (pa.x - rb.x) + 1;
-                    case RIGHT:
-                        return (rb.x - pa.x) + 1;
-                }
-            } else {
-                return spiral.lines[index - 1].length + 1;
-            }
-        } else {
-            switch(spiral.lines[i].direction) {
-                case UP:
-                    return (pa.y - rb.y) + 1;
-                case DOWN:
-                    return (rb.y - pa.y) + 1;
-                case LEFT:
-                    return (pa.x - rb.x) + 1;
-                case RIGHT:
-                    return (rb.x - pa.x) + 1;
-            }
-        }
+        return spiral.lines[index - 1].length + 1;
     } else {
         /*
-         * If we got here, then i is -1 which means that no collisions could be
-         * found, which means we don't have to extend the previous segment.
+         * If we got here, then no collisions could be found, which means we
+         * don't have to extend the previous segment.
          */
-        // TODO: Change this block to return the same size
-        return spiral.lines[index - 1].length + 1; // couldn't work it out :/
+        return spiral.lines[index - 1].length;
     }
 }
 
