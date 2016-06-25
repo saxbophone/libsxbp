@@ -60,19 +60,26 @@ parallel(direction_t a, direction_t b) {
 }
 
 /*
- * given two lines ab and cd, given as co-ords a+b and c+d,
- * return true if the lines they make up intersect
+ * given two lines a and b, given as the starting co-ords a and b, each line's
+ * length and it's direction, return true if the lines they make up intersect
  */
 bool
-segments_intersect(co_ord_t a, co_ord_t b, co_ord_t c, co_ord_t d) {
+segments_intersect(
+    co_ord_t a, length_t al, direction_t ad,
+    co_ord_t b, length_t bl, direction_t bd
+) {
     /*
      * HACK: Construct a spiral co-ord cache struct with the co-ords
      * of these lines and all the points between them. Use spiral_collides()
      * function to check these. Not the best or most efficient way of doing it
      * but easier for now.
      */
-    spiral_t spiral = {};
-    // spiral.co_ord_cache.co_ords.items 
+    // build spiral struct
+    spiral_t spiral = {
+        .size = 2,
+        .lines = calloc(sizeof(line_t), 2),
+    };
+    // spiral.co_ord_cache.co_ords.items
 }
 
 /*
@@ -98,20 +105,20 @@ suggest_resize(spiral_t spiral, size_t index) {
      * cannot intersect with it (and it would break the algorithm if we tested
      * them, as they will appear to intersect with it).
      */
-    // grab co-ords of last line (one that is the collider)
-    co_ord_t a = spiral.co_ord_cache.co_ords.items[
+    // grab co-ords of the start of the last line (one that is the collider)
+    co_ord_t ca = spiral.co_ord_cache.co_ords.items[
         spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length
     ];
-    co_ord_t b = spiral.co_ord_cache.co_ords.items[
-        spiral.co_ord_cache.co_ords.size - 1
-    ];
-    // grab co-ords of the start of the previous line
-    co_ord_t e = spiral.co_ord_cache.co_ords.items[
+    // grab co-ords of the previous line
+    co_ord_t pa = spiral.co_ord_cache.co_ords.items[
         spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length -
         spiral.lines[index - 1].length
     ];
-    // reserved names for storing the currently tested line
-    co_ord_t c, d;
+    co_ord_t pb = spiral.co_ord_cache.co_ords.items[
+        spiral.co_ord_cache.co_ords.size - 1 - spiral.lines[index].length
+    ];
+    // reserved name for storing currently-tested line
+    co_ord_t ra, rb;
     size_t cache_index = spiral.co_ord_cache.co_ords.size - 1;
     size_t i;
     for(i = (index); i > -1; i--) {
@@ -121,14 +128,15 @@ suggest_resize(spiral_t spiral, size_t index) {
             continue;
         } else {
             // grab co-ords of currently tested line
-            c = spiral.co_ord_cache.co_ords.items[
+            ra = spiral.co_ord_cache.co_ords.items[
                 cache_index - spiral.lines[i].length
             ];
-            d = spiral.co_ord_cache.co_ords.items[
-                cache_index
-            ];
+            rb = spiral.co_ord_cache.co_ords.items[cache_index];
             if(
-                segments_intersect(a, b, c, d)
+                segments_intersect(
+                    ra, spiral.lines[i].length, spiral.lines[i].direction,
+                    ca, spiral.lines[index].length, spiral.lines[index].direction
+                )
             ) {
                 // if they collide, then quit the loop
                 break;
@@ -152,13 +160,13 @@ suggest_resize(spiral_t spiral, size_t index) {
                 // for each of these clauses, the other line will be opposite direction
                 switch(spiral.lines[i].direction) {
                     case UP:
-                        return (e.y - d.y) + 1;
+                        return (pa.y - rb.y) + 1;
                     case DOWN:
-                        return (d.y - e.y) + 1;
+                        return (rb.y - pa.y) + 1;
                     case LEFT:
-                        return (e.x - d.x) + 1;
+                        return (pa.x - rb.x) + 1;
                     case RIGHT:
-                        return (d.x - e.x) + 1;
+                        return (rb.x - pa.x) + 1;
                 }
             } else {
                 return spiral.lines[index - 1].length + 1;
@@ -166,13 +174,13 @@ suggest_resize(spiral_t spiral, size_t index) {
         } else {
             switch(spiral.lines[i].direction) {
                 case UP:
-                    return (e.y - d.y) + 1;
+                    return (pa.y - rb.y) + 1;
                 case DOWN:
-                    return (d.y - e.y) + 1;
+                    return (rb.y - pa.y) + 1;
                 case LEFT:
-                    return (e.x - d.x) + 1;
+                    return (pa.x - rb.x) + 1;
                 case RIGHT:
-                    return (d.x - e.x) + 1;
+                    return (rb.x - pa.x) + 1;
             }
         }
     } else {
