@@ -11,16 +11,6 @@ extern "C"{
 #endif
 
 /*
- * given two lines a and b, given as the starting co-ords a and b, each line's
- * length and it's direction, return true if the lines they make up intersect
- */
-bool
-segments_intersect(
-    co_ord_t a, length_t al, direction_t ad,
-    co_ord_t b, length_t bl, direction_t bd
-);
-
-/*
  * given a spiral for which the length of all its lines are not yet known,
  * calculate the length needed for each line in the spiral (to avoid line overlap)
  * and store these in a spiral struct and return that

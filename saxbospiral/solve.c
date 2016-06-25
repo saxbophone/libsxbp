@@ -16,9 +16,11 @@ extern "C"{
  * collide with any of the others, given their current directions and jump sizes
  * (using co-ords stored in cache).
  * NOTE: This assumes that all lines except the most recent are valid and
- * don't collide
+ * don't collide.
+ * Returns the index of the line that the latest line collided with if there are
+ * collisions, or -1 if no collisions were found.
  */
-static bool
+static int64_t
 spiral_collides(spiral_t spiral) {
     /*
      * if there are less than 4 lines in the spiral, then there's no way it
@@ -44,11 +46,11 @@ spiral_collides(spiral_t spiral) {
                         spiral.co_ord_cache.co_ords.items[j].y
                     )
                 ) {
-                    return true;
+                    return (int64_t)i;
                 }
             }
         }
-        return false;
+        return -1;
     }
 }
 
@@ -57,29 +59,6 @@ static bool
 parallel(direction_t a, direction_t b) {
     // NOTE: This works because direction constants are ordered radially
     return ((a % 2) == (b % 2)) ? true : false;
-}
-
-/*
- * given two lines a and b, given as the starting co-ords a and b, each line's
- * length and it's direction, return true if the lines they make up intersect
- */
-bool
-segments_intersect(
-    co_ord_t a, length_t al, direction_t ad,
-    co_ord_t b, length_t bl, direction_t bd
-) {
-    /*
-     * HACK: Construct a spiral co-ord cache struct with the co-ords
-     * of these lines and all the points between them. Use spiral_collides()
-     * function to check these. Not the best or most efficient way of doing it
-     * but easier for now.
-     */
-    // build spiral struct
-    spiral_t spiral = {
-        .size = 2,
-        .lines = calloc(sizeof(line_t), 2),
-    };
-    // spiral.co_ord_cache.co_ords.items
 }
 
 /*
@@ -218,7 +197,8 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
         ) ? current_index : spiral.co_ord_cache.validity;
         // update the spiral's co-ord cache
         cache_spiral_points(&spiral, current_index + 1);
-        if(spiral_collides(spiral)) {
+        spiral.collides = spiral_collides(spiral);
+        if(spiral.collides != -1) {
             /*
              * if we've caused a collision, we need to call the suggest_resize()
              * function to get the suggested length to resize the previous
