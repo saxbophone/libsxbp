@@ -318,7 +318,6 @@ suggest_resize(spiral_t spiral, size_t index) {
                 return spiral.lines[index - 1].length + 1;
             }
         } else {
-            printf("DIRECTIONS EQUAL\n");
             switch(spiral.lines[i].direction) {
                 case UP:
                     return (e.y - d.y) + 1;
