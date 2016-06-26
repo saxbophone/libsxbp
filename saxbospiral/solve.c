@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "saxbospiral.h"
@@ -29,6 +30,8 @@ spiral_collides(spiral_t spiral) {
     if (spiral.size < 4) {
         return -1;
     } else {
+        // place to store highest collided line
+        int64_t collided = -1;
         // initialise a counter to keep track of what line we're on
         int64_t line_count = 0;
         int64_t ttl = spiral.lines[line_count].length + 1; // ttl of line
@@ -36,20 +39,24 @@ spiral_collides(spiral_t spiral) {
         line_t last_line = spiral.lines[spiral.size - 1];
         size_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
-        for(int64_t i = 0; i < start_of_last_line; i++) {
-            for(size_t j = start_of_last_line; j < last_co_ord; j++) {
-                if(
-                    (
-                        spiral.co_ord_cache.co_ords.items[i].x ==
-                        spiral.co_ord_cache.co_ords.items[j].x
-                    )
-                    &&
-                    (
-                        spiral.co_ord_cache.co_ords.items[i].y ==
-                        spiral.co_ord_cache.co_ords.items[j].y
-                    )
-                ) {
-                    return line_count;
+        for(int64_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
+            for(size_t j = 0; j < i; j++) {
+                if(i != j) {
+                    if(
+                        (
+                            spiral.co_ord_cache.co_ords.items[i].x ==
+                            spiral.co_ord_cache.co_ords.items[j].x
+                        )
+                        &&
+                        (
+                            spiral.co_ord_cache.co_ords.items[i].y ==
+                            spiral.co_ord_cache.co_ords.items[j].y
+                        )
+                    ) {
+                        collided = line_count;
+                    }
+                } else {
+                    printf("NO\n");
                 }
             }
             // update ttl (and counter if needed)
@@ -59,7 +66,7 @@ spiral_collides(spiral_t spiral) {
                 ttl = spiral.lines[line_count].length;
             }
         }
-        return -1;
+        return collided;
     }
 }
 
@@ -88,7 +95,7 @@ suggest_resize(spiral_t spiral, size_t index) {
     if(spiral.collides != -1) {
         // store the 'previous' and 'rigid' lines.
         line_t p = spiral.lines[index - 1];
-        line_t r = spiral.lines[spiral.collides];
+        line_t r = spiral.lines[spiral.collides - 1];
         // create variables to store the start and end co-ords of these lines
         co_ord_t pa, pb, ra, rb;
         /*
@@ -118,7 +125,7 @@ suggest_resize(spiral_t spiral, size_t index) {
             (i < spiral.size && cache_index < spiral.co_ord_cache.co_ords.size);
             i++
         ) {
-            if(i == spiral.collides) {
+            if(i == spiral.collides - 1) {
                 // it's r, store it!
                 ra = spiral.co_ord_cache.co_ords.items[cache_index];
                 cache_index += (spiral.lines[i].length);
@@ -132,22 +139,56 @@ suggest_resize(spiral_t spiral, size_t index) {
          * TODO: Apply the rules mentioned in collision_resolution_rules.txt to
          * calculate the correct length to set the previous line to. Return this.
          */
-        if(false) {
-        // if((p.direction == DOWN) && (r.direction == DOWN)) {
-        //     printf("OPTIMISED (%li)\n", (pa.y - rb.y) + 1);
-        //     return (pa.y - rb.y) + 1;
-        // } else if((p.direction == UP) && (r.direction == UP)) {
-        //     printf("OPTIMISED (%li)\n", (rb.y - pa.y) + 1);
-        //     return (rb.y - pa.y) + 1;
-        // } else if((p.direction == LEFT) && (r.direction == LEFT)) {
-        //     printf("OPTIMISED (%li)\n", (pa.x - rb.x) + 1);
-        //     return (pa.x - rb.x) + 1;
-        // } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
-        //     printf("OPTIMISED (%li)\n", (rb.x - pa.x) + 1);
-        //     return (rb.x - pa.x) + 1;
-        // } else if((p.direction == LEFT) && (r.direction == RIGHT)) {
-        //     printf("OPTIMISED (%li)\n", (pa.x - rb.x) + r.length + 1);
-        //     return (pa.x - rb.x) + r.length + 1;
+        printf("%zi - ", index);
+        switch(p.direction) {
+            case UP:
+                printf("UP : ");
+                break;
+            case DOWN:
+                printf("DOWN : ");
+                break;
+            case LEFT:
+                printf("LEFT : ");
+                break;
+            case RIGHT:
+                printf("RIGHT : ");
+                break;
+        }
+        switch(r.direction) {
+            case UP:
+                printf("UP ");
+                break;
+            case DOWN:
+                printf("DOWN ");
+                break;
+            case LEFT:
+                printf("LEFT ");
+                break;
+            case RIGHT:
+                printf("RIGHT ");
+                break;
+        }
+        printf(
+            "(%li, %li) => (%li, %li) | (%li, %li) => (%li, %li) ",
+            pa.x, pa.y, pb.x, pb.y, ra.x, ra.y, rb.x, rb.y
+        );
+        // if(false) {
+        if((p.direction == DOWN) && (r.direction == DOWN)) {
+            return r.length + 1 + (pa.y - ra.y);
+        } else if((p.direction == UP) && (r.direction == UP)) {
+            return r.length + 1 + (ra.y - pa.y);
+        } else if((p.direction == LEFT) && (r.direction == LEFT)) {
+            return r.length + 1 + (pa.x - ra.x);
+        } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
+            return r.length + 1 + (ra.x - pa.x);
+        } else if((p.direction == LEFT) && (r.direction == RIGHT)) {
+            return r.length + 1 + (pa.x - rb.x);
+        } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
+            return r.length + 1 + (rb.x - pa.x);
+        } else if((p.direction == UP) && (r.direction == DOWN)) {
+            return r.length + 1 + (rb.y - pa.y);
+        } else if((p.direction == DOWN) && (r.direction == UP)) {
+            return r.length + 1 + (pa.y - rb.y);
         } else {
             // this is the catch-all case, where no way to optimise was found
             return spiral.lines[index - 1].length + 1;
@@ -188,12 +229,14 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
         cache_spiral_points(&spiral, current_index + 1);
         spiral.collides = spiral_collides(spiral);
         if(spiral.collides != -1) {
+            // printf("COLLIDES: %li\n", spiral.collides);
             /*
              * if we've caused a collision, we need to call the suggest_resize()
              * function to get the suggested length to resize the previous
              * segment to
              */
             current_length = suggest_resize(spiral, current_index);
+            printf("OPT: %u\n", current_length);
             current_index--;
         } else if(current_index != index) {
             /*
@@ -230,7 +273,10 @@ plot_spiral(spiral_t input) {
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
+        // printf("!");
+        fflush(stdout);
     }
+    printf("\n");
     // free the co_ord_cache member's dynamic memory if required
     if(output.co_ord_cache.co_ords.size > 0) {
         free(output.co_ord_cache.co_ords.items);
