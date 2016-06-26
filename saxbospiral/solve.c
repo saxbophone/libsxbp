@@ -18,8 +18,8 @@ extern "C"{
  * (using co-ords stored in cache).
  * NOTE: This assumes that all lines except the most recent are valid and
  * don't collide.
- * Returns the index of the line that the latest line collided with if there are
- * collisions, or -1 if no collisions were found.
+ * Returns the index of the highest line that the latest line collided with if
+ * there are collisions, or -1 if no collisions were found.
  */
 static int64_t
 spiral_collides(spiral_t spiral) {
@@ -41,22 +41,18 @@ spiral_collides(spiral_t spiral) {
         // check the co-ords of the last line segment against all the others
         for(int64_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
             for(size_t j = 0; j < i; j++) {
-                if(i != j) {
-                    if(
-                        (
-                            spiral.co_ord_cache.co_ords.items[i].x ==
-                            spiral.co_ord_cache.co_ords.items[j].x
-                        )
-                        &&
-                        (
-                            spiral.co_ord_cache.co_ords.items[i].y ==
-                            spiral.co_ord_cache.co_ords.items[j].y
-                        )
-                    ) {
-                        collided = line_count;
-                    }
-                } else {
-                    printf("NO\n");
+                if(
+                    (
+                        spiral.co_ord_cache.co_ords.items[i].x ==
+                        spiral.co_ord_cache.co_ords.items[j].x
+                    )
+                    &&
+                    (
+                        spiral.co_ord_cache.co_ords.items[i].y ==
+                        spiral.co_ord_cache.co_ords.items[j].y
+                    )
+                ) {
+                    collided = line_count;
                 }
             }
             // update ttl (and counter if needed)
@@ -136,43 +132,9 @@ suggest_resize(spiral_t spiral, size_t index) {
             }
         }
         /*
-         * TODO: Apply the rules mentioned in collision_resolution_rules.txt to
-         * calculate the correct length to set the previous line to. Return this.
+         * Apply the rules mentioned in collision_resolution_rules.txt to
+         * calculate the correct length to set the previous line and return it.
          */
-        printf("%zi - ", index);
-        switch(p.direction) {
-            case UP:
-                printf("UP : ");
-                break;
-            case DOWN:
-                printf("DOWN : ");
-                break;
-            case LEFT:
-                printf("LEFT : ");
-                break;
-            case RIGHT:
-                printf("RIGHT : ");
-                break;
-        }
-        switch(r.direction) {
-            case UP:
-                printf("UP ");
-                break;
-            case DOWN:
-                printf("DOWN ");
-                break;
-            case LEFT:
-                printf("LEFT ");
-                break;
-            case RIGHT:
-                printf("RIGHT ");
-                break;
-        }
-        printf(
-            "(%li, %li) => (%li, %li) | (%li, %li) => (%li, %li) ",
-            pa.x, pa.y, pb.x, pb.y, ra.x, ra.y, rb.x, rb.y
-        );
-        // if(false) {
         if((p.direction == DOWN) && (r.direction == DOWN)) {
             return r.length + 1 + (pa.y - ra.y);
         } else if((p.direction == UP) && (r.direction == UP)) {
@@ -229,14 +191,12 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
         cache_spiral_points(&spiral, current_index + 1);
         spiral.collides = spiral_collides(spiral);
         if(spiral.collides != -1) {
-            // printf("COLLIDES: %li\n", spiral.collides);
             /*
              * if we've caused a collision, we need to call the suggest_resize()
              * function to get the suggested length to resize the previous
              * segment to
              */
             current_length = suggest_resize(spiral, current_index);
-            printf("OPT: %u\n", current_length);
             current_index--;
         } else if(current_index != index) {
             /*
@@ -273,10 +233,7 @@ plot_spiral(spiral_t input) {
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
         output = resize_spiral(output, i, 1);
-        // printf("!");
-        fflush(stdout);
     }
-    printf("\n");
     // free the co_ord_cache member's dynamic memory if required
     if(output.co_ord_cache.co_ords.size > 0) {
         free(output.co_ord_cache.co_ords.items);
