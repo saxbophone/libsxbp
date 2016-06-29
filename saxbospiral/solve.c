@@ -66,13 +66,6 @@ spiral_collides(spiral_t spiral) {
     }
 }
 
-// returns true if a and b are parallel directions (on the same axis)
-static bool
-parallel(direction_t a, direction_t b) {
-    // NOTE: This works because direction constants are ordered radially
-    return ((a % 2) == (b % 2)) ? true : false;
-}
-
 /*
  * given a spiral struct that is known to collide and the index of the 'last'
  * segment in the spiral (i.e. the one that was found to be colliding), return
