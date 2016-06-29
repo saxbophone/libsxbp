@@ -13,16 +13,16 @@ extern "C"{
 #endif
 
 /*
- * private function, given a spiral struct, check if the latest line would
- * collide with any of the others, given their current directions and jump sizes
- * (using co-ords stored in cache).
+ * private function, given a spiral struct and the index of the highest line
+ * to use, check if the latest line would collide with any of the others, given
+ * their current directions and jump sizes (using co-ords stored in cache).
  * NOTE: This assumes that all lines except the most recent are valid and
  * don't collide.
- * Returns the index of the highest line that the latest line collided with if
+ * Returns the index of the lowest line that the latest line collided with if
  * there are collisions, or -1 if no collisions were found.
  */
 static int64_t
-spiral_collides(spiral_t spiral) {
+spiral_collides(spiral_t spiral, size_t index) {
     /*
      * if there are less than 4 lines in the spiral, then there's no way it
      * can collide, so return -1 early
@@ -30,13 +30,11 @@ spiral_collides(spiral_t spiral) {
     if (spiral.size < 4) {
         return -1;
     } else {
-        // place to store highest collided line
-        int64_t collided = -1;
         // initialise a counter to keep track of what line we're on
         int64_t line_count = 0;
         int64_t ttl = spiral.lines[line_count].length + 1; // ttl of line
         size_t last_co_ord = spiral.co_ord_cache.co_ords.size;
-        line_t last_line = spiral.lines[spiral.size - 1];
+        line_t last_line = spiral.lines[index];
         size_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
         for(int64_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
@@ -52,7 +50,7 @@ spiral_collides(spiral_t spiral) {
                         spiral.co_ord_cache.co_ords.items[j].y
                     )
                 ) {
-                    collided = line_count;
+                    return line_count;
                 }
             }
             // update ttl (and counter if needed)
@@ -62,7 +60,7 @@ spiral_collides(spiral_t spiral) {
                 ttl = spiral.lines[line_count].length;
             }
         }
-        return collided;
+        return -1;
     }
 }
 
@@ -84,13 +82,15 @@ suggest_resize(spiral_t spiral, size_t index) {
     if(spiral.collides != -1) {
         // store the 'previous' and 'rigid' lines.
         line_t p = spiral.lines[index - 1];
-        line_t r = spiral.lines[spiral.collides - 1];
+        line_t r = spiral.lines[spiral.collides];
         // create variables to store the start and end co-ords of these lines
         co_ord_t pa, pb, ra, rb;
         /*
          * We need to grab the start and end co-ords of the line previous to the
          * colliding line, and the rigid line that it collided with.
          */
+        size_t p_index = sum_lines(spiral, 0, index);
+        size_t r_index = sum_lines(spiral, 0, spiral.collides);
         size_t cache_index;
         cache_index = 0;
         for(
@@ -98,9 +98,10 @@ suggest_resize(spiral_t spiral, size_t index) {
             (i < spiral.size && cache_index < spiral.co_ord_cache.co_ords.size);
             i++
         ) {
-            if(i == (index - 1)) {
+            if(i == (index)) {
                 // it's p, store it!
                 pa = spiral.co_ord_cache.co_ords.items[cache_index];
+                printf("%zi %zi\n", p_index, cache_index);
                 cache_index += (spiral.lines[i].length);
                 pb = spiral.co_ord_cache.co_ords.items[cache_index];
                 break;
@@ -114,9 +115,10 @@ suggest_resize(spiral_t spiral, size_t index) {
             (i < spiral.size && cache_index < spiral.co_ord_cache.co_ords.size);
             i++
         ) {
-            if(i == spiral.collides - 1) {
+            if(i == spiral.collides) {
                 // it's r, store it!
                 ra = spiral.co_ord_cache.co_ords.items[cache_index];
+                printf("%zi %zi\n", r_index, cache_index);
                 cache_index += (spiral.lines[i].length);
                 rb = spiral.co_ord_cache.co_ords.items[cache_index];
                 break;
@@ -182,7 +184,7 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
         ) ? current_index : spiral.co_ord_cache.validity;
         // update the spiral's co-ord cache
         cache_spiral_points(&spiral, current_index + 1);
-        spiral.collides = spiral_collides(spiral);
+        spiral.collides = spiral_collides(spiral, current_index);
         if(spiral.collides != -1) {
             /*
              * if we've caused a collision, we need to call the suggest_resize()
