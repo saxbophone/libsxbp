@@ -9,10 +9,10 @@
 extern "C"{
 #endif
 
-// return the sum of all line lengths within the given indexes
-static size_t
+// returns the sum of all line lengths within the given indexes
+size_t
 sum_lines(spiral_t spiral, size_t start, size_t end) {
-    size_t size = 1;
+    size_t size = 0;
     for(size_t i = start; i < end; i++) {
         size += spiral.lines[i].length;
     }
@@ -30,8 +30,8 @@ sum_lines(spiral_t spiral, size_t start, size_t end) {
  */
 co_ord_array_t
 spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
-    // the amount of space needed is the sum of all line lengths:
-    size_t size = sum_lines(spiral, start, end);
+    // the amount of space needed is the sum of all line lengths + 1 for end
+    size_t size = sum_lines(spiral, start, end) + 1;
     // allocate memory
     co_ord_array_t results = {
         .items = calloc(sizeof(co_ord_t), size),
@@ -67,8 +67,8 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
  */
 void
 cache_spiral_points(spiral_t * spiral, size_t limit) {
-    // the amount of space needed is the sum of all line lengths:
-    size_t size = sum_lines(*spiral, 0, limit);
+    // the amount of space needed is the sum of all line lengths + 1 for end
+    size_t size = sum_lines(*spiral, 0, limit) + 1;
     // allocate / reallocate memory
     if(spiral->co_ord_cache.co_ords.items == NULL) {
         /*
@@ -95,7 +95,7 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     ) ? limit : spiral->co_ord_cache.validity;
     if(spiral->co_ord_cache.validity != 0) {
         // get index of the latest known co-ord
-        result_index += (sum_lines(*spiral, 0, smallest) - 1);
+        result_index += sum_lines(*spiral, 0, smallest);
         // update current to be at latest known co-ord
         current = spiral->co_ord_cache.co_ords.items[result_index];
     } else {

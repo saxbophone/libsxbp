@@ -10,6 +10,10 @@
 extern "C"{
 #endif
 
+// returns the sum of all line lengths within the given indexes
+size_t
+sum_lines(spiral_t spiral, size_t start, size_t end);
+
 /*
  * given a spiral_t struct, a pair of co-ords specifying the start point and
  * indexes of the lowest and highest line segments to use, return a
