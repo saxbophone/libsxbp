@@ -39,9 +39,6 @@ spiral_collides(spiral_t spiral, size_t index) {
         // check the co-ords of the last line segment against all the others
         for(int64_t i = 0; i < start_of_last_line; i++) {
             for(size_t j = start_of_last_line; j < last_co_ord; j++) {
-                if(i == j) {
-                    printf("SAME\n");
-                }
                 if(
                     (
                         spiral.co_ord_cache.co_ords.items[i].x ==
@@ -84,7 +81,6 @@ suggest_resize(spiral_t spiral, size_t index) {
     // check if collides or not, return same size if no collision
     if(spiral.collides != -1) {
         // store the 'previous' and 'rigid' lines.
-        printf("%zi %zi %zi\n", index, spiral.collides, index - 1);
         line_t p = spiral.lines[index - 1];
         line_t r = spiral.lines[spiral.collides];
         // create variables to store the start and end co-ords of these lines
@@ -95,7 +91,6 @@ suggest_resize(spiral_t spiral, size_t index) {
          */
         size_t p_index = sum_lines(spiral, 0, index - 1);
         size_t r_index = sum_lines(spiral, 0, spiral.collides);
-        printf("%zi, %zi\n", p_index, r_index);
         pa = spiral.co_ord_cache.co_ords.items[p_index];
         pb = spiral.co_ord_cache.co_ords.items[p_index + p.length];
         ra = spiral.co_ord_cache.co_ords.items[r_index];
@@ -105,28 +100,20 @@ suggest_resize(spiral_t spiral, size_t index) {
          * calculate the correct length to set the previous line and return it.
          */
         if((p.direction == DOWN) && (r.direction == DOWN)) {
-            printf("%zi\n", r.length + 1 + (pa.y - ra.y));
             return r.length + 1 + (pa.y - ra.y);
         } else if((p.direction == UP) && (r.direction == UP)) {
-            printf("%zi\n", r.length + 1 + (ra.y - pa.y));
             return r.length + 1 + (ra.y - pa.y);
         } else if((p.direction == LEFT) && (r.direction == LEFT)) {
-            printf("%zi\n", r.length + 1 + (pa.x - ra.x));
             return r.length + 1 + (pa.x - ra.x);
         } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
-            printf("%zi\n", r.length + 1 + (ra.x - pa.x));
             return r.length + 1 + (ra.x - pa.x);
         } else if((p.direction == LEFT) && (r.direction == RIGHT)) {
-            printf("%zi\n", r.length + 1 + (pa.x - rb.x));
             return r.length + 1 + (pa.x - rb.x);
         } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
-            printf("%zi\n", r.length + 1 + (rb.x - pa.x));
             return r.length + 1 + (rb.x - pa.x);
         } else if((p.direction == UP) && (r.direction == DOWN)) {
-            printf("%zi\n", r.length + 1 + (rb.y - pa.y));
             return r.length + 1 + (rb.y - pa.y);
         } else if((p.direction == DOWN) && (r.direction == UP)) {
-            printf("%zi\n", r.length + 1 + (pa.y - rb.y));
             return r.length + 1 + (pa.y - rb.y);
         } else {
             // this is the catch-all case, where no way to optimise was found
