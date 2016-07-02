@@ -33,7 +33,7 @@ load_spiral(buffer_t buffer) {
      */
     if(
         (strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0)
-        && (buffer.size >= FILE_HEADER_SIZE + 4)
+        && (buffer.size >= FILE_HEADER_SIZE + LINE_T_PACK_SIZE)
     ) {
         // good to go
         // TODO: Add checks for buffer data version compatibility
