@@ -85,6 +85,10 @@ spiral_collides(spiral_t spiral, size_t index) {
  *
  * NOTE: This function does not *need* to be called with spirals that collide,
  * but it is pointless to call this function with a spiral that does not collide
+ *
+ * NOTE: In the context of this function, 'rigid' or 'r' refers to the line that
+ * the newly plotted line has collided with and 'previous' or 'p' refers to the
+ * line before the newly plotted line.
  */
 static length_t
 suggest_resize(spiral_t spiral, size_t index) {
@@ -109,22 +113,24 @@ suggest_resize(spiral_t spiral, size_t index) {
          * Apply the rules mentioned in collision_resolution_rules.txt to
          * calculate the correct length to set the previous line and return it.
          */
-        if((p.direction == DOWN) && (r.direction == DOWN)) {
-            return r.length + 1 + (pa.y - ra.y);
+        if(false) {
+            (void)0; // no-op
+        // } else if((p.direction == DOWN) && (r.direction == DOWN)) {
+        //     return r.length + 1 + (pa.y - ra.y);
         } else if((p.direction == UP) && (r.direction == UP)) {
             return r.length + 1 + (ra.y - pa.y);
-        } else if((p.direction == LEFT) && (r.direction == LEFT)) {
-            return r.length + 1 + (pa.x - ra.x);
-        } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
-            return r.length + 1 + (ra.x - pa.x);
+        // } else if((p.direction == LEFT) && (r.direction == LEFT)) {
+        //     return r.length + 1 + (pa.x - ra.x);
+        // } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
+        //     return r.length + 1 + (ra.x - pa.x);
         } else if((p.direction == LEFT) && (r.direction == RIGHT)) {
             return r.length + 1 + (pa.x - rb.x);
-        } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
-            return r.length + 1 + (rb.x - pa.x);
-        } else if((p.direction == UP) && (r.direction == DOWN)) {
-            return r.length + 1 + (rb.y - pa.y);
-        } else if((p.direction == DOWN) && (r.direction == UP)) {
-            return r.length + 1 + (pa.y - rb.y);
+        // } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
+        //     return r.length + 1 + (rb.x - pa.x);
+        // } else if((p.direction == UP) && (r.direction == DOWN)) {
+        //     return r.length + 1 + (rb.y - pa.y);
+        // } else if((p.direction == DOWN) && (r.direction == UP)) {
+        //     return r.length + 1 + (pa.y - rb.y);
         } else {
             // this is the catch-all case, where no way to optimise was found
             return spiral.lines[index - 1].length + 1;
