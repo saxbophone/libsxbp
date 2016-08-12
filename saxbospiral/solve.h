@@ -16,6 +16,14 @@ extern "C"{
 spiral_t
 plot_spiral(spiral_t spiral);
 
+/*
+ * given a spiral struct, the index of one of it's lines and a target length to
+ * set that line to, attempt to set the target line to that length,
+ * back-tracking to resize the previous line if it collides.
+ */
+spiral_t
+resize_spiral(spiral_t spiral, size_t index, uint32_t length);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
