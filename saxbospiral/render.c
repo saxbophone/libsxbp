@@ -77,6 +77,8 @@ render_spiral(spiral_t spiral) {
         .x = bounds.items[1].x + normalisation_vector.x,
         .y = bounds.items[1].y + normalisation_vector.y,
     };
+    // free memory allocated for bounds.items, as we no longer need it
+    free(bounds.items);
     // initialise output bitmap - image dimensions are twice the size + 1
     bitmap_t output = {
         .width = ((bottom_right.x + 1) * 2) + 1,
