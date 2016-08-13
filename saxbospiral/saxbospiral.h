@@ -76,6 +76,7 @@ typedef struct spiral_t {
     size_t size;
     line_t * lines;
     co_ord_cache_t co_ord_cache;
+    int64_t collides;
 } spiral_t;
 
 typedef struct buffer_t {

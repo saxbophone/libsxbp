@@ -33,7 +33,7 @@ load_spiral(buffer_t buffer) {
      */
     if(
         (strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0)
-        && (buffer.size >= FILE_HEADER_SIZE + 4)
+        && (buffer.size >= FILE_HEADER_SIZE + LINE_T_PACK_SIZE)
     ) {
         // good to go
         // TODO: Add checks for buffer data version compatibility
@@ -103,7 +103,7 @@ dump_spiral(spiral_t spiral) {
     for(uint8_t i = 0; i < 8; i++) {
         uint8_t shift = (8 * (7 - i));
         output.bytes[16 + i] = (uint8_t)(
-            ((uint64_t)spiral.size & (0xff << shift)) >> shift
+            ((uint64_t)spiral.size & (0xffUL << shift)) >> shift
         );
     }
     // write final newline at end of header

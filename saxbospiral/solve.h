@@ -1,6 +1,8 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_SOLVE_H
 #define SAXBOPHONE_SAXBOSPIRAL_SOLVE_H
 
+#include <stdbool.h>
+
 #include "saxbospiral.h"
 
 
