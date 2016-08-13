@@ -90,7 +90,7 @@ logo: prepare generate renderer
 build: prepare generate renderer
 
 clean-objects:
-	rm -rf *.o saxbospiral/*.o
+	rm -rf *.o saxbospiral/*.o saxbospiral/render_backends/*.o
 
 clean-executables:
 	rm -rf *.out *.exe *.x86_64 tests prepare generate renderer
