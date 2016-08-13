@@ -27,9 +27,12 @@ init_spiral(buffer_t buffer) {
     // number of lines is number of bits of the data
     size_t line_count = buffer.size * 8;
     // create spiral_t struct
-    spiral_t result = { .size = line_count, };
-    // allocate enough memory for a line_t struct for each bit
-    result.lines = calloc(sizeof(line_t), line_count);
+    spiral_t result = {
+        .size = line_count,
+        .collides = -1,
+        // allocate enough memory for a line_t struct for each bit
+        .lines = calloc(sizeof(line_t), line_count),
+    };
     /*
      * first direction is a one-off, pre-prepare the stored direction for this
      * if first bit is 0, then first direction is UP, else if 1 then it's RIGHT

@@ -202,6 +202,7 @@ test_plot_spiral() {
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
         if(output.lines[i].length != expected.lines[i].length) {
+            printf("%i != %i\n", output.lines[i].length, expected.lines[i].length);
             result = false;
         }
     }
