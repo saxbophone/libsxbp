@@ -117,10 +117,10 @@ suggest_resize(spiral_t spiral, size_t index) {
             (void)0; // no-op
         } else if((p.direction == UP) && (r.direction == UP)) {
             return r.length + 1 + (ra.y - pa.y);
-        } else if((p.direction == UP) && (r.direction == DOWN)) {
-            return r.length + 1 + (rb.y - pa.y);
-        } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
-            return r.length + 1 + (ra.x - pb.x);
+        // } else if((p.direction == UP) && (r.direction == DOWN)) {
+        //     return r.length + 1 + (rb.y - pa.y);
+        // } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
+        //     return r.length + 1 + (ra.x - pb.x);
         } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
             return r.length + 1 + (rb.x - pa.x);
         } else {
