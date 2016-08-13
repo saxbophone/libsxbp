@@ -122,7 +122,7 @@ suggest_resize(spiral_t spiral, size_t index) {
         // } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
         //     return r.length + 1 + (ra.x - pb.x);
         } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
-            return r.length + 1 + (rb.x - pa.x);
+            return r.length + (rb.x - pa.x);
         } else {
             // this is the catch-all case, where no way to optimise was found
             return spiral.lines[index - 1].length + 1;
