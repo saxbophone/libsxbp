@@ -116,13 +116,21 @@ suggest_resize(spiral_t spiral, size_t index) {
         if(false) {
             (void)0; // no-op
         } else if((p.direction == UP) && (r.direction == UP)) {
-            return r.length + 1 + (ra.y - pa.y);
-        // } else if((p.direction == UP) && (r.direction == DOWN)) {
-        //     return r.length + 1 + (rb.y - pa.y);
-        // } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
-        //     return r.length + 1 + (ra.x - pb.x);
+            return (ra.y - pa.y) + r.length + 1;
+        } else if((p.direction == UP) && (r.direction == DOWN)) {
+            return (rb.y - pa.y) + r.length + 1;
+        } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
+            return (ra.x - pa.x) + r.length + 1;
         } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
-            return r.length + (rb.x - pa.x);
+            return (rb.x - pa.x) + r.length + 1;
+        } else if((p.direction == DOWN) && (r.direction == UP)) {
+            return (pa.y - rb.y) + r.length + 1;
+        } else if((p.direction == DOWN) && (r.direction == DOWN)) {
+            return (pa.y - ra.y) + r.length + 1;
+        } else if((p.direction == LEFT) && (r.direction == RIGHT)) {
+            return (pa.x - rb.x) + r.length + 1;
+        } else if((p.direction == LEFT) && (r.direction == LEFT)) {
+            return (pa.x - ra.x) + r.length + 1;
         } else {
             // this is the catch-all case, where no way to optimise was found
             return spiral.lines[index - 1].length + 1;
