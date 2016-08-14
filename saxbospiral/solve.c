@@ -94,6 +94,15 @@ static length_t
 suggest_resize(spiral_t spiral, size_t index) {
     // check if collides or not, return same size if no collision
     if(spiral.collides != -1) {
+        /*
+         * if the colliding line's length is greater than 1, we cannot make any
+         * intelligent suggestions on the length to extend the previous line to
+         * (without the high likelihood of creating a line that wastes space),
+         * so we just return the previous line's length +1
+         */
+        if(spiral.lines[index].length > 1) {
+            return spiral.lines[index - 1].length + 1;
+        }
         // store the 'previous' and 'rigid' lines.
         line_t p = spiral.lines[index - 1];
         line_t r = spiral.lines[spiral.collides];
@@ -176,11 +185,7 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
              * function to get the suggested length to resize the previous
              * segment to
              */
-            if(current_length == 1) {
-                current_length = suggest_resize(spiral, current_index);
-            } else {
-                current_length = spiral.lines[current_index - 1].length + 1;
-            }
+            current_length = suggest_resize(spiral, current_index);
             current_index--;
         } else if(current_index != index) {
             /*
