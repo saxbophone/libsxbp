@@ -176,7 +176,11 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
              * function to get the suggested length to resize the previous
              * segment to
              */
-            current_length = suggest_resize(spiral, current_index);
+            if(current_length == 1) {
+                current_length = suggest_resize(spiral, current_index);
+            } else {
+                current_length = spiral.lines[current_index - 1].length + 1;
+            }
             current_index--;
         } else if(current_index != index) {
             /*
