@@ -1,18 +1,18 @@
-cmake_minimum_required(VERSION 3.0)
-enable_language(C CXX)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+ENABLE_LANGUAGE(C CXX)
 
-project(saxbospiral VERSION 0.8.0 LANGUAGES C)
+PROJECT(saxbospiral VERSION 0.8.0 LANGUAGES C)
 
-file(GLOB LIB_SAXBOSPIRAL_SOURCES "saxbospiral/*.c" "saxbospiral/render_backends/*.c")
-add_library(saxbospiral SHARED ${LIB_SAXBOSPIRAL_SOURCES})
+FILE(GLOB LIB_SAXBOSPIRAL_SOURCES "saxbospiral/*.c" "saxbospiral/render_backends/*.c")
+ADD_LIBRARY(saxbospiral SHARED ${LIB_SAXBOSPIRAL_SOURCES})
 
-add_executable(sxp_prepare prepare.c)
-add_executable(sxp_generate generate.c)
-add_executable(sxp_render render.c)
-add_executable(sxp_test tests.c)
+ADD_EXECUTABLE(sxp_prepare prepare.c)
+ADD_EXECUTABLE(sxp_generate generate.c)
+ADD_EXECUTABLE(sxp_render render.c)
+ADD_EXECUTABLE(sxp_test tests.c)
 
-include (GenerateExportHeader)
-generate_export_header(
+INCLUDE(GenerateExportHeader)
+GENERATE_EXPORT_HEADER(
     saxbospiral
     BASE_NAME saxbospiral
     EXPORT_MACRO_NAME saxbospiral_EXPORTS
@@ -20,20 +20,20 @@ generate_export_header(
     STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC
 )
 
-find_package(PNG REQUIRED)
-include_directories(${PNG_INCLUDE_DIR})
+FIND_PACKAGE(PNG REQUIRED)
+INCLUDE_DIRECTORIES(${PNG_INCLUDE_DIR})
 
-target_link_libraries(sxp_prepare saxbospiral ${PNG_LIBRARY})
-target_link_libraries(sxp_generate saxbospiral ${PNG_LIBRARY})
-target_link_libraries(sxp_render saxbospiral ${PNG_LIBRARY})
-target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY})
+TARGET_LINK_LIBRARIES(sxp_prepare saxbospiral ${PNG_LIBRARY})
+TARGET_LINK_LIBRARIES(sxp_generate saxbospiral ${PNG_LIBRARY})
+TARGET_LINK_LIBRARIES(sxp_render saxbospiral ${PNG_LIBRARY})
+TARGET_LINK_LIBRARIES(sxp_test saxbospiral ${PNG_LIBRARY})
 
-install(
+INSTALL(
     TARGETS saxbospiral
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
 )
-install(
+INSTALL(
     PROGRAMS sxp_prepare sxp_generate sxp_render sxp_test DESTINATION bin
 )
