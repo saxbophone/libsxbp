@@ -6,13 +6,13 @@ project(saxbospiral VERSION 0.8.0 LANGUAGES C)
 file(GLOB LIB_SAXBOSPIRAL_SOURCES "saxbospiral/*.c" "saxbospiral/render_backends/*.c")
 add_library(saxbospiral SHARED ${LIB_SAXBOSPIRAL_SOURCES})
 
-add_executable(prepare prepare.c)
-add_executable(generate generate.c)
-add_executable(renderer renderer.c)
-add_executable(tests tests.c)
+add_executable(sxp_prepare prepare.c)
+add_executable(sxp_generate generate.c)
+add_executable(sxp_render render.c)
+add_executable(sxp_test tests.c)
 
 include (GenerateExportHeader)
-GENERATE_EXPORT_HEADER(
+generate_export_header(
     saxbospiral
     BASE_NAME saxbospiral
     EXPORT_MACRO_NAME saxbospiral_EXPORTS
@@ -23,7 +23,17 @@ GENERATE_EXPORT_HEADER(
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
-target_link_libraries(prepare saxbospiral ${PNG_LIBRARY})
-target_link_libraries(generate saxbospiral ${PNG_LIBRARY})
-target_link_libraries(renderer saxbospiral ${PNG_LIBRARY})
-target_link_libraries(tests saxbospiral ${PNG_LIBRARY})
+target_link_libraries(sxp_prepare saxbospiral ${PNG_LIBRARY})
+target_link_libraries(sxp_generate saxbospiral ${PNG_LIBRARY})
+target_link_libraries(sxp_render saxbospiral ${PNG_LIBRARY})
+target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY})
+
+install(
+    TARGETS saxbospiral
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+install(
+    PROGRAMS sxp_prepare sxp_generate sxp_render sxp_test DESTINATION bin
+)
