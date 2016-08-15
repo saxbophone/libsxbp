@@ -35,3 +35,10 @@ renderer
 
 # Debug files
 *.dSYM/
+
+# CMake Stuff
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+saxbospiral_export.h
