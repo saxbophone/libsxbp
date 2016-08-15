@@ -1,9 +1,13 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 ENABLE_LANGUAGE(C CXX)
+ENABLE_TESTING()
 
 PROJECT(saxbospiral VERSION 0.8.0 LANGUAGES C)
 
-FILE(GLOB LIB_SAXBOSPIRAL_SOURCES "saxbospiral/*.c" "saxbospiral/render_backends/*.c")
+FILE(
+    GLOB LIB_SAXBOSPIRAL_SOURCES
+    "saxbospiral/*.c" "saxbospiral/render_backends/*.c"
+)
 ADD_LIBRARY(saxbospiral SHARED ${LIB_SAXBOSPIRAL_SOURCES})
 
 ADD_EXECUTABLE(sxp_prepare prepare.c)
@@ -35,5 +39,11 @@ INSTALL(
     RUNTIME DESTINATION bin
 )
 INSTALL(
-    PROGRAMS sxp_prepare sxp_generate sxp_render sxp_test DESTINATION bin
+    PROGRAMS
+    sxp_prepare
+    sxp_generate
+    sxp_render
+    DESTINATION bin
 )
+
+ADD_TEST(unit_tests sxp_test)

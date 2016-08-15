@@ -39,7 +39,8 @@ sxp_render
 # CMake Stuff
 CMakeCache.txt
 CMakeFiles/
+Testing/
 Makefile
-cmake_install.cmake
+*.cmake
 install_manifest.txt
 saxbospiral_export.h
