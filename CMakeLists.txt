@@ -1,6 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 ENABLE_LANGUAGE(C CXX)
-ENABLE_TESTING()
 
 PROJECT(saxbospiral VERSION 0.8.0 LANGUAGES C)
 
@@ -46,4 +45,22 @@ INSTALL(
     DESTINATION bin
 )
 
+ENABLE_TESTING()
 ADD_TEST(unit_tests sxp_test)
+# fetch a shell script runner
+FIND_PROGRAM(COMMAND_INTERPRETER bash)
+# only run functional test if we found bash
+IF(COMMAND_INTERPRETER)
+    ADD_TEST(
+        NAME func_test COMMAND ${COMMAND_INTERPRETER}
+        # each script needs to know the path to each executable it runs
+        "func_test.sh" sxp_prepare sxp_generate sxp_render
+    )
+    ADD_CUSTOM_TARGET(
+        NAME build_logo COMMAND ${COMMAND_INTERPRETER}
+        "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png"
+    )
+ELSE()
+    # warn about skipping of functional test script
+    message(WARNING "Skipping functional test script, couldn't find Bash Shell")
+ENDIF()
