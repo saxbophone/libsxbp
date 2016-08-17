@@ -43,4 +43,3 @@ Testing/
 Makefile
 *.cmake
 install_manifest.txt
-saxbospiral_export.h
