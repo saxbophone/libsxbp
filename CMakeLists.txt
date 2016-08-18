@@ -18,7 +18,7 @@ file(
     GLOB LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS
     "saxbospiral/render_backends/*.h"
 )
-add_library(saxbospiral SHARED ${LIB_SAXBOSPIRAL_SOURCES})
+add_library(saxbospiral ${LIB_SAXBOSPIRAL_SOURCES})
 # Link libsaxbospiral with libpng so we get libpng symbols
 target_link_libraries(saxbospiral ${PNG_LIBRARY})
 
