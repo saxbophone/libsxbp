@@ -73,7 +73,7 @@ if(COMMAND_INTERPRETER)
         "func_test.sh" sxp_prepare sxp_generate sxp_render
     )
     add_custom_target(
-        NAME build_logo COMMAND ${COMMAND_INTERPRETER}
+        build_logo ${COMMAND_INTERPRETER}
         "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png"
     )
 else()
