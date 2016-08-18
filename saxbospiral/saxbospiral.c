@@ -5,8 +5,11 @@
 extern "C"{
 #endif
 
+// Version numbers are passed as preprocessor definitions by CMake
 const version_t VERSION = {
-    .major = 0, .minor = 8, .patch = 0,
+    .major = SAXBOSPIRAL_VERSION_MAJOR,
+    .minor = SAXBOSPIRAL_VERSION_MINOR,
+    .patch = SAXBOSPIRAL_VERSION_PATCH,
 };
 
 // vector direction constants

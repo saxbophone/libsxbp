@@ -28,10 +28,18 @@
 *.x86_64
 *.hex
 # Custom named executables
-tests
-prepare
-generate
-renderer
+sxp_test
+sxp_prepare
+sxp_generate
+sxp_render
 
 # Debug files
 *.dSYM/
+
+# CMake Stuff
+CMakeCache.txt
+CMakeFiles/
+Testing/
+Makefile
+*.cmake
+install_manifest.txt
