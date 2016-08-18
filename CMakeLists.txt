@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 enable_language(C CXX)
 
-project(saxbospiral VERSION 0.8.0 LANGUAGES C)
+project(saxbospiral VERSION 0.9.0 LANGUAGES C)
 # pass in version of library as preprocessor definitions
 add_definitions(-DSAXBOSPIRAL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_MINOR=${PROJECT_VERSION_MINOR})
