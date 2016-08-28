@@ -1,11 +1,40 @@
+# begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 enable_language(C CXX)
 
-project(saxbospiral VERSION 0.9.0 LANGUAGES C)
+project(saxbospiral VERSION 0.10.0 LANGUAGES C)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(
+    SAXBOSPIRAL_VERSION_STRING
+    "v${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+)
+set(SAXBOSPIRAL_ESCAPED_VERSION_STRING "\"${SAXBOSPIRAL_VERSION_STRING}\"")
+# end basic metadata
+
 # pass in version of library as preprocessor definitions
 add_definitions(-DSAXBOSPIRAL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_MINOR=${PROJECT_VERSION_MINOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_PATCH=${PROJECT_VERSION_PATCH})
+add_definitions(-DSAXBOSPIRAL_VERSION_STRING=${SAXBOSPIRAL_ESCAPED_VERSION_STRING})
+
+include(CheckCCompilerFlag)
+
+# used for enabling additional compiler options if supported
+function(enable_c_compiler_flag_if_supported flag)
+    string(FIND "${CMAKE_C_FLAGS}" "${flag}" flag_already_set)
+    if(flag_already_set EQUAL -1)
+        check_c_compiler_flag("${flag}" flag_supported)
+        if(flag_supported)
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}" PARENT_SCOPE)
+        endif()
+    endif()
+endfunction()
+
+# enable extra flags (warnings) if we're not in release mode
+if(NOT CMAKE_BUILD_TYPE EQUAL CMAKE_C_FLAGS_RELEASE)
+    enable_c_compiler_flag_if_supported("-Werror")
+endif()
 
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
@@ -70,11 +99,11 @@ if(COMMAND_INTERPRETER)
     add_test(
         NAME func_test COMMAND ${COMMAND_INTERPRETER}
         # each script needs to know the path to each executable it runs
-        "func_test.sh" sxp_prepare sxp_generate sxp_render
+        "func_test.sh" sxp_prepare sxp_generate sxp_render "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
     )
     add_custom_target(
         build_logo ${COMMAND_INTERPRETER}
-        "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png"
+        "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png" "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
     )
 else()
     # warn about skipping of functional test script

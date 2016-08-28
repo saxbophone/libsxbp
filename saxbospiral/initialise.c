@@ -24,8 +24,8 @@ change_direction(direction_t current, rotation_t turn) {
  */
 spiral_t
 init_spiral(buffer_t buffer) {
-    // number of lines is number of bits of the data
-    size_t line_count = buffer.size * 8;
+    // number of lines is number of bits of the data, + 1 for the first UP line
+    size_t line_count = (buffer.size * 8) + 1;
     // create spiral_t struct
     spiral_t result = {
         .size = line_count,
@@ -33,11 +33,10 @@ init_spiral(buffer_t buffer) {
         // allocate enough memory for a line_t struct for each bit
         .lines = calloc(sizeof(line_t), line_count),
     };
-    /*
-     * first direction is a one-off, pre-prepare the stored direction for this
-     * if first bit is 0, then first direction is UP, else if 1 then it's RIGHT
-     */
-    direction_t current = ((buffer.bytes[0] & 0b10000000) == 0) ? LEFT : DOWN;
+    // First line is always an UP line - this is for orientation purposes
+    direction_t current = UP;
+    result.lines[0].direction = current;
+    result.lines[0].length = 0;
     /*
      * now, iterate over all the bits in the data and convert to directions
      * that make the spiral pattern, storing these directions in the result lines
@@ -48,7 +47,7 @@ init_spiral(buffer_t buffer) {
             // bit level loop
             uint8_t e = 7 - b; // which power of two to use with bit mask
             uint8_t bit = (buffer.bytes[s] & (1 << e)) >> e; // the currently accessed bit
-            size_t index = (s * 8) + b; // line index
+            size_t index = (s * 8) + b + 1; // line index
             rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
             rotation = (bit == 0) ? CLOCKWISE : ANTI_CLOCKWISE;
