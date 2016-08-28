@@ -7,6 +7,24 @@ add_definitions(-DSAXBOSPIRAL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_MINOR=${PROJECT_VERSION_MINOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_PATCH=${PROJECT_VERSION_PATCH})
 
+include(CheckCCompilerFlag)
+
+# used for enabling additional compiler options if supported
+function(enable_c_compiler_flag_if_supported flag)
+    string(FIND "${CMAKE_C_FLAGS}" "${flag}" flag_already_set)
+    if(flag_already_set EQUAL -1)
+        check_c_compiler_flag("${flag}" flag_supported)
+        if(flag_supported)
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}" PARENT_SCOPE)
+        endif()
+    endif()
+endfunction()
+
+# enable extra flags (warnings) if we're not in release mode
+if(NOT CMAKE_BUILD_TYPE EQUAL CMAKE_C_FLAGS_RELEASE)
+    enable_c_compiler_flag_if_supported("-Werror")
+endif()
+
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
