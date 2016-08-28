@@ -181,6 +181,7 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
     size_t current_index = index;
     length_t current_length = length;
     while(true) {
+        // update length of target line, re-calculate spiral co-ords,
         update_spiral(&spiral, current_index, current_length);
         if(spiral.collides != -1) {
             /*
@@ -188,11 +189,23 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
              * function to get the suggested length to resize the previous
              * segment to
              */
-            current_length = suggest_resize(spiral, current_index);
-            if(current_length > 1) {
-                current_length = spiral.lines[current_index - 1].length + 1;
-            }
+            length_t suggested_length = suggest_resize(spiral, current_index);
             current_index--;
+            if(current_length > 1) {
+                /*
+                 * if the current length of the line that collided was over 1,
+                 * we can't just accept the suggested value as this might cause
+                 * space to be wasted. Instead, we need to test this value
+                 * (while also plotting the next line), and if it doesn't
+                 * collide, then keep on decreasing the previous line and
+                 * testing until we get a collision. We then use the lowest good
+                 * length we found.
+                 */
+                current_length = spiral.lines[current_index].length + 1;
+            } else {
+                // we can happily accept the suggested resize
+                current_length = suggested_length;
+            }
         } else if(current_index != index) {
             /*
              * if we didn't cause a collision but we're not on the top-most
