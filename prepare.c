@@ -66,7 +66,7 @@ main(int argc, char * argv[]) {
             // will create
             printf(
                 "File size is %zi bytes - This generates a spiral with %zi lines\n",
-                read_file_size, read_file_size*8
+                read_file_size, (read_file_size * 8) + 1
             );
             // allocate memory buffer
             buffer_t input = {
