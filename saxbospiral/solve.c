@@ -201,7 +201,38 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
                  * testing until we get a collision. We then use the lowest good
                  * length we found.
                  */
-                current_length = spiral.lines[current_index].length + 1;
+                length_t reset_length = spiral.lines[current_index].length + 1;
+                // check that the suggestion doesn't collide
+                update_spiral(&spiral, current_index, suggested_length);
+                // if it collides, skip to next stage of the loop to handle it
+                if(spiral.collides != -1) {
+                    current_length = suggested_length;
+                    continue;
+                }
+                // now plot next line at 1
+                update_spiral(&spiral, current_index + 1, 1);
+                // if it collides, skip to next stage of the loop to handle it
+                if(spiral.collides != -1) {
+                    current_index = current_index + 1;
+                    current_length = 1;
+                    continue;
+                }
+                // BEGIN PROBLEM SECTION
+                // // if we got here, then the suggested length didn't collide
+                // // now we can find the lowest good length
+                // while(spiral.collides == -1) {
+                //     suggested_length--;
+                //     update_spiral(&spiral, current_index, suggested_length);
+                //     update_spiral(&spiral, current_index + 1, 1);
+                // }
+                // // the loop exited because it found a length that collided
+                // // increment the suggested size
+                // current_length = suggested_length + 1;
+                // update_spiral(&spiral, current_index, current_length);
+                // current_index++;
+                // current_length = 1;
+                // END PROBLEM SECTION
+                current_length = reset_length;
             } else {
                 // we can happily accept the suggested resize
                 current_length = suggested_length;
