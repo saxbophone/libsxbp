@@ -75,6 +75,29 @@ spiral_collides(spiral_t spiral, size_t index) {
 }
 
 /*
+ * private function - given a pointer to a spiral struct, an index of the line
+ * to change and the length to change it to:
+ * - change the line's length
+ * - invalidate the co-ord cache
+ * - check if it collides or not
+ */
+static void
+update_spiral(spiral_t * spiral, size_t index, length_t length) {
+    // set the target line to the target length
+    spiral->lines[index].length = length;
+    /*
+     * also, set cache validity to this index so we invalidate any invalid
+     * entries in the co-ord cache
+     */
+    spiral->co_ord_cache.validity = (
+        index < spiral->co_ord_cache.validity
+    ) ? index : spiral->co_ord_cache.validity;
+    // update the spiral's co-ord cache
+    cache_spiral_points(spiral, index + 1);
+    spiral->collides = spiral_collides(*spiral, index);
+}
+
+/*
  * given a spiral struct that is known to collide and the index of the 'last'
  * segment in the spiral (i.e. the one that was found to be colliding), return
  * a suggested length to set the segment before this line to.
@@ -158,27 +181,15 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
     size_t current_index = index;
     length_t current_length = length;
     while(true) {
-        // set the target line to the target length
-        spiral.lines[current_index].length = current_length;
-        /*
-         * also, set cache validity to this index so we invalidate any invalid
-         * entries in the co-ord cache
-         */
-        spiral.co_ord_cache.validity = (
-            current_index < spiral.co_ord_cache.validity
-        ) ? current_index : spiral.co_ord_cache.validity;
-        // update the spiral's co-ord cache
-        cache_spiral_points(&spiral, current_index + 1);
-        spiral.collides = spiral_collides(spiral, current_index);
+        update_spiral(&spiral, current_index, current_length);
         if(spiral.collides != -1) {
             /*
              * if we've caused a collision, we need to call the suggest_resize()
              * function to get the suggested length to resize the previous
              * segment to
              */
-            if(current_length == 1) {
-                current_length = suggest_resize(spiral, current_index);
-            } else {
+            current_length = suggest_resize(spiral, current_index);
+            if(current_length > 1) {
                 current_length = spiral.lines[current_index - 1].length + 1;
             }
             current_index--;
