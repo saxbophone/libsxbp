@@ -38,22 +38,31 @@ test_init_spiral() {
     buffer.bytes = malloc(buffer.size);
     buffer.bytes = (uint8_t[2]){ 0b01101101, 0b11000111, };
     // build expected output struct
-    spiral_t expected = { .size = 16, };
-    expected.lines = calloc(sizeof(line_t), 16);
-    direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+    spiral_t expected = { .size = 17, };
+    expected.lines = calloc(sizeof(line_t), 17);
+    direction_t directions[17] = {
+        UP, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT,
+        DOWN, RIGHT, UP, RIGHT, DOWN, LEFT, DOWN, RIGHT, UP
     };
-    for(uint8_t i = 0; i < 16; i++) {
+    for(uint8_t i = 0; i < 17; i++) {
         expected.lines[i].direction = directions[i];
     }
 
     // call init_spiral with buffer and store result
     spiral_t output = init_spiral(buffer);
 
+    if(output.size != expected.size) {
+        result = false;
+    }
     // compare with expected struct
-    for(uint8_t i = 0; i < 16; i++) {
+    for(uint8_t i = 0; i < 17; i++) {
         if(output.lines[i].direction != expected.lines[i].direction) {
+            printf(
+                "%u: %i != %i\n",
+                i,
+                output.lines[i].direction,
+                expected.lines[i].direction
+            );
             result = false;
         }
     }
