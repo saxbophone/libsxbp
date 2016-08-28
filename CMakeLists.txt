@@ -5,12 +5,18 @@ enable_language(C CXX)
 project(saxbospiral VERSION 0.9.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(
+    SAXBOSPIRAL_VERSION_STRING
+    "v${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+)
+set(SAXBOSPIRAL_ESCAPED_VERSION_STRING "\"${SAXBOSPIRAL_VERSION_STRING}\"")
 # end basic metadata
 
 # pass in version of library as preprocessor definitions
 add_definitions(-DSAXBOSPIRAL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_MINOR=${PROJECT_VERSION_MINOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_PATCH=${PROJECT_VERSION_PATCH})
+add_definitions(-DSAXBOSPIRAL_VERSION_STRING=${SAXBOSPIRAL_ESCAPED_VERSION_STRING})
 
 include(CheckCCompilerFlag)
 
@@ -93,11 +99,11 @@ if(COMMAND_INTERPRETER)
     add_test(
         NAME func_test COMMAND ${COMMAND_INTERPRETER}
         # each script needs to know the path to each executable it runs
-        "func_test.sh" sxp_prepare sxp_generate sxp_render
+        "func_test.sh" sxp_prepare sxp_generate sxp_render "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
     )
     add_custom_target(
         build_logo ${COMMAND_INTERPRETER}
-        "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png"
+        "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png" "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
     )
 else()
     # warn about skipping of functional test script

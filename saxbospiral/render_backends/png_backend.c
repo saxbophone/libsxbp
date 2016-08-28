@@ -52,13 +52,8 @@ write_png_image(FILE * file_handle, bitmap_t bitmap) {
     metadata[2].key = "Copyright";
     metadata[2].text = "Copyright Joshua Saxby";
     metadata[3].key = "Software";
-    // can't sprintf directly to the text attribute
-    char software[25];
-    sprintf(
-        software, "SAXBOSPIRAL v%i.%i.%i",
-        VERSION.major, VERSION.minor, VERSION.patch
-    );
-    metadata[3].text = software;
+    // SAXBOSPIRAL_VERSION_STRING is a macro that expands to a double-quoted string
+    metadata[3].text = "SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING;
     metadata[4].key = "Comment";
     metadata[4].text = "https://github.com/saxbophone/saxbospiral";
     // set compression of each metadata key
