@@ -17,14 +17,15 @@ buffer_write_data(png_structp png_ptr, png_bytep data, png_size_t length) {
     // retrieve pointer to buffer
     buffer_t * p = (buffer_t *)png_get_io_ptr(png_ptr);
     size_t new_size = p->size + length;
-    // allocate or grow buffer
-    if(p->bytes) {
+    // if buffer bytes pointer is not NULL, then re-allocate
+    if(p->bytes != NULL) {
         p->bytes = realloc(p->bytes, new_size);
     }
-    else{
+    // otherwise, allocate
+    else {
         p->bytes = malloc(new_size);
     }
-    if(!p->bytes){
+    if(!p->bytes) {
         png_error(png_ptr, "Write Error");
     }
     // copy new bytes to end of buffer
@@ -44,13 +45,11 @@ build_png(
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (png_ptr == NULL) {
       fprintf(stderr, "Could not allocate write struct\n");
-      // abort();
       png_error(png_ptr, "Write Error");
     }
     info_ptr = png_create_info_struct(png_ptr);
     if (info_ptr == NULL) {
       fprintf(stderr, "Could not allocate info struct\n");
-      // abort();
       png_error(png_ptr, "Write Error");
     }
     // set PNG write function - in this case, a function that writes to buffer
