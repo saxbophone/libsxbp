@@ -93,6 +93,11 @@ main(int argc, char * argv[]) {
         // if file was ok, then render the spiral to a monochrome bitmap
         bitmap_t image = render_spiral(spiral);
         printf("[DONE]\n");
+        printf("Building PNG File... ");
+        // now write PNG image data to buffer with libpng
+        buffer_t output_buffer = write_png_image(image);
+        printf("[DONE]\n");
+        printf("Saving rendered image to output file... ");
         // try and open output file for writing
         FILE * output_file_handle = fopen(output_file_path, "wb");
         if(output_file_handle == NULL) {
@@ -100,10 +105,18 @@ main(int argc, char * argv[]) {
             file_open_error(output_file_path);
             return 1;
         }
-        printf("Saving rendered image to output file... ");
-        // now write PNG image data to file with libpng
-        write_png_image(output_file_handle, image);
+        // save buffer data
+        size_t bytes_written = fwrite(
+            output_buffer.bytes, 1, output_buffer.size, output_file_handle
+        );
+        if(bytes_written != output_buffer.size) {
+            fprintf(stderr, "%s\n", "ERROR - Didn't write whole file.");
+            return 1;
+        }
         printf("[DONE]\n");
+        // free data in buffer
+        free(output_buffer.bytes);
+        output_buffer.size = 0;
         // close output file handle
         fclose(output_file_handle);
         return 0;
