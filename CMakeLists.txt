@@ -95,12 +95,12 @@ find_program(COMMAND_INTERPRETER bash)
 if(COMMAND_INTERPRETER)
     add_test(
         NAME func_test COMMAND ${COMMAND_INTERPRETER}
-        # each script needs to know the path to each executable it runs
-        "func_test.sh" sxp_prepare sxp_generate sxp_render "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
+        # each script needs to know the path to the sxp cli executable
+        "func_test.sh" sxp "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
     )
     add_custom_target(
         build_logo ${COMMAND_INTERPRETER}
-        "build_logo.sh" sxp_prepare sxp_generate sxp_render "saxbospiral.png" "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
+        "build_logo.sh" sxp "saxbospiral.png" "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
     )
 else()
     # warn about skipping of functional test script
