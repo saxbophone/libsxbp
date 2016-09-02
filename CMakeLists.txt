@@ -36,8 +36,15 @@ if(NOT CMAKE_BUILD_TYPE EQUAL CMAKE_C_FLAGS_RELEASE)
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
 
+# dependencies
+# add custom dependencies directory
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+# libpng
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
+# Argtable
+find_package(Argtable REQUIRED)
+include_directories(${ARGTABLE_INCLUDE_DIR})
 
 # C source files
 file(
@@ -60,10 +67,10 @@ add_executable(sxp_generate generate.c)
 add_executable(sxp_render render.c)
 add_executable(sxp_test tests.c)
 
-target_link_libraries(sxp_prepare saxbospiral ${PNG_LIBRARY})
-target_link_libraries(sxp_generate saxbospiral ${PNG_LIBRARY})
-target_link_libraries(sxp_render saxbospiral ${PNG_LIBRARY})
-target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY})
+target_link_libraries(sxp_prepare saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
+target_link_libraries(sxp_generate saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
+target_link_libraries(sxp_render saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
+target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
 
 install(
     TARGETS saxbospiral
