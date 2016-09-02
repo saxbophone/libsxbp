@@ -62,15 +62,11 @@ add_library(saxbospiral ${LIB_SAXBOSPIRAL_SOURCES})
 # Link libsaxbospiral with libpng so we get libpng symbols
 target_link_libraries(saxbospiral ${PNG_LIBRARY})
 
-add_executable(sxp_prepare prepare.c)
-add_executable(sxp_generate generate.c)
-add_executable(sxp_render render.c)
+add_executable(sxp sxp.c)
 add_executable(sxp_test tests.c)
 
-target_link_libraries(sxp_prepare saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
-target_link_libraries(sxp_generate saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
-target_link_libraries(sxp_render saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
-target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
+target_link_libraries(sxp saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
+target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY})
 
 install(
     TARGETS saxbospiral
@@ -89,13 +85,7 @@ install(
     DESTINATION include/saxbospiral/render_backends
 )
 
-install(
-    PROGRAMS
-    sxp_prepare
-    sxp_generate
-    sxp_render
-    DESTINATION bin
-)
+install(PROGRAMS sxp DESTINATION bin)
 
 enable_testing()
 add_test(unit_tests sxp_test)
