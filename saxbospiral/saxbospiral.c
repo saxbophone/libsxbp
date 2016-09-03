@@ -12,6 +12,14 @@ const version_t VERSION = {
     .patch = SAXBOSPIRAL_VERSION_PATCH,
 };
 
+/*
+ * computes a version_hash_t for a given version_t,
+ * to be used for indexing and ordering
+ */
+version_hash_t version_hash(version_t version) {
+    return (version.major * 65536) + (version.minor * 256) + version.patch;
+}
+
 // vector direction constants
 const vector_t VECTOR_DIRECTIONS[4] = {
     // UP       RIGHT       DOWN        LEFT

@@ -130,6 +130,14 @@ run(
     } else if(generate) {
         // try and load a spiral struct from input file
         spiral_t spiral = load_spiral(input_buffer);
+        // the spiral size will be set to 0 if buffer data was invalid
+        if(spiral.size == 0) {
+            fprintf(
+                stderr, "ERROR - File data was invalid (not a format accepted "
+                "by SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING ")\n"
+            );
+            return false;
+        }
         // we must plot all lines from spiral file
         spiral = plot_spiral(spiral, perfection);
         // dump spiral
