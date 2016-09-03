@@ -114,6 +114,10 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
         // store the 'previous' and 'rigid' lines.
         line_t p = spiral.lines[index - 1];
         line_t r = spiral.lines[spiral.collides];
+        // if pr and r are not parallel, we can return early
+        if((p.direction % 2) != (r.direction % 2)) {
+            return spiral.lines[index - 1].length + 1;
+        }
         // create variables to store the start and end co-ords of these lines
         co_ord_t pa, pb, ra, rb;
         /*
