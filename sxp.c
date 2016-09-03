@@ -5,6 +5,7 @@
 #include <argtable2.h>
 
 #include "sxp.h"
+#include "saxbospiral/saxbospiral.h"
 
 
 #ifdef __cplusplus
@@ -13,7 +14,7 @@ extern "C"{
 
 // returns size of file associated with given file handle
 size_t
-file_size(FILE * file_handle) {
+get_file_size(FILE * file_handle) {
     // seek to end
     fseek(file_handle, 0L, SEEK_END);
     // get size
@@ -28,7 +29,7 @@ file_size(FILE * file_handle) {
  * path can be NULL and if it is then it returns stdin
  */
 FILE *
-get_input_file(char * path) {
+get_input_file(const char * path) {
     return (path != NULL) ? fopen(path, "rb") : stdin;
 }
 
@@ -37,13 +38,88 @@ get_input_file(char * path) {
  * path can be NULL and if it is then it returns stdout
  */
 FILE *
-get_output_file(char * path) {
+get_output_file(const char * path) {
     return (path != NULL) ? fopen(path, "wb") : stdout;
 }
 
-// main
+/*
+ * given an open file handle and a buffer, read the file contents into buffer
+ * returns true on success and false on failure.
+ */
+bool
+file_to_buffer(FILE * file_handle, buffer_t * buffer) {
+    size_t file_size = get_file_size(file_handle);
+    // allocate/re-allocate buffer memory
+    if(buffer->bytes == NULL) {
+        buffer->bytes = calloc(1, file_size);
+    } else {
+        buffer->bytes = realloc(buffer->bytes, file_size);
+    }
+    if(buffer->bytes == NULL) {
+        // couldn't allocate enough memory!
+        return false;
+    }
+    buffer->size = file_size;
+    // read in file data to buffer
+    size_t bytes_read = fread(buffer->bytes, 1, file_size, file_handle);
+    // check amount read was the size of file
+    if(bytes_read != file_size) {
+        // free memory
+        free(buffer->bytes);
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/*
+ * given a buffer struct and an open file handle, writes the buffer contents
+ * to the file.
+ * returns true on success and false on failure.
+ */
+bool
+buffer_to_file(buffer_t * buffer, FILE * file_handle) {
+    size_t bytes_written = fwrite(
+        buffer->bytes, 1, buffer->size, file_handle
+    );
+    // check amount written was the size of buffer
+    if(bytes_written != buffer->size) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/*
+ * function responsible for actually doing the main work, called by main with
+ * options configured via command-line.
+ * returns true on success, false on failure.
+ */
+bool
+run(
+    bool prepare, bool generate, bool render,
+    const char * input_file_path, const char * output_file_path
+) {
+    // get input file handle
+    FILE * input_file = get_input_file(input_file_path);
+    if(prepare) {
+        // we must read in raw file and build spiral from it first
+    } else if(generate) {
+        // we must read in a spiral file and plot all lines
+    } else if(render) {
+        // we must read in a spiral file and render it to image
+    } else {
+        // none of the above. this is an error condition - nothing to be done
+        fprintf(stderr, "%s\n", "Nothing to be done!");
+        return false;
+    }
+}
+
+// main - mostly just process arguments, the bulk of the work is done by run()
 int
 main(int argc, char * argv[]) {
+    // status code initially set to -1
+    int status_code = -1;
     // build argtable struct for parsing command-line arguments
     // show help
     struct arg_lit * help = arg_lit0("h","help", "show this help and exit");
@@ -82,7 +158,7 @@ main(int argc, char * argv[]) {
     if(arg_nullcheck(argtable) != 0) {
         // NULL entries were detected, so some allocations failed
         fprintf(stderr, "%s\n", "Bad Doo-doo!");
-        return 2;
+        status_code = 2;
     }
     // parse arguments
     int count_errors = arg_parse(argc,argv,argtable);
@@ -91,16 +167,34 @@ main(int argc, char * argv[]) {
         printf("Usage: %s", program_name);
         arg_print_syntax(stdout, argtable, "\n");
         arg_print_glossary(stdout, argtable, "  %-25s %s\n");
-        return 0;
+        status_code = 0;
     } else if(count_errors > 0) {
         // next, if parser returned any errors, display them then exit
         arg_print_errors(stdout, end, program_name);
-        return 1;
+        status_code = 1;
     }
+    // if at this point status_code is not -1, clean up then return early
+    if(status_code != -1) {
+        arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
+        return status_code;
+    }
+    // otherwise, carry on...
     // if we asked for the version, show it
     if(version->count > 0) {
         printf("Saxbospiral " SAXBOSPIRAL_VERSION_STRING "\n");
     }
+    // now, call run with options from command-line
+    bool result = run(
+        (prepare->count > 0) ? true : false,
+        (generate->count > 0) ? true : false,
+        (render->count > 0) ? true : false,
+        * input->filename,
+        * output->filename
+    );
+    // free argtable struct
+    arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
+    // return appropriate status code based on success/failure
+    return (result) ? 0 : 1;
 }
 
 #ifdef __cplusplus
