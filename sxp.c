@@ -95,13 +95,21 @@ run(
         return false;
     }
     // make input buffer
-    buffer_t input_buffer;
+    buffer_t input_buffer = {.size = 0, .bytes = NULL};
     // make output buffer
-    buffer_t output_buffer;
+    buffer_t output_buffer = {.size = 0, .bytes = NULL};
     // read input file into buffer
     bool read_ok = file_to_buffer(input_file, &input_buffer);
+    // used later for telling if write of output file was success
+    bool write_ok = false;
     // close input file
     fclose(input_file);
+    // get output file handle
+    FILE * output_file = fopen(output_file_path, "wb");
+    if(output_file == NULL) {
+        fprintf(stderr, "%s\n", "Couldn't open output file");
+        return false;
+    }
     // if read was unsuccessful, don't continue
     if(read_ok == false) {
         fprintf(stderr, "%s\n", "Couldn't read input file");
@@ -110,8 +118,6 @@ run(
     if(prepare) {
         // we must build spiral from raw file first
         spiral_t spiral = init_spiral(input_buffer);
-        // free input buffer (TODO: work out why we can't do this at end of func)
-        free(input_buffer.bytes);
         if(generate) {
             // now we must plot all lines from spiral file
             spiral = plot_spiral(spiral);
@@ -122,8 +128,6 @@ run(
     } else if(generate) {
         // try and load a spiral struct from input file
         spiral_t spiral = load_spiral(input_buffer);
-        // free input buffer (TODO: work out why we can't do this at end of func)
-        free(input_buffer.bytes);
         // we must plot all lines from spiral file
         spiral = plot_spiral(spiral);
         // dump spiral
@@ -131,8 +135,6 @@ run(
     } else if(render) {
         // try and load a spiral struct from input file
         spiral_t spiral = load_spiral(input_buffer);
-        // free input buffer (TODO: work out why we can't do this at end of func)
-        free(input_buffer.bytes);
         // the spiral size will be set to 0 if buffer data was invalid
         if(spiral.size == 0) {
             fprintf(
@@ -150,17 +152,12 @@ run(
         fprintf(stderr, "%s\n", "Nothing to be done!");
         return false;
     }
-    // get output file handle
-    FILE * output_file = fopen(output_file_path, "wb");
-    if(output_file == NULL) {
-        fprintf(stderr, "%s\n", "Couldn't open output file");
-        return false;
-    }
     // now, write output buffer to file
-    bool write_ok = buffer_to_file(&output_buffer, output_file);
+    write_ok = buffer_to_file(&output_buffer, output_file);
     // close output file
     fclose(output_file);
-    // free output buffer buffer
+    // free buffers
+    free(input_buffer.bytes);
     free(output_buffer.bytes);
     // return success depends on last write
     return write_ok;
@@ -221,7 +218,7 @@ main(int argc, char * argv[]) {
         status_code = 0;
     } else if(count_errors > 0) {
         // next, if parser returned any errors, display them then exit
-        arg_print_errors(stdout, end, program_name);
+        arg_print_errors(stderr, end, program_name);
         status_code = 1;
     }
     // if at this point status_code is not -1, clean up then return early
