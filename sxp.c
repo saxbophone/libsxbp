@@ -6,6 +6,12 @@
 
 #include "sxp.h"
 #include "saxbospiral/saxbospiral.h"
+#include "saxbospiral/initialise.h"
+#include "saxbospiral/solve.h"
+#include "saxbospiral/serialise.h"
+#include "saxbospiral/render.h"
+#include "saxbospiral/render_backends/png_backend.h"
+
 
 
 #ifdef __cplusplus
@@ -100,19 +106,86 @@ run(
     bool prepare, bool generate, bool render,
     const char * input_file_path, const char * output_file_path
 ) {
+    printf("RUN\n");
     // get input file handle
     FILE * input_file = get_input_file(input_file_path);
+    // make input buffer
+    buffer_t input_buffer;
+    // make output buffer
+    buffer_t output_buffer;
+    // read input file into buffer
+    bool read_ok = file_to_buffer(input_file, &input_buffer);
+    // close input file
+    fclose(input_file);
+    // if read was unsuccessful, don't continue
+    if(read_ok == false) {
+        fprintf(stderr, "%s\n", "Couldn't read input file");
+        return false;
+    }
     if(prepare) {
-        // we must read in raw file and build spiral from it first
-    } else if(generate) {
-        // we must read in a spiral file and plot all lines
-    } else if(render) {
-        // we must read in a spiral file and render it to image
+        printf("PREPARE\n");
+        // we must build spiral from raw file first
+        spiral_t spiral = init_spiral(input_buffer);
+        if(generate) {
+            printf("GENERATE\n");
+            // now we must plot all lines from spiral file
+            spiral = plot_spiral(spiral);
+        }
+        if(render) {
+            printf("RENDER\n");
+            // we must render an image from spiral
+            bitmap_t image = render_spiral(spiral);
+            printf("WRITE\n");
+            // now write PNG image data to buffer with libpng
+            output_buffer = write_png_image(image);
+        } else {
+            // dump spiral
+            output_buffer = dump_spiral(spiral);
+        }
+    } else if(generate || render) {
+        // try and load a spiral struct from input file
+        spiral_t spiral = load_spiral(input_buffer);
+        // the spiral size will be set to 0 if buffer data was invalid
+        if(spiral.size == 0) {
+            fprintf(
+                stderr, "ERROR - File data was invalid (not a format accepted "
+                "by SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING ")\n"
+            );
+            return false;
+        }
+        if(generate) {
+            printf("GENERATE\n");
+            // now we must plot all lines from spiral
+            spiral = plot_spiral(spiral);
+        }
+        if(render) {
+            printf("RENDER\n");
+            // we must render an image from spiral
+            // FIXME: This call currently throwing a Segfault!
+            bitmap_t image = render_spiral(spiral);
+            printf("WRITE\n");
+            // now write PNG image data to buffer with libpng
+            output_buffer = write_png_image(image);
+        } else {
+            // let's just dump the spiral again
+            output_buffer = dump_spiral(spiral);
+        }
     } else {
         // none of the above. this is an error condition - nothing to be done
         fprintf(stderr, "%s\n", "Nothing to be done!");
         return false;
     }
+    // get output file handle
+    FILE * output_file = get_output_file(output_file_path);
+    // now, write output buffer to file
+    bool write_ok = buffer_to_file(&output_buffer, output_file);
+    // close output file
+    fclose(output_file);
+    // free buffers
+    // free(input_buffer.bytes);
+    // free(output_buffer.bytes);
+    // return success depends on last write
+    return write_ok;
 }
 
 // main - mostly just process arguments, the bulk of the work is done by run()
