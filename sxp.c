@@ -206,7 +206,9 @@ main(int argc, char * argv[]) {
     // check argtable members were allocated successfully
     if(arg_nullcheck(argtable) != 0) {
         // NULL entries were detected, so some allocations failed
-        fprintf(stderr, "%s\n", "Bad Doo-doo!");
+        fprintf(
+            stderr, "%s\n", "FATAL: Could not allocate all entries for argtable"
+        );
         status_code = 2;
     }
     // parse arguments
