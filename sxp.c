@@ -134,7 +134,7 @@ run(
         if(spiral.size == 0) {
             fprintf(
                 stderr, "ERROR - File data was invalid (not a format accepted "
-                "by SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING ")\n"
+                "by SAXBOSPIRAL v" SAXBOSPIRAL_VERSION_STRING ")\n"
             );
             return false;
         }
@@ -149,7 +149,7 @@ run(
         if(spiral.size == 0) {
             fprintf(
                 stderr, "ERROR - File data was invalid (not a format accepted "
-                "by SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING ")\n"
+                "by SAXBOSPIRAL v" SAXBOSPIRAL_VERSION_STRING ")\n"
             );
             return false;
         }
@@ -240,7 +240,7 @@ main(int argc, char * argv[]) {
     int count_errors = arg_parse(argc, argv, argtable);
     // if we asked for the version, show it
     if(version->count > 0) {
-        printf("Saxbospiral " SAXBOSPIRAL_VERSION_STRING "\n");
+        printf("%s %s\n", program_name, SAXBOSPIRAL_VERSION_STRING);
         status_code = 0;
     }
     if(help->count > 0) {

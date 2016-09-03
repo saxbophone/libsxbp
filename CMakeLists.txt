@@ -7,7 +7,7 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
     SAXBOSPIRAL_VERSION_STRING
-    "v${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+    "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
 )
 set(SAXBOSPIRAL_ESCAPED_VERSION_STRING "\"${SAXBOSPIRAL_VERSION_STRING}\"")
 # end basic metadata
@@ -96,11 +96,11 @@ if(COMMAND_INTERPRETER)
     add_test(
         NAME func_test COMMAND ${COMMAND_INTERPRETER}
         # each script needs to know the path to the sxp cli executable
-        "func_test.sh" sxp "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
+        "func_test.sh" sxp "saxbospiral v${SAXBOSPIRAL_VERSION_STRING}"
     )
     add_custom_target(
         build_logo ${COMMAND_INTERPRETER}
-        "build_logo.sh" sxp "saxbospiral.png" "saxbospiral ${SAXBOSPIRAL_VERSION_STRING}"
+        "build_logo.sh" sxp "saxbospiral.png" "saxbospiral v${SAXBOSPIRAL_VERSION_STRING}"
     )
 else()
     # warn about skipping of functional test script
