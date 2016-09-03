@@ -31,24 +31,6 @@ get_file_size(FILE * file_handle) {
 }
 
 /*
- * returns file handle of input file, given a file path string
- * path can be NULL and if it is then it returns stdin
- */
-FILE *
-get_input_file(const char * path) {
-    return (path != NULL) ? fopen(path, "rb") : stdin;
-}
-
-/*
- * returns file handle of output file, given a file path string
- * path can be NULL and if it is then it returns stdout
- */
-FILE *
-get_output_file(const char * path) {
-    return (path != NULL) ? fopen(path, "wb") : stdout;
-}
-
-/*
  * given an open file handle and a buffer, read the file contents into buffer
  * returns true on success and false on failure.
  */
@@ -106,9 +88,12 @@ run(
     bool prepare, bool generate, bool render,
     const char * input_file_path, const char * output_file_path
 ) {
-    printf("RUN\n");
     // get input file handle
-    FILE * input_file = get_input_file(input_file_path);
+    FILE * input_file = fopen(input_file_path, "rb");
+    if(input_file == NULL) {
+        fprintf(stderr, "%s\n", "Couldn't open input file");
+        return false;
+    }
     // make input buffer
     buffer_t input_buffer;
     // make output buffer
@@ -123,28 +108,31 @@ run(
         return false;
     }
     if(prepare) {
-        printf("PREPARE\n");
         // we must build spiral from raw file first
         spiral_t spiral = init_spiral(input_buffer);
+        // free input buffer (TODO: work out why we can't do this at end of func)
+        free(input_buffer.bytes);
         if(generate) {
-            printf("GENERATE\n");
             // now we must plot all lines from spiral file
             spiral = plot_spiral(spiral);
         }
-        if(render) {
-            printf("RENDER\n");
-            // we must render an image from spiral
-            bitmap_t image = render_spiral(spiral);
-            printf("WRITE\n");
-            // now write PNG image data to buffer with libpng
-            output_buffer = write_png_image(image);
-        } else {
-            // dump spiral
-            output_buffer = dump_spiral(spiral);
-        }
-    } else if(generate || render) {
+        // TODO: Currently unable to generate and render all in one invocation
+        // dump spiral
+        output_buffer = dump_spiral(spiral);
+    } else if(generate) {
         // try and load a spiral struct from input file
         spiral_t spiral = load_spiral(input_buffer);
+        // free input buffer (TODO: work out why we can't do this at end of func)
+        free(input_buffer.bytes);
+        // we must plot all lines from spiral file
+        spiral = plot_spiral(spiral);
+        // dump spiral
+        output_buffer = dump_spiral(spiral);
+    } else if(render) {
+        // try and load a spiral struct from input file
+        spiral_t spiral = load_spiral(input_buffer);
+        // free input buffer (TODO: work out why we can't do this at end of func)
+        free(input_buffer.bytes);
         // the spiral size will be set to 0 if buffer data was invalid
         if(spiral.size == 0) {
             fprintf(
@@ -153,37 +141,27 @@ run(
             );
             return false;
         }
-        if(generate) {
-            printf("GENERATE\n");
-            // now we must plot all lines from spiral
-            spiral = plot_spiral(spiral);
-        }
-        if(render) {
-            printf("RENDER\n");
-            // we must render an image from spiral
-            // FIXME: This call currently throwing a Segfault!
-            bitmap_t image = render_spiral(spiral);
-            printf("WRITE\n");
-            // now write PNG image data to buffer with libpng
-            output_buffer = write_png_image(image);
-        } else {
-            // let's just dump the spiral again
-            output_buffer = dump_spiral(spiral);
-        }
+        // we must render an image from spiral
+        bitmap_t image = render_spiral(spiral);
+        // now write PNG image data to buffer with libpng
+        output_buffer = write_png_image(image);
     } else {
         // none of the above. this is an error condition - nothing to be done
         fprintf(stderr, "%s\n", "Nothing to be done!");
         return false;
     }
     // get output file handle
-    FILE * output_file = get_output_file(output_file_path);
+    FILE * output_file = fopen(output_file_path, "wb");
+    if(output_file == NULL) {
+        fprintf(stderr, "%s\n", "Couldn't open output file");
+        return false;
+    }
     // now, write output buffer to file
     bool write_ok = buffer_to_file(&output_buffer, output_file);
     // close output file
     fclose(output_file);
-    // free buffers
-    // free(input_buffer.bytes);
-    // free(output_buffer.bytes);
+    // free output buffer buffer
+    free(output_buffer.bytes);
     // return success depends on last write
     return write_ok;
 }

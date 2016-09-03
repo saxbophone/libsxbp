@@ -17,20 +17,6 @@ size_t
 get_file_size(FILE * file_handle);
 
 /*
- * returns file handle of input file, given a file path string
- * path can be NULL and if it is then it returns stdin
- */
-FILE *
-get_input_file(const char * path);
-
-/*
- * returns file handle of output file, given a file path string
- * path can be NULL and if it is then it returns stdout
- */
-FILE *
-get_output_file(const char * path);
-
-/*
  * given an open file handle and a buffer, read the file contents into buffer
  * returns true on success and false on failure.
  */
