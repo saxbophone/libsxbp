@@ -4,11 +4,19 @@ Experimental generation of 2D spiralling lines based on input binary data
 
 ## Dependencies
 
-You will need:
+### Library
+
+For the library, you will need:
 
 - A compiler that can compile C99 code
 - [Cmake](https://cmake.org/) - v3.0 or newer
 - [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes preinstalled with many modern unix-like systems)
+
+### CLI
+
+For the included CLI program, you will also need:
+
+- [Argtable 2](http://argtable.sourceforge.net/) - must use v2, v1 and v3 will not work
 
 ### Note:
 
