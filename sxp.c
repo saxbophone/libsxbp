@@ -213,14 +213,19 @@ main(int argc, char * argv[]) {
     }
     // parse arguments
     int count_errors = arg_parse(argc,argv,argtable);
+    // if we asked for the version, show it
+    if(version->count > 0) {
+        printf("Saxbospiral " SAXBOSPIRAL_VERSION_STRING "\n");
+        status_code = 0;
+    }
     if(help->count > 0) {
-        // first check if we asked for the help option
+        // check if we asked for the help option
         printf("Usage: %s", program_name);
         arg_print_syntax(stdout, argtable, "\n");
         arg_print_glossary(stdout, argtable, "  %-25s %s\n");
         status_code = 0;
     } else if(count_errors > 0) {
-        // next, if parser returned any errors, display them then exit
+        // if parser returned any errors, display them then exit
         arg_print_errors(stderr, end, program_name);
         status_code = 1;
     }
@@ -230,10 +235,6 @@ main(int argc, char * argv[]) {
         return status_code;
     }
     // otherwise, carry on...
-    // if we asked for the version, show it
-    if(version->count > 0) {
-        printf("Saxbospiral " SAXBOSPIRAL_VERSION_STRING "\n");
-    }
     // now, call run with options from command-line
     bool result = run(
         (prepare->count > 0) ? true : false,
