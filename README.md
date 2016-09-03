@@ -22,10 +22,19 @@ For the included CLI program, you will also need:
 
 These commands are for unix-like systems, without an IDE or other build system besides CMake. If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
 
-## Build
+## Basic Build
 
 ```sh
 cmake .
+make
+```
+
+## Recommended Library Build
+
+Add two custom options to CMake to build the library in release mode (with full optimisation) and as a shared dynamic library:
+
+```sh
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 make
 ```
 
