@@ -75,9 +75,11 @@ spiral_collides(spiral_t spiral, size_t index) {
 }
 
 /*
- * given a spiral struct that is known to collide and the index of the 'last'
- * segment in the spiral (i.e. the one that was found to be colliding), return
- * a suggested length to set the segment before this line to.
+ * given a spiral struct that is known to collide, the index of the 'last'
+ * segment in the spiral (i.e. the one that was found to be colliding) and a
+ * perfection threshold (-1 for no perfection, or otherwise the maximmum line
+ * length at which to allow aggressive optimisation), return a suggested length
+ * to set the segment before this line to.
  *
  * NOTE: This function is not guaranteed to make suggestions that will not
  * collide. Every suggestion that is followed should then have the spiral
@@ -91,21 +93,31 @@ spiral_collides(spiral_t spiral, size_t index) {
  * line before the newly plotted line.
  */
 static length_t
-suggest_resize(spiral_t spiral, size_t index) {
+suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
     // check if collides or not, return same size if no collision
     if(spiral.collides != -1) {
         /*
-         * if the colliding line's length is greater than 1, we cannot make any
-         * intelligent suggestions on the length to extend the previous line to
-         * (without the high likelihood of creating a line that wastes space),
-         * so we just return the previous line's length +1
+         * if the perfection threshold is -1, then we can just use our suggestion,
+         * as perfection is disabled.
+         * otherwise, if the colliding line's length is greater than our
+         * perfection threshold, we cannot make any intelligent suggestions on
+         * the length to extend the previous line to (without the high
+         * likelihood of creating a line that wastes space), so we just return
+         * the previous line's length +1
          */
-        if(spiral.lines[index].length > 1) {
+        if(
+            (perfection_threshold != -1) &&
+            (spiral.lines[index].length > (length_t)perfection_threshold)
+        ) {
             return spiral.lines[index - 1].length + 1;
         }
         // store the 'previous' and 'rigid' lines.
         line_t p = spiral.lines[index - 1];
         line_t r = spiral.lines[spiral.collides];
+        // if pr and r are not parallel, we can return early
+        if((p.direction % 2) != (r.direction % 2)) {
+            return spiral.lines[index - 1].length + 1;
+        }
         // create variables to store the start and end co-ords of these lines
         co_ord_t pa, pb, ra, rb;
         /*
@@ -155,11 +167,15 @@ suggest_resize(spiral_t spiral, size_t index) {
 
 /*
  * given a spiral struct, the index of one of it's lines and a target length to
- * set that line to, attempt to set the target line to that length,
- * back-tracking to resize the previous line if it collides.
+ * set that line to and a perfection threshold (-1 for no perfection, or
+ * otherwise the maximmum line length at which to allow aggressive optimisation)
+ * attempt to set the target line to that length, back-tracking to resize the
+ * previous line if it collides.
  */
 spiral_t
-resize_spiral(spiral_t spiral, size_t index, length_t length) {
+resize_spiral(
+    spiral_t spiral, size_t index, uint32_t length, int perfection_threshold
+) {
     /*
      * setup state variables, these are used in place of recursion for managing
      * state of which line is being resized, and what size it should be.
@@ -185,7 +201,9 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
              * function to get the suggested length to resize the previous
              * segment to
              */
-            current_length = suggest_resize(spiral, current_index);
+            current_length = suggest_resize(
+                spiral, current_index, perfection_threshold
+            );
             current_index--;
         } else if(current_index != index) {
             /*
@@ -206,22 +224,24 @@ resize_spiral(spiral_t spiral, size_t index, length_t length) {
 }
 
 /*
- * given a spiral for which the length of all its lines are not yet known,
- * calculate the length needed for each line in the spiral (to avoid line overlap)
- * and store these in a spiral struct and return that
+ * given a spiral for which the length of all its lines are not yet known and
+ * a perfection threshold (-1 for no perfection, or otherwise the maximmum line
+ * length at which to allow aggressive optimisation) calculate the length needed
+ * for each line in the spiral (to avoid line overlap) and store these in a
+ * spiral struct and return that
  */
 spiral_t
-plot_spiral(spiral_t input) {
+plot_spiral(spiral_t spiral, int perfection_threshold) {
     // allocate new struct as copy of input struct
-    spiral_t output = { .size = input.size, };
+    spiral_t output = { .size = spiral.size, };
     output.lines = calloc(sizeof(line_t), output.size);
     // copy across the spiral lines
     for(size_t i = 0; i < output.size; i++) {
-        output.lines[i] = input.lines[i];
+        output.lines[i] = spiral.lines[i];
     }
     // calculate the length of each line
     for(size_t i = 0; i < output.size; i++) {
-        output = resize_spiral(output, i, 1);
+        output = resize_spiral(output, i, 1, perfection_threshold);
     }
     // free the co_ord_cache member's dynamic memory if required
     if(output.co_ord_cache.co_ords.size > 0) {

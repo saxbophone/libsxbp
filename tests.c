@@ -206,7 +206,7 @@ test_plot_spiral() {
     }
 
     // call init_spiral with buffer and store result
-    spiral_t output = plot_spiral(input);
+    spiral_t output = plot_spiral(input, 1);
 
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
