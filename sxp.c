@@ -186,15 +186,16 @@ main(int argc, char * argv[]) {
     );
     // flag for if we want to render a spiral to imagee
     struct arg_lit * render = arg_lit0(
-        "r", "render", "render the input spiral to an image"
+        "r", "render", "render the input spiral to an image (cannot be used "
+        "with -p or -g options)"
     );
     // input file path option
     struct arg_file * input = arg_file0(
-        "i", "input", "<path>", "input file path (uses stdin if not given)"
+        "i", "input", "<path>", "input file path"
     );
     // output file path option
     struct arg_file * output = arg_file0(
-        "o", "output", "<path>", "output file path (uses stdout if not given)"
+        "o", "output", "<path>", "output file path"
     );
     // argtable boilerplate
     struct arg_end * end = arg_end(20);
