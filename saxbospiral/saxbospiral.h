@@ -22,6 +22,15 @@ typedef struct version_t {
 
 extern const version_t VERSION;
 
+// used for indexing and comparing different versions in order
+typedef uint32_t version_hash_t;
+
+/*
+ * computes a version_hash_t for a given version_t,
+ * to be used for indexing and ordering
+ */
+version_hash_t version_hash(version_t version);
+
 // type for representing a cartesian direction
 typedef uint8_t direction_t;
 
