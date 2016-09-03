@@ -107,7 +107,7 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
          */
         if(
             (perfection_threshold != -1) &&
-            (spiral.lines[index].length > perfection_threshold)
+            (spiral.lines[index].length > (length_t)perfection_threshold)
         ) {
             return spiral.lines[index - 1].length + 1;
         }
