@@ -35,13 +35,20 @@ load_spiral(buffer_t buffer) {
         (strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0)
         && (buffer.size >= FILE_HEADER_SIZE + LINE_T_PACK_SIZE)
     ) {
-        // good to go
-        // TODO: Add checks for buffer data version compatibility
-        /*
-        version_t data_version = {
-            buffer.bytes[12], buffer.bytes[13], buffer.bytes[13],
+        // grab file version from header
+        version_t buffer_version = {
+            .major = buffer.bytes[12],
+            .minor = buffer.bytes[13],
+            .patch = buffer.bytes[14],
         };
-        */
+        // we don't accept anything over v0.11.x, so the max is v0.11.255
+        version_t max_version = { .major = 0, .minor = 11, .patch = 255, };
+        // check for version compatibility
+        if(version_hash(buffer_version) > version_hash(max_version)) {
+            // check failed
+            return output;
+        }
+        // good to go
         // get size of spiral object contained in buffer
         size_t spiral_size = 0;
         for(size_t i = 0; i < 8; i++) {

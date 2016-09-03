@@ -85,7 +85,7 @@ buffer_to_file(buffer_t * buffer, FILE * file_handle) {
  */
 bool
 run(
-    bool prepare, bool generate, bool render,
+    bool prepare, bool generate, bool render, bool perfect, int perfect_threshold,
     const char * input_file_path, const char * output_file_path
 ) {
     // get input file handle
@@ -115,12 +115,14 @@ run(
         fprintf(stderr, "%s\n", "Couldn't read input file");
         return false;
     }
+    // resolve perfection threshold - set to -1 if disabled completely
+    int perfection = (perfect == false) ? -1 : perfect_threshold;
     if(prepare) {
         // we must build spiral from raw file first
         spiral_t spiral = init_spiral(input_buffer);
         if(generate) {
             // now we must plot all lines from spiral file
-            spiral = plot_spiral(spiral);
+            spiral = plot_spiral(spiral, perfection);
         }
         // TODO: Currently unable to generate and render all in one invocation
         // dump spiral
@@ -128,8 +130,16 @@ run(
     } else if(generate) {
         // try and load a spiral struct from input file
         spiral_t spiral = load_spiral(input_buffer);
+        // the spiral size will be set to 0 if buffer data was invalid
+        if(spiral.size == 0) {
+            fprintf(
+                stderr, "ERROR - File data was invalid (not a format accepted "
+                "by SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING ")\n"
+            );
+            return false;
+        }
         // we must plot all lines from spiral file
-        spiral = plot_spiral(spiral);
+        spiral = plot_spiral(spiral, perfection);
         // dump spiral
         output_buffer = dump_spiral(spiral);
     } else if(render) {
@@ -189,18 +199,31 @@ main(int argc, char * argv[]) {
         "r", "render", "render the input spiral to an image (cannot be used "
         "with -p or -g options)"
     );
+    struct arg_lit * perfect = arg_lit0(
+        "D", "disable-perfection", "allow aggressive optimisations to take "
+        "place for a massive speed boost, at the cost of producing spirals that"
+        " are imperfect and waste some space with oversized lines"
+    );
+    struct arg_int * perfect_threshold = arg_int0(
+        "d", "perfection-threshold", NULL, "set a threshold above which length "
+        "lines are not optimised (default value is 1, which still yields "
+        "results)"
+    );
     // input file path option
     struct arg_file * input = arg_file0(
-        "i", "input", "<path>", "input file path"
+        "i", "input", NULL, "input file path"
     );
     // output file path option
     struct arg_file * output = arg_file0(
-        "o", "output", "<path>", "output file path"
+        "o", "output", NULL, "output file path"
     );
     // argtable boilerplate
     struct arg_end * end = arg_end(20);
     void * argtable[] = {
-        help, version, prepare, generate, render, input, output, end,
+        help, version,
+        prepare, generate, render,
+        perfect, perfect_threshold,
+        input, output, end,
     };
     const char * program_name = "sxp";
     // check argtable members were allocated successfully
@@ -211,8 +234,10 @@ main(int argc, char * argv[]) {
         );
         status_code = 2;
     }
+    // set default value of perfect_threshold argument
+    perfect_threshold->ival[0] = 1;
     // parse arguments
-    int count_errors = arg_parse(argc,argv,argtable);
+    int count_errors = arg_parse(argc, argv, argtable);
     // if we asked for the version, show it
     if(version->count > 0) {
         printf("Saxbospiral " SAXBOSPIRAL_VERSION_STRING "\n");
@@ -240,6 +265,8 @@ main(int argc, char * argv[]) {
         (prepare->count > 0) ? true : false,
         (generate->count > 0) ? true : false,
         (render->count > 0) ? true : false,
+        (perfect->count > 0) ? false : true,
+        perfect_threshold->ival[0],
         * input->filename,
         * output->filename
     );
