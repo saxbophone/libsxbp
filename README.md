@@ -22,6 +22,8 @@ For the included CLI program, you will also need:
 
 These commands are for unix-like systems, without an IDE or other build system besides CMake. If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
 
+Additionally, it is of worth noting that this library has only been thoroughly tested and developed on Ubuntu GNU/Linux, although every effort has been made to make it as cross-platform as possible. It should compile under any POSIX-compliant system with the correct additional dependencies listed. **v0.8** is known to successfully cross-compile from Ubuntu to Windows (via [cygwin](https://www.cygwin.com/)) and Max OSX (using a locally-built compiler toolchain provided via [OSXCross](https://github.com/tpoechtrager/osxcross). It is highly likely that all other versions cross-compile as well (but I haven't yet verified this).
+
 ## Basic Build
 
 ```sh
