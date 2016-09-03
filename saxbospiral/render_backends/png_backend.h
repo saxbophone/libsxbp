@@ -1,6 +1,7 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_PNG_BACKEND_H
 #define SAXBOPHONE_SAXBOSPIRAL_PNG_BACKEND_H
 
+#include "../saxbospiral.h"
 #include "../render.h"
 
 
@@ -9,13 +10,11 @@ extern "C"{
 #endif
 
 /*
- * given a file handle and a bitmap_t struct, write the bitmap data as a PNG
- * image to the file, using libpng
- *
- * TODO: Change this to write to a buffer rather than straight to file.
+ * given a bitmap_t struct, create a new buffer and write the bitmap data as a
+ * PNG image to the buffer, using libpng. Returns the written buffer.
  */
-void
-write_png_image(FILE * file_handle, bitmap_t bitmap);
+buffer_t
+write_png_image(bitmap_t bitmap);
 
 #ifdef __cplusplus
 } // extern "C"

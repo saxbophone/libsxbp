@@ -29,9 +29,7 @@
 *.hex
 # Custom named executables
 sxp_test
-sxp_prepare
-sxp_generate
-sxp_render
+sxp
 
 # Debug files
 *.dSYM/
@@ -41,5 +39,6 @@ CMakeCache.txt
 CMakeFiles/
 Testing/
 Makefile
-*.cmake
+cmake_install.cmake
+CTestTestfile.cmake
 install_manifest.txt
