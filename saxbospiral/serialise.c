@@ -41,8 +41,8 @@ load_spiral(buffer_t buffer) {
             .minor = buffer.bytes[13],
             .patch = buffer.bytes[14],
         };
-        // we don't accept anything over v0.11.x, so the max is v0.11.255
-        version_t max_version = { .major = 0, .minor = 11, .patch = 255, };
+        // we don't accept anything over v0.12.x, so the max is v0.12.255
+        version_t max_version = { .major = 0, .minor = 12, .patch = 255, };
         // check for version compatibility
         if(version_hash(buffer_version) > version_hash(max_version)) {
             // check failed
