@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.0)
 enable_language(C CXX)
 
-project(saxbospiral VERSION 0.11.2 LANGUAGES C)
+project(saxbospiral VERSION 0.11.3 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
