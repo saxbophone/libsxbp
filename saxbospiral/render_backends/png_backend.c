@@ -82,7 +82,7 @@ write_png_image(bitmap_t bitmap) {
     metadata[2].text = "Copyright Joshua Saxby";
     metadata[3].key = "Software";
     // SAXBOSPIRAL_VERSION_STRING is a macro that expands to a double-quoted string
-    metadata[3].text = "SAXBOSPIRAL " SAXBOSPIRAL_VERSION_STRING;
+    metadata[3].text = "SAXBOSPIRAL v" SAXBOSPIRAL_VERSION_STRING;
     metadata[4].key = "Comment";
     metadata[4].text = "https://github.com/saxbophone/saxbospiral";
     // set compression of each metadata key
