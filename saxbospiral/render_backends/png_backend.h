@@ -10,11 +10,13 @@ extern "C"{
 #endif
 
 /*
- * given a bitmap_t struct, create a new buffer and write the bitmap data as a
- * PNG image to the buffer, using libpng. Returns the written buffer.
+ * given a bitmap_t struct and a pointer to a buffer_t, write the bitmap data as
+ * a PNG image to the buffer, using libpng.
+ * TODO: Check if the return type of this can be void, or if we should return
+ * something else as a status report.
  */
-buffer_t
-write_png_image(bitmap_t bitmap);
+void
+write_png_image(bitmap_t bitmap, buffer_t * buffer);
 
 #ifdef __cplusplus
 } // extern "C"

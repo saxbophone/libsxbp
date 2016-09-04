@@ -15,15 +15,22 @@ extern const size_t FILE_HEADER_SIZE;
 extern const size_t LINE_T_PACK_SIZE;
 
 /*
- * given a buffer, return a spiral represented by the data in the struct
- * returns a spiral of length 0 if the data could not be interpreted correctly
+ * given a buffer and a pointer to a blank spiral_t, create a spiral represented
+ * by the data in the struct and write to the spiral
+ * TODO: Check if the return type of this can be void, or if we should return
+ * something else as a status report.
  */
-spiral_t
-load_spiral(buffer_t buffer);
+void
+load_spiral(buffer_t buffer, spiral_t * spiral);
 
-// given a spiral, return a buffer of the raw bytes used to represent and store it
-buffer_t
-dump_spiral(spiral_t spiral);
+/*
+ * given a spiral_t struct and a pointer to a blank buffer_t, serialise a binary
+ * representation of the spiral and write this to the data buffer pointer
+ * TODO: Check if the return type of this can be void, or if we should return
+ * something else as a status report.
+ */
+void
+dump_spiral(spiral_t spiral, buffer_t * buffer);
 
 #ifdef __cplusplus
 } // extern "C"
