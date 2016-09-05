@@ -20,11 +20,14 @@ const size_t FILE_HEADER_SIZE = 25;
 const size_t LINE_T_PACK_SIZE = 4;
 
 /*
- * given a buffer, return a spiral represented by the data in the struct
- * returns a spiral of length 0 if the data could not be interpreted correctly
+ * given a buffer and a pointer to a blank spiral_t, create a spiral represented
+ * by the data in the struct and write to the spiral
+ * returns a serialise_result_t struct, which will contain information about
+ * whether the operation was successful or not and information about what went
+ * wrong if it was not successful
  */
-spiral_t
-load_spiral(buffer_t buffer) {
+serialise_result_t
+load_spiral(buffer_t buffer, spiral_t * spiral) {
     // create initial output spiral, a spiral of length 0 (shows failure)
     spiral_t output = { .size = 0, };
     /*
@@ -92,9 +95,15 @@ load_spiral(buffer_t buffer) {
     return output;
 }
 
-// given a spiral, return a buffer of the raw bytes used to represent and store it
-buffer_t
-dump_spiral(spiral_t spiral) {
+/*
+ * given a spiral_t struct and a pointer to a blank buffer_t, serialise a binary
+ * representation of the spiral and write this to the data buffer pointer
+ * returns a serialise_result_t struct, which will contain information about
+ * whether the operation was successful or not and information about what went
+ * wrong if it was not successful
+ */
+serialise_result_t
+dump_spiral(spiral_t spiral, buffer_t * buffer) {
     // build output buffer struct, base size on header + spiral size
     buffer_t output = {
         .size = (FILE_HEADER_SIZE + (LINE_T_PACK_SIZE * spiral.size)),
