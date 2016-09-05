@@ -37,12 +37,7 @@ spiral_collides(spiral_t spiral, size_t index) {
     } else {
         // initialise a counter to keep track of what line we're on
         int64_t line_count = 0;
-        // TODO: Check that the ttl needs to be length+1 and not just length
         int64_t ttl = spiral.lines[line_count].length + 1; // ttl of line
-        /*
-         * TODO: Make the loop ignore the two lines before the latest.
-         * These can NEVER collide with it and this will improve performance.
-         */
         size_t last_co_ord = spiral.co_ord_cache.co_ords.size;
         line_t last_line = spiral.lines[index];
         size_t start_of_last_line = (last_co_ord - last_line.length) - 1;
@@ -68,6 +63,14 @@ spiral_collides(spiral_t spiral, size_t index) {
             if(ttl == 0) {
                 line_count++;
                 ttl = spiral.lines[line_count].length;
+            }
+            /*
+             * terminate the loop if the next line would be the line 2 lines
+             * before the last one (these two lines can never collide with the
+             * last and can be safely ignored, for a small performance increase)
+             */
+            if(line_count == (spiral.size - 2 - 1)) { // -1 for zero-index
+                break;
             }
         }
         return -1;
