@@ -31,29 +31,31 @@ typedef uint32_t version_hash_t;
  */
 version_hash_t version_hash(version_t version);
 
-/*
- * handy short-hand for debugging purposes
- * usage: debug_t debug = DEBUG;
- */
-#define DEBUG { .line = __LINE__, .file = __FILE__, .function = __func__, }
-
 // struct for storing the location of a DEBUG invocation
 typedef struct debug_t {
     size_t line;
     char * file;
-    char * function;
+    const char * function;
 } debug_t;
+
+/*
+ * handy short-hand for debugging purposes
+ * usage: debug_t debug = DEBUG;
+ */
+#define DEBUG (debug_t) { .line = __LINE__, .file = __FILE__, .function = __func__, }
 
 // enum for function error information
 typedef enum diagnostic_t {
-    OPERATION_OK, // no problem
+    STATE_UNKNOWN = 0, // unknown, the default state
+    OPERATION_FAIL, // generic failure state
     MALLOC_REFUSED, // memory allocation or re-allocation was refused
     IMPOSSIBLE_CONDITION, // condition thought to be impossible detected
+    OPERATION_OK, // no problem
 } diagnostic_t;
 
 // struct for storing generic diagnostics about function failure reasons
 typedef struct status_t {
-    debug_t breakpoint; // for storing location of error
+    debug_t location; // for storing location of error
     diagnostic_t diagnostic; // for storing error information (if any) 
 } status_t;
 
