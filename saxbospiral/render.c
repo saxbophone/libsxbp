@@ -17,11 +17,14 @@ extern "C"{
 #endif
 
 /*
- * given a spiral struct with co-ords in it's cache, find and return the co-ords
- * for the corners of the square needed to contain the points.
+ * given a spiral struct with co-ords in it's cache and a pointer to a
+ * 2-item-long array of type co_ord_t, find and store the co-ords for the
+ * corners of the square needed to contain the points.
+ * NOTE: This should NEVER be called with a pointer to anything other than a
+ * 2-item struct of type co_ord_t
  */
-static co_ord_array_t
-get_bounds(spiral_t spiral) {
+void
+get_bounds(spiral_t spiral, co_ord_t * bounds) {
     tuple_item_t min_x = 0;
     tuple_item_t min_y = 0;
     tuple_item_t max_x = 0;
@@ -40,17 +43,11 @@ get_bounds(spiral_t spiral) {
             max_y = spiral.co_ord_cache.co_ords.items[i].y;
         }
     }
-    // initialise output struct
-    co_ord_array_t bounds = {
-        .size = 2,
-        .items = calloc(sizeof(co_ord_t), 2),
-    };
     // write bounds to struct
-    bounds.items[0].x = min_x;
-    bounds.items[0].y = min_y;
-    bounds.items[1].x = max_x;
-    bounds.items[1].y = max_y;
-    return bounds;
+    bounds[0].x = min_x;
+    bounds[0].y = min_y;
+    bounds[1].x = max_x;
+    bounds[1].y = max_y;
 }
 
 /*
@@ -62,11 +59,12 @@ render_spiral(spiral_t spiral) {
     // plot co-ords of spiral into it's cache
     cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
-    co_ord_array_t bounds = get_bounds(spiral);
+    co_ord_t bounds[2];
+    get_bounds(spiral, bounds);
     // get the normalisation vector needed to make all values unsigned
     tuple_t normalisation_vector = {
-        .x = -bounds.items[0].x,
-        .y = -bounds.items[0].y,
+        .x = -bounds[0].x,
+        .y = -bounds[0].y,
     };
     // get co-ords of top left and bottom right corners, as unsigned
     co_ord_t top_left = {
@@ -74,11 +72,9 @@ render_spiral(spiral_t spiral) {
         .y = 0,
     };
     co_ord_t bottom_right = {
-        .x = bounds.items[1].x + normalisation_vector.x,
-        .y = bounds.items[1].y + normalisation_vector.y,
+        .x = bounds[1].x + normalisation_vector.x,
+        .y = bounds[1].y + normalisation_vector.y,
     };
-    // free memory allocated for bounds.items, as we no longer need it
-    free(bounds.items);
     // initialise output bitmap - image dimensions are twice the size + 1
     bitmap_t output = {
         .width = ((bottom_right.x + 1) * 2) + 1,
