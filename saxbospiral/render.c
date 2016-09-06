@@ -51,11 +51,14 @@ get_bounds(spiral_t spiral, co_ord_t * bounds) {
 }
 
 /*
- * given a spiral struct, returns a bitmap_t representing a monochromatic image
- * of the rendered spiral
+ * given a spiral struct and a pointer to a blank bitmap_t struct, writes data
+ * representing a monochromatic image of the rendered spiral to the bitmap
+ * returns a status struct with error information (if any)
  */
-bitmap_t
-render_spiral(spiral_t spiral) {
+status_t
+render_spiral(spiral_t spiral, bitmap_t * image) {
+    // create result status struct
+    status_t result;
     // plot co-ords of spiral into it's cache
     cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
@@ -75,15 +78,29 @@ render_spiral(spiral_t spiral) {
         .x = bounds[1].x + normalisation_vector.x,
         .y = bounds[1].y + normalisation_vector.y,
     };
-    // initialise output bitmap - image dimensions are twice the size + 1
-    bitmap_t output = {
-        .width = ((bottom_right.x + 1) * 2) + 1,
-        .height = ((bottom_right.y + 1) * 2) + 1,
-    };
-    // allocate dynamic memory - 2D array of bools
-    output.pixels = malloc(output.width * sizeof(bool*));
-    for(size_t i = 0; i < output.width; i++) {
-        output.pixels[i] = calloc(output.height, sizeof(bool));
+    // initialise image struct - image dimensions are twice the size + 1
+    image->width = ((bottom_right.x + 1) * 2) + 1;
+    image->height = ((bottom_right.y + 1) * 2) + 1;
+    // allocate dynamic memory to image struct - 2D array of bools
+    image->pixels = malloc(image->width * sizeof(bool*));
+    // check for malloc fail
+    if(image->pixels == NULL) {
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        return result;
+    }
+    for(size_t i = 0; i < image->width; i++) {
+        image->pixels[i] = calloc(image->height, sizeof(bool));
+        // check for malloc fail
+        if(image->pixels[i] == NULL) {
+            // we need to free() all previous rows
+            for(size_t j = i; j > 0; j--) {
+                free(image->pixels[j]);
+            }
+            result.location = DEBUG;
+            result.diagnostic = MALLOC_REFUSED;
+            return result;
+        }
     }
     // set 'current point' co-ordinate
     co_ord_t current = {
@@ -102,7 +119,7 @@ render_spiral(spiral_t spiral) {
             // skip the second pixel of the first line
             if(!((i == 0) && (j == 1))) {
                 // flip the y-axis otherwise they appear vertically mirrored
-                output.pixels[x_pos][output.height - 1 - y_pos] = true;
+                image->pixels[x_pos][image->height - 1 - y_pos] = true;
             }
             if(j != (spiral.lines[i].length * 2)) {
                 // if we're not on the last line, advance the marker along
@@ -111,7 +128,9 @@ render_spiral(spiral_t spiral) {
             }
         }
     }
-    return output;
+    // status ok
+    result.diagnostic = OPERATION_OK;
+    return result;
 }
 
 #ifdef __cplusplus

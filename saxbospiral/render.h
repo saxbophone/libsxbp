@@ -25,10 +25,9 @@ typedef struct bitmap_t {
 /*
  * given a spiral struct and a pointer to a blank bitmap_t struct, writes data
  * representing a monochromatic image of the rendered spiral to the bitmap
- * TODO: Check if the return type of this can be void, or if we should return
- * something else as a status report.
+ * returns a status struct with error information (if any)
  */
-void
+status_t
 render_spiral(spiral_t spiral, bitmap_t * image);
 
 #ifdef __cplusplus
