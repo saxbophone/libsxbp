@@ -10,12 +10,11 @@ extern "C"{
 #endif
 
 /*
- * given a bitmap_t struct and a pointer to a buffer_t, write the bitmap data as
- * a PNG image to the buffer, using libpng.
- * TODO: Check if the return type of this can be void, or if we should return
- * something else as a status report.
+ * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
+ * data as a PNG image to the buffer, using libpng.
+ * returns a status struct containing error information, if any
  */
-void
+status_t
 write_png_image(bitmap_t bitmap, buffer_t * buffer);
 
 #ifdef __cplusplus
