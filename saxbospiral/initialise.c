@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "saxbospiral.h"
 #include "initialise.h"
 
 
@@ -18,25 +19,33 @@ change_direction(direction_t current, rotation_t turn) {
 }
 
 /*
- * initialises a spiral_t struct from an array pointer to unsigned bytes
+ * given a buffer_t full of data, and a pointer to a blank spiral_t
+ * struct, populates the spiral struct from the data in the buffer
  * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
  * instructions which are then used to build the pattern.
+ * returns a status_t struct with error information (if needed)
  */
-spiral_t
-init_spiral(buffer_t buffer) {
+status_t
+init_spiral(buffer_t buffer, spiral_t * spiral) {
+    // result status object
+    status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line
     size_t line_count = (buffer.size * 8) + 1;
-    // create spiral_t struct
-    spiral_t result = {
-        .size = line_count,
-        .collides = -1,
-        // allocate enough memory for a line_t struct for each bit
-        .lines = calloc(sizeof(line_t), line_count),
-    };
+    // populate spiral struct
+    spiral->size = line_count;
+    spiral->collides = -1;
+    // allocate enough memory for a line_t struct for each bit
+    spiral->lines = calloc(sizeof(line_t), line_count);
+    // check for memory allocation failure
+    if(spiral->lines == NULL) {
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        return result;
+    }
     // First line is always an UP line - this is for orientation purposes
     direction_t current = UP;
-    result.lines[0].direction = current;
-    result.lines[0].length = 0;
+    spiral->lines[0].direction = current;
+    spiral->lines[0].length = 0;
     /*
      * now, iterate over all the bits in the data and convert to directions
      * that make the spiral pattern, storing these directions in the result lines
@@ -54,11 +63,13 @@ init_spiral(buffer_t buffer) {
             // calculate the change of direction
             current = change_direction(current, rotation);
             // store direction in result struct
-            result.lines[index].direction = current;
+            spiral->lines[index].direction = current;
             // set length to 0 initially
-            result.lines[index].length = 0;
+            spiral->lines[index].length = 0;
         }
     }
+    // all ok
+    result.diagnostic = OPERATION_OK;
     return result;
 }
 

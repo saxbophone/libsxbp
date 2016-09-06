@@ -20,10 +20,9 @@ change_direction(direction_t current, rotation_t turn);
  * struct, populates the spiral struct from the data in the buffer
  * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
  * instructions which are then used to build the pattern.
- * TODO: Check if the return type of this can be void, or if we should return
- * something else as a status report.
+ * returns a status_t struct with error information (if needed)
  */
-void
+status_t
 init_spiral(buffer_t buffer, spiral_t * spiral);
 
 #ifdef __cplusplus
