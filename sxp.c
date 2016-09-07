@@ -95,9 +95,9 @@ run(
         return false;
     }
     // make input buffer
-    buffer_t input_buffer = {.size = 0, .bytes = NULL};
+    buffer_t input_buffer = {};
     // make output buffer
-    buffer_t output_buffer = {.size = 0, .bytes = NULL};
+    buffer_t output_buffer = {};
     // read input file into buffer
     bool read_ok = file_to_buffer(input_file, &input_buffer);
     // used later for telling if write of output file was success
@@ -119,6 +119,33 @@ run(
     spiral_t spiral = {};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
+
+    //// TODO: Get this version of the program working, as this is ideal
+
+    // if(prepare) {
+    //     // we must build spiral from raw file first
+    //     init_spiral(input_buffer, &spiral);
+    // } else {
+    //     // otherwise, we must load spiral from file
+    //     load_spiral(input_buffer, &spiral);
+    // }
+    // if(generate) {
+    //     // we must plot all lines from spiral file
+    //     spiral = plot_spiral(spiral, perfection);
+    // }
+    // if(render) {
+    //     // we must render an image from spiral
+    //     bitmap_t image = {};
+    //     render_spiral(spiral, &image);
+    //     // now write PNG image data to buffer with libpng
+    //     write_png_image(image, &output_buffer);
+    // } else {
+    //     // otherwise, we must simply dump the spiral as-is
+    //     dump_spiral(spiral, &output_buffer);
+    // }
+
+    //// NOTE: End Ideal version of the program
+
     if(prepare) {
         // we must build spiral from raw file first
         init_spiral(input_buffer, &spiral);
@@ -126,7 +153,6 @@ run(
             // now we must plot all lines from spiral file
             spiral = plot_spiral(spiral, perfection);
         }
-        // TODO: Currently unable to generate and render all in one invocation
         // dump spiral
         dump_spiral(spiral, &output_buffer);
     } else if(generate) {
@@ -179,7 +205,7 @@ main(int argc, char * argv[]) {
     // flag for if we want to generate the solution for a spiral's line lengths
     struct arg_lit * generate = arg_lit0(
         "g", "generate",
-        "generate the correct lengths of all the lines in the input spiral"
+        "generate the correct lengths of all the lines in the spiral"
     );
     // flag for if we want to render a spiral to imagee
     struct arg_lit * render = arg_lit0(
