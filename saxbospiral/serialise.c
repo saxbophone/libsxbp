@@ -37,7 +37,7 @@ load_spiral(buffer_t buffer, spiral_t * spiral) {
         return result;
     }
     // check for magic number and return early if not right
-    if(strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) == 0) {
+    if(strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) != 0) {
         result.status.location = DEBUG; // catch location of error
         result.status.diagnostic = OPERATION_FAIL; // flag failure
         result.diagnostic = DESERIALISE_BAD_MAGIC_NUMBER; // failure reason
