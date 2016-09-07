@@ -232,6 +232,7 @@ resize_spiral(
  * length at which to allow aggressive optimisation) calculate the length needed
  * for each line in the spiral (to avoid line overlap) and store these in a
  * spiral struct and return that
+ * TODO: Refactor to take a pointer to a spiral and not a spiral, and not return
  */
 spiral_t
 plot_spiral(spiral_t spiral, int perfection_threshold) {
