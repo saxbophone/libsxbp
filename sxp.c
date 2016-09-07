@@ -115,11 +115,12 @@ run(
         fprintf(stderr, "%s\n", "Couldn't read input file");
         return false;
     }
+    // create initial blank spiral struct
+    spiral_t spiral = {};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
     if(prepare) {
         // we must build spiral from raw file first
-        spiral_t spiral;
         init_spiral(input_buffer, &spiral);
         if(generate) {
             // now we must plot all lines from spiral file
@@ -130,7 +131,6 @@ run(
         dump_spiral(spiral, &output_buffer);
     } else if(generate) {
         // try and load a spiral struct from input file
-        spiral_t spiral;
         load_spiral(input_buffer, &spiral);
         // we must plot all lines from spiral file
         spiral = plot_spiral(spiral, perfection);
@@ -138,7 +138,6 @@ run(
         dump_spiral(spiral, &output_buffer);
     } else if(render) {
         // try and load a spiral struct from input file
-        spiral_t spiral;
         load_spiral(input_buffer, &spiral);
         // we must render an image from spiral
         bitmap_t image;
