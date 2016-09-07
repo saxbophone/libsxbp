@@ -5,7 +5,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "saxbospiral.h"
@@ -60,10 +59,6 @@ status_t
 render_spiral(spiral_t spiral, bitmap_t * image) {
     // create result status struct
     status_t result;
-    printf("GOOD\n");
-    free(spiral.co_ord_cache.co_ords.items);
-    spiral.co_ord_cache.co_ords.size = 0;
-    spiral.co_ord_cache.validity = 0;
     // plot co-ords of spiral into it's cache
     cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
