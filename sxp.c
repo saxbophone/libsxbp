@@ -119,17 +119,19 @@ run(
     int perfection = (perfect == false) ? -1 : perfect_threshold;
     if(prepare) {
         // we must build spiral from raw file first
-        spiral_t spiral = init_spiral(input_buffer);
+        spiral_t spiral;
+        init_spiral(input_buffer, &spiral);
         if(generate) {
             // now we must plot all lines from spiral file
             spiral = plot_spiral(spiral, perfection);
         }
         // TODO: Currently unable to generate and render all in one invocation
         // dump spiral
-        output_buffer = dump_spiral(spiral);
+        dump_spiral(spiral, &output_buffer);
     } else if(generate) {
         // try and load a spiral struct from input file
-        spiral_t spiral = load_spiral(input_buffer);
+        spiral_t spiral;
+        load_spiral(input_buffer, &spiral);
         // the spiral size will be set to 0 if buffer data was invalid
         if(spiral.size == 0) {
             fprintf(
@@ -141,10 +143,11 @@ run(
         // we must plot all lines from spiral file
         spiral = plot_spiral(spiral, perfection);
         // dump spiral
-        output_buffer = dump_spiral(spiral);
+        dump_spiral(spiral, &output_buffer);
     } else if(render) {
         // try and load a spiral struct from input file
-        spiral_t spiral = load_spiral(input_buffer);
+        spiral_t spiral;
+        load_spiral(input_buffer, &spiral);
         // the spiral size will be set to 0 if buffer data was invalid
         if(spiral.size == 0) {
             fprintf(
@@ -154,9 +157,10 @@ run(
             return false;
         }
         // we must render an image from spiral
-        bitmap_t image = render_spiral(spiral);
+        bitmap_t image;
+        render_spiral(spiral, &image);
         // now write PNG image data to buffer with libpng
-        output_buffer = write_png_image(image);
+        write_png_image(image, &output_buffer);
     } else {
         // none of the above. this is an error condition - nothing to be done
         fprintf(stderr, "%s\n", "Nothing to be done!");
