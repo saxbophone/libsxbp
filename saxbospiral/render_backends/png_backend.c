@@ -37,31 +37,51 @@ buffer_write_data(png_structp png_ptr, png_bytep data, png_size_t length) {
 // dummy function for unecessary flush function
 void dummy_png_flush(png_structp png_ptr) {}
 
+// simple libpng cleanup function - used mainly for freeing memory
+void
+cleanup_png_lib(png_structp png_ptr, png_infop info_ptr, png_bytep row) {
+    if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+    if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+    if (row != NULL) free(row);
+}
+
 /*
- * given a bitmap_t struct, create a new buffer and write the bitmap data as a
- * PNG image to the buffer, using libpng. Returns the written buffer.
+ * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
+ * data as a PNG image to the buffer, using libpng.
+ * returns a status struct containing error information, if any
  */
-buffer_t
-write_png_image(bitmap_t bitmap) {
+status_t
+write_png_image(bitmap_t bitmap, buffer_t * buffer) {
+    // result status
+    status_t result;
     // init buffer
-    buffer_t buffer = { .size = 0, };
+    buffer->size = 0;
     // init libpng stuff
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
     png_bytep row = NULL;
-    //
+    // allocate libpng memory
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    // catch malloc fail
     if (png_ptr == NULL) {
-      fprintf(stderr, "Could not allocate write struct\n");
-      png_error(png_ptr, "Write Error");
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        // cleanup
+        cleanup_png_lib(png_ptr, info_ptr, row);
+        return result;
     }
+    // allocate libpng memory
     info_ptr = png_create_info_struct(png_ptr);
+    // catch malloc fail
     if (info_ptr == NULL) {
-      fprintf(stderr, "Could not allocate info struct\n");
-      png_error(png_ptr, "Write Error");
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        // cleanup
+        cleanup_png_lib(png_ptr, info_ptr, row);
+        return result;
     }
     // set PNG write function - in this case, a function that writes to buffer
-    png_set_write_fn(png_ptr, &buffer, buffer_write_data, dummy_png_flush);
+    png_set_write_fn(png_ptr, buffer, buffer_write_data, dummy_png_flush);
     // Write header - specify a 1-bit grayscale image with adam7 interlacing
     png_set_IHDR(
         png_ptr, info_ptr, bitmap.width, bitmap.height,
@@ -98,6 +118,14 @@ write_png_image(bitmap_t bitmap) {
     png_set_packing(png_ptr);
     // Allocate memory for one row (1 byte per pixel - RGB)
     row = (png_bytep) malloc(bitmap.width * sizeof(png_byte));
+    // catch malloc fail
+    if(row == NULL) {
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        // cleanup
+        cleanup_png_lib(png_ptr, info_ptr, row);
+        return result;
+    }
     // Write image data
     for (size_t y = 0 ; y < bitmap.height; y++) {
        for (size_t x = 0; x < bitmap.width; x++) {
@@ -109,10 +137,10 @@ write_png_image(bitmap_t bitmap) {
     // End write
     png_write_end(png_ptr, NULL);
     // cleanup
-    if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
-    if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
-    if (row != NULL) free(row);
-    return buffer;
+    cleanup_png_lib(png_ptr, info_ptr, row);
+    // status ok
+    result.diagnostic = OPERATION_OK;
+    return result;
 }
 
 #ifdef __cplusplus

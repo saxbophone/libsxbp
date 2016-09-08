@@ -16,12 +16,14 @@ direction_t
 change_direction(direction_t current, rotation_t turn);
 
 /*
- * initialises a spiral_t struct from an array pointer to unsigned bytes
+ * given a buffer_t full of data, and a pointer to a blank spiral_t
+ * struct, populates the spiral struct from the data in the buffer
  * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
  * instructions which are then used to build the pattern.
+ * returns a status_t struct with error information (if needed)
  */
-spiral_t
-init_spiral(buffer_t buffer);
+status_t
+init_spiral(buffer_t buffer, spiral_t * spiral);
 
 #ifdef __cplusplus
 } // extern "C"

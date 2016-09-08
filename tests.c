@@ -48,8 +48,9 @@ test_init_spiral() {
         expected.lines[i].direction = directions[i];
     }
 
-    // call init_spiral with buffer and store result
-    spiral_t output = init_spiral(buffer);
+    // call init_spiral with buffer and write to blank spiral
+    spiral_t output;
+    init_spiral(buffer, &output);
 
     if(output.size != expected.size) {
         result = false;
@@ -103,8 +104,10 @@ test_spiral_points() {
         {  3,  3, }, {  3,  4, }, {  2,  4, }
     };
 
+    // create struct for results
+    co_ord_array_t results = {};
     // call spiral_points on struct with start point and maximum limit
-    co_ord_array_t results = spiral_points(input, expected[0], 0, 16);
+    spiral_points(input, &results, expected[0], 0, 16);
 
     // validate data
     if(results.size != 23) {
@@ -187,9 +190,9 @@ test_plot_spiral() {
     // success / failure variable
     bool result = true;
     // build input and output structs
-    spiral_t input = { .size = 16, };
+    spiral_t spiral = { .size = 16, };
     spiral_t expected = { .size = 16, };
-    input.lines = calloc(sizeof(line_t), 16);
+    spiral.lines = calloc(sizeof(line_t), 16);
     expected.lines = calloc(sizeof(line_t), 16);
     direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
@@ -199,26 +202,25 @@ test_plot_spiral() {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(uint8_t i = 0; i < 16; i++) {
-        input.lines[i].direction = directions[i];
-        input.lines[i].length = 0;
+        spiral.lines[i].direction = directions[i];
+        spiral.lines[i].length = 0;
         expected.lines[i].direction = directions[i];
         expected.lines[i].length = lengths[i];
     }
 
-    // call init_spiral with buffer and store result
-    spiral_t output = plot_spiral(input, 1);
+    // call plot_spiral on spiral
+    plot_spiral(&spiral, 1);
 
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
-        if(output.lines[i].length != expected.lines[i].length) {
-            printf("%i != %i\n", output.lines[i].length, expected.lines[i].length);
+        if(spiral.lines[i].length != expected.lines[i].length) {
+            printf("%i != %i\n", spiral.lines[i].length, expected.lines[i].length);
             result = false;
         }
     }
 
     // free memory
-    free(input.lines);
-    free(output.lines);
+    free(spiral.lines);
     free(expected.lines);
 
     return result;
@@ -275,8 +277,9 @@ test_load_spiral() {
         expected.lines[i].length = lengths[i];
     }
 
-    // call load_spiral with buffer and store result
-    spiral_t output = load_spiral(buffer);
+    // call load_spiral with buffer and write to output spiral
+    spiral_t output;
+    load_spiral(buffer, &output);
 
     if(output.size != expected.size) {
         result = false; 
@@ -309,10 +312,14 @@ test_load_spiral_rejects_missing_magic_number() {
     // construct data header
     buffer.bytes = (uint8_t *)"not the header you were looking for";
 
-    // call load_spiral with buffer and store result
-    spiral_t output = load_spiral(buffer);
+    // call load_spiral with buffer and blank spiral, store result
+    spiral_t output;
+    serialise_result_t serialise_result = load_spiral(buffer, &output);
 
-    if(output.size != 0) {
+    if(
+        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
+        (serialise_result.diagnostic != DESERIALISE_BAD_MAGIC_NUMBER)
+    ) {
         result = false;
     }
 
@@ -329,10 +336,14 @@ test_load_spiral_rejects_too_small_for_header() {
     // construct data header
     buffer.bytes = (uint8_t *)"SAXBOSPIRAL";
 
-    // call load_spiral with buffer and store result
-    spiral_t output = load_spiral(buffer);
+    // call load_spiral with buffer and blank spiral, store result
+    spiral_t output;
+    serialise_result_t serialise_result = load_spiral(buffer, &output);
 
-    if(output.size != 0) {
+    if(
+        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
+        (serialise_result.diagnostic != DESERIALISE_BAD_HEADER_SIZE)
+    ) {
         result = false;
     }
 
@@ -363,10 +374,14 @@ test_load_spiral_rejects_too_small_data_section() {
     for(size_t i = 0; i < 16; i++) {
         buffer.bytes[i+25] = data[i];
     }
-    // call load_spiral with buffer and store result
-    spiral_t output = load_spiral(buffer);
+    // call load_spiral with buffer and blank spiral, store result
+    spiral_t output;
+    serialise_result_t serialise_result = load_spiral(buffer, &output);
 
-    if(output.size != 0) {
+    if(
+        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
+        (serialise_result.diagnostic != DESERIALISE_BAD_DATA_SIZE)
+    ) {
         result = false;
     }
 
@@ -424,8 +439,9 @@ test_dump_spiral() {
         expected.bytes[i+25] = data[i];
     }
 
-    // call dump_spiral with spiral and store result
-    buffer_t output = dump_spiral(input);
+    // call dump_spiral with spiral and write to output buffer
+    buffer_t output;
+    dump_spiral(input, &output);
 
     if(output.size != expected.size) {
         result = false;
