@@ -239,11 +239,6 @@ plot_spiral(spiral_t * spiral, int perfection_threshold) {
     for(size_t i = 0; i < spiral->size; i++) {
         resize_spiral(spiral, i, 1, perfection_threshold);
     }
-    // free the co_ord_cache member's dynamic memory if required
-    if(spiral->co_ord_cache.co_ords.size > 0) {
-        free(spiral->co_ord_cache.co_ords.items);
-        spiral->co_ord_cache.co_ords.size = 0;
-    }
 }
 
 #ifdef __cplusplus
