@@ -167,32 +167,26 @@ main(int argc, char * argv[]) {
     // show help
     struct arg_lit * help = arg_lit0("h","help", "show this help and exit");
     // show version
-    struct arg_lit * version = arg_lit0("v", "version", "show version");
+    struct arg_lit * version = arg_lit0("v", "version", "show version and exit");
     // flag for if we want to prepare a spiral
     struct arg_lit * prepare = arg_lit0(
         "p", "prepare",
-        "prepare a spiral with directions attained from processing the binary "
-        "data from the input file"
+        "prepare a spiral from raw binary data"
     );
     // flag for if we want to generate the solution for a spiral's line lengths
     struct arg_lit * generate = arg_lit0(
         "g", "generate",
-        "generate the correct lengths of all the lines in the spiral"
+        "generate the lengths of a spiral's lines"
     );
     // flag for if we want to render a spiral to imagee
     struct arg_lit * render = arg_lit0(
-        "r", "render", "render the input spiral to an image (cannot be used "
-        "with -p or -g options)"
+        "r", "render", "render a spiral to an image"
     );
     struct arg_lit * perfect = arg_lit0(
-        "D", "disable-perfection", "allow aggressive optimisations to take "
-        "place for a massive speed boost, at the cost of producing spirals that"
-        " are imperfect and waste some space with oversized lines"
+        "D", "disable-perfection", "allow unlimited optimisations"
     );
     struct arg_int * perfect_threshold = arg_int0(
-        "d", "perfection-threshold", NULL, "set a threshold above which length "
-        "lines are not optimised (default value is 1, which still yields "
-        "results)"
+        "d", "perfection-threshold", NULL, "set optimisation threshold"
     );
     // input file path option
     struct arg_file * input = arg_file0(
@@ -228,16 +222,20 @@ main(int argc, char * argv[]) {
         printf("%s %s\n", program_name, SAXBOSPIRAL_VERSION_STRING);
         status_code = 0;
     }
+    // if parser returned any errors, display them and set return code to 1
+    if(count_errors > 0) {
+        arg_print_errors(stderr, end, program_name);
+        status_code = 1;
+    }
+    // set return code to 0 if we asked for help
     if(help->count > 0) {
-        // check if we asked for the help option
+        status_code = 0;
+    }
+    // display usage information if we asked for help or got arguments wrong
+    if((count_errors > 0) || (help->count > 0)) {
         printf("Usage: %s", program_name);
         arg_print_syntax(stdout, argtable, "\n");
         arg_print_glossary(stdout, argtable, "  %-25s %s\n");
-        status_code = 0;
-    } else if(count_errors > 0) {
-        // if parser returned any errors, display them then exit
-        arg_print_errors(stderr, end, program_name);
-        status_code = 1;
     }
     // if at this point status_code is not -1, clean up then return early
     if(status_code != -1) {

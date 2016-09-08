@@ -23,7 +23,7 @@ extern "C"{
  * NOTE: This should NEVER be called with a pointer to anything other than a
  * 2-item struct of type co_ord_t
  */
-void
+static void
 get_bounds(spiral_t spiral, co_ord_t * bounds) {
     tuple_item_t min_x = 0;
     tuple_item_t min_y = 0;
