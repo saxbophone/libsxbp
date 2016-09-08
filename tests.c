@@ -104,8 +104,10 @@ test_spiral_points() {
         {  3,  3, }, {  3,  4, }, {  2,  4, }
     };
 
+    // create struct for results
+    co_ord_array_t results = {};
     // call spiral_points on struct with start point and maximum limit
-    co_ord_array_t results = spiral_points(input, expected[0], 0, 16);
+    spiral_points(input, &results, expected[0], 0, 16);
 
     // validate data
     if(results.size != 23) {
