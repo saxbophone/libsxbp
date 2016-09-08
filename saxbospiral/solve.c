@@ -174,8 +174,9 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
  * perfection, or otherwise the maximmum line length at which to allow
  * aggressive optimisation) attempt to set the target line to that length,
  * back-tracking to resize the previous line if it collides.
+ * returns a status struct (used for error information)
  */
-void
+status_t
 resize_spiral(
     spiral_t * spiral, size_t index, uint32_t length, int perfection_threshold
 ) {
@@ -183,6 +184,8 @@ resize_spiral(
      * setup state variables, these are used in place of recursion for managing
      * state of which line is being resized, and what size it should be.
      */
+    // set result status
+    status_t result = {};
     size_t current_index = index;
     length_t current_length = length;
     while(true) {
@@ -195,8 +198,12 @@ resize_spiral(
         spiral->co_ord_cache.validity = (
             current_index < spiral->co_ord_cache.validity
         ) ? current_index : spiral->co_ord_cache.validity;
-        // update the spiral's co-ord cache
-        cache_spiral_points(spiral, current_index + 1);
+        // update the spiral's co-ord cache, and catch any errors
+        result = cache_spiral_points(spiral, current_index + 1);
+        // return if errors
+        if(result.diagnostic != OPERATION_OK) {
+            return result;
+        }
         spiral->collides = spiral_collides(*spiral, current_index);
         if(spiral->collides != -1) {
             /*
@@ -219,9 +226,10 @@ resize_spiral(
         } else {
             /*
              * if we're on the top-most line and there's no collision
-             * this means we've finished! Return from function.
+             * this means we've finished! Return OPERATION_OK from function.
              */
-            return;
+            result.diagnostic = OPERATION_OK;
+            return result;
         }
     }
 }
@@ -232,13 +240,23 @@ resize_spiral(
  * the maximmum line length at which to allow aggressive optimisation) calculate
  * the length needed for each line in the spiral (to avoid line overlap) and
  * store these in a the spiral struct that is pointed to by the pointer
+ * returns a status struct (used for error information)
  */
-void
+status_t
 plot_spiral(spiral_t * spiral, int perfection_threshold) {
+    // set up result status
+    status_t result = {};
     // calculate the length of each line
     for(size_t i = 0; i < spiral->size; i++) {
-        resize_spiral(spiral, i, 1, perfection_threshold);
+        result = resize_spiral(spiral, i, 1, perfection_threshold);
+        // catch and return error if any
+        if(result.diagnostic != OPERATION_OK) {
+            return result;
+        }
     }
+    // all ok
+    result.diagnostic = OPERATION_OK;
+    return result;
 }
 
 #ifdef __cplusplus
