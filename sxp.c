@@ -119,61 +119,33 @@ run(
     spiral_t spiral = {};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
-
-    //// TODO: Get this version of the program working, as this is ideal
-
-    // if(prepare) {
-    //     // we must build spiral from raw file first
-    //     init_spiral(input_buffer, &spiral);
-    // } else {
-    //     // otherwise, we must load spiral from file
-    //     load_spiral(input_buffer, &spiral);
-    // }
-    // if(generate) {
-    //     // we must plot all lines from spiral file
-    //     spiral = plot_spiral(spiral, perfection);
-    // }
-    // if(render) {
-    //     // we must render an image from spiral
-    //     bitmap_t image = {};
-    //     render_spiral(spiral, &image);
-    //     // now write PNG image data to buffer with libpng
-    //     write_png_image(image, &output_buffer);
-    // } else {
-    //     // otherwise, we must simply dump the spiral as-is
-    //     dump_spiral(spiral, &output_buffer);
-    // }
-
-    //// NOTE: End Ideal version of the program
-
+    // check error condition (where no actions were specified)
+    if((prepare || generate || render) == false) {
+        // none of the above. this is an error condition - nothing to be done
+        fprintf(stderr, "%s\n", "Nothing to be done!");
+        return false;
+    }
+    // otherwise, good to go
     if(prepare) {
         // we must build spiral from raw file first
         init_spiral(input_buffer, &spiral);
-        if(generate) {
-            // now we must plot all lines from spiral file
-            spiral = plot_spiral(spiral, perfection);
-        }
-        // dump spiral
-        dump_spiral(spiral, &output_buffer);
-    } else if(generate) {
-        // try and load a spiral struct from input file
+    } else {
+        // otherwise, we must load spiral from file
         load_spiral(input_buffer, &spiral);
+    }
+    if(generate) {
         // we must plot all lines from spiral file
-        spiral = plot_spiral(spiral, perfection);
-        // dump spiral
-        dump_spiral(spiral, &output_buffer);
-    } else if(render) {
-        // try and load a spiral struct from input file
-        load_spiral(input_buffer, &spiral);
+        plot_spiral(&spiral, perfection);
+    }
+    if(render) {
         // we must render an image from spiral
-        bitmap_t image;
+        bitmap_t image = {};
         render_spiral(spiral, &image);
         // now write PNG image data to buffer with libpng
         write_png_image(image, &output_buffer);
     } else {
-        // none of the above. this is an error condition - nothing to be done
-        fprintf(stderr, "%s\n", "Nothing to be done!");
-        return false;
+        // otherwise, we must simply dump the spiral as-is
+        dump_spiral(spiral, &output_buffer);
     }
     // now, write output buffer to file
     write_ok = buffer_to_file(&output_buffer, output_file);

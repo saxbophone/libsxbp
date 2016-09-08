@@ -188,9 +188,9 @@ test_plot_spiral() {
     // success / failure variable
     bool result = true;
     // build input and output structs
-    spiral_t input = { .size = 16, };
+    spiral_t spiral = { .size = 16, };
     spiral_t expected = { .size = 16, };
-    input.lines = calloc(sizeof(line_t), 16);
+    spiral.lines = calloc(sizeof(line_t), 16);
     expected.lines = calloc(sizeof(line_t), 16);
     direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
@@ -200,26 +200,25 @@ test_plot_spiral() {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(uint8_t i = 0; i < 16; i++) {
-        input.lines[i].direction = directions[i];
-        input.lines[i].length = 0;
+        spiral.lines[i].direction = directions[i];
+        spiral.lines[i].length = 0;
         expected.lines[i].direction = directions[i];
         expected.lines[i].length = lengths[i];
     }
 
-    // call init_spiral with buffer and store result
-    spiral_t output = plot_spiral(input, 1);
+    // call plot_spiral on spiral
+    plot_spiral(&spiral, 1);
 
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
-        if(output.lines[i].length != expected.lines[i].length) {
-            printf("%i != %i\n", output.lines[i].length, expected.lines[i].length);
+        if(spiral.lines[i].length != expected.lines[i].length) {
+            printf("%i != %i\n", spiral.lines[i].length, expected.lines[i].length);
             result = false;
         }
     }
 
     // free memory
-    free(input.lines);
-    free(output.lines);
+    free(spiral.lines);
     free(expected.lines);
 
     return result;
