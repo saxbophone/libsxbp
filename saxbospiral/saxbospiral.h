@@ -56,7 +56,7 @@ typedef enum diagnostic_t {
 // struct for storing generic diagnostics about function failure reasons
 typedef struct status_t {
     debug_t location; // for storing location of error
-    diagnostic_t diagnostic; // for storing error information (if any) 
+    diagnostic_t diagnostic; // for storing error information (if any)
 } status_t;
 
 // type for representing a cartesian direction
@@ -79,7 +79,7 @@ typedef int8_t rotation_t;
 typedef uint32_t length_t;
 
 /* 
- * struct for representing one line segment in the spiral structure, including 
+ * struct for representing one line segment in the spiral structure, including
  * the direction of the line and it's length (initially set to 0) 
  * the whole struct uses bitfields to occupy 32 bits of memory
  */
