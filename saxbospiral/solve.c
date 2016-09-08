@@ -169,43 +169,50 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
 }
 
 /*
- * given a spiral struct, the index of one of it's lines and a target length to
- * set that line to and a perfection threshold (-1 for no perfection, or
- * otherwise the maximmum line length at which to allow aggressive optimisation)
- * attempt to set the target line to that length, back-tracking to resize the
- * previous line if it collides.
+ * given a pointer to a spiral struct, the index of one of it's lines and a
+ * target length to set that line to and a perfection threshold (-1 for no
+ * perfection, or otherwise the maximmum line length at which to allow
+ * aggressive optimisation) attempt to set the target line to that length,
+ * back-tracking to resize the previous line if it collides.
+ * returns a status struct (used for error information)
  */
-spiral_t
+status_t
 resize_spiral(
-    spiral_t spiral, size_t index, uint32_t length, int perfection_threshold
+    spiral_t * spiral, size_t index, uint32_t length, int perfection_threshold
 ) {
     /*
      * setup state variables, these are used in place of recursion for managing
      * state of which line is being resized, and what size it should be.
      */
+    // set result status
+    status_t result = {};
     size_t current_index = index;
     length_t current_length = length;
     while(true) {
         // set the target line to the target length
-        spiral.lines[current_index].length = current_length;
+        spiral->lines[current_index].length = current_length;
         /*
          * also, set cache validity to this index so we invalidate any invalid
          * entries in the co-ord cache
          */
-        spiral.co_ord_cache.validity = (
-            current_index < spiral.co_ord_cache.validity
-        ) ? current_index : spiral.co_ord_cache.validity;
-        // update the spiral's co-ord cache
-        cache_spiral_points(&spiral, current_index + 1);
-        spiral.collides = spiral_collides(spiral, current_index);
-        if(spiral.collides != -1) {
+        spiral->co_ord_cache.validity = (
+            current_index < spiral->co_ord_cache.validity
+        ) ? current_index : spiral->co_ord_cache.validity;
+        // update the spiral's co-ord cache, and catch any errors
+        result = cache_spiral_points(spiral, current_index + 1);
+        // return if errors
+        if(result.diagnostic != OPERATION_OK) {
+            return result;
+        }
+        spiral->collides = spiral_collides(*spiral, current_index);
+        if(spiral->collides != -1) {
             /*
              * if we've caused a collision, we need to call the suggest_resize()
              * function to get the suggested length to resize the previous
              * segment to
              */
             current_length = suggest_resize(
-                spiral, current_index, perfection_threshold
+                *spiral, current_index, perfection_threshold
             );
             current_index--;
         } else if(current_index != index) {
@@ -219,39 +226,37 @@ resize_spiral(
         } else {
             /*
              * if we're on the top-most line and there's no collision
-             * this means we've finished! Return result.
+             * this means we've finished! Return OPERATION_OK from function.
              */
-            return spiral;
+            result.diagnostic = OPERATION_OK;
+            return result;
         }
     }
 }
 
 /*
- * given a spiral for which the length of all its lines are not yet known and
- * a perfection threshold (-1 for no perfection, or otherwise the maximmum line
- * length at which to allow aggressive optimisation) calculate the length needed
- * for each line in the spiral (to avoid line overlap) and store these in a
- * spiral struct and return that
+ * given a pointer to a spiral spiral for which the length of all its lines are
+ * not yet known and a perfection threshold (-1 for no perfection, or otherwise
+ * the maximmum line length at which to allow aggressive optimisation) calculate
+ * the length needed for each line in the spiral (to avoid line overlap) and
+ * store these in a the spiral struct that is pointed to by the pointer
+ * returns a status struct (used for error information)
  */
-spiral_t
-plot_spiral(spiral_t spiral, int perfection_threshold) {
-    // allocate new struct as copy of input struct
-    spiral_t output = { .size = spiral.size, };
-    output.lines = calloc(sizeof(line_t), output.size);
-    // copy across the spiral lines
-    for(size_t i = 0; i < output.size; i++) {
-        output.lines[i] = spiral.lines[i];
-    }
+status_t
+plot_spiral(spiral_t * spiral, int perfection_threshold) {
+    // set up result status
+    status_t result = {};
     // calculate the length of each line
-    for(size_t i = 0; i < output.size; i++) {
-        output = resize_spiral(output, i, 1, perfection_threshold);
+    for(size_t i = 0; i < spiral->size; i++) {
+        result = resize_spiral(spiral, i, 1, perfection_threshold);
+        // catch and return error if any
+        if(result.diagnostic != OPERATION_OK) {
+            return result;
+        }
     }
-    // free the co_ord_cache member's dynamic memory if required
-    if(output.co_ord_cache.co_ords.size > 0) {
-        free(output.co_ord_cache.co_ords.items);
-        output.co_ord_cache.co_ords.size = 0;
-    }
-    return output;
+    // all ok
+    result.diagnostic = OPERATION_OK;
+    return result;
 }
 
 #ifdef __cplusplus

@@ -95,9 +95,9 @@ run(
         return false;
     }
     // make input buffer
-    buffer_t input_buffer = {.size = 0, .bytes = NULL};
+    buffer_t input_buffer = {};
     // make output buffer
-    buffer_t output_buffer = {.size = 0, .bytes = NULL};
+    buffer_t output_buffer = {};
     // read input file into buffer
     bool read_ok = file_to_buffer(input_file, &input_buffer);
     // used later for telling if write of output file was success
@@ -115,52 +115,37 @@ run(
         fprintf(stderr, "%s\n", "Couldn't read input file");
         return false;
     }
+    // create initial blank spiral struct
+    spiral_t spiral = {};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
-    if(prepare) {
-        // we must build spiral from raw file first
-        spiral_t spiral = init_spiral(input_buffer);
-        if(generate) {
-            // now we must plot all lines from spiral file
-            spiral = plot_spiral(spiral, perfection);
-        }
-        // TODO: Currently unable to generate and render all in one invocation
-        // dump spiral
-        output_buffer = dump_spiral(spiral);
-    } else if(generate) {
-        // try and load a spiral struct from input file
-        spiral_t spiral = load_spiral(input_buffer);
-        // the spiral size will be set to 0 if buffer data was invalid
-        if(spiral.size == 0) {
-            fprintf(
-                stderr, "ERROR - File data was invalid (not a format accepted "
-                "by SAXBOSPIRAL v" SAXBOSPIRAL_VERSION_STRING ")\n"
-            );
-            return false;
-        }
-        // we must plot all lines from spiral file
-        spiral = plot_spiral(spiral, perfection);
-        // dump spiral
-        output_buffer = dump_spiral(spiral);
-    } else if(render) {
-        // try and load a spiral struct from input file
-        spiral_t spiral = load_spiral(input_buffer);
-        // the spiral size will be set to 0 if buffer data was invalid
-        if(spiral.size == 0) {
-            fprintf(
-                stderr, "ERROR - File data was invalid (not a format accepted "
-                "by SAXBOSPIRAL v" SAXBOSPIRAL_VERSION_STRING ")\n"
-            );
-            return false;
-        }
-        // we must render an image from spiral
-        bitmap_t image = render_spiral(spiral);
-        // now write PNG image data to buffer with libpng
-        output_buffer = write_png_image(image);
-    } else {
+    // check error condition (where no actions were specified)
+    if((prepare || generate || render) == false) {
         // none of the above. this is an error condition - nothing to be done
         fprintf(stderr, "%s\n", "Nothing to be done!");
         return false;
+    }
+    // otherwise, good to go
+    if(prepare) {
+        // we must build spiral from raw file first
+        init_spiral(input_buffer, &spiral);
+    } else {
+        // otherwise, we must load spiral from file
+        load_spiral(input_buffer, &spiral);
+    }
+    if(generate) {
+        // we must plot all lines from spiral file
+        plot_spiral(&spiral, perfection);
+    }
+    if(render) {
+        // we must render an image from spiral
+        bitmap_t image = {};
+        render_spiral(spiral, &image);
+        // now write PNG image data to buffer with libpng
+        write_png_image(image, &output_buffer);
+    } else {
+        // otherwise, we must simply dump the spiral as-is
+        dump_spiral(spiral, &output_buffer);
     }
     // now, write output buffer to file
     write_ok = buffer_to_file(&output_buffer, output_file);
@@ -182,32 +167,26 @@ main(int argc, char * argv[]) {
     // show help
     struct arg_lit * help = arg_lit0("h","help", "show this help and exit");
     // show version
-    struct arg_lit * version = arg_lit0("v", "version", "show version");
+    struct arg_lit * version = arg_lit0("v", "version", "show version and exit");
     // flag for if we want to prepare a spiral
     struct arg_lit * prepare = arg_lit0(
         "p", "prepare",
-        "prepare a spiral with directions attained from processing the binary "
-        "data from the input file"
+        "prepare a spiral from raw binary data"
     );
     // flag for if we want to generate the solution for a spiral's line lengths
     struct arg_lit * generate = arg_lit0(
         "g", "generate",
-        "generate the correct lengths of all the lines in the input spiral"
+        "generate the lengths of a spiral's lines"
     );
     // flag for if we want to render a spiral to imagee
     struct arg_lit * render = arg_lit0(
-        "r", "render", "render the input spiral to an image (cannot be used "
-        "with -p or -g options)"
+        "r", "render", "render a spiral to an image"
     );
     struct arg_lit * perfect = arg_lit0(
-        "D", "disable-perfection", "allow aggressive optimisations to take "
-        "place for a massive speed boost, at the cost of producing spirals that"
-        " are imperfect and waste some space with oversized lines"
+        "D", "disable-perfection", "allow unlimited optimisations"
     );
     struct arg_int * perfect_threshold = arg_int0(
-        "d", "perfection-threshold", NULL, "set a threshold above which length "
-        "lines are not optimised (default value is 1, which still yields "
-        "results)"
+        "d", "perfection-threshold", NULL, "set optimisation threshold"
     );
     // input file path option
     struct arg_file * input = arg_file0(
@@ -243,16 +222,20 @@ main(int argc, char * argv[]) {
         printf("%s %s\n", program_name, SAXBOSPIRAL_VERSION_STRING);
         status_code = 0;
     }
+    // if parser returned any errors, display them and set return code to 1
+    if(count_errors > 0) {
+        arg_print_errors(stderr, end, program_name);
+        status_code = 1;
+    }
+    // set return code to 0 if we asked for help
     if(help->count > 0) {
-        // check if we asked for the help option
+        status_code = 0;
+    }
+    // display usage information if we asked for help or got arguments wrong
+    if((count_errors > 0) || (help->count > 0)) {
         printf("Usage: %s", program_name);
         arg_print_syntax(stdout, argtable, "\n");
         arg_print_glossary(stdout, argtable, "  %-25s %s\n");
-        status_code = 0;
-    } else if(count_errors > 0) {
-        // if parser returned any errors, display them then exit
-        arg_print_errors(stderr, end, program_name);
-        status_code = 1;
     }
     // if at this point status_code is not -1, clean up then return early
     if(status_code != -1) {

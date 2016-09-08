@@ -8,6 +8,4 @@
 # 
 echo "Generating logo";
 echo -n "$3" > temp.hex && \
-./"$1" -pg -i temp.hex -o temp.sxp && \
-./"$1" -r -i temp.sxp -o "$2"
-rm temp.hex temp.sxp;
+./"$1" -pgr -i temp.hex -o "$2";

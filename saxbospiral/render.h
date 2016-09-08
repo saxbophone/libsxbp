@@ -23,11 +23,12 @@ typedef struct bitmap_t {
 } bitmap_t;
 
 /*
- * given a spiral struct, returns a bitmap_t representing a monochromatic image
- * of the rendered spiral
+ * given a spiral struct and a pointer to a blank bitmap_t struct, writes data
+ * representing a monochromatic image of the rendered spiral to the bitmap
+ * returns a status struct with error information (if any)
  */
-bitmap_t
-render_spiral(spiral_t spiral);
+status_t
+render_spiral(spiral_t spiral, bitmap_t * image);
 
 #ifdef __cplusplus
 } // extern "C"

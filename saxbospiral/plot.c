@@ -20,28 +20,39 @@ sum_lines(spiral_t spiral, size_t start, size_t end) {
 }
 
 /*
- * given a spiral_t struct, a pair of co-ords specifying the start point and
- * indexes of the lowest and highest line segments to use, return a
- * co_ord_array_t struct containing all the co-ordinates of the line segments of
- * the struct according to the current directions and lengths of the lines in
- * the spiral.
+ * given a spiral_t struct, a pointer to a co_ord_array_t, a pair of co-ords
+ * specifying the start point and indexes of the lowest and highest line
+ * segments to use, write to the co_ord_array_t struct all the co-ordinates of
+ * the line segments of the struct according to the current directions and
+ * lengths of the lines in the spiral.
  * each line segment is only one unit long, meaning multiple ones are needed for
  * lines longer than one unit.
+ * returns a status struct with error information (if any)
  */
-co_ord_array_t
-spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
+status_t
+spiral_points(
+    spiral_t spiral, co_ord_array_t * output, co_ord_t start_point,
+    size_t start, size_t end
+) {
+    // prepare result status
+    status_t result = {};
     // the amount of space needed is the sum of all line lengths + 1 for end
     size_t size = sum_lines(spiral, start, end) + 1;
     // allocate memory
-    co_ord_array_t results = {
-        .items = calloc(sizeof(co_ord_t), size),
-        .size = size,
-    };
+    output->items = calloc(sizeof(co_ord_t), size);
+    // catch malloc error
+    if(output->items == NULL) {
+        // set error information then early return
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        return result;
+    }
+    output->size = size;
     // start current co-ordinate at the given start point
     co_ord_t current = start_point;
     // initialise independent result index
     size_t result_index = 0;
-    results.items[result_index] = current;
+    output->items[result_index] = current;
     // calculate all the specified co-ords
     for(size_t i = start; i < end; i++) {
         // get current direction
@@ -50,11 +61,13 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
         for(length_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
-            results.items[result_index + 1] = current;
+            output->items[result_index + 1] = current;
             result_index++;
         }
     }
-    return results;
+    // all good
+    result.diagnostic = OPERATION_OK;
+    return result;
 }
 
 /*
@@ -64,9 +77,12 @@ spiral_points(spiral_t spiral, co_ord_t start_point, size_t start, size_t end) {
  * each line segment is only one unit long, meaning multiple ones are needed for
  * lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
  * member and are re-used if they are still valid
+ * returns a status struct with error information (if any)
  */
-void
+status_t
 cache_spiral_points(spiral_t * spiral, size_t limit) {
+    // prepare result status
+    status_t result = {};
     // the amount of space needed is the sum of all line lengths + 1 for end
     size_t size = sum_lines(*spiral, 0, limit) + 1;
     // allocate / reallocate memory
@@ -81,6 +97,13 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
         spiral->co_ord_cache.co_ords.items = realloc(
             spiral->co_ord_cache.co_ords.items, sizeof(co_ord_t) * size
         );
+    }
+    // catch malloc failure
+    if(spiral->co_ord_cache.co_ords.items == NULL) {
+        // set error information then early return
+        result.location = DEBUG;
+        result.diagnostic = MALLOC_REFUSED;
+        return result;
     }
     spiral->co_ord_cache.co_ords.size = size;
     // start at (0, 0) as origin
@@ -103,7 +126,14 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
         spiral->co_ord_cache.co_ords.items[0] = current;
     }
     // calculate the missing co-ords
-    co_ord_array_t missing = spiral_points(*spiral, current, smallest, limit);
+    co_ord_array_t missing= {};
+    status_t calculate_result = spiral_points(
+        *spiral, &missing, current, smallest, limit
+    );
+    // return errors from previous call if needed
+    if(calculate_result.diagnostic != OPERATION_OK) {
+        return calculate_result;
+    }
     // add the missing co-ords to the cache
     for(size_t i = result_index; i < size; i++) {
         spiral->co_ord_cache.co_ords.items[i] = missing.items[i-result_index];
@@ -116,6 +146,9 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
     spiral->co_ord_cache.validity = (
         limit > spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
+    // return ok
+    result.diagnostic = OPERATION_OK;
+    return result;
 }
 
 #ifdef __cplusplus
