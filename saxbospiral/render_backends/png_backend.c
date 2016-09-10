@@ -34,8 +34,13 @@ buffer_write_data(png_structp png_ptr, png_bytep data, png_size_t length) {
     p->size += length;
 }
 
+// disable GCC warning about the unused parameter, as this is a dummy function
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 // dummy function for unecessary flush function
 void dummy_png_flush(png_structp png_ptr) {}
+// re-enable all warnings
+#pragma GCC diagnostic pop
 
 // simple libpng cleanup function - used mainly for freeing memory
 void
