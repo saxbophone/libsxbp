@@ -78,6 +78,69 @@ buffer_to_file(buffer_t * buffer, FILE * file_handle) {
 }
 
 /*
+ * private function, given a diagnostic_t error, returns the string name of the
+ * error code
+ */
+static const char *
+error_code_string(diagnostic_t error) {
+    switch(error) {
+        case OPERATION_FAIL:
+            return "OPERATION_FAIL";
+        case MALLOC_REFUSED:
+            return "MALLOC_REFUSED";
+        case IMPOSSIBLE_CONDITION:
+            return "IMPOSSIBLE_CONDITION";
+        case OPERATION_OK:
+            return "OPERATION_OK (NO ERROR)";
+        case STATE_UNKNOWN:
+        default:
+            return "UNKNOWN ERROR";
+    }
+}
+
+/*
+ * private function, given a deserialise_diagnostic_t error, returns the string
+ * name of the error code
+ */
+static const char *
+file_error_code_string(deserialise_diagnostic_t error) {
+    switch(error) {
+        case DESERIALISE_OK:
+            return "DESERIALISE_OK (NO ERROR)";
+        case DESERIALISE_BAD_HEADER_SIZE:
+            return "DESERIALISE_BAD_HEADER_SIZE";
+        case DESERIALISE_BAD_MAGIC_NUMBER:
+            return "DESERIALISE_BAD_MAGIC_NUMBER";
+        case DESERIALISE_BAD_VERSION:
+            return "DESERIALISE_BAD_VERSION";
+        case DESERIALISE_BAD_DATA_SIZE:
+            return "DESERIALISE_BAD_DATA_SIZE";
+        default:
+            return "UNKNOWN ERROR";
+    }
+}
+
+/*
+ * private function to handle all generic errors, by printing to stderr
+ * returns true if there was an error, false if not
+ */
+static bool
+handle_error(status_t result) {
+    // if we had problems, print to stderr and return true
+    if(result.diagnostic != OPERATION_OK) {
+        fprintf(
+            stderr,
+            "Error code %s when trying to initialise spiral from raw data\n",
+            error_code_string(result.diagnostic)
+        );
+        return true;
+    } else {
+        // otherwise, return false to say 'no error'
+        return false;
+    }
+}
+
+/*
  * function responsible for actually doing the main work, called by main with
  * options configured via command-line.
  * returns true on success, false on failure.
@@ -121,24 +184,58 @@ run(
     // otherwise, good to go
     if(prepare) {
         // we must build spiral from raw file first
-        init_spiral(input_buffer, &spiral);
+        if(handle_error(init_spiral(input_buffer, &spiral))) {
+            // handle errors
+            return false;
+        }
     } else {
         // otherwise, we must load spiral from file
-        load_spiral(input_buffer, &spiral);
+        serialise_result_t result = load_spiral(input_buffer, &spiral);
+        // if we had problems, print to stderr and quit
+        if(result.status.diagnostic != OPERATION_OK) {
+            fprintf(
+                stderr,
+                "Error when trying to initialise spiral from raw data\n"
+                "Generic Error: %s\nFile Loader Error: %s\n",
+                error_code_string(result.status.diagnostic),
+                file_error_code_string(result.diagnostic)
+            );
+            return false;
+        }
     }
     if(generate) {
         // we must plot all lines from spiral file
-        plot_spiral(&spiral, perfection);
+        if(handle_error(plot_spiral(&spiral, perfection))) {
+            // handle errors
+            return false;
+        }
     }
     if(render) {
         // we must render an image from spiral
         bitmap_t image = {0};
-        render_spiral(spiral, &image);
+        if(handle_error(render_spiral(spiral, &image))) {
+            // handle errors
+            return false;
+        }
         // now write PNG image data to buffer with libpng
-        write_png_image(image, &output_buffer);
+        if(handle_error(write_png_image(image, &output_buffer))) {
+            // handle errors
+            return false;
+        }
     } else {
         // otherwise, we must simply dump the spiral as-is
-        dump_spiral(spiral, &output_buffer);
+        serialise_result_t result = dump_spiral(spiral, &output_buffer);
+        // if we had problems, print to stderr and quit
+        if(result.status.diagnostic != OPERATION_OK) {
+            fprintf(
+                stderr,
+                "Error when trying to initialise spiral from raw data\n"
+                "Generic Error: %s\nFile Loader Error: %s\n",
+                error_code_string(result.status.diagnostic),
+                file_error_code_string(result.diagnostic)
+            );
+            return false;
+        }
     }
     // get output file handle
     FILE * output_file = fopen(output_file_path, "wb");
