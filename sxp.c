@@ -103,12 +103,6 @@ run(
     bool write_ok = false;
     // close input file
     fclose(input_file);
-    // get output file handle
-    FILE * output_file = fopen(output_file_path, "wb");
-    if(output_file == NULL) {
-        fprintf(stderr, "%s\n", "Couldn't open output file");
-        return false;
-    }
     // if read was unsuccessful, don't continue
     if(read_ok == false) {
         fprintf(stderr, "%s\n", "Couldn't read input file");
@@ -145,6 +139,12 @@ run(
     } else {
         // otherwise, we must simply dump the spiral as-is
         dump_spiral(spiral, &output_buffer);
+    }
+    // get output file handle
+    FILE * output_file = fopen(output_file_path, "wb");
+    if(output_file == NULL) {
+        fprintf(stderr, "%s\n", "Couldn't open output file");
+        return false;
     }
     // now, write output buffer to file
     write_ok = buffer_to_file(&output_buffer, output_file);
