@@ -13,7 +13,6 @@
 #include "saxbospiral/render_backends/png_backend.h"
 
 
-
 #ifdef __cplusplus
 extern "C"{
 #endif
