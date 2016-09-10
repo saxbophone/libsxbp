@@ -40,7 +40,7 @@ spiral_collides(spiral_t spiral, size_t index) {
         int64_t ttl = spiral.lines[line_count].length + 1; // ttl of line
         size_t last_co_ord = spiral.co_ord_cache.co_ords.size;
         line_t last_line = spiral.lines[index];
-        size_t start_of_last_line = (last_co_ord - last_line.length) - 1;
+        int64_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
         for(int64_t i = 0; i < start_of_last_line; i++) {
             for(size_t j = start_of_last_line; j < last_co_ord; j++) {
@@ -69,7 +69,7 @@ spiral_collides(spiral_t spiral, size_t index) {
              * before the last one (these two lines can never collide with the
              * last and can be safely ignored, for a small performance increase)
              */
-            if(line_count == (spiral.size - 2 - 1)) { // -1 for zero-index
+            if(line_count == ((int64_t)spiral.size - 2 - 1)) { // -1 for zero-index
                 break;
             }
         }

@@ -34,11 +34,12 @@ endfunction()
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     # enable all warnings about 'questionable constructs'
     enable_c_compiler_flag_if_supported("-Wall")
+    # issue 'pedantic' warnings for strict ISO compliance
+    enable_c_compiler_flag_if_supported("-Wpedantic")
+    # enable 'extra' strict warnings
+    enable_c_compiler_flag_if_supported("-Wextra")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
-    # issue 'pedantic' warnings for strict ISO compliance
-    # these also get converted into errors
-    enable_c_compiler_flag_if_supported("-Wpedantic")
 endif()
 
 # dependencies

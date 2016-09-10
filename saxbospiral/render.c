@@ -108,7 +108,7 @@ render_spiral(spiral_t spiral, bitmap_t * image) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
-        for(uint64_t j = 0; j < (spiral.lines[i].length * 2) + 1; j++) {
+        for(uint64_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
             tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
             tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
@@ -117,7 +117,7 @@ render_spiral(spiral_t spiral, bitmap_t * image) {
                 // flip the y-axis otherwise they appear vertically mirrored
                 image->pixels[x_pos][image->height - 1 - y_pos] = true;
             }
-            if(j != (spiral.lines[i].length * 2)) {
+            if(j != (spiral.lines[i].length * 2U)) {
                 // if we're not on the last line, advance the marker along
                 current.x += direction.x;
                 current.y += direction.y;
