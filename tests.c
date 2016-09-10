@@ -105,7 +105,7 @@ test_spiral_points() {
     };
 
     // create struct for results
-    co_ord_array_t results = {};
+    co_ord_array_t results = {0};
     // call spiral_points on struct with start point and maximum limit
     spiral_points(input, &results, expected[0], 0, 16);
 
