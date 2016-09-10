@@ -110,6 +110,8 @@ typedef struct co_ord_cache_t {
 } co_ord_cache_t;
 
 typedef struct spiral_t {
+    // TODO: Change type of this to int64_t
+    //       Then, remove typecast in solve.c, in function spiral_collides()
     size_t size;
     line_t * lines;
     co_ord_cache_t co_ord_cache;

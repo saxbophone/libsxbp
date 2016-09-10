@@ -478,7 +478,7 @@ run_test_case(
 }
 
 int
-main(int argc, char const *argv[]) {
+main() {
     // set up test suite status flag
     bool result = true;
     // call run_test_case() for each test case
