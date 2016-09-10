@@ -184,9 +184,8 @@ run(
     // otherwise, good to go
     if(prepare) {
         // we must build spiral from raw file first
-        status_t result = init_spiral(input_buffer, &spiral);
-        // check for error
-        if(handle_error(result)) {
+        if(handle_error(init_spiral(input_buffer, &spiral))) {
+            // handle errors
             return false;
         }
     } else {
@@ -206,24 +205,21 @@ run(
     }
     if(generate) {
         // we must plot all lines from spiral file
-        status_t result = plot_spiral(&spiral, perfection);
-        // check for error
-        if(handle_error(result)) {
+        if(handle_error(plot_spiral(&spiral, perfection))) {
+            // handle errors
             return false;
         }
     }
     if(render) {
         // we must render an image from spiral
         bitmap_t image = {0};
-        status_t result = render_spiral(spiral, &image);
-        // check for error
-        if(handle_error(result)) {
+        if(handle_error(render_spiral(spiral, &image))) {
+            // handle errors
             return false;
         }
         // now write PNG image data to buffer with libpng
-        result = write_png_image(image, &output_buffer);
-        // check for error
-        if(handle_error(result)) {
+        if(handle_error(write_png_image(image, &output_buffer))) {
+            // handle errors
             return false;
         }
     } else {
