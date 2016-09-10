@@ -32,7 +32,8 @@ endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
-    enable_c_compiler_flag_if_supported("-Werror")
+    # enable_c_compiler_flag_if_supported("-Werror")
+    enable_c_compiler_flag_if_supported("-Wpedantic")
 endif()
 
 # dependencies
