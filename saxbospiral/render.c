@@ -69,11 +69,7 @@ render_spiral(spiral_t spiral, bitmap_t * image) {
         .x = -bounds[0].x,
         .y = -bounds[0].y,
     };
-    // get co-ords of top left and bottom right corners, as unsigned
-    co_ord_t top_left = {
-        .x = 0,
-        .y = 0,
-    };
+    // get co-ords of bottom right corner, as unsigned
     co_ord_t bottom_right = {
         .x = bounds[1].x + normalisation_vector.x,
         .y = bounds[1].y + normalisation_vector.y,
