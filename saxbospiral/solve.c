@@ -40,7 +40,7 @@ spiral_collides(spiral_t spiral, size_t index) {
         int64_t ttl = spiral.lines[line_count].length + 1; // ttl of line
         size_t last_co_ord = spiral.co_ord_cache.co_ords.size;
         line_t last_line = spiral.lines[index];
-        size_t start_of_last_line = (last_co_ord - last_line.length) - 1;
+        int64_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
         for(int64_t i = 0; i < start_of_last_line; i++) {
             for(size_t j = start_of_last_line; j < last_co_ord; j++) {
@@ -69,7 +69,7 @@ spiral_collides(spiral_t spiral, size_t index) {
              * before the last one (these two lines can never collide with the
              * last and can be safely ignored, for a small performance increase)
              */
-            if(line_count == (spiral.size - 2 - 1)) { // -1 for zero-index
+            if(line_count == ((int64_t)spiral.size - 2 - 1)) { // -1 for zero-index
                 break;
             }
         }
@@ -122,7 +122,7 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
             return spiral.lines[index - 1].length + 1;
         }
         // create variables to store the start and end co-ords of these lines
-        co_ord_t pa, pb, ra, rb;
+        co_ord_t pa, ra, rb;
         /*
          * We need to grab the start and end co-ords of the line previous to the
          * colliding line, and the rigid line that it collided with.
@@ -130,7 +130,6 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
         size_t p_index = sum_lines(spiral, 0, index - 1);
         size_t r_index = sum_lines(spiral, 0, spiral.collides);
         pa = spiral.co_ord_cache.co_ords.items[p_index];
-        pb = spiral.co_ord_cache.co_ords.items[p_index + p.length];
         ra = spiral.co_ord_cache.co_ords.items[r_index];
         rb = spiral.co_ord_cache.co_ords.items[r_index + r.length];
         /*
@@ -185,7 +184,7 @@ resize_spiral(
      * state of which line is being resized, and what size it should be.
      */
     // set result status
-    status_t result = {};
+    status_t result = {0};
     size_t current_index = index;
     length_t current_length = length;
     while(true) {
@@ -245,7 +244,7 @@ resize_spiral(
 status_t
 plot_spiral(spiral_t * spiral, int perfection_threshold) {
     // set up result status
-    status_t result = {};
+    status_t result = {0};
     // calculate the length of each line
     for(size_t i = 0; i < spiral->size; i++) {
         result = resize_spiral(spiral, i, 1, perfection_threshold);

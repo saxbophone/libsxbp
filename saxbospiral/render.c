@@ -58,22 +58,18 @@ get_bounds(spiral_t spiral, co_ord_t * bounds) {
 status_t
 render_spiral(spiral_t spiral, bitmap_t * image) {
     // create result status struct
-    status_t result = {};
+    status_t result = {0};
     // plot co-ords of spiral into it's cache
     cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
-    co_ord_t bounds[2] = {};
+    co_ord_t bounds[2] = {0};
     get_bounds(spiral, bounds);
     // get the normalisation vector needed to make all values unsigned
     tuple_t normalisation_vector = {
         .x = -bounds[0].x,
         .y = -bounds[0].y,
     };
-    // get co-ords of top left and bottom right corners, as unsigned
-    co_ord_t top_left = {
-        .x = 0,
-        .y = 0,
-    };
+    // get co-ords of bottom right corner, as unsigned
     co_ord_t bottom_right = {
         .x = bounds[1].x + normalisation_vector.x,
         .y = bounds[1].y + normalisation_vector.y,
@@ -112,7 +108,7 @@ render_spiral(spiral_t spiral, bitmap_t * image) {
         // get current direction
         vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
-        for(uint64_t j = 0; j < (spiral.lines[i].length * 2) + 1; j++) {
+        for(uint64_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
             tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
             tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
@@ -121,7 +117,7 @@ render_spiral(spiral_t spiral, bitmap_t * image) {
                 // flip the y-axis otherwise they appear vertically mirrored
                 image->pixels[x_pos][image->height - 1 - y_pos] = true;
             }
-            if(j != (spiral.lines[i].length * 2)) {
+            if(j != (spiral.lines[i].length * 2U)) {
                 // if we're not on the last line, advance the marker along
                 current.x += direction.x;
                 current.y += direction.y;

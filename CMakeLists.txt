@@ -1,8 +1,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
-enable_language(C CXX)
 
-project(saxbospiral VERSION 0.12.0 LANGUAGES C)
+project(saxbospiral VERSION 0.12.1 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
@@ -18,9 +17,9 @@ add_definitions(-DSAXBOSPIRAL_VERSION_MINOR=${PROJECT_VERSION_MINOR})
 add_definitions(-DSAXBOSPIRAL_VERSION_PATCH=${PROJECT_VERSION_PATCH})
 add_definitions(-DSAXBOSPIRAL_VERSION_STRING=${SAXBOSPIRAL_ESCAPED_VERSION_STRING})
 
+# used for enabling additional compiler options if supported
 include(CheckCCompilerFlag)
 
-# used for enabling additional compiler options if supported
 function(enable_c_compiler_flag_if_supported flag)
     string(FIND "${CMAKE_C_FLAGS}" "${flag}" flag_already_set)
     if(flag_already_set EQUAL -1)
@@ -32,7 +31,14 @@ function(enable_c_compiler_flag_if_supported flag)
 endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
-if(NOT CMAKE_BUILD_TYPE EQUAL CMAKE_C_FLAGS_RELEASE)
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    # enable all warnings about 'questionable constructs'
+    enable_c_compiler_flag_if_supported("-Wall")
+    # issue 'pedantic' warnings for strict ISO compliance
+    enable_c_compiler_flag_if_supported("-Wpedantic")
+    # enable 'extra' strict warnings
+    enable_c_compiler_flag_if_supported("-Wextra")
+    # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
 

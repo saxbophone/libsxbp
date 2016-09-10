@@ -95,7 +95,8 @@ load_spiral(buffer_t buffer, spiral_t * spiral) {
          * bit mask and shift 3 bytes to left
          */
         spiral->lines[i].length = (
-            buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] & 0b00111111
+            buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)]
+            & 0x3f // <= binary value is 0b00111111
         ) << 24;
         // handle remaining 3 bytes in loop
         for(uint8_t j = 0; j < 3; j++) {
