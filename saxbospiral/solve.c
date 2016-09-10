@@ -122,7 +122,7 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
             return spiral.lines[index - 1].length + 1;
         }
         // create variables to store the start and end co-ords of these lines
-        co_ord_t pa, pb, ra, rb;
+        co_ord_t pa, ra, rb;
         /*
          * We need to grab the start and end co-ords of the line previous to the
          * colliding line, and the rigid line that it collided with.
@@ -130,7 +130,6 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
         size_t p_index = sum_lines(spiral, 0, index - 1);
         size_t r_index = sum_lines(spiral, 0, spiral.collides);
         pa = spiral.co_ord_cache.co_ords.items[p_index];
-        pb = spiral.co_ord_cache.co_ords.items[p_index + p.length];
         ra = spiral.co_ord_cache.co_ords.items[r_index];
         rb = spiral.co_ord_cache.co_ords.items[r_index + r.length];
         /*

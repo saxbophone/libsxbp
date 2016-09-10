@@ -32,6 +32,8 @@ endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    # enable all warnings about 'questionable constructs'
+    enable_c_compiler_flag_if_supported("-Wall")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
     # issue 'pedantic' warnings for strict ISO compliance
