@@ -35,7 +35,7 @@ spiral_points(
     size_t start, size_t end
 ) {
     // prepare result status
-    status_t result = {};
+    status_t result = {0};
     // the amount of space needed is the sum of all line lengths + 1 for end
     size_t size = sum_lines(spiral, start, end) + 1;
     // allocate memory
@@ -82,7 +82,7 @@ spiral_points(
 status_t
 cache_spiral_points(spiral_t * spiral, size_t limit) {
     // prepare result status
-    status_t result = {};
+    status_t result = {0};
     // the amount of space needed is the sum of all line lengths + 1 for end
     size_t size = sum_lines(*spiral, 0, limit) + 1;
     // allocate / reallocate memory
@@ -126,7 +126,7 @@ cache_spiral_points(spiral_t * spiral, size_t limit) {
         spiral->co_ord_cache.co_ords.items[0] = current;
     }
     // calculate the missing co-ords
-    co_ord_array_t missing= {};
+    co_ord_array_t missing= {0};
     status_t calculate_result = spiral_points(
         *spiral, &missing, current, smallest, limit
     );

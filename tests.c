@@ -36,7 +36,7 @@ test_init_spiral() {
     // build buffer of bytes for input data
     buffer_t buffer = { .size = 2, };
     buffer.bytes = malloc(buffer.size);
-    buffer.bytes = (uint8_t[2]){ 0b01101101, 0b11000111, };
+    buffer.bytes = (uint8_t[2]){ 0x6d, 0xc7, };
     // build expected output struct
     spiral_t expected = { .size = 17, };
     expected.lines = calloc(sizeof(line_t), 17);
@@ -105,7 +105,7 @@ test_spiral_points() {
     };
 
     // create struct for results
-    co_ord_array_t results = {};
+    co_ord_array_t results = {0};
     // call spiral_points on struct with start point and maximum limit
     spiral_points(input, &results, expected[0], 0, 16);
 
@@ -239,24 +239,24 @@ test_load_spiral() {
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
     );
-    // construct data section
+    // construct data section - each line of the array is one line of the spiral
     uint8_t data[64] = {
-        0b00000000, 0b00000000, 0b00000000, 0b00000001,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000001,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000010,
-        0b00000000, 0b00000000, 0b00000000, 0b00000100,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
-        0b00000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000010,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000001,
-        0b00000000, 0b00000000, 0b00000000, 0b00000010,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0x00, 0x00, 0x00, 0x01,
+        0xc0, 0x00, 0x00, 0x01,
+        0x80, 0x00, 0x00, 0x01,
+        0xc0, 0x00, 0x00, 0x01,
+        0x80, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x01,
+        0x80, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x02,
+        0x00, 0x00, 0x00, 0x04,
+        0xc0, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x02,
+        0x80, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x02,
+        0xc0, 0x00, 0x00, 0x01,
     };
     // write data to buffer
     for(size_t i = 0; i < 64; i++) {
@@ -365,10 +365,10 @@ test_load_spiral_rejects_too_small_data_section() {
     );
     // construct data section - make it deliberately too short
     uint8_t data[16] = {
-        0b00000000, 0b00000000, 0b00000000, 0b00000000,
-        0b00000000, 0b00000000, 0b00000000, 0b00000000,
-        0b00000000, 0b00000000, 0b00000000, 0b00000000,
-        0b00000000, 0b00000000, 0b00000000, 0b00000000,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
     };
     // write data to buffer
     for(size_t i = 0; i < 16; i++) {
@@ -417,22 +417,22 @@ test_dump_spiral() {
     );
     // construct expected data section
     uint8_t data[64] = {
-        0b00000000, 0b00000000, 0b00000000, 0b00000001,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000001,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000010,
-        0b00000000, 0b00000000, 0b00000000, 0b00000100,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
-        0b00000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000010,
-        0b10000000, 0b00000000, 0b00000000, 0b00000001,
-        0b01000000, 0b00000000, 0b00000000, 0b00000001,
-        0b00000000, 0b00000000, 0b00000000, 0b00000010,
-        0b11000000, 0b00000000, 0b00000000, 0b00000001,
+        0x00, 0x00, 0x00, 0x01,
+        0xc0, 0x00, 0x00, 0x01,
+        0x80, 0x00, 0x00, 0x01,
+        0xc0, 0x00, 0x00, 0x01,
+        0x80, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x01,
+        0x80, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x02,
+        0x00, 0x00, 0x00, 0x04,
+        0xc0, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x02,
+        0x80, 0x00, 0x00, 0x01,
+        0x40, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x02,
+        0xc0, 0x00, 0x00, 0x01,
     };
     // write data to expected buffer
     for(size_t i = 0; i < 64; i++) {
