@@ -1,7 +1,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(saxbospiral VERSION 0.12.1 LANGUAGES C)
+project(saxbospiral VERSION 0.12.2 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
