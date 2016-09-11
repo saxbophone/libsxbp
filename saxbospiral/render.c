@@ -58,11 +58,11 @@ get_bounds(spiral_t spiral, co_ord_t * bounds) {
 status_t
 render_spiral(spiral_t spiral, bitmap_t * image) {
     // create result status struct
-    status_t result = {0};
+    status_t result = {{0, 0, 0}, 0};
     // plot co-ords of spiral into it's cache
     cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
-    co_ord_t bounds[2] = {0};
+    co_ord_t bounds[2] = {{0, 0}};
     get_bounds(spiral, bounds);
     // get the normalisation vector needed to make all values unsigned
     tuple_t normalisation_vector = {

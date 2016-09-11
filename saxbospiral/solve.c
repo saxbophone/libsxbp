@@ -184,7 +184,7 @@ resize_spiral(
      * state of which line is being resized, and what size it should be.
      */
     // set result status
-    status_t result = {0};
+    status_t result = {{0, 0, 0}, 0};
     size_t current_index = index;
     length_t current_length = length;
     while(true) {
@@ -244,7 +244,7 @@ resize_spiral(
 status_t
 plot_spiral(spiral_t * spiral, int perfection_threshold) {
     // set up result status
-    status_t result = {0};
+    status_t result = {{0, 0, 0}, 0};
     // calculate the length of each line
     for(size_t i = 0; i < spiral->size; i++) {
         result = resize_spiral(spiral, i, 1, perfection_threshold);
