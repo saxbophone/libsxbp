@@ -157,9 +157,9 @@ run(
         return false;
     }
     // make input buffer
-    buffer_t input_buffer = {0};
+    buffer_t input_buffer = {0, 0};
     // make output buffer
-    buffer_t output_buffer = {0};
+    buffer_t output_buffer = {0, 0};
     // read input file into buffer
     bool read_ok = file_to_buffer(input_file, &input_buffer);
     // used later for telling if write of output file was success
@@ -172,7 +172,7 @@ run(
         return false;
     }
     // create initial blank spiral struct
-    spiral_t spiral = {0};
+    spiral_t spiral = {0, 0, {{0, 0}, 0}, 0};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
     // check error condition (where no actions were specified)
@@ -212,7 +212,7 @@ run(
     }
     if(render) {
         // we must render an image from spiral
-        bitmap_t image = {0};
+        bitmap_t image = {0, 0, 0};
         if(handle_error(render_spiral(spiral, &image))) {
             // handle errors
             return false;
