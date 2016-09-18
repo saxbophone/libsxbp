@@ -26,8 +26,7 @@ const size_t LINE_T_PACK_SIZE = 4;
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t
-load_spiral(buffer_t buffer, spiral_t * spiral) {
+serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
     serialise_result_t result; // build struct for returning success / failure
     // first, if header is too small for header + 1 line, then return early
     if(buffer.size < FILE_HEADER_SIZE + LINE_T_PACK_SIZE) {
@@ -117,8 +116,7 @@ load_spiral(buffer_t buffer, spiral_t * spiral) {
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t
-dump_spiral(spiral_t spiral, buffer_t * buffer) {
+serialise_result_t dump_spiral(spiral_t spiral, buffer_t * buffer) {
     serialise_result_t result; // build struct for returning success / failure
     // populate buffer struct, base size on header + spiral size
     buffer->size = (FILE_HEADER_SIZE + (LINE_T_PACK_SIZE * spiral.size));

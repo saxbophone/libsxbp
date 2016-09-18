@@ -10,8 +10,7 @@ extern "C"{
 #endif
 
 // returns the sum of all line lengths within the given indexes
-size_t
-sum_lines(spiral_t spiral, size_t start, size_t end) {
+size_t sum_lines(spiral_t spiral, size_t start, size_t end) {
     size_t size = 0;
     for(size_t i = start; i < end; i++) {
         size += spiral.lines[i].length;
@@ -29,8 +28,7 @@ sum_lines(spiral_t spiral, size_t start, size_t end) {
  * lines longer than one unit.
  * returns a status struct with error information (if any)
  */
-status_t
-spiral_points(
+status_t spiral_points(
     spiral_t spiral, co_ord_array_t * output, co_ord_t start_point,
     size_t start, size_t end
 ) {
@@ -79,8 +77,7 @@ spiral_points(
  * member and are re-used if they are still valid
  * returns a status struct with error information (if any)
  */
-status_t
-cache_spiral_points(spiral_t * spiral, size_t limit) {
+status_t cache_spiral_points(spiral_t * spiral, size_t limit) {
     // prepare result status
     status_t result = {{0, 0, 0}, 0};
     // the amount of space needed is the sum of all line lengths + 1 for end
