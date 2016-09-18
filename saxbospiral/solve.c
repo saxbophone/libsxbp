@@ -26,8 +26,7 @@ extern "C"{
  * Returns the index of the lowest line that the latest line collided with if
  * there are collisions, or -1 if no collisions were found.
  */
-static int64_t
-spiral_collides(spiral_t spiral, size_t index) {
+static int64_t spiral_collides(spiral_t spiral, size_t index) {
     /*
      * if there are less than 4 lines in the spiral, then there's no way it
      * can collide, so return -1 early
@@ -95,8 +94,9 @@ spiral_collides(spiral_t spiral, size_t index) {
  * the newly plotted line has collided with and 'previous' or 'p' refers to the
  * line before the newly plotted line.
  */
-static length_t
-suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
+static length_t suggest_resize(
+    spiral_t spiral, size_t index, int perfection_threshold
+) {
     // check if collides or not, return same size if no collision
     if(spiral.collides != -1) {
         /*
@@ -175,8 +175,7 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
  */
-status_t
-resize_spiral(
+status_t resize_spiral(
     spiral_t * spiral, size_t index, uint32_t length, int perfection_threshold
 ) {
     /*
@@ -241,8 +240,7 @@ resize_spiral(
  * store these in a the spiral struct that is pointed to by the pointer
  * returns a status struct (used for error information)
  */
-status_t
-plot_spiral(spiral_t * spiral, int perfection_threshold) {
+status_t plot_spiral(spiral_t * spiral, int perfection_threshold) {
     // set up result status
     status_t result = {{0, 0, 0}, 0};
     // calculate the length of each line

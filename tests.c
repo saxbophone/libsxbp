@@ -10,8 +10,7 @@
 #include "saxbospiral/serialise.h"
 
 
-bool
-test_change_direction() {
+bool test_change_direction() {
     if(change_direction(UP, CLOCKWISE) != RIGHT) {
         return false;
     } else if(change_direction(UP, ANTI_CLOCKWISE) != LEFT) {
@@ -29,8 +28,7 @@ test_change_direction() {
     }
 }
 
-bool
-test_init_spiral() {
+bool test_init_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -75,8 +73,7 @@ test_init_spiral() {
     return result;
 }
 
-bool
-test_spiral_points() {
+bool test_spiral_points() {
     // success variable
     bool success = true;
     // prepare input spiral struct
@@ -130,8 +127,7 @@ test_spiral_points() {
     return success;
 }
 
-bool
-test_cache_spiral_points_blank() {
+bool test_cache_spiral_points_blank() {
     // success variable
     bool success = true;
     // prepare input spiral struct
@@ -185,8 +181,7 @@ test_cache_spiral_points_blank() {
     return success;
 }
 
-bool
-test_plot_spiral() {
+bool test_plot_spiral() {
     // success / failure variable
     bool result = true;
     // build input and output structs
@@ -226,8 +221,7 @@ test_plot_spiral() {
     return result;
 }
 
-bool
-test_load_spiral() {
+bool test_load_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -302,8 +296,7 @@ test_load_spiral() {
     return result;
 }
 
-bool
-test_load_spiral_rejects_missing_magic_number() {
+bool test_load_spiral_rejects_missing_magic_number() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -326,8 +319,7 @@ test_load_spiral_rejects_missing_magic_number() {
     return result;
 }
 
-bool
-test_load_spiral_rejects_too_small_for_header() {
+bool test_load_spiral_rejects_too_small_for_header() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data - should be smaller than 26
@@ -350,8 +342,7 @@ test_load_spiral_rejects_too_small_for_header() {
     return result;
 }
 
-bool
-test_load_spiral_rejects_too_small_data_section() {
+bool test_load_spiral_rejects_too_small_data_section() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -388,8 +379,7 @@ test_load_spiral_rejects_too_small_data_section() {
     return result;
 }
 
-bool
-test_dump_spiral() {
+bool test_dump_spiral() {
     // success / failure variable
     bool result = true;
     // build input struct
@@ -466,8 +456,7 @@ test_dump_spiral() {
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
 // or failure status, which should be stored in the test suite status bool.
-bool
-run_test_case(
+bool run_test_case(
     bool test_suite_state, bool (*test_case_func)(), char * test_case_name
 ) {
     printf("%s: ", test_case_name);
@@ -477,8 +466,7 @@ run_test_case(
     return test_suite_state && test_result;
 }
 
-int
-main() {
+int main() {
     // set up test suite status flag
     bool result = true;
     // call run_test_case() for each test case

@@ -18,8 +18,7 @@ extern "C"{
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
  */
-status_t
-resize_spiral(
+status_t resize_spiral(
     spiral_t * spiral, size_t index, uint32_t length, int perfection_threshold
 );
 
@@ -31,8 +30,7 @@ resize_spiral(
  * store these in a the spiral struct that is pointed to by the pointer
  * returns a status struct (used for error information)
  */
-status_t
-plot_spiral(spiral_t * spiral, int perfection_threshold);
+status_t plot_spiral(spiral_t * spiral, int perfection_threshold);
 
 #ifdef __cplusplus
 } // extern "C"

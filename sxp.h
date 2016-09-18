@@ -13,31 +13,27 @@ extern "C"{
 #endif
 
 // returns size of file associated with given file handle
-size_t
-get_file_size(FILE * file_handle);
+size_t get_file_size(FILE * file_handle);
 
 /*
  * given an open file handle and a buffer, read the file contents into buffer
  * returns true on success and false on failure.
  */
-bool
-file_to_buffer(FILE * file_handle, buffer_t * buffer);
+bool file_to_buffer(FILE * file_handle, buffer_t * buffer);
 
 /*
  * given a buffer struct and an open file handle, writes the buffer contents
  * to the file.
  * returns true on success and false on failure.
  */
-bool
-buffer_to_file(buffer_t * buffer, FILE * file_handle);
+bool buffer_to_file(buffer_t * buffer, FILE * file_handle);
 
 /*
  * function responsible for actually doing the main work, called by main with
  * options configured via command-line.
  * returns true on success, false on failure.
  */
-bool
-run(
+bool run(
     bool prepare, bool generate, bool render, bool perfect, int perfect_threshold,
     const char * input_file_path, const char * output_file_path
 );

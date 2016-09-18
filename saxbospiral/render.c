@@ -23,8 +23,7 @@ extern "C"{
  * NOTE: This should NEVER be called with a pointer to anything other than a
  * 2-item struct of type co_ord_t
  */
-static void
-get_bounds(spiral_t spiral, co_ord_t * bounds) {
+static void get_bounds(spiral_t spiral, co_ord_t * bounds) {
     tuple_item_t min_x = 0;
     tuple_item_t min_y = 0;
     tuple_item_t max_x = 0;
@@ -55,8 +54,7 @@ get_bounds(spiral_t spiral, co_ord_t * bounds) {
  * representing a monochromatic image of the rendered spiral to the bitmap
  * returns a status struct with error information (if any)
  */
-status_t
-render_spiral(spiral_t spiral, bitmap_t * image) {
+status_t render_spiral(spiral_t spiral, bitmap_t * image) {
     // create result status struct
     status_t result = {{0, 0, 0}, 0};
     // plot co-ords of spiral into it's cache
