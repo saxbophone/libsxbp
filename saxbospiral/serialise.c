@@ -89,8 +89,8 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
             buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] >> 6
         );
         /*
-         * length is stored as 30 least significant bits, so we have to unpack it
-         * handle first byte on it's own as we only need least 6 bits of it
+         * length is stored as 30 least significant bits, so we have to unpack
+         * it handle first byte on it's own as we only need least 6 bits of it
          * bit mask and shift 3 bytes to left
          */
         spiral->lines[i].length = (

@@ -33,8 +33,8 @@ status_t spiral_points(
  * line to use, calculate and store the co-ordinates of all line segments that
  * would make up the spiral if the current lengths and directions were used.
  * each line segment is only one unit long, meaning multiple ones are needed for
- * lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
- * member and are re-used if they are still valid
+ * lines longer than one unit. The co-ords are stored in the
+ * spiral's co_ord_cache member and are re-used if they are still valid
  * returns a status struct with error information (if any)
  */
 status_t cache_spiral_points(spiral_t * spiral, size_t limit);

@@ -101,7 +101,10 @@ status_t write_png_image(bitmap_t bitmap, buffer_t * buffer) {
     metadata[0].key = "Author";
     metadata[0].text = "Joshua Saxby (https://github.com/saxbophone)";
     metadata[1].key = "Description";
-    metadata[1].text = "Experimental generation of 2D spiralling lines based on input binary data";
+    metadata[1].text = (
+        "Experimental generation of 2D spiralling lines based on input binary "
+        "data"
+    );
     metadata[2].key = "Copyright";
     metadata[2].text = "Copyright Joshua Saxby";
     metadata[3].key = "Software";
@@ -118,7 +121,8 @@ status_t write_png_image(bitmap_t bitmap, buffer_t * buffer) {
     png_write_info(png_ptr, info_ptr);
     // set bit shift - TODO: Check if this is acutally needed
     png_set_shift(png_ptr, &sig_bit);
-    // set bit packing - NOTE: I'm pretty sure this bit is needed but worth checking
+    // set bit packing
+    // NOTE: I'm pretty sure this bit is needed but worth checking
     png_set_packing(png_ptr);
     // Allocate memory for one row (1 byte per pixel - RGB)
     row = (png_bytep) malloc(bitmap.width * sizeof(png_byte));

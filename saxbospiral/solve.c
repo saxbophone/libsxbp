@@ -100,8 +100,8 @@ static length_t suggest_resize(
     // check if collides or not, return same size if no collision
     if(spiral.collides != -1) {
         /*
-         * if the perfection threshold is -1, then we can just use our suggestion,
-         * as perfection is disabled.
+         * if the perfection threshold is -1, then we can just use our
+         * suggestion, as perfection is disabled.
          * otherwise, if the colliding line's length is greater than our
          * perfection threshold, we cannot make any intelligent suggestions on
          * the length to extend the previous line to (without the high
