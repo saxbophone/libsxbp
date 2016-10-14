@@ -415,7 +415,7 @@ bool test_dump_spiral() {
         input.lines[i].length = lengths[i];
     }
     // build buffer of bytes for expected output data
-    buffer_t expected = { .size = 89, };
+    buffer_t expected = { .size = 89 + 8 + 4, };
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
@@ -460,6 +460,7 @@ bool test_dump_spiral() {
         // compare with expected buffer
         for(size_t i = 0; i < expected.size; i++) {
             if(output.bytes[i] != expected.bytes[i]) {
+                printf("%lu\n", i);
                 result = false;
             }
         }

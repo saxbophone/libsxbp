@@ -37,6 +37,26 @@ static uint32_t load_uint32_t(buffer_t* buffer, size_t start_index) {
     return value;
 }
 
+// dumps a 64-bit unsigned integer of value to buffer at given index
+static void dump_uint64_t(uint64_t value, buffer_t* buffer, size_t start_index) {
+    for(uint8_t i = 0; i < 8; i++) {
+        uint8_t shift = (8 * (7 - i));
+        buffer->bytes[start_index + i] = (uint8_t)(
+            (value & (0xffUL << shift)) >> shift
+        );
+    }
+}
+
+// dumps a 32-bit unsigned integer of value to buffer at given index
+static void dump_uint32_t(uint32_t value, buffer_t* buffer, size_t start_index) {
+    for(uint8_t i = 0; i < 4; i++) {
+        uint8_t shift = (8 * (3 - i));
+        buffer->bytes[start_index + i] = (uint8_t)(
+            (value & (0xffUL << shift)) >> shift
+        );
+    }
+}
+
 /*
  * given a buffer and a pointer to a blank spiral_t, create a spiral represented
  * by the data in the struct and write to the spiral
@@ -150,15 +170,12 @@ serialise_result_t dump_spiral(spiral_t spiral, buffer_t * buffer) {
         (char *)buffer->bytes, "SAXBOSPIRAL\n%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch
     );
-    // write second part of data header (spiral size as 64 bit uint)
-    for(uint8_t i = 0; i < 8; i++) {
-        uint8_t shift = (8 * (7 - i));
-        buffer->bytes[16 + i] = (uint8_t)(
-            ((uint64_t)spiral.size & (0xffUL << shift)) >> shift
-        );
-    }
+    // write second part of data header (size, solved count and seconds fields)
+    dump_uint64_t(spiral.size, buffer, 16);
+    dump_uint64_t(spiral.solved_count, buffer, 24);
+    dump_uint32_t(spiral.seconds_spent, buffer, 32);
     // write final newline at end of header
-    buffer->bytes[24] = '\n';
+    buffer->bytes[FILE_HEADER_SIZE - 1] = '\n';
     // now write the data section
     for(size_t i = 0; i < spiral.size; i++) {
         /*
