@@ -111,11 +111,13 @@ typedef struct co_ord_cache_t {
 } co_ord_cache_t;
 
 typedef struct spiral_t {
-    uint64_t size;
-    line_t * lines;
-    co_ord_cache_t co_ord_cache;
-    bool collides;
-    uint64_t collider;
+    uint64_t size; // count of lines
+    line_t * lines; // dynamic array of lines
+    co_ord_cache_t co_ord_cache; // co-ord cache for lines
+    bool collides; // whether this spiral collides or not
+    uint64_t collider; // the index of the line causing collision, if any
+    uint64_t solved_count; // the index of the highest line solved so far
+    uint32_t seconds_spent; // count of seconds spent solving the spiral
 } spiral_t;
 
 typedef struct buffer_t {
