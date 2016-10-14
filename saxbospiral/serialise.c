@@ -16,7 +16,7 @@ extern "C"{
 #endif
 
 // constants related to how spiral data is packed in files - measured in bytes
-const size_t FILE_HEADER_SIZE = 25 + 8 + 4;
+const size_t FILE_HEADER_SIZE = 37;
 const size_t LINE_T_PACK_SIZE = 4;
 
 // loads a 64-bit unsigned integer from buffer starting at given index

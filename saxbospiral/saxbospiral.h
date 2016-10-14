@@ -116,6 +116,11 @@ typedef struct spiral_t {
     co_ord_cache_t co_ord_cache; // co-ord cache for lines
     bool collides; // whether this spiral collides or not
     uint64_t collider; // the index of the line causing collision, if any
+    /*
+     * NOTE: The remaining fields are currently unused by the solver/generator
+     * code, but they are read to and written from files. They will be used
+     * by the rest of the code in future versions.
+     */
     uint64_t solved_count; // the count of lines solved so far (index of next)
     uint32_t seconds_spent; // count of seconds spent solving the spiral
 } spiral_t;
