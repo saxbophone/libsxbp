@@ -165,7 +165,7 @@ bool run(
         return false;
     }
     // create initial blank spiral struct
-    spiral_t spiral = {0, 0, {{0, 0}, 0}, 0};
+    spiral_t spiral = {0, NULL, {{NULL, 0}, 0}, false, 0};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
     // check error condition (where no actions were specified)

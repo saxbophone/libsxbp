@@ -6,6 +6,7 @@
 #warning "Please compile this code for a target with 64-bit words or greater."
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -110,12 +111,11 @@ typedef struct co_ord_cache_t {
 } co_ord_cache_t;
 
 typedef struct spiral_t {
-    // TODO: Change type of this to int64_t
-    //       Then, remove typecast in solve.c, in function spiral_collides()
-    size_t size;
+    uint64_t size;
     line_t * lines;
     co_ord_cache_t co_ord_cache;
-    int64_t collides;
+    bool collides;
+    uint64_t collider;
 } spiral_t;
 
 typedef struct buffer_t {
