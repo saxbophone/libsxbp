@@ -124,8 +124,7 @@ static bool handle_error(status_t result) {
     if(result.diagnostic != OPERATION_OK) {
         fprintf(
             stderr,
-            "Error code %s when trying to initialise spiral from raw data\n",
-            error_code_string(result.diagnostic)
+            "Error Code: %s\n", error_code_string(result.diagnostic)
         );
         return true;
     } else {
@@ -188,8 +187,7 @@ bool run(
         if(result.status.diagnostic != OPERATION_OK) {
             fprintf(
                 stderr,
-                "Error when trying to initialise spiral from raw data\n"
-                "Generic Error: %s\nFile Loader Error: %s\n",
+                "Error Code:\t\t%s\nFile Error Code:\t%s\n",
                 error_code_string(result.status.diagnostic),
                 file_error_code_string(result.diagnostic)
             );
@@ -222,8 +220,7 @@ bool run(
         if(result.status.diagnostic != OPERATION_OK) {
             fprintf(
                 stderr,
-                "Error when trying to initialise spiral from raw data\n"
-                "Generic Error: %s\nFile Loader Error: %s\n",
+                "Error Code:\t\t%s\nFile Error Code:\t%s\n",
                 error_code_string(result.status.diagnostic),
                 file_error_code_string(result.diagnostic)
             );
