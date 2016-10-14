@@ -86,10 +86,10 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
         .minor = buffer.bytes[13],
         .patch = buffer.bytes[14],
     };
-    // we don't accept anything over v0.12.x, so the max is v0.12.255
-    version_t max_version = { .major = 0, .minor = 12, .patch = 255, };
+    // we don't accept anything less than v0.13.0, so the min is v0.13.0
+    version_t min_version = { .major = 0, .minor = 13, .patch = 0, };
     // check for version compatibility
-    if(version_hash(buffer_version) > version_hash(max_version)) {
+    if(version_hash(buffer_version) < version_hash(min_version)) {
         // check failed
         result.status.location = DEBUG; // catch location of error
         result.status.diagnostic = OPERATION_FAIL; // flag failure

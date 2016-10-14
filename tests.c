@@ -393,6 +393,46 @@ bool test_load_spiral_rejects_too_small_data_section() {
     return result;
 }
 
+bool test_load_spiral_rejects_wrong_version() {
+    // success / failure variable
+    bool result = true;
+    // build buffer of bytes for input data
+    buffer_t buffer = { .size = 41, };
+    buffer.bytes = calloc(1, buffer.size);
+    // construct data header
+    sprintf(
+        (char *)buffer.bytes,
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+        0, 12, 255,
+        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
+        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
+        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+    );
+    // construct data section - make it deliberately too short
+    uint8_t data[16] = {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+    };
+    // write data to buffer
+    for(size_t i = 0; i < 16; i++) {
+        buffer.bytes[i+25] = data[i];
+    }
+    // call load_spiral with buffer and blank spiral, store result
+    spiral_t output;
+    serialise_result_t serialise_result = load_spiral(buffer, &output);
+
+    if(
+        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
+        (serialise_result.diagnostic != DESERIALISE_BAD_VERSION)
+    ) {
+        result = false;
+    }
+
+    return result;
+}
+
 bool test_dump_spiral() {
     // success / failure variable
     bool result = true;
@@ -512,6 +552,10 @@ int main() {
     result = run_test_case(
         result, test_load_spiral_rejects_too_small_data_section,
         "test_load_spiral_rejects_too_small_data_section"
+    );
+    result = run_test_case(
+        result, test_load_spiral_rejects_wrong_version,
+        "test_load_spiral_rejects_wrong_version"
     );
     result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
     return result ? 0 : 1;
