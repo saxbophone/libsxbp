@@ -225,13 +225,16 @@ bool test_load_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 89, };
+    buffer_t buffer = { .size = 101, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
         (char *)buffer.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch,
+        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
+        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
+        0, 0, 12, 53 // seconds_spent serialised as 32-bit
     );
     // construct data section - each line of the array is one line of the spiral
     uint8_t data[64] = {
@@ -254,10 +257,12 @@ bool test_load_spiral() {
     };
     // write data to buffer
     for(size_t i = 0; i < 64; i++) {
-        buffer.bytes[i+25] = data[i];
+        buffer.bytes[i + FILE_HEADER_SIZE] = data[i];
     }
     // build expected output struct
-    spiral_t expected = { .size = 16, };
+    spiral_t expected = {
+        .size = 16, .solved_count = 5, .seconds_spent = 3125,
+    };
     expected.lines = calloc(sizeof(line_t), 16);
     direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
@@ -276,7 +281,11 @@ bool test_load_spiral() {
     load_spiral(buffer, &output);
 
     if(output.size != expected.size) {
-        result = false; 
+        result = false;
+    } else if(output.solved_count != expected.solved_count) {
+        result = false;
+    } else if(output.seconds_spent != expected.seconds_spent) {
+        result = false;
     } else {
         // compare with expected struct
         for(uint8_t i = 0; i < 16; i++) {
@@ -300,10 +309,12 @@ bool test_load_spiral_rejects_missing_magic_number() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 36, };
+    buffer_t buffer = { .size = 59, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = (uint8_t *)"not the header you were looking for";
+    buffer.bytes = (uint8_t *)(
+        "not the header you were looking for eh? I think not surely?"
+    );
 
     // call load_spiral with buffer and blank spiral, store result
     spiral_t output;
@@ -351,8 +362,11 @@ bool test_load_spiral_rejects_too_small_data_section() {
     // construct data header
     sprintf(
         (char *)buffer.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch,
+        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
+        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
+        0, 0, 12, 53 // seconds_spent serialised as 32-bit
     );
     // construct data section - make it deliberately too short
     uint8_t data[16] = {
@@ -379,11 +393,55 @@ bool test_load_spiral_rejects_too_small_data_section() {
     return result;
 }
 
+bool test_load_spiral_rejects_wrong_version() {
+    // success / failure variable
+    bool result = true;
+    // build buffer of bytes for input data
+    buffer_t buffer = { .size = 41, };
+    buffer.bytes = calloc(1, buffer.size);
+    // construct data header
+    sprintf(
+        (char *)buffer.bytes,
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+        0, 12, 255,
+        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
+        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
+        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+    );
+    // construct data section - make it deliberately too short
+    uint8_t data[16] = {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+    };
+    // write data to buffer
+    for(size_t i = 0; i < 16; i++) {
+        buffer.bytes[i+25] = data[i];
+    }
+    // call load_spiral with buffer and blank spiral, store result
+    spiral_t output;
+    serialise_result_t serialise_result = load_spiral(buffer, &output);
+
+    if(
+        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
+        (serialise_result.diagnostic != DESERIALISE_BAD_VERSION)
+    ) {
+        result = false;
+    }
+
+    return result;
+}
+
 bool test_dump_spiral() {
     // success / failure variable
     bool result = true;
     // build input struct
-    spiral_t input = { .size = 16, };
+    spiral_t input = {
+        .size = 16,
+        .solved_count = 5,
+        .seconds_spent = 3125,
+    };
     input.lines = calloc(sizeof(line_t), 16);
     direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
@@ -397,13 +455,16 @@ bool test_dump_spiral() {
         input.lines[i].length = lengths[i];
     }
     // build buffer of bytes for expected output data
-    buffer_t expected = { .size = 89, };
+    buffer_t expected = { .size = 101, };
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
         (char *)expected.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch, 0, 0, 0, 0, 0, 0, 0, 16
+        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+        VERSION.major, VERSION.minor, VERSION.patch,
+        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
+        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
+        0, 0, 12, 53 // seconds_spent serialised as 32-bit
     );
     // construct expected data section
     uint8_t data[64] = {
@@ -426,7 +487,7 @@ bool test_dump_spiral() {
     };
     // write data to expected buffer
     for(size_t i = 0; i < 64; i++) {
-        expected.bytes[i+25] = data[i];
+        expected.bytes[i + FILE_HEADER_SIZE] = data[i];
     }
 
     // call dump_spiral with spiral and write to output buffer
@@ -491,6 +552,10 @@ int main() {
     result = run_test_case(
         result, test_load_spiral_rejects_too_small_data_section,
         "test_load_spiral_rejects_too_small_data_section"
+    );
+    result = run_test_case(
+        result, test_load_spiral_rejects_wrong_version,
+        "test_load_spiral_rejects_wrong_version"
     );
     result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
     return result ? 0 : 1;
