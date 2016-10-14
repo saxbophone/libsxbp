@@ -16,8 +16,26 @@ extern "C"{
 #endif
 
 // constants related to how spiral data is packed in files - measured in bytes
-const size_t FILE_HEADER_SIZE = 25;
+const size_t FILE_HEADER_SIZE = 25 + 8 + 4;
 const size_t LINE_T_PACK_SIZE = 4;
+
+// loads a 64-bit unsigned integer from buffer starting at given index
+static uint64_t load_uint64_t(buffer_t* buffer, size_t start_index) {
+    uint64_t value = 0;
+    for(size_t i = 0; i < 8; i++) {
+        value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
+    }
+    return value;
+}
+
+// loads a 32-bit unsigned integer from buffer starting at given index
+static uint32_t load_uint32_t(buffer_t* buffer, size_t start_index) {
+    uint32_t value = 0;
+    for(size_t i = 0; i < 4; i++) {
+        value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
+    }
+    return value;
+}
 
 /*
  * given a buffer and a pointer to a blank spiral_t, create a spiral represented
@@ -59,10 +77,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
         return result;
     }
     // get size of spiral object contained in buffer
-    size_t spiral_size = 0;
-    for(size_t i = 0; i < 8; i++) {
-        spiral_size |= (buffer.bytes[16 + i]) << (8 * (7 - i));
-    }
+    uint64_t spiral_size = load_uint64_t(&buffer, 16);
     // Check that the file data section is large enough for the spiral size
     if((buffer.size - FILE_HEADER_SIZE) != (LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed
@@ -72,8 +87,10 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
         return result;
     }
     // good to go
-    // populate spiral struct
+    // populate spiral struct, loading some more values
     spiral->size = spiral_size;
+    spiral->solved_count = load_uint64_t(&buffer, 24);
+    spiral->seconds_spent = load_uint32_t(&buffer, 32);
     // allocate memory
     spiral->lines = calloc(sizeof(line_t), spiral->size);
     // catch allocation error
