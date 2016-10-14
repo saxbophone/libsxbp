@@ -18,8 +18,7 @@ extern "C"{
 #endif
 
 // returns size of file associated with given file handle
-size_t
-get_file_size(FILE * file_handle) {
+size_t get_file_size(FILE * file_handle) {
     // seek to end
     fseek(file_handle, 0L, SEEK_END);
     // get size
@@ -33,8 +32,7 @@ get_file_size(FILE * file_handle) {
  * given an open file handle and a buffer, read the file contents into buffer
  * returns true on success and false on failure.
  */
-bool
-file_to_buffer(FILE * file_handle, buffer_t * buffer) {
+bool file_to_buffer(FILE * file_handle, buffer_t * buffer) {
     size_t file_size = get_file_size(file_handle);
     // allocate/re-allocate buffer memory
     if(buffer->bytes == NULL) {
@@ -64,8 +62,7 @@ file_to_buffer(FILE * file_handle, buffer_t * buffer) {
  * to the file.
  * returns true on success and false on failure.
  */
-bool
-buffer_to_file(buffer_t * buffer, FILE * file_handle) {
+bool buffer_to_file(buffer_t * buffer, FILE * file_handle) {
     size_t bytes_written = fwrite(
         buffer->bytes, 1, buffer->size, file_handle
     );
@@ -81,8 +78,7 @@ buffer_to_file(buffer_t * buffer, FILE * file_handle) {
  * private function, given a diagnostic_t error, returns the string name of the
  * error code
  */
-static const char *
-error_code_string(diagnostic_t error) {
+static const char * error_code_string(diagnostic_t error) {
     switch(error) {
         case OPERATION_FAIL:
             return "OPERATION_FAIL";
@@ -102,8 +98,7 @@ error_code_string(diagnostic_t error) {
  * private function, given a deserialise_diagnostic_t error, returns the string
  * name of the error code
  */
-static const char *
-file_error_code_string(deserialise_diagnostic_t error) {
+static const char * file_error_code_string(deserialise_diagnostic_t error) {
     switch(error) {
         case DESERIALISE_OK:
             return "DESERIALISE_OK (NO ERROR)";
@@ -124,8 +119,7 @@ file_error_code_string(deserialise_diagnostic_t error) {
  * private function to handle all generic errors, by printing to stderr
  * returns true if there was an error, false if not
  */
-static bool
-handle_error(status_t result) {
+static bool handle_error(status_t result) {
     // if we had problems, print to stderr and return true
     if(result.diagnostic != OPERATION_OK) {
         fprintf(
@@ -145,8 +139,7 @@ handle_error(status_t result) {
  * options configured via command-line.
  * returns true on success, false on failure.
  */
-bool
-run(
+bool run(
     bool prepare, bool generate, bool render, bool perfect, int perfect_threshold,
     const char * input_file_path, const char * output_file_path
 ) {
@@ -172,7 +165,7 @@ run(
         return false;
     }
     // create initial blank spiral struct
-    spiral_t spiral = {0, 0, {{0, 0}, 0}, 0};
+    spiral_t spiral = {0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
     // resolve perfection threshold - set to -1 if disabled completely
     int perfection = (perfect == false) ? -1 : perfect_threshold;
     // check error condition (where no actions were specified)
@@ -255,8 +248,7 @@ run(
 }
 
 // main - mostly just process arguments, the bulk of the work is done by run()
-int
-main(int argc, char * argv[]) {
+int main(int argc, char * argv[]) {
     // status code initially set to -1
     int status_code = -1;
     // build argtable struct for parsing command-line arguments

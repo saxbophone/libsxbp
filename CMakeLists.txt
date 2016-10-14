@@ -1,7 +1,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(saxbospiral VERSION 0.12.2 LANGUAGES C)
+project(saxbospiral VERSION 0.13.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
@@ -31,11 +31,12 @@ function(enable_c_compiler_flag_if_supported flag)
 endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
-if(NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
+    message("Warnings Enabled")
     # enable all warnings about 'questionable constructs'
     enable_c_compiler_flag_if_supported("-Wall")
     # issue 'pedantic' warnings for strict ISO compliance
-    enable_c_compiler_flag_if_supported("-Wpedantic")
+    enable_c_compiler_flag_if_supported("-pedantic")
     # enable 'extra' strict warnings
     enable_c_compiler_flag_if_supported("-Wextra")
     # convert all warnings into errors

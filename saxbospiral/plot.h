@@ -11,8 +11,7 @@ extern "C"{
 #endif
 
 // returns the sum of all line lengths within the given indexes
-size_t
-sum_lines(spiral_t spiral, size_t start, size_t end);
+size_t sum_lines(spiral_t spiral, size_t start, size_t end);
 
 /*
  * given a spiral_t struct, a pointer to a co_ord_array_t, a pair of co-ords
@@ -24,8 +23,7 @@ sum_lines(spiral_t spiral, size_t start, size_t end);
  * lines longer than one unit.
  * returns a status struct with error information (if any)
  */
-status_t
-spiral_points(
+status_t spiral_points(
     spiral_t spiral, co_ord_array_t * output, co_ord_t start_point,
     size_t start, size_t end
 );
@@ -35,12 +33,11 @@ spiral_points(
  * line to use, calculate and store the co-ordinates of all line segments that
  * would make up the spiral if the current lengths and directions were used.
  * each line segment is only one unit long, meaning multiple ones are needed for
- * lines longer than one unit. The co-ords are stored in the spiral's co_ord_cache
- * member and are re-used if they are still valid
+ * lines longer than one unit. The co-ords are stored in the
+ * spiral's co_ord_cache member and are re-used if they are still valid
  * returns a status struct with error information (if any)
  */
-status_t
-cache_spiral_points(spiral_t * spiral, size_t limit);
+status_t cache_spiral_points(spiral_t * spiral, size_t limit);
 
 #ifdef __cplusplus
 } // extern "C"

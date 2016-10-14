@@ -18,62 +18,64 @@ extern "C"{
 #endif
 
 /*
- * private function, given a spiral struct and the index of the highest line
- * to use, check if the latest line would collide with any of the others, given
- * their current directions and jump sizes (using co-ords stored in cache).
+ * private function, given a pointer to a spiral struct and the index of the
+ * highest line to use, check if the latest line would collide with any of the
+ * others, given their current directions and jump sizes (using co-ords stored
+ * in cache).
  * NOTE: This assumes that all lines except the most recent are valid and
  * don't collide.
- * Returns the index of the lowest line that the latest line collided with if
- * there are collisions, or -1 if no collisions were found.
+ * Returns boolean on whether or not the spiral collides or not. Also, sets the
+ * collider field in the spiral struct to the index of the colliding line
+ * (if any)
  */
-static int64_t
-spiral_collides(spiral_t spiral, size_t index) {
+static bool spiral_collides(spiral_t* spiral, size_t index) {
     /*
      * if there are less than 4 lines in the spiral, then there's no way it
-     * can collide, so return -1 early
+     * can collide, so return false early
      */
-    if (spiral.size < 4) {
-        return -1;
+    if (spiral->size < 4) {
+        return false;
     } else {
         // initialise a counter to keep track of what line we're on
-        int64_t line_count = 0;
-        int64_t ttl = spiral.lines[line_count].length + 1; // ttl of line
-        size_t last_co_ord = spiral.co_ord_cache.co_ords.size;
-        line_t last_line = spiral.lines[index];
-        int64_t start_of_last_line = (last_co_ord - last_line.length) - 1;
+        uint64_t line_count = 0;
+        uint64_t ttl = spiral->lines[line_count].length + 1; // ttl of line
+        size_t last_co_ord = spiral->co_ord_cache.co_ords.size;
+        line_t last_line = spiral->lines[index];
+        uint64_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
-        for(int64_t i = 0; i < start_of_last_line; i++) {
+        for(uint64_t i = 0; i < start_of_last_line; i++) {
             for(size_t j = start_of_last_line; j < last_co_ord; j++) {
                 if(
                     (
-                        spiral.co_ord_cache.co_ords.items[i].x ==
-                        spiral.co_ord_cache.co_ords.items[j].x
+                        spiral->co_ord_cache.co_ords.items[i].x ==
+                        spiral->co_ord_cache.co_ords.items[j].x
                     )
                     &&
                     (
-                        spiral.co_ord_cache.co_ords.items[i].y ==
-                        spiral.co_ord_cache.co_ords.items[j].y
+                        spiral->co_ord_cache.co_ords.items[i].y ==
+                        spiral->co_ord_cache.co_ords.items[j].y
                     )
                 ) {
-                    return line_count;
+                    spiral->collider = line_count;
+                    return true;
                 }
             }
             // update ttl (and counter if needed)
             ttl--;
             if(ttl == 0) {
                 line_count++;
-                ttl = spiral.lines[line_count].length;
+                ttl = spiral->lines[line_count].length;
             }
             /*
              * terminate the loop if the next line would be the line 2 lines
              * before the last one (these two lines can never collide with the
              * last and can be safely ignored, for a small performance increase)
              */
-            if(line_count == ((int64_t)spiral.size - 2 - 1)) { // -1 for zero-index
+            if(line_count == (spiral->size - 2 - 1)) { // -1 for zero-index
                 break;
             }
         }
-        return -1;
+        return false;
     }
 }
 
@@ -95,13 +97,14 @@ spiral_collides(spiral_t spiral, size_t index) {
  * the newly plotted line has collided with and 'previous' or 'p' refers to the
  * line before the newly plotted line.
  */
-static length_t
-suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
+static length_t suggest_resize(
+    spiral_t spiral, size_t index, int perfection_threshold
+) {
     // check if collides or not, return same size if no collision
-    if(spiral.collides != -1) {
+    if(spiral.collides) {
         /*
-         * if the perfection threshold is -1, then we can just use our suggestion,
-         * as perfection is disabled.
+         * if the perfection threshold is -1, then we can just use our
+         * suggestion, as perfection is disabled.
          * otherwise, if the colliding line's length is greater than our
          * perfection threshold, we cannot make any intelligent suggestions on
          * the length to extend the previous line to (without the high
@@ -116,7 +119,7 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
         }
         // store the 'previous' and 'rigid' lines.
         line_t p = spiral.lines[index - 1];
-        line_t r = spiral.lines[spiral.collides];
+        line_t r = spiral.lines[spiral.collider];
         // if pr and r are not parallel, we can return early
         if((p.direction % 2) != (r.direction % 2)) {
             return spiral.lines[index - 1].length + 1;
@@ -128,7 +131,7 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
          * colliding line, and the rigid line that it collided with.
          */
         size_t p_index = sum_lines(spiral, 0, index - 1);
-        size_t r_index = sum_lines(spiral, 0, spiral.collides);
+        size_t r_index = sum_lines(spiral, 0, spiral.collider);
         pa = spiral.co_ord_cache.co_ords.items[p_index];
         ra = spiral.co_ord_cache.co_ords.items[r_index];
         rb = spiral.co_ord_cache.co_ords.items[r_index + r.length];
@@ -175,9 +178,8 @@ suggest_resize(spiral_t spiral, size_t index, int perfection_threshold) {
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
  */
-status_t
-resize_spiral(
-    spiral_t * spiral, size_t index, uint32_t length, int perfection_threshold
+status_t resize_spiral(
+    spiral_t* spiral, size_t index, uint32_t length, int perfection_threshold
 ) {
     /*
      * setup state variables, these are used in place of recursion for managing
@@ -203,8 +205,8 @@ resize_spiral(
         if(result.diagnostic != OPERATION_OK) {
             return result;
         }
-        spiral->collides = spiral_collides(*spiral, current_index);
-        if(spiral->collides != -1) {
+        spiral->collides = spiral_collides(spiral, current_index);
+        if(spiral->collides) {
             /*
              * if we've caused a collision, we need to call the suggest_resize()
              * function to get the suggested length to resize the previous
@@ -241,8 +243,7 @@ resize_spiral(
  * store these in a the spiral struct that is pointed to by the pointer
  * returns a status struct (used for error information)
  */
-status_t
-plot_spiral(spiral_t * spiral, int perfection_threshold) {
+status_t plot_spiral(spiral_t* spiral, int perfection_threshold) {
     // set up result status
     status_t result = {{0, 0, 0}, 0};
     // calculate the length of each line

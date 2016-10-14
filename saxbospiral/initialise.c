@@ -13,8 +13,7 @@ extern "C"{
  * when facing the direction specified by current, return the direction that
  * will be faced when turning in the rotational direction specified by turn.
  */
-direction_t
-change_direction(direction_t current, rotation_t turn) {
+direction_t change_direction(direction_t current, rotation_t turn) {
     return (current + turn) % 4U;
 }
 
@@ -25,8 +24,7 @@ change_direction(direction_t current, rotation_t turn) {
  * instructions which are then used to build the pattern.
  * returns a status_t struct with error information (if needed)
  */
-status_t
-init_spiral(buffer_t buffer, spiral_t * spiral) {
+status_t init_spiral(buffer_t buffer, spiral_t * spiral) {
     // result status object
     status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line
@@ -47,15 +45,15 @@ init_spiral(buffer_t buffer, spiral_t * spiral) {
     spiral->lines[0].direction = current;
     spiral->lines[0].length = 0;
     /*
-     * now, iterate over all the bits in the data and convert to directions
-     * that make the spiral pattern, storing these directions in the result lines
+     * now, iterate over all the bits in the data and convert to directions that
+     * make the spiral pattern, storing these directions in the result lines
      */
     for(size_t s = 0; s < buffer.size; s++) {
         // byte-level loop
         for(size_t b = 0; b < 8; b++) {
             // bit level loop
             uint8_t e = 7 - b; // which power of two to use with bit mask
-            uint8_t bit = (buffer.bytes[s] & (1 << e)) >> e; // the currently accessed bit
+            uint8_t bit = (buffer.bytes[s] & (1 << e)) >> e; // the current bit
             size_t index = (s * 8) + b + 1; // line index
             rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
