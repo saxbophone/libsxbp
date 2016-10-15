@@ -213,7 +213,7 @@ bool run(
             (uint64_t)total_lines : lines_to_plot
         );
         // we must plot all lines from spiral file
-        if(handle_error(plot_spiral(&spiral, perfection, lines_to_plot))) {
+        if(handle_error(plot_spiral(&spiral, perfection, lines_to_plot, NULL))) {
             // handle errors
             return false;
         }

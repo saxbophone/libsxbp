@@ -204,7 +204,7 @@ bool test_plot_spiral() {
     }
 
     // call plot_spiral on spiral
-    plot_spiral(&spiral, 1, 16);
+    plot_spiral(&spiral, 1, 16, NULL);
 
     // check solved count
     if(spiral.solved_count != expected.solved_count) {
@@ -248,7 +248,7 @@ bool test_plot_spiral_partial() {
     }
 
     // call plot_spiral on spiral, with instruction to only plot up to line 9
-    plot_spiral(&spiral, 1, 9);
+    plot_spiral(&spiral, 1, 9, NULL);
 
     // check solved count
     if(spiral.solved_count != expected.solved_count) {
