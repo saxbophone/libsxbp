@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -18,7 +19,7 @@ extern "C"{
 #endif
 
 // returns size of file associated with given file handle
-size_t get_file_size(FILE * file_handle) {
+size_t get_file_size(FILE* file_handle) {
     // seek to end
     fseek(file_handle, 0L, SEEK_END);
     // get size
@@ -32,7 +33,7 @@ size_t get_file_size(FILE * file_handle) {
  * given an open file handle and a buffer, read the file contents into buffer
  * returns true on success and false on failure.
  */
-bool file_to_buffer(FILE * file_handle, buffer_t * buffer) {
+bool file_to_buffer(FILE* file_handle, buffer_t* buffer) {
     size_t file_size = get_file_size(file_handle);
     // allocate/re-allocate buffer memory
     if(buffer->bytes == NULL) {
@@ -62,7 +63,7 @@ bool file_to_buffer(FILE * file_handle, buffer_t * buffer) {
  * to the file.
  * returns true on success and false on failure.
  */
-bool buffer_to_file(buffer_t * buffer, FILE * file_handle) {
+bool buffer_to_file(buffer_t* buffer, FILE* file_handle) {
     size_t bytes_written = fwrite(
         buffer->bytes, 1, buffer->size, file_handle
     );
@@ -78,7 +79,7 @@ bool buffer_to_file(buffer_t * buffer, FILE * file_handle) {
  * private function, given a diagnostic_t error, returns the string name of the
  * error code
  */
-static const char * error_code_string(diagnostic_t error) {
+static const char* error_code_string(diagnostic_t error) {
     switch(error) {
         case OPERATION_FAIL:
             return "OPERATION_FAIL";
@@ -98,7 +99,7 @@ static const char * error_code_string(diagnostic_t error) {
  * private function, given a deserialise_diagnostic_t error, returns the string
  * name of the error code
  */
-static const char * file_error_code_string(deserialise_diagnostic_t error) {
+static const char* file_error_code_string(deserialise_diagnostic_t error) {
     switch(error) {
         case DESERIALISE_OK:
             return "DESERIALISE_OK (NO ERROR)";
@@ -141,10 +142,10 @@ static bool handle_error(status_t result) {
 bool run(
     bool prepare, bool generate, bool render, bool perfect,
     int perfect_threshold, int line_limit, int total_lines,
-    const char * input_file_path, const char * output_file_path
+    const char* input_file_path, const char* output_file_path
 ) {
     // get input file handle
-    FILE * input_file = fopen(input_file_path, "rb");
+    FILE* input_file = fopen(input_file_path, "rb");
     if(input_file == NULL) {
         fprintf(stderr, "%s\n", "Couldn't open input file");
         return false;
@@ -245,7 +246,7 @@ bool run(
         }
     }
     // get output file handle
-    FILE * output_file = fopen(output_file_path, "wb");
+    FILE* output_file = fopen(output_file_path, "wb");
     if(output_file == NULL) {
         fprintf(stderr, "%s\n", "Couldn't open output file");
         return false;
@@ -262,57 +263,57 @@ bool run(
 }
 
 // main - mostly just process arguments, the bulk of the work is done by run()
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[]) {
     // status code initially set to -1
     int status_code = -1;
     // build argtable struct for parsing command-line arguments
     // show help
-    struct arg_lit * help = arg_lit0("h","help", "show this help and exit");
+    struct arg_lit* help = arg_lit0("h","help", "show this help and exit");
     // show version
-    struct arg_lit * version = arg_lit0("v", "version", "show version and exit");
+    struct arg_lit* version = arg_lit0("v", "version", "show version and exit");
     // flag for if we want to prepare a spiral
-    struct arg_lit * prepare = arg_lit0(
+    struct arg_lit* prepare = arg_lit0(
         "p", "prepare",
         "prepare a spiral from raw binary data"
     );
     // flag for if we want to generate the solution for a spiral's line lengths
-    struct arg_lit * generate = arg_lit0(
+    struct arg_lit* generate = arg_lit0(
         "g", "generate",
         "generate the lengths of a spiral's lines"
     );
     // flag for if we want to render a spiral to imagee
-    struct arg_lit * render = arg_lit0(
+    struct arg_lit* render = arg_lit0(
         "r", "render", "render a spiral to an image"
     );
-    struct arg_lit * perfect = arg_lit0(
+    struct arg_lit* perfect = arg_lit0(
         "D", "disable-perfection", "allow unlimited optimisations"
     );
-    struct arg_int * perfect_threshold = arg_int0(
+    struct arg_int* perfect_threshold = arg_int0(
         "d", "perfection-threshold", NULL, "set optimisation threshold"
     );
-    struct arg_int * total_lines = arg_int0(
+    struct arg_int* total_lines = arg_int0(
         "t", "total-lines", NULL, "total number of lines to plot to"
     );
-    struct arg_int * line_limit = arg_int0(
+    struct arg_int* line_limit = arg_int0(
         "l", "line-limit", NULL, "plot this many more lines than currently solved"
     );
     // input file path option
-    struct arg_file * input = arg_file0(
+    struct arg_file* input = arg_file0(
         "i", "input", NULL, "input file path"
     );
     // output file path option
-    struct arg_file * output = arg_file0(
+    struct arg_file* output = arg_file0(
         "o", "output", NULL, "output file path"
     );
     // argtable boilerplate
-    struct arg_end * end = arg_end(20);
-    void * argtable[] = {
+    struct arg_end* end = arg_end(20);
+    void* argtable[] = {
         help, version,
         prepare, generate, render,
         perfect, perfect_threshold, line_limit, total_lines,
         input, output, end,
     };
-    const char * program_name = "sxp";
+    const char* program_name = "sxp";
     // check argtable members were allocated successfully
     if(arg_nullcheck(argtable) != 0) {
         // NULL entries were detected, so some allocations failed
@@ -363,8 +364,8 @@ int main(int argc, char * argv[]) {
         perfect_threshold->ival[0],
         line_limit->ival[0],
         total_lines->ival[0],
-        * input->filename,
-        * output->filename
+        *input->filename,
+        *output->filename
     );
     // free argtable struct
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

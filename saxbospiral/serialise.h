@@ -39,7 +39,7 @@ extern const size_t LINE_T_PACK_SIZE;
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral);
+serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral);
 
 /*
  * given a spiral_t struct and a pointer to a blank buffer_t, serialise a binary
@@ -48,7 +48,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral);
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t dump_spiral(spiral_t spiral, buffer_t * buffer);
+serialise_result_t dump_spiral(spiral_t spiral, buffer_t* buffer);
 
 #ifdef __cplusplus
 } // extern "C"

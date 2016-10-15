@@ -277,7 +277,7 @@ bool test_load_spiral() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        (char *)buffer.bytes,
+        (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -360,7 +360,7 @@ bool test_load_spiral_rejects_missing_magic_number() {
     buffer_t buffer = { .size = 59, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = (uint8_t *)(
+    buffer.bytes = (uint8_t*)(
         "not the header you were looking for eh? I think not surely?"
     );
 
@@ -385,7 +385,7 @@ bool test_load_spiral_rejects_too_small_for_header() {
     buffer_t buffer = { .size = 12, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = (uint8_t *)"SAXBOSPIRAL";
+    buffer.bytes = (uint8_t*)"SAXBOSPIRAL";
 
     // call load_spiral with buffer and blank spiral, store result
     spiral_t output;
@@ -409,7 +409,7 @@ bool test_load_spiral_rejects_too_small_data_section() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        (char *)buffer.bytes,
+        (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -449,7 +449,7 @@ bool test_load_spiral_rejects_wrong_version() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        (char *)buffer.bytes,
+        (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         0, 12, 255,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -507,7 +507,7 @@ bool test_dump_spiral() {
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
-        (char *)expected.bytes,
+        (char*)expected.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -566,7 +566,7 @@ bool test_dump_spiral() {
 // test case's name. it will run the test case function and return the success
 // or failure status, which should be stored in the test suite status bool.
 bool run_test_case(
-    bool test_suite_state, bool (*test_case_func)(), char * test_case_name
+    bool test_suite_state, bool (*test_case_func)(), char* test_case_name
 ) {
     printf("%s: ", test_case_name);
     fflush(stdout);

@@ -4,9 +4,9 @@
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "saxbospiral.h"
 #include "plot.h"
@@ -253,7 +253,7 @@ status_t resize_spiral(
  * returns a status struct (used for error information)
  */
 status_t plot_spiral(
-    spiral_t * spiral, int perfection_threshold, uint64_t max_line,
+    spiral_t* spiral, int perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
         spiral_t* spiral, uint64_t latest_line, uint64_t target_line
     )

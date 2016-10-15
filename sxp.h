@@ -2,8 +2,8 @@
 #define SAXBOPHONE_SAXBOSPIRAL_SXP_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "saxbospiral/saxbospiral.h"
 
