@@ -19,7 +19,7 @@ extern "C"{
  * returns a status struct (used for error information)
  */
 status_t resize_spiral(
-    spiral_t * spiral, size_t index, uint32_t length, int perfection_threshold
+    spiral_t* spiral, size_t index, uint32_t length, int perfection_threshold
 );
 
 /*
@@ -38,7 +38,7 @@ status_t resize_spiral(
  * returns a status struct (used for error information)
  */
 status_t plot_spiral(
-    spiral_t * spiral, int perfection_threshold, uint64_t max_line,
+    spiral_t* spiral, int perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
         spiral_t* spiral, uint64_t latest_line, uint64_t target_line
     )

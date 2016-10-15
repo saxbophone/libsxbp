@@ -17,7 +17,7 @@ static void buffer_write_data(
     png_structp png_ptr, png_bytep data, png_size_t length
 ) {
     // retrieve pointer to buffer
-    buffer_t * p = (buffer_t *)png_get_io_ptr(png_ptr);
+    buffer_t* p = (buffer_t*)png_get_io_ptr(png_ptr);
     size_t new_size = p->size + length;
     // if buffer bytes pointer is not NULL, then re-allocate
     if(p->bytes != NULL) {
@@ -55,7 +55,7 @@ void cleanup_png_lib(png_structp png_ptr, png_infop info_ptr, png_bytep row) {
  * data as a PNG image to the buffer, using libpng.
  * returns a status struct containing error information, if any
  */
-status_t write_png_image(bitmap_t bitmap, buffer_t * buffer) {
+status_t write_png_image(bitmap_t bitmap, buffer_t* buffer) {
     // result status
     status_t result;
     // init buffer

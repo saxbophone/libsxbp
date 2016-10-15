@@ -29,7 +29,7 @@ size_t sum_lines(spiral_t spiral, size_t start, size_t end) {
  * returns a status struct with error information (if any)
  */
 status_t spiral_points(
-    spiral_t spiral, co_ord_array_t * output, co_ord_t start_point,
+    spiral_t spiral, co_ord_array_t* output, co_ord_t start_point,
     size_t start, size_t end
 ) {
     // prepare result status
@@ -77,7 +77,7 @@ status_t spiral_points(
  * co_ord_cache member and are re-used if they are still valid
  * returns a status struct with error information (if any)
  */
-status_t cache_spiral_points(spiral_t * spiral, size_t limit) {
+status_t cache_spiral_points(spiral_t* spiral, size_t limit) {
     // prepare result status
     status_t result = {{0, 0, 0}, 0};
     // the amount of space needed is the sum of all line lengths + 1 for end

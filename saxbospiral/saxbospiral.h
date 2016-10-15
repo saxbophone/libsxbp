@@ -35,8 +35,8 @@ version_hash_t version_hash(version_t version);
 // struct for storing the location of a DEBUG invocation
 typedef struct debug_t {
     size_t line;
-    char * file;
-    const char * function;
+    char* file;
+    const char* function;
 } debug_t;
 
 /*
@@ -101,7 +101,7 @@ typedef tuple_t vector_t;
 typedef tuple_t co_ord_t;
 
 typedef struct co_ord_array_t {
-    co_ord_t * items;
+    co_ord_t* items;
     size_t size;
 } co_ord_array_t;
 
@@ -112,7 +112,7 @@ typedef struct co_ord_cache_t {
 
 typedef struct spiral_t {
     uint64_t size; // count of lines
-    line_t * lines; // dynamic array of lines
+    line_t* lines; // dynamic array of lines
     co_ord_cache_t co_ord_cache; // co-ord cache for lines
     bool collides; // whether this spiral collides or not
     uint64_t collider; // the index of the line causing collision, if any
@@ -126,7 +126,7 @@ typedef struct spiral_t {
 } spiral_t;
 
 typedef struct buffer_t {
-    uint8_t * bytes;
+    uint8_t* bytes;
     size_t size;
 } buffer_t;
 

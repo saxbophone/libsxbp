@@ -21,7 +21,7 @@ direction_t change_direction(direction_t current, rotation_t turn);
  * instructions which are then used to build the pattern.
  * returns a status_t struct with error information (if needed)
  */
-status_t init_spiral(buffer_t buffer, spiral_t * spiral);
+status_t init_spiral(buffer_t buffer, spiral_t* spiral);
 
 #ifdef __cplusplus
 } // extern "C"

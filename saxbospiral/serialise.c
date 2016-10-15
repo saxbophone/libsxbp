@@ -64,7 +64,7 @@ static void dump_uint32_t(uint32_t value, buffer_t* buffer, size_t start_index) 
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
+serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
     serialise_result_t result; // build struct for returning success / failure
     // first, if header is too small for header + 1 line, then return early
     if(buffer.size < FILE_HEADER_SIZE + LINE_T_PACK_SIZE) {
@@ -74,7 +74,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
         return result;
     }
     // check for magic number and return early if not right
-    if(strncmp((char *)buffer.bytes, "SAXBOSPIRAL", 11) != 0) {
+    if(strncmp((char*)buffer.bytes, "SAXBOSPIRAL", 11) != 0) {
         result.status.location = DEBUG; // catch location of error
         result.status.diagnostic = OPERATION_FAIL; // flag failure
         result.diagnostic = DESERIALISE_BAD_MAGIC_NUMBER; // failure reason
@@ -153,7 +153,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t * spiral) {
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t dump_spiral(spiral_t spiral, buffer_t * buffer) {
+serialise_result_t dump_spiral(spiral_t spiral, buffer_t* buffer) {
     serialise_result_t result; // build struct for returning success / failure
     // populate buffer struct, base size on header + spiral size
     buffer->size = (FILE_HEADER_SIZE + (LINE_T_PACK_SIZE * spiral.size));
@@ -167,7 +167,7 @@ serialise_result_t dump_spiral(spiral_t spiral, buffer_t * buffer) {
     }
     // write first part of data header (magic number and version info)
     sprintf(
-        (char *)buffer->bytes, "SAXBOSPIRAL\n%c%c%c\n",
+        (char*)buffer->bytes, "SAXBOSPIRAL\n%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch
     );
     // write second part of data header (size, solved count and seconds fields)
