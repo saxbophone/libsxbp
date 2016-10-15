@@ -186,7 +186,7 @@ bool test_plot_spiral() {
     bool result = true;
     // build input and output structs
     spiral_t spiral = { .size = 16, };
-    spiral_t expected = { .size = 16, };
+    spiral_t expected = { .size = 16, .solved_count = 16, };
     spiral.lines = calloc(sizeof(line_t), 16);
     expected.lines = calloc(sizeof(line_t), 16);
     direction_t directions[16] = {
@@ -204,10 +204,58 @@ bool test_plot_spiral() {
     }
 
     // call plot_spiral on spiral
-    plot_spiral(&spiral, 1);
+    plot_spiral(&spiral, 1, 16, NULL);
 
+    // check solved count
+    if(spiral.solved_count != expected.solved_count) {
+        result = false;
+    }
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
+        if(spiral.lines[i].length != expected.lines[i].length) {
+            printf("%i != %i\n", spiral.lines[i].length, expected.lines[i].length);
+            result = false;
+        }
+    }
+
+    // free memory
+    free(spiral.lines);
+    free(expected.lines);
+
+    return result;
+}
+
+bool test_plot_spiral_partial() {
+    // success / failure variable
+    bool result = true;
+    // build input and output structs
+    spiral_t spiral = { .size = 16, };
+    spiral_t expected = { .size = 16, .solved_count = 9, };
+    spiral.lines = calloc(sizeof(line_t), 16);
+    expected.lines = calloc(sizeof(line_t), 16);
+    direction_t directions[16] = {
+        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
+        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+    };
+    length_t lengths[16] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    for(uint8_t i = 0; i < 9; i++) {
+        spiral.lines[i].direction = directions[i];
+        spiral.lines[i].length = 0;
+        expected.lines[i].direction = directions[i];
+        expected.lines[i].length = lengths[i];
+    }
+
+    // call plot_spiral on spiral, with instruction to only plot up to line 9
+    plot_spiral(&spiral, 1, 9, NULL);
+
+    // check solved count
+    if(spiral.solved_count != expected.solved_count) {
+        result = false;
+    }
+    // compare with expected struct
+    for(uint8_t i = 0; i < 9; i++) {
         if(spiral.lines[i].length != expected.lines[i].length) {
             printf("%i != %i\n", spiral.lines[i].length, expected.lines[i].length);
             result = false;
@@ -229,7 +277,7 @@ bool test_load_spiral() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        (char *)buffer.bytes,
+        (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -312,7 +360,7 @@ bool test_load_spiral_rejects_missing_magic_number() {
     buffer_t buffer = { .size = 59, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = (uint8_t *)(
+    buffer.bytes = (uint8_t*)(
         "not the header you were looking for eh? I think not surely?"
     );
 
@@ -337,7 +385,7 @@ bool test_load_spiral_rejects_too_small_for_header() {
     buffer_t buffer = { .size = 12, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = (uint8_t *)"SAXBOSPIRAL";
+    buffer.bytes = (uint8_t*)"SAXBOSPIRAL";
 
     // call load_spiral with buffer and blank spiral, store result
     spiral_t output;
@@ -361,7 +409,7 @@ bool test_load_spiral_rejects_too_small_data_section() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        (char *)buffer.bytes,
+        (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -401,7 +449,7 @@ bool test_load_spiral_rejects_wrong_version() {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
-        (char *)buffer.bytes,
+        (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         0, 12, 255,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -459,7 +507,7 @@ bool test_dump_spiral() {
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
-        (char *)expected.bytes,
+        (char*)expected.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
         VERSION.major, VERSION.minor, VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
@@ -518,7 +566,7 @@ bool test_dump_spiral() {
 // test case's name. it will run the test case function and return the success
 // or failure status, which should be stored in the test suite status bool.
 bool run_test_case(
-    bool test_suite_state, bool (*test_case_func)(), char * test_case_name
+    bool test_suite_state, bool (*test_case_func)(), char* test_case_name
 ) {
     printf("%s: ", test_case_name);
     fflush(stdout);
@@ -540,6 +588,9 @@ int main() {
         result, test_cache_spiral_points_blank, "test_cache_spiral_points_blank"
     );
     result = run_test_case(result, test_plot_spiral, "test_plot_spiral");
+    result = run_test_case(
+        result, test_plot_spiral_partial, "test_plot_spiral_partial"
+    );
     result = run_test_case(result, test_load_spiral, "test_load_spiral");
     result = run_test_case(
         result, test_load_spiral_rejects_missing_magic_number,

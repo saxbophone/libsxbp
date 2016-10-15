@@ -2,8 +2,8 @@
 #define SAXBOPHONE_SAXBOSPIRAL_SXP_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "saxbospiral/saxbospiral.h"
 
@@ -34,7 +34,8 @@ bool buffer_to_file(buffer_t * buffer, FILE * file_handle);
  * returns true on success, false on failure.
  */
 bool run(
-    bool prepare, bool generate, bool render, bool perfect, int perfect_threshold,
+    bool prepare, bool generate, bool render, bool perfect,
+    int perfect_threshold, int line_limit, int total_lines,
     const char * input_file_path, const char * output_file_path
 );
 

@@ -24,7 +24,7 @@ direction_t change_direction(direction_t current, rotation_t turn) {
  * instructions which are then used to build the pattern.
  * returns a status_t struct with error information (if needed)
  */
-status_t init_spiral(buffer_t buffer, spiral_t * spiral) {
+status_t init_spiral(buffer_t buffer, spiral_t* spiral) {
     // result status object
     status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line

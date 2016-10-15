@@ -4,9 +4,9 @@
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "saxbospiral.h"
 #include "plot.h"
@@ -227,8 +227,10 @@ status_t resize_spiral(
         } else {
             /*
              * if we're on the top-most line and there's no collision
-             * this means we've finished! Return OPERATION_OK from function.
+             * this means we've finished! Set solved_count to this index+1
+             * Return OPERATION_OK from function.
              */
+            spiral->solved_count = index + 1;
             result.diagnostic = OPERATION_OK;
             return result;
         }
@@ -237,21 +239,39 @@ status_t resize_spiral(
 
 /*
  * given a pointer to a spiral spiral for which the length of all its lines are
- * not yet known and a perfection threshold (-1 for no perfection, or otherwise
- * the maximmum line length at which to allow aggressive optimisation) calculate
- * the length needed for each line in the spiral (to avoid line overlap) and
- * store these in a the spiral struct that is pointed to by the pointer
+ * not yet known, a perfection threshold (-1 for no perfection, or otherwise
+ * the maximmum line length at which to allow aggressive optimisation), the
+ * index of the highest line to plot to and a pointer to a callback function,
+ * calculate the length needed for each line in the spiral up to this index
+ * (to avoid line overlap) and store these in a the spiral struct that is
+ * pointed to by the pointer
+ * the function pointer can be NULL, if it is not then it will be called every
+ * time a new line of the spiral is solved. The function should be of return
+ * type void and take three arguments: a pointer to a spiral_t struct, an
+ * integer specifying the index of the latest solved line and an integer
+ * specifying the index of the highest line that will be solved.
  * returns a status struct (used for error information)
  */
-status_t plot_spiral(spiral_t* spiral, int perfection_threshold) {
+status_t plot_spiral(
+    spiral_t* spiral, int perfection_threshold, uint64_t max_line,
+    void(* progress_callback)(
+        spiral_t* spiral, uint64_t latest_line, uint64_t target_line
+    )
+) {
     // set up result status
     status_t result = {{0, 0, 0}, 0};
+    // get index of highest line to plot
+    uint64_t max_index = (max_line > spiral->size) ? spiral->size : max_line;
     // calculate the length of each line
-    for(size_t i = 0; i < spiral->size; i++) {
+    for(size_t i = 0; i < max_index; i++) {
         result = resize_spiral(spiral, i, 1, perfection_threshold);
         // catch and return error if any
         if(result.diagnostic != OPERATION_OK) {
             return result;
+        }
+        // call callback if given
+        if(progress_callback != NULL) {
+            progress_callback(spiral, i, max_index);
         }
     }
     // all ok

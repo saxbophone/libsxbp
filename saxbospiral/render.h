@@ -27,7 +27,7 @@ typedef struct bitmap_t {
  * representing a monochromatic image of the rendered spiral to the bitmap
  * returns a status struct with error information (if any)
  */
-status_t render_spiral(spiral_t spiral, bitmap_t * image);
+status_t render_spiral(spiral_t spiral, bitmap_t* image);
 
 #ifdef __cplusplus
 } // extern "C"
