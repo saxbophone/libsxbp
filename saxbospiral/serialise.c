@@ -3,6 +3,7 @@
 #warning "Please compile this code for a target with 64-bit words or greater."
 #endif
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -4,9 +4,9 @@
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "saxbospiral.h"
 #include "plot.h"
