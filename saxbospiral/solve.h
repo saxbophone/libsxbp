@@ -24,13 +24,16 @@ status_t resize_spiral(
 
 /*
  * given a pointer to a spiral spiral for which the length of all its lines are
- * not yet known and a perfection threshold (-1 for no perfection, or otherwise
- * the maximmum line length at which to allow aggressive optimisation) calculate
- * the length needed for each line in the spiral (to avoid line overlap) and
- * store these in a the spiral struct that is pointed to by the pointer
+ * not yet known, a perfection threshold (-1 for no perfection, or otherwise
+ * the maximmum line length at which to allow aggressive optimisation) and the
+ * index of the highest line to plot to, calculate the length needed for each
+ * line in the spiral up to this index (to avoid line overlap) and store these
+ * in a the spiral struct that is pointed to by the pointer
  * returns a status struct (used for error information)
  */
-status_t plot_spiral(spiral_t * spiral, int perfection_threshold);
+status_t plot_spiral(
+    spiral_t * spiral, int perfection_threshold, uint64_t max_line
+);
 
 #ifdef __cplusplus
 } // extern "C"

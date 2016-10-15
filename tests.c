@@ -186,7 +186,7 @@ bool test_plot_spiral() {
     bool result = true;
     // build input and output structs
     spiral_t spiral = { .size = 16, };
-    spiral_t expected = { .size = 16, };
+    spiral_t expected = { .size = 16, .solved_count = 16, };
     spiral.lines = calloc(sizeof(line_t), 16);
     expected.lines = calloc(sizeof(line_t), 16);
     direction_t directions[16] = {
@@ -204,10 +204,58 @@ bool test_plot_spiral() {
     }
 
     // call plot_spiral on spiral
-    plot_spiral(&spiral, 1);
+    plot_spiral(&spiral, 1, 16);
 
+    // check solved count
+    if(spiral.solved_count != expected.solved_count) {
+        result = false;
+    }
     // compare with expected struct
     for(uint8_t i = 0; i < 16; i++) {
+        if(spiral.lines[i].length != expected.lines[i].length) {
+            printf("%i != %i\n", spiral.lines[i].length, expected.lines[i].length);
+            result = false;
+        }
+    }
+
+    // free memory
+    free(spiral.lines);
+    free(expected.lines);
+
+    return result;
+}
+
+bool test_plot_spiral_partial() {
+    // success / failure variable
+    bool result = true;
+    // build input and output structs
+    spiral_t spiral = { .size = 16, };
+    spiral_t expected = { .size = 16, .solved_count = 9, };
+    spiral.lines = calloc(sizeof(line_t), 16);
+    expected.lines = calloc(sizeof(line_t), 16);
+    direction_t directions[16] = {
+        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
+        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+    };
+    length_t lengths[16] = {
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+    };
+    for(uint8_t i = 0; i < 9; i++) {
+        spiral.lines[i].direction = directions[i];
+        spiral.lines[i].length = 0;
+        expected.lines[i].direction = directions[i];
+        expected.lines[i].length = lengths[i];
+    }
+
+    // call plot_spiral on spiral, with instruction to only plot up to line 9
+    plot_spiral(&spiral, 1, 9);
+
+    // check solved count
+    if(spiral.solved_count != expected.solved_count) {
+        result = false;
+    }
+    // compare with expected struct
+    for(uint8_t i = 0; i < 9; i++) {
         if(spiral.lines[i].length != expected.lines[i].length) {
             printf("%i != %i\n", spiral.lines[i].length, expected.lines[i].length);
             result = false;
@@ -540,6 +588,9 @@ int main() {
         result, test_cache_spiral_points_blank, "test_cache_spiral_points_blank"
     );
     result = run_test_case(result, test_plot_spiral, "test_plot_spiral");
+    result = run_test_case(
+        result, test_plot_spiral_partial, "test_plot_spiral_partial"
+    );
     result = run_test_case(result, test_load_spiral, "test_load_spiral");
     result = run_test_case(
         result, test_load_spiral_rejects_missing_magic_number,

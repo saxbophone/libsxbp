@@ -196,7 +196,7 @@ bool run(
     }
     if(generate) {
         // we must plot all lines from spiral file
-        if(handle_error(plot_spiral(&spiral, perfection))) {
+        if(handle_error(plot_spiral(&spiral, perfection, spiral.size))) {
             // handle errors
             return false;
         }
