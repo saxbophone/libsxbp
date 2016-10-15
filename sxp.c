@@ -209,7 +209,7 @@ bool run(
         );
         // set to total_lines if set and less than current amount
         lines_to_plot = (
-            (total_lines != -1 && total_lines < lines_to_plot) ?
+            (total_lines != -1 && (uint64_t)total_lines < lines_to_plot) ?
             (uint64_t)total_lines : lines_to_plot
         );
         // we must plot all lines from spiral file
