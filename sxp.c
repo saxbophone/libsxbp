@@ -203,9 +203,9 @@ bool run(
          */
         // first, check the line_limit argument
         uint64_t lines_to_plot;
-        // set to spiral size + line limit if set, else spiral size
+        // set to solved count + line limit if set, else spiral size
         lines_to_plot = (
-            (line_limit != -1) ? (spiral.size + line_limit) : spiral.size
+            (line_limit != -1) ? (spiral.solved_count + line_limit) : spiral.size
         );
         // set to total_lines if set and less than current amount
         lines_to_plot = (
