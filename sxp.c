@@ -139,7 +139,8 @@ static bool handle_error(status_t result) {
  * returns true on success, false on failure.
  */
 bool run(
-    bool prepare, bool generate, bool render, bool perfect, int perfect_threshold,
+    bool prepare, bool generate, bool render, bool perfect,
+    int perfect_threshold, int total_lines,
     const char * input_file_path, const char * output_file_path
 ) {
     // get input file handle
@@ -195,8 +196,13 @@ bool run(
         }
     }
     if(generate) {
+        // find out how many lines we are to plot.
+        // use value from command-line if given, else use spiral size
+        uint64_t lines_to_plot = (
+            (total_lines == -1) ? spiral.size : (uint64_t)total_lines
+        );
         // we must plot all lines from spiral file
-        if(handle_error(plot_spiral(&spiral, perfection, spiral.size))) {
+        if(handle_error(plot_spiral(&spiral, perfection, lines_to_plot))) {
             // handle errors
             return false;
         }
@@ -273,6 +279,9 @@ int main(int argc, char * argv[]) {
     struct arg_int * perfect_threshold = arg_int0(
         "d", "perfection-threshold", NULL, "set optimisation threshold"
     );
+    struct arg_int * total_lines = arg_int0(
+        "t", "total-lines", NULL, "total number of lines to plot to"
+    );
     // input file path option
     struct arg_file * input = arg_file0(
         "i", "input", NULL, "input file path"
@@ -286,7 +295,7 @@ int main(int argc, char * argv[]) {
     void * argtable[] = {
         help, version,
         prepare, generate, render,
-        perfect, perfect_threshold,
+        perfect, perfect_threshold, total_lines,
         input, output, end,
     };
     const char * program_name = "sxp";
@@ -300,6 +309,8 @@ int main(int argc, char * argv[]) {
     }
     // set default value of perfect_threshold argument
     perfect_threshold->ival[0] = 1;
+    // set default value of total_lines argument
+    total_lines->ival[0] = -1;
     // parse arguments
     int count_errors = arg_parse(argc, argv, argtable);
     // if we asked for the version, show it
@@ -335,6 +346,7 @@ int main(int argc, char * argv[]) {
         (render->count > 0) ? true : false,
         (perfect->count > 0) ? false : true,
         perfect_threshold->ival[0],
+        total_lines->ival[0],
         * input->filename,
         * output->filename
     );

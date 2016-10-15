@@ -34,7 +34,8 @@ bool buffer_to_file(buffer_t * buffer, FILE * file_handle);
  * returns true on success, false on failure.
  */
 bool run(
-    bool prepare, bool generate, bool render, bool perfect, int perfect_threshold,
+    bool prepare, bool generate, bool render, bool perfect,
+    int perfect_threshold, int total_lines,
     const char * input_file_path, const char * output_file_path
 );
 
