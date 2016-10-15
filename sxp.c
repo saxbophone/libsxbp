@@ -140,7 +140,7 @@ static bool handle_error(status_t result) {
  */
 bool run(
     bool prepare, bool generate, bool render, bool perfect,
-    int perfect_threshold, int total_lines,
+    int perfect_threshold, int line_limit, int total_lines,
     const char * input_file_path, const char * output_file_path
 ) {
     // get input file handle
@@ -196,10 +196,21 @@ bool run(
         }
     }
     if(generate) {
-        // find out how many lines we are to plot.
-        // use value from command-line if given, else use spiral size
-        uint64_t lines_to_plot = (
-            (total_lines == -1) ? spiral.size : (uint64_t)total_lines
+        /*
+         * find out how many lines we are to plot
+         * this is based on two options: the line_limit and the total_lines
+         * arguments.
+         */
+        // first, check the line_limit argument
+        uint64_t lines_to_plot;
+        // set to spiral size + line limit if set, else spiral size
+        lines_to_plot = (
+            (line_limit != -1) ? (spiral.size + line_limit) : spiral.size
+        );
+        // set to total_lines if set and less than current amount
+        lines_to_plot = (
+            (total_lines != -1 && total_lines < lines_to_plot) ?
+            (uint64_t)total_lines : lines_to_plot
         );
         // we must plot all lines from spiral file
         if(handle_error(plot_spiral(&spiral, perfection, lines_to_plot))) {
@@ -282,6 +293,9 @@ int main(int argc, char * argv[]) {
     struct arg_int * total_lines = arg_int0(
         "t", "total-lines", NULL, "total number of lines to plot to"
     );
+    struct arg_int * line_limit = arg_int0(
+        "l", "line-limit", NULL, "plot this many more lines than currently solved"
+    );
     // input file path option
     struct arg_file * input = arg_file0(
         "i", "input", NULL, "input file path"
@@ -295,7 +309,7 @@ int main(int argc, char * argv[]) {
     void * argtable[] = {
         help, version,
         prepare, generate, render,
-        perfect, perfect_threshold, total_lines,
+        perfect, perfect_threshold, line_limit, total_lines,
         input, output, end,
     };
     const char * program_name = "sxp";
@@ -309,7 +323,8 @@ int main(int argc, char * argv[]) {
     }
     // set default value of perfect_threshold argument
     perfect_threshold->ival[0] = 1;
-    // set default value of total_lines argument
+    // set default value of line_limit and total_lines arguments
+    line_limit->ival[0] = -1;
     total_lines->ival[0] = -1;
     // parse arguments
     int count_errors = arg_parse(argc, argv, argtable);
@@ -346,6 +361,7 @@ int main(int argc, char * argv[]) {
         (render->count > 0) ? true : false,
         (perfect->count > 0) ? false : true,
         perfect_threshold->ival[0],
+        line_limit->ival[0],
         total_lines->ival[0],
         * input->filename,
         * output->filename
