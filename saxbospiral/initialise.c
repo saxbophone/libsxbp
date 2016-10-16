@@ -18,6 +18,13 @@ direction_t change_direction(direction_t current, rotation_t turn) {
 }
 
 /*
+ * returns a spiral struct with all fields initialised to 0
+ */
+spiral_t blank_spiral() {
+    return (spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
+}
+
+/*
  * given a buffer_t full of data, and a pointer to a blank spiral_t
  * struct, populates the spiral struct from the data in the buffer
  * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
