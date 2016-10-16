@@ -22,9 +22,8 @@ static void buffer_write_data(
     // if buffer bytes pointer is not NULL, then re-allocate
     if(p->bytes != NULL) {
         p->bytes = realloc(p->bytes, new_size);
-    }
-    // otherwise, allocate
-    else {
+    } else {
+        // otherwise, allocate
         p->bytes = malloc(new_size);
     }
     if(!p->bytes) {
@@ -45,9 +44,15 @@ void dummy_png_flush(png_structp png_ptr) {}
 
 // simple libpng cleanup function - used mainly for freeing memory
 void cleanup_png_lib(png_structp png_ptr, png_infop info_ptr, png_bytep row) {
-    if (info_ptr != NULL) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
-    if (png_ptr != NULL) png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
-    if (row != NULL) free(row);
+    if(info_ptr != NULL) {
+        png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+    }
+    if(png_ptr != NULL) {
+        png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+    }
+    if(row != NULL) {
+        free(row);
+    }
 }
 
 /*
@@ -67,7 +72,7 @@ status_t write_png_image(bitmap_t bitmap, buffer_t* buffer) {
     // allocate libpng memory
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     // catch malloc fail
-    if (png_ptr == NULL) {
+    if(png_ptr == NULL) {
         result.location = DEBUG;
         result.diagnostic = MALLOC_REFUSED;
         // cleanup
@@ -77,7 +82,7 @@ status_t write_png_image(bitmap_t bitmap, buffer_t* buffer) {
     // allocate libpng memory
     info_ptr = png_create_info_struct(png_ptr);
     // catch malloc fail
-    if (info_ptr == NULL) {
+    if(info_ptr == NULL) {
         result.location = DEBUG;
         result.diagnostic = MALLOC_REFUSED;
         // cleanup
@@ -135,11 +140,11 @@ status_t write_png_image(bitmap_t bitmap, buffer_t* buffer) {
         return result;
     }
     // Write image data
-    for (size_t y = 0 ; y < bitmap.height; y++) {
-       for (size_t x = 0; x < bitmap.width; x++) {
+    for(size_t y = 0 ; y < bitmap.height; y++) {
+        for(size_t x = 0; x < bitmap.width; x++) {
             // set to black if there is a point here, white if not
             row[x] = (bitmap.pixels[x][y] == true) ? 0 : 1;
-       }
+        }
        png_write_row(png_ptr, row);
     }
     // End write
