@@ -9,7 +9,7 @@ extern "C"{
 #endif
 
 // returns the sum of all line lengths within the given indexes
-size_t sum_lines(spiral_t spiral, size_t start, size_t end) {
+size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end) {
     size_t size = 0;
     for(size_t i = start; i < end; i++) {
         size += spiral.lines[i].length;
@@ -27,35 +27,35 @@ size_t sum_lines(spiral_t spiral, size_t start, size_t end) {
  * lines longer than one unit.
  * returns a status struct with error information (if any)
  */
-status_t spiral_points(
-    spiral_t spiral, co_ord_array_t* output, co_ord_t start_point,
-    size_t start, size_t end
+sxbp_status_t sxbp_spiral_points(
+    sxbp_spiral_t spiral, sxbp_co_ord_array_t* output,
+    sxbp_co_ord_t start_point, size_t start, size_t end
 ) {
     // prepare result status
-    status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result = {{0, 0, 0}, 0};
     // the amount of space needed is the sum of all line lengths + 1 for end
-    size_t size = sum_lines(spiral, start, end) + 1;
+    size_t size = sxbp_sum_lines(spiral, start, end) + 1;
     // allocate memory
-    output->items = calloc(sizeof(co_ord_t), size);
+    output->items = calloc(sizeof(sxbp_co_ord_t), size);
     // catch malloc error
     if(output->items == NULL) {
         // set error information then early return
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         return result;
     }
     output->size = size;
     // start current co-ordinate at the given start point
-    co_ord_t current = start_point;
+    sxbp_co_ord_t current = start_point;
     // initialise independent result index
     size_t result_index = 0;
     output->items[result_index] = current;
     // calculate all the specified co-ords
     for(size_t i = start; i < end; i++) {
         // get current direction
-        vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
-        for(length_t j = 0; j < spiral.lines[i].length; j++) {
+        for(sxbp_length_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
             current.y += direction.y;
             output->items[result_index + 1] = current;
@@ -63,7 +63,7 @@ status_t spiral_points(
         }
     }
     // all good
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 
@@ -76,34 +76,36 @@ status_t spiral_points(
  * co_ord_cache member and are re-used if they are still valid
  * returns a status struct with error information (if any)
  */
-status_t cache_spiral_points(spiral_t* spiral, size_t limit) {
+sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
     // prepare result status
-    status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result = {{0, 0, 0}, 0};
     // the amount of space needed is the sum of all line lengths + 1 for end
-    size_t size = sum_lines(*spiral, 0, limit) + 1;
+    size_t size = sxbp_sum_lines(*spiral, 0, limit) + 1;
     // allocate / reallocate memory
     if(spiral->co_ord_cache.co_ords.items == NULL) {
         /*
          * if no memory has been allocated for the co-ords yet, then do this now
          * allocate enough memory to store these
          */
-        spiral->co_ord_cache.co_ords.items = calloc(sizeof(co_ord_t), size);
+        spiral->co_ord_cache.co_ords.items = calloc(
+            sizeof(sxbp_co_ord_t), size
+        );
     } else if(spiral->co_ord_cache.co_ords.size != size) {
         // if there isn't enough memory allocated, re-allocate memory instead
         spiral->co_ord_cache.co_ords.items = realloc(
-            spiral->co_ord_cache.co_ords.items, sizeof(co_ord_t) * size
+            spiral->co_ord_cache.co_ords.items, sizeof(sxbp_co_ord_t) * size
         );
     }
     // catch malloc failure
     if(spiral->co_ord_cache.co_ords.items == NULL) {
         // set error information then early return
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         return result;
     }
     spiral->co_ord_cache.co_ords.size = size;
     // start at (0, 0) as origin
-    co_ord_t current = { 0, 0, };
+    sxbp_co_ord_t current = { 0, 0, };
     size_t result_index = 0; // maintain independent index for co-ords array
     /*
      * if we're not going to re-calculate the whole array, skip forward the
@@ -114,7 +116,7 @@ status_t cache_spiral_points(spiral_t* spiral, size_t limit) {
     ) ? limit : spiral->co_ord_cache.validity;
     if(spiral->co_ord_cache.validity != 0) {
         // get index of the latest known co-ord
-        result_index += sum_lines(*spiral, 0, smallest);
+        result_index += sxbp_sum_lines(*spiral, 0, smallest);
         // update current to be at latest known co-ord
         current = spiral->co_ord_cache.co_ords.items[result_index];
     } else {
@@ -122,12 +124,12 @@ status_t cache_spiral_points(spiral_t* spiral, size_t limit) {
         spiral->co_ord_cache.co_ords.items[0] = current;
     }
     // calculate the missing co-ords
-    co_ord_array_t missing= {0, 0};
-    status_t calculate_result = spiral_points(
+    sxbp_co_ord_array_t missing= {0, 0};
+    sxbp_status_t calculate_result = sxbp_spiral_points(
         *spiral, &missing, current, smallest, limit
     );
     // return errors from previous call if needed
-    if(calculate_result.diagnostic != OPERATION_OK) {
+    if(calculate_result.diagnostic != SXBP_OPERATION_OK) {
         return calculate_result;
     }
     // add the missing co-ords to the cache
@@ -143,7 +145,7 @@ status_t cache_spiral_points(spiral_t* spiral, size_t limit) {
         limit > spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
     // return ok
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 

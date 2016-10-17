@@ -11,26 +11,26 @@ extern "C"{
 #endif
 
 // for providing further error information specific to spiral deserialisation
-typedef enum deserialise_diagnostic_t {
-    DESERIALISE_OK, // no problem
-    DESERIALISE_BAD_HEADER_SIZE, // header section too small to be valid
-    DESERIALISE_BAD_MAGIC_NUMBER, // wrong magic number in header section
-    DESERIALISE_BAD_VERSION, // unsupported data version (according to header)
-    DESERIALISE_BAD_DATA_SIZE, // data section too small to be valid
-} deserialise_diagnostic_t;
+typedef enum sxbp_deserialise_diagnostic_t {
+    SXBP_DESERIALISE_OK, // no problem
+    SXBP_DESERIALISE_BAD_HEADER_SIZE, // header section too small to be valid
+    SXBP_DESERIALISE_BAD_MAGIC_NUMBER, // wrong magic number in header section
+    SXBP_DESERIALISE_BAD_VERSION, // unsupported data version (according to header)
+    SXBP_DESERIALISE_BAD_DATA_SIZE, // data section too small to be valid
+} sxbp_deserialise_diagnostic_t;
 
 /*
  * for storing both generic and specific error information about serialisation
  * operations in one place
  */
-typedef struct serialise_result_t {
-    status_t status; // generic error information applicable to all functions
-    deserialise_diagnostic_t diagnostic; // additional specific error information
-} serialise_result_t;
+typedef struct sxbp_serialise_result_t {
+    sxbp_status_t status; // generic error information applicable to all functions
+    sxbp_deserialise_diagnostic_t diagnostic; // additional specific error information
+} sxbp_serialise_result_t;
 
 // constants related to how spiral data is packed in files - measured in bytes
-extern const size_t FILE_HEADER_SIZE;
-extern const size_t LINE_T_PACK_SIZE;
+extern const size_t SXBP_FILE_HEADER_SIZE;
+extern const size_t SXBP_LINE_T_PACK_SIZE;
 
 /*
  * given a buffer and a pointer to a blank spiral_t, create a spiral represented
@@ -39,7 +39,9 @@ extern const size_t LINE_T_PACK_SIZE;
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral);
+sxbp_serialise_result_t sxbp_load_spiral(
+    sxbp_buffer_t buffer, sxbp_spiral_t* spiral
+);
 
 /*
  * given a spiral_t struct and a pointer to a blank buffer_t, serialise a binary
@@ -48,7 +50,9 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral);
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t dump_spiral(spiral_t spiral, buffer_t* buffer);
+sxbp_serialise_result_t sxbp_dump_spiral(
+    sxbp_spiral_t spiral, sxbp_buffer_t* buffer
+);
 
 #ifdef __cplusplus
 } // extern "C"

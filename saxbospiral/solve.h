@@ -18,8 +18,9 @@ extern "C"{
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
  */
-status_t resize_spiral(
-    spiral_t* spiral, size_t index, uint32_t length, int perfection_threshold
+sxbp_status_t sxbp_resize_spiral(
+    sxbp_spiral_t* spiral, size_t index, sxbp_length_t length,
+    int perfection_threshold
 );
 
 /*
@@ -37,10 +38,10 @@ status_t resize_spiral(
  * specifying the index of the highest line that will be solved.
  * returns a status struct (used for error information)
  */
-status_t plot_spiral(
-    spiral_t* spiral, int perfection_threshold, uint64_t max_line,
+sxbp_status_t sxbp_plot_spiral(
+    sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
-        spiral_t* spiral, uint64_t latest_line, uint64_t target_line
+        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line
     )
 );
 
