@@ -17,11 +17,11 @@ extern "C"{
 #endif
 
 // constants related to how spiral data is packed in files - measured in bytes
-const size_t FILE_HEADER_SIZE = 37;
-const size_t LINE_T_PACK_SIZE = 4;
+const size_t SXBP_FILE_HEADER_SIZE = 37;
+const size_t SXBP_LINE_T_PACK_SIZE = 4;
 
 // loads a 64-bit unsigned integer from buffer starting at given index
-static uint64_t load_uint64_t(buffer_t* buffer, size_t start_index) {
+static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
     uint64_t value = 0;
     for(size_t i = 0; i < 8; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
@@ -30,7 +30,7 @@ static uint64_t load_uint64_t(buffer_t* buffer, size_t start_index) {
 }
 
 // loads a 32-bit unsigned integer from buffer starting at given index
-static uint32_t load_uint32_t(buffer_t* buffer, size_t start_index) {
+static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
     uint32_t value = 0;
     for(size_t i = 0; i < 4; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
@@ -39,7 +39,9 @@ static uint32_t load_uint32_t(buffer_t* buffer, size_t start_index) {
 }
 
 // dumps a 64-bit unsigned integer of value to buffer at given index
-static void dump_uint64_t(uint64_t value, buffer_t* buffer, size_t start_index) {
+static void dump_uint64_t(
+    uint64_t value, sxbp_buffer_t* buffer, size_t start_index
+) {
     for(uint8_t i = 0; i < 8; i++) {
         uint8_t shift = (8 * (7 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
@@ -49,7 +51,9 @@ static void dump_uint64_t(uint64_t value, buffer_t* buffer, size_t start_index) 
 }
 
 // dumps a 32-bit unsigned integer of value to buffer at given index
-static void dump_uint32_t(uint32_t value, buffer_t* buffer, size_t start_index) {
+static void dump_uint32_t(
+    uint32_t value, sxbp_buffer_t* buffer, size_t start_index
+) {
     for(uint8_t i = 0; i < 4; i++) {
         uint8_t shift = (8 * (3 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
@@ -65,10 +69,12 @@ static void dump_uint32_t(uint32_t value, buffer_t* buffer, size_t start_index) 
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
-    serialise_result_t result; // build struct for returning success / failure
+sxbp_serialise_result_t sxbp_load_spiral(
+    sxbp_buffer_t buffer, sxbp_spiral_t* spiral
+) {
+    sxbp_serialise_result_t result; // build struct for returning success / failure
     // first, if header is too small for header + 1 line, then return early
-    if(buffer.size < FILE_HEADER_SIZE + LINE_T_PACK_SIZE) {
+    if(buffer.size < SXBP_FILE_HEADER_SIZE + SXBP_LINE_T_PACK_SIZE) {
         result.status.location = DEBUG; // catch location of error
         result.status.diagnostic = OPERATION_FAIL; // flag failure
         result.diagnostic = DESERIALISE_BAD_HEADER_SIZE; // failure reason
@@ -82,15 +88,15 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
         return result;
     }
     // grab file version from header
-    version_t buffer_version = {
+    sxbp_version_t buffer_version = {
         .major = buffer.bytes[12],
         .minor = buffer.bytes[13],
         .patch = buffer.bytes[14],
     };
     // we don't accept anything less than v0.13.0, so the min is v0.13.0
-    version_t min_version = { .major = 0, .minor = 13, .patch = 0, };
+    sxbp_version_t min_version = { .major = 0, .minor = 13, .patch = 0, };
     // check for version compatibility
-    if(version_hash(buffer_version) < version_hash(min_version)) {
+    if(sxbp_version_hash(buffer_version) < sxbp_version_hash(min_version)) {
         // check failed
         result.status.location = DEBUG; // catch location of error
         result.status.diagnostic = OPERATION_FAIL; // flag failure
@@ -100,7 +106,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
     // get size of spiral object contained in buffer
     uint64_t spiral_size = load_uint64_t(&buffer, 16);
     // Check that the file data section is large enough for the spiral size
-    if((buffer.size - FILE_HEADER_SIZE) != (LINE_T_PACK_SIZE * spiral_size)) {
+    if((buffer.size - SXBP_FILE_HEADER_SIZE) != (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed
         result.status.location = DEBUG; // catch location of error
         result.status.diagnostic = OPERATION_FAIL; // flag failure
@@ -113,7 +119,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
     spiral->solved_count = load_uint64_t(&buffer, 24);
     spiral->seconds_spent = load_uint32_t(&buffer, 32);
     // allocate memory
-    spiral->lines = calloc(sizeof(line_t), spiral->size);
+    spiral->lines = calloc(sizeof(sxbp_line_t), spiral->size);
     // catch allocation error
     if(spiral->lines == NULL) {
         result.status.location = DEBUG; // catch location of error
@@ -124,7 +130,7 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
     for(size_t i = 0; i < spiral_size; i++) {
         // direction is stored in 2 most significant bits of each 32-bit sequence
         spiral->lines[i].direction = (
-            buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)] >> 6
+            buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)] >> 6
         );
         /*
          * length is stored as 30 least significant bits, so we have to unpack
@@ -132,13 +138,13 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
          * bit mask and shift 3 bytes to left
          */
         spiral->lines[i].length = (
-            buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)]
+            buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)]
             & 0x3f // <= binary value is 0b00111111
         ) << 24;
         // handle remaining 3 bytes in loop
         for(uint8_t j = 0; j < 3; j++) {
             spiral->lines[i].length |= (
-                buffer.bytes[FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE) + 1 + j]
+                buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE) + 1 + j]
             ) << (8 * (2 - j));
         }
     }
@@ -154,10 +160,12 @@ serialise_result_t load_spiral(buffer_t buffer, spiral_t* spiral) {
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
  */
-serialise_result_t dump_spiral(spiral_t spiral, buffer_t* buffer) {
-    serialise_result_t result; // build struct for returning success / failure
+sxbp_serialise_result_t sxbp_dump_spiral(
+    sxbp_spiral_t spiral, sxbp_buffer_t* buffer
+) {
+    sxbp_serialise_result_t result; // build struct for returning success / failure
     // populate buffer struct, base size on header + spiral size
-    buffer->size = (FILE_HEADER_SIZE + (LINE_T_PACK_SIZE * spiral.size));
+    buffer->size = (SXBP_FILE_HEADER_SIZE + (SXBP_LINE_T_PACK_SIZE * spiral.size));
     // allocate memory for buffer
     buffer->bytes = calloc(1, buffer->size);
     // catch memory allocation failure
@@ -169,14 +177,14 @@ serialise_result_t dump_spiral(spiral_t spiral, buffer_t* buffer) {
     // write first part of data header (magic number and version info)
     sprintf(
         (char*)buffer->bytes, "SAXBOSPIRAL\n%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch
+        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch
     );
     // write second part of data header (size, solved count and seconds fields)
     dump_uint64_t(spiral.size, buffer, 16);
     dump_uint64_t(spiral.solved_count, buffer, 24);
     dump_uint32_t(spiral.seconds_spent, buffer, 32);
     // write final newline at end of header
-    buffer->bytes[FILE_HEADER_SIZE - 1] = '\n';
+    buffer->bytes[SXBP_FILE_HEADER_SIZE - 1] = '\n';
     // now write the data section
     for(size_t i = 0; i < spiral.size; i++) {
         /*
@@ -184,16 +192,16 @@ serialise_result_t dump_spiral(spiral_t spiral, buffer_t* buffer) {
          * map direction to 2 most significant bits
          */
         buffer->bytes[
-            FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)
+            SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)
         ] = (spiral.lines[i].direction << 6);
         // handle first 6 bits of the length
         buffer->bytes[
-            FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE)
+            SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)
         ] |= (spiral.lines[i].length >> 24);
         // handle remaining 3 bytes in a loop
         for(uint8_t j = 0; j < 3; j++) {
             buffer->bytes[
-                FILE_HEADER_SIZE + (i * LINE_T_PACK_SIZE) + 1 + j
+                SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE) + 1 + j
             ] = (uint8_t)(spiral.lines[i].length >> (8 * (2 - j)));
         }
     }

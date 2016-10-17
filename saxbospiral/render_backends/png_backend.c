@@ -17,7 +17,7 @@ static void buffer_write_data(
     png_structp png_ptr, png_bytep data, png_size_t length
 ) {
     // retrieve pointer to buffer
-    buffer_t* p = (buffer_t*)png_get_io_ptr(png_ptr);
+    sxbp_buffer_t* p = (sxbp_buffer_t*)png_get_io_ptr(png_ptr);
     size_t new_size = p->size + length;
     // if buffer bytes pointer is not NULL, then re-allocate
     if(p->bytes != NULL) {
@@ -38,12 +38,14 @@ static void buffer_write_data(
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 // dummy function for unecessary flush function
-void dummy_png_flush(png_structp png_ptr) {}
+static void dummy_png_flush(png_structp png_ptr) {}
 // re-enable all warnings
 #pragma GCC diagnostic pop
 
 // simple libpng cleanup function - used mainly for freeing memory
-void cleanup_png_lib(png_structp png_ptr, png_infop info_ptr, png_bytep row) {
+static void cleanup_png_lib(
+    png_structp png_ptr, png_infop info_ptr, png_bytep row
+) {
     if(info_ptr != NULL) {
         png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
     }
@@ -60,9 +62,11 @@ void cleanup_png_lib(png_structp png_ptr, png_infop info_ptr, png_bytep row) {
  * data as a PNG image to the buffer, using libpng.
  * returns a status struct containing error information, if any
  */
-status_t write_png_image(bitmap_t bitmap, buffer_t* buffer) {
+sxbp_status_t sxbp_write_png_image(
+    sxbp_bitmap_t bitmap, sxbp_buffer_t* buffer
+) {
     // result status
-    status_t result;
+    sxbp_status_t result;
     // init buffer
     buffer->size = 0;
     // init libpng stuff

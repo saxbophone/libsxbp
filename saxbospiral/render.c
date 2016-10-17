@@ -23,11 +23,11 @@ extern "C"{
  * NOTE: This should NEVER be called with a pointer to anything other than a
  * 2-item struct of type co_ord_t
  */
-static void get_bounds(spiral_t spiral, co_ord_t* bounds) {
-    tuple_item_t min_x = 0;
-    tuple_item_t min_y = 0;
-    tuple_item_t max_x = 0;
-    tuple_item_t max_y = 0;
+static void get_bounds(sxbp_spiral_t spiral, sxbp_co_ord_t* bounds) {
+    sxbp_tuple_item_t min_x = 0;
+    sxbp_tuple_item_t min_y = 0;
+    sxbp_tuple_item_t max_x = 0;
+    sxbp_tuple_item_t max_y = 0;
     for(size_t i = 0; i < spiral.co_ord_cache.co_ords.size; i++) {
         if(spiral.co_ord_cache.co_ords.items[i].x < min_x) {
             min_x = spiral.co_ord_cache.co_ords.items[i].x;
@@ -54,21 +54,21 @@ static void get_bounds(spiral_t spiral, co_ord_t* bounds) {
  * representing a monochromatic image of the rendered spiral to the bitmap
  * returns a status struct with error information (if any)
  */
-status_t render_spiral(spiral_t spiral, bitmap_t* image) {
+sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     // create result status struct
-    status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result = {{0, 0, 0}, 0};
     // plot co-ords of spiral into it's cache
-    cache_spiral_points(&spiral, spiral.size);
+    sxbp_cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
-    co_ord_t bounds[2] = {{0, 0}};
+    sxbp_co_ord_t bounds[2] = {{0, 0}};
     get_bounds(spiral, bounds);
     // get the normalisation vector needed to make all values unsigned
-    tuple_t normalisation_vector = {
+    sxbp_tuple_t normalisation_vector = {
         .x = -bounds[0].x,
         .y = -bounds[0].y,
     };
     // get co-ords of bottom right corner, as unsigned
-    co_ord_t bottom_right = {
+    sxbp_co_ord_t bottom_right = {
         .x = bounds[1].x + normalisation_vector.x,
         .y = bounds[1].y + normalisation_vector.y,
     };
@@ -97,19 +97,19 @@ status_t render_spiral(spiral_t spiral, bitmap_t* image) {
         }
     }
     // set 'current point' co-ordinate
-    co_ord_t current = {
+    sxbp_co_ord_t current = {
         .x = 0,
         .y = 0,
     };
     // plot the lines of the spiral as points
     for(size_t i = 0; i < spiral.size; i++) {
         // get current direction
-        vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        sxbp_vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
         for(uint64_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
-            tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
-            tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
+            sxbp_tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
+            sxbp_tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
             // skip the second pixel of the first line
             if(!((i == 0) && (j == 1))) {
                 // flip the y-axis otherwise they appear vertically mirrored

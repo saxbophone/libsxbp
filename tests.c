@@ -10,35 +10,35 @@
 #include "saxbospiral/serialise.h"
 
 
-bool test_change_direction() {
-    if(change_direction(UP, CLOCKWISE) != RIGHT) {
+bool test_sxbp_change_direction() {
+    if(sxbp_change_direction(UP, CLOCKWISE) != RIGHT) {
         return false;
-    } else if(change_direction(UP, ANTI_CLOCKWISE) != LEFT) {
+    } else if(sxbp_change_direction(UP, ANTI_CLOCKWISE) != LEFT) {
         return false;
-    } else if(change_direction(LEFT, CLOCKWISE) != UP) {
+    } else if(sxbp_change_direction(LEFT, CLOCKWISE) != UP) {
         return false;
-    } else if(change_direction(LEFT, ANTI_CLOCKWISE) != DOWN) {
+    } else if(sxbp_change_direction(LEFT, ANTI_CLOCKWISE) != DOWN) {
         return false;
-    } else if(change_direction(DOWN, CLOCKWISE) != LEFT) {
+    } else if(sxbp_change_direction(DOWN, CLOCKWISE) != LEFT) {
         return false;
-    } else if(change_direction(RIGHT, ANTI_CLOCKWISE) != UP) {
+    } else if(sxbp_change_direction(RIGHT, ANTI_CLOCKWISE) != UP) {
         return false;
     } else {
         return true;
     }
 }
 
-bool test_init_spiral() {
+bool test_sxbp_init_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 2, };
+    sxbp_buffer_t buffer = { .size = 2, };
     buffer.bytes = malloc(buffer.size);
     buffer.bytes = (uint8_t[2]){ 0x6d, 0xc7, };
     // build expected output struct
-    spiral_t expected = { .size = 17, };
-    expected.lines = calloc(sizeof(line_t), 17);
-    direction_t directions[17] = {
+    sxbp_spiral_t expected = { .size = 17, };
+    expected.lines = calloc(sizeof(sxbp_line_t), 17);
+    sxbp_direction_t directions[17] = {
         UP, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT,
         DOWN, RIGHT, UP, RIGHT, DOWN, LEFT, DOWN, RIGHT, UP
     };
@@ -47,8 +47,8 @@ bool test_init_spiral() {
     }
 
     // call init_spiral with buffer and write to blank spiral
-    spiral_t output;
-    init_spiral(buffer, &output);
+    sxbp_spiral_t output;
+    sxbp_init_spiral(buffer, &output);
 
     if(output.size != expected.size) {
         result = false;
@@ -73,19 +73,19 @@ bool test_init_spiral() {
     return result;
 }
 
-bool test_spiral_points() {
+bool test_sxbp_spiral_points() {
     // success variable
     bool success = true;
     // prepare input spiral struct
-    spiral_t input = {
+    sxbp_spiral_t input = {
         .size = 16,
-        .lines = calloc(sizeof(line_t), 16),
+        .lines = calloc(sizeof(sxbp_line_t), 16),
     };
-    direction_t directions[16] = {
+    sxbp_direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
         UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
     };
-    length_t lengths[16] = {
+    sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(size_t i = 0; i < 16; i++) {
@@ -93,7 +93,7 @@ bool test_spiral_points() {
         input.lines[i].length = lengths[i];
     }
     // prepare expected output data
-    co_ord_t expected[23] = {
+    sxbp_co_ord_t expected[23] = {
         {  0,  0, }, {  0,  1, }, { -1,  1, }, { -1,  0, }, { -2,  0, },
         { -2, -1, }, { -1, -1, }, { -1, -2, }, {  0, -2, }, {  1, -2, },
         {  1, -1, }, {  1,  0, }, {  1,  1, }, {  1,  2, }, {  0,  2, },
@@ -102,9 +102,9 @@ bool test_spiral_points() {
     };
 
     // create struct for results
-    co_ord_array_t results = {0, 0};
+    sxbp_co_ord_array_t results = {0, 0};
     // call spiral_points on struct with start point and maximum limit
-    spiral_points(input, &results, expected[0], 0, 16);
+    sxbp_spiral_points(input, &results, expected[0], 0, 16);
 
     // validate data
     if(results.size != 23) {
@@ -127,19 +127,19 @@ bool test_spiral_points() {
     return success;
 }
 
-bool test_cache_spiral_points_blank() {
+bool test_sxbp_cache_spiral_points_blank() {
     // success variable
     bool success = true;
     // prepare input spiral struct
-    spiral_t input = {
+    sxbp_spiral_t input = {
         .size = 16,
-        .lines = calloc(sizeof(line_t), 16),
+        .lines = calloc(sizeof(sxbp_line_t), 16),
     };
-    direction_t directions[16] = {
+    sxbp_direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
         UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
     };
-    length_t lengths[16] = {
+    sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(size_t i = 0; i < 16; i++) {
@@ -147,7 +147,7 @@ bool test_cache_spiral_points_blank() {
         input.lines[i].length = lengths[i];
     }
     // prepare expected output data
-    co_ord_t expected[23] = {
+    sxbp_co_ord_t expected[23] = {
         {  0,  0, }, {  0,  1, }, { -1,  1, }, { -1,  0, }, { -2,  0, },
         { -2, -1, }, { -1, -1, }, { -1, -2, }, {  0, -2, }, {  1, -2, },
         {  1, -1, }, {  1,  0, }, {  1,  1, }, {  1,  2, }, {  0,  2, },
@@ -156,7 +156,7 @@ bool test_cache_spiral_points_blank() {
     };
 
     // call spiral_points on struct with maximum limit
-    cache_spiral_points(&input, 16);
+    sxbp_cache_spiral_points(&input, 16);
 
     // validate data
     if(input.co_ord_cache.co_ords.size != 23) {
@@ -181,19 +181,19 @@ bool test_cache_spiral_points_blank() {
     return success;
 }
 
-bool test_plot_spiral() {
+bool test_sxbp_plot_spiral() {
     // success / failure variable
     bool result = true;
     // build input and output structs
-    spiral_t spiral = { .size = 16, };
-    spiral_t expected = { .size = 16, .solved_count = 16, };
-    spiral.lines = calloc(sizeof(line_t), 16);
-    expected.lines = calloc(sizeof(line_t), 16);
-    direction_t directions[16] = {
+    sxbp_spiral_t spiral = { .size = 16, };
+    sxbp_spiral_t expected = { .size = 16, .solved_count = 16, };
+    spiral.lines = calloc(sizeof(sxbp_line_t), 16);
+    expected.lines = calloc(sizeof(sxbp_line_t), 16);
+    sxbp_direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
         UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
     };
-    length_t lengths[16] = {
+    sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(uint8_t i = 0; i < 16; i++) {
@@ -204,7 +204,7 @@ bool test_plot_spiral() {
     }
 
     // call plot_spiral on spiral
-    plot_spiral(&spiral, 1, 16, NULL);
+    sxbp_plot_spiral(&spiral, 1, 16, NULL);
 
     // check solved count
     if(spiral.solved_count != expected.solved_count) {
@@ -225,19 +225,19 @@ bool test_plot_spiral() {
     return result;
 }
 
-bool test_plot_spiral_partial() {
+bool test_sxbp_plot_spiral_partial() {
     // success / failure variable
     bool result = true;
     // build input and output structs
-    spiral_t spiral = { .size = 16, };
-    spiral_t expected = { .size = 16, .solved_count = 9, };
-    spiral.lines = calloc(sizeof(line_t), 16);
-    expected.lines = calloc(sizeof(line_t), 16);
-    direction_t directions[16] = {
+    sxbp_spiral_t spiral = { .size = 16, };
+    sxbp_spiral_t expected = { .size = 16, .solved_count = 9, };
+    spiral.lines = calloc(sizeof(sxbp_line_t), 16);
+    expected.lines = calloc(sizeof(sxbp_line_t), 16);
+    sxbp_direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
         UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
     };
-    length_t lengths[16] = {
+    sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 1, 1,
     };
     for(uint8_t i = 0; i < 9; i++) {
@@ -248,7 +248,7 @@ bool test_plot_spiral_partial() {
     }
 
     // call plot_spiral on spiral, with instruction to only plot up to line 9
-    plot_spiral(&spiral, 1, 9, NULL);
+    sxbp_plot_spiral(&spiral, 1, 9, NULL);
 
     // check solved count
     if(spiral.solved_count != expected.solved_count) {
@@ -269,17 +269,17 @@ bool test_plot_spiral_partial() {
     return result;
 }
 
-bool test_load_spiral() {
+bool test_sxbp_load_spiral() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 101, };
+    sxbp_buffer_t buffer = { .size = 101, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
         (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch,
+        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
         0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
         0, 0, 12, 53 // seconds_spent serialised as 32-bit
@@ -305,18 +305,18 @@ bool test_load_spiral() {
     };
     // write data to buffer
     for(size_t i = 0; i < 64; i++) {
-        buffer.bytes[i + FILE_HEADER_SIZE] = data[i];
+        buffer.bytes[i + SXBP_FILE_HEADER_SIZE] = data[i];
     }
     // build expected output struct
-    spiral_t expected = {
+    sxbp_spiral_t expected = {
         .size = 16, .solved_count = 5, .seconds_spent = 3125,
     };
-    expected.lines = calloc(sizeof(line_t), 16);
-    direction_t directions[16] = {
+    expected.lines = calloc(sizeof(sxbp_line_t), 16);
+    sxbp_direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
         UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
     };
-    length_t lengths[16] = {
+    sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(uint8_t i = 0; i < 16; i++) {
@@ -325,8 +325,8 @@ bool test_load_spiral() {
     }
 
     // call load_spiral with buffer and write to output spiral
-    spiral_t output;
-    load_spiral(buffer, &output);
+    sxbp_spiral_t output;
+    sxbp_load_spiral(buffer, &output);
 
     if(output.size != expected.size) {
         result = false;
@@ -353,11 +353,11 @@ bool test_load_spiral() {
     return result;
 }
 
-bool test_load_spiral_rejects_missing_magic_number() {
+bool test_sxbp_load_spiral_rejects_missing_magic_number() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 59, };
+    sxbp_buffer_t buffer = { .size = 59, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     buffer.bytes = (uint8_t*)(
@@ -365,8 +365,8 @@ bool test_load_spiral_rejects_missing_magic_number() {
     );
 
     // call load_spiral with buffer and blank spiral, store result
-    spiral_t output;
-    serialise_result_t serialise_result = load_spiral(buffer, &output);
+    sxbp_spiral_t output;
+    sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
         (serialise_result.status.diagnostic != OPERATION_FAIL) ||
@@ -378,18 +378,18 @@ bool test_load_spiral_rejects_missing_magic_number() {
     return result;
 }
 
-bool test_load_spiral_rejects_too_small_for_header() {
+bool test_sxbp_load_spiral_rejects_too_small_for_header() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data - should be smaller than 26
-    buffer_t buffer = { .size = 12, };
+    sxbp_buffer_t buffer = { .size = 12, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     buffer.bytes = (uint8_t*)"SAXBOSPIRAL";
 
     // call load_spiral with buffer and blank spiral, store result
-    spiral_t output;
-    serialise_result_t serialise_result = load_spiral(buffer, &output);
+    sxbp_spiral_t output;
+    sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
         (serialise_result.status.diagnostic != OPERATION_FAIL) ||
@@ -401,17 +401,17 @@ bool test_load_spiral_rejects_too_small_for_header() {
     return result;
 }
 
-bool test_load_spiral_rejects_too_small_data_section() {
+bool test_sxbp_load_spiral_rejects_too_small_data_section() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 41, };
+    sxbp_buffer_t buffer = { .size = 41, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
         (char*)buffer.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch,
+        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
         0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
         0, 0, 12, 53 // seconds_spent serialised as 32-bit
@@ -428,8 +428,8 @@ bool test_load_spiral_rejects_too_small_data_section() {
         buffer.bytes[i+25] = data[i];
     }
     // call load_spiral with buffer and blank spiral, store result
-    spiral_t output;
-    serialise_result_t serialise_result = load_spiral(buffer, &output);
+    sxbp_spiral_t output;
+    sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
         (serialise_result.status.diagnostic != OPERATION_FAIL) ||
@@ -441,11 +441,11 @@ bool test_load_spiral_rejects_too_small_data_section() {
     return result;
 }
 
-bool test_load_spiral_rejects_wrong_version() {
+bool test_sxbp_load_spiral_rejects_wrong_version() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    buffer_t buffer = { .size = 41, };
+    sxbp_buffer_t buffer = { .size = 41, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
@@ -468,8 +468,8 @@ bool test_load_spiral_rejects_wrong_version() {
         buffer.bytes[i+25] = data[i];
     }
     // call load_spiral with buffer and blank spiral, store result
-    spiral_t output;
-    serialise_result_t serialise_result = load_spiral(buffer, &output);
+    sxbp_spiral_t output;
+    sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
         (serialise_result.status.diagnostic != OPERATION_FAIL) ||
@@ -481,21 +481,21 @@ bool test_load_spiral_rejects_wrong_version() {
     return result;
 }
 
-bool test_dump_spiral() {
+bool test_sxbp_dump_spiral() {
     // success / failure variable
     bool result = true;
     // build input struct
-    spiral_t input = {
+    sxbp_spiral_t input = {
         .size = 16,
         .solved_count = 5,
         .seconds_spent = 3125,
     };
-    input.lines = calloc(sizeof(line_t), 16);
-    direction_t directions[16] = {
+    input.lines = calloc(sizeof(sxbp_line_t), 16);
+    sxbp_direction_t directions[16] = {
         UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
         UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
     };
-    length_t lengths[16] = {
+    sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
     };
     for(uint8_t i = 0; i < 16; i++) {
@@ -503,13 +503,13 @@ bool test_dump_spiral() {
         input.lines[i].length = lengths[i];
     }
     // build buffer of bytes for expected output data
-    buffer_t expected = { .size = 101, };
+    sxbp_buffer_t expected = { .size = 101, };
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
         (char*)expected.bytes,
         "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        VERSION.major, VERSION.minor, VERSION.patch,
+        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
         0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
         0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
         0, 0, 12, 53 // seconds_spent serialised as 32-bit
@@ -535,12 +535,12 @@ bool test_dump_spiral() {
     };
     // write data to expected buffer
     for(size_t i = 0; i < 64; i++) {
-        expected.bytes[i + FILE_HEADER_SIZE] = data[i];
+        expected.bytes[i + SXBP_FILE_HEADER_SIZE] = data[i];
     }
 
     // call dump_spiral with spiral and write to output buffer
-    buffer_t output;
-    dump_spiral(input, &output);
+    sxbp_buffer_t output;
+    sxbp_dump_spiral(input, &output);
 
     if(output.size != expected.size) {
         result = false;
@@ -579,35 +579,46 @@ int main() {
     // set up test suite status flag
     bool result = true;
     // call run_test_case() for each test case
-    result = run_test_case(result, test_change_direction, "test_change_direction");
-    result = run_test_case(result, test_init_spiral, "test_init_spiral");
     result = run_test_case(
-        result, test_spiral_points, "test_spiral_points"
+        result, test_sxbp_change_direction, "test_sxbp_change_direction"
     );
     result = run_test_case(
-        result, test_cache_spiral_points_blank, "test_cache_spiral_points_blank"
-    );
-    result = run_test_case(result, test_plot_spiral, "test_plot_spiral");
-    result = run_test_case(
-        result, test_plot_spiral_partial, "test_plot_spiral_partial"
-    );
-    result = run_test_case(result, test_load_spiral, "test_load_spiral");
-    result = run_test_case(
-        result, test_load_spiral_rejects_missing_magic_number,
-        "test_load_spiral_rejects_missing_magic_number"
+        result, test_sxbp_init_spiral, "test_sxbp_init_spiral"
     );
     result = run_test_case(
-        result, test_load_spiral_rejects_too_small_for_header,
-        "test_load_spiral_rejects_too_small_for_header"
+        result, test_sxbp_spiral_points, "test_sxbp_spiral_points"
     );
     result = run_test_case(
-        result, test_load_spiral_rejects_too_small_data_section,
-        "test_load_spiral_rejects_too_small_data_section"
+        result, test_sxbp_cache_spiral_points_blank,
+        "test_sxbp_cache_spiral_points_blank"
     );
     result = run_test_case(
-        result, test_load_spiral_rejects_wrong_version,
-        "test_load_spiral_rejects_wrong_version"
+        result, test_sxbp_plot_spiral, "test_sxbp_plot_spiral"
     );
-    result = run_test_case(result, test_dump_spiral, "test_dump_spiral");
+    result = run_test_case(
+        result, test_sxbp_plot_spiral_partial, "test_sxbp_plot_spiral_partial"
+    );
+    result = run_test_case(
+        result, test_sxbp_load_spiral, "test_sxbp_load_spiral"
+    );
+    result = run_test_case(
+        result, test_sxbp_load_spiral_rejects_missing_magic_number,
+        "test_sxbp_load_spiral_rejects_missing_magic_number"
+    );
+    result = run_test_case(
+        result, test_sxbp_load_spiral_rejects_too_small_for_header,
+        "test_sxbp_load_spiral_rejects_too_small_for_header"
+    );
+    result = run_test_case(
+        result, test_sxbp_load_spiral_rejects_too_small_data_section,
+        "test_sxbp_load_spiral_rejects_too_small_data_section"
+    );
+    result = run_test_case(
+        result, test_sxbp_load_spiral_rejects_wrong_version,
+        "test_sxbp_load_spiral_rejects_wrong_version"
+    );
+    result = run_test_case(
+        result, test_sxbp_dump_spiral, "test_sxbp_dump_spiral"
+    );
     return result ? 0 : 1;
 }

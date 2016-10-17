@@ -28,7 +28,7 @@ extern "C"{
  * collider field in the spiral struct to the index of the colliding line
  * (if any)
  */
-static bool spiral_collides(spiral_t* spiral, size_t index) {
+static bool spiral_collides(sxbp_spiral_t* spiral, size_t index) {
     /*
      * if there are less than 4 lines in the spiral, then there's no way it
      * can collide, so return false early
@@ -40,7 +40,7 @@ static bool spiral_collides(spiral_t* spiral, size_t index) {
         uint64_t line_count = 0;
         uint64_t ttl = spiral->lines[line_count].length + 1; // ttl of line
         size_t last_co_ord = spiral->co_ord_cache.co_ords.size;
-        line_t last_line = spiral->lines[index];
+        sxbp_line_t last_line = spiral->lines[index];
         uint64_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
         for(uint64_t i = 0; i < start_of_last_line; i++) {
@@ -97,8 +97,8 @@ static bool spiral_collides(spiral_t* spiral, size_t index) {
  * the newly plotted line has collided with and 'previous' or 'p' refers to the
  * line before the newly plotted line.
  */
-static length_t suggest_resize(
-    spiral_t spiral, size_t index, int perfection_threshold
+static sxbp_length_t suggest_resize(
+    sxbp_spiral_t spiral, size_t index, int perfection_threshold
 ) {
     // check if collides or not, return same size if no collision
     if(spiral.collides) {
@@ -113,25 +113,25 @@ static length_t suggest_resize(
          */
         if(
             (perfection_threshold != -1) &&
-            (spiral.lines[index].length > (length_t)perfection_threshold)
+            (spiral.lines[index].length > (sxbp_length_t)perfection_threshold)
         ) {
             return spiral.lines[index - 1].length + 1;
         }
         // store the 'previous' and 'rigid' lines.
-        line_t p = spiral.lines[index - 1];
-        line_t r = spiral.lines[spiral.collider];
+        sxbp_line_t p = spiral.lines[index - 1];
+        sxbp_line_t r = spiral.lines[spiral.collider];
         // if pr and r are not parallel, we can return early
         if((p.direction % 2) != (r.direction % 2)) {
             return spiral.lines[index - 1].length + 1;
         }
         // create variables to store the start and end co-ords of these lines
-        co_ord_t pa, ra, rb;
+        sxbp_co_ord_t pa, ra, rb;
         /*
          * We need to grab the start and end co-ords of the line previous to the
          * colliding line, and the rigid line that it collided with.
          */
-        size_t p_index = sum_lines(spiral, 0, index - 1);
-        size_t r_index = sum_lines(spiral, 0, spiral.collider);
+        size_t p_index = sxbp_sum_lines(spiral, 0, index - 1);
+        size_t r_index = sxbp_sum_lines(spiral, 0, spiral.collider);
         pa = spiral.co_ord_cache.co_ords.items[p_index];
         ra = spiral.co_ord_cache.co_ords.items[r_index];
         rb = spiral.co_ord_cache.co_ords.items[r_index + r.length];
@@ -176,17 +176,18 @@ static length_t suggest_resize(
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
  */
-status_t resize_spiral(
-    spiral_t* spiral, size_t index, uint32_t length, int perfection_threshold
+sxbp_status_t sxbp_resize_spiral(
+    sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
+    int perfection_threshold
 ) {
     /*
      * setup state variables, these are used in place of recursion for managing
      * state of which line is being resized, and what size it should be.
      */
     // set result status
-    status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result = {{0, 0, 0}, 0};
     size_t current_index = index;
-    length_t current_length = length;
+    sxbp_length_t current_length = length;
     while(true) {
         // set the target line to the target length
         spiral->lines[current_index].length = current_length;
@@ -198,7 +199,7 @@ status_t resize_spiral(
             current_index < spiral->co_ord_cache.validity
         ) ? current_index : spiral->co_ord_cache.validity;
         // update the spiral's co-ord cache, and catch any errors
-        result = cache_spiral_points(spiral, current_index + 1);
+        result = sxbp_cache_spiral_points(spiral, current_index + 1);
         // return if errors
         if(result.diagnostic != OPERATION_OK) {
             return result;
@@ -250,19 +251,19 @@ status_t resize_spiral(
  * specifying the index of the highest line that will be solved.
  * returns a status struct (used for error information)
  */
-status_t plot_spiral(
-    spiral_t* spiral, int perfection_threshold, uint64_t max_line,
+sxbp_status_t sxbp_plot_spiral(
+    sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
-        spiral_t* spiral, uint64_t latest_line, uint64_t target_line
+        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line
     )
 ) {
     // set up result status
-    status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result = {{0, 0, 0}, 0};
     // get index of highest line to plot
     uint64_t max_index = (max_line > spiral->size) ? spiral->size : max_line;
     // calculate the length of each line
     for(size_t i = 0; i < max_index; i++) {
-        result = resize_spiral(spiral, i, 1, perfection_threshold);
+        result = sxbp_resize_spiral(spiral, i, 1, perfection_threshold);
         // catch and return error if any
         if(result.diagnostic != OPERATION_OK) {
             return result;
