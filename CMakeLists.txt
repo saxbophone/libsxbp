@@ -49,9 +49,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
 find_package(PNG 1.2 EXACT REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
-# Argtable
-find_package(Argtable REQUIRED)
-include_directories(${ARGTABLE_INCLUDE_DIR})
 
 # C source files
 file(
@@ -69,10 +66,8 @@ add_library(saxbospiral ${LIB_SAXBOSPIRAL_SOURCES})
 # Link libsaxbospiral with libpng so we get libpng symbols
 target_link_libraries(saxbospiral ${PNG_LIBRARY})
 
-add_executable(sxp sxp.c)
 add_executable(sxp_test tests.c)
 
-target_link_libraries(sxp saxbospiral ${PNG_LIBRARY} ${ARGTABLE_LIBRARY})
 target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY})
 
 install(
@@ -92,24 +87,7 @@ install(
     DESTINATION include/saxbospiral/render_backends
 )
 
-install(PROGRAMS sxp DESTINATION bin)
-
 enable_testing()
 add_test(unit_tests sxp_test)
 # fetch a shell script runner
 find_program(COMMAND_INTERPRETER bash)
-# only run functional test if we found bash
-if(COMMAND_INTERPRETER)
-    add_test(
-        NAME func_test COMMAND ${COMMAND_INTERPRETER}
-        # each script needs to know the path to the sxp cli executable
-        "func_test.sh" sxp "saxbospiral v${SAXBOSPIRAL_VERSION_STRING}"
-    )
-    add_custom_target(
-        build_logo ${COMMAND_INTERPRETER}
-        "build_logo.sh" sxp "saxbospiral.png" "saxbospiral v${SAXBOSPIRAL_VERSION_STRING}"
-    )
-else()
-    # warn about skipping of functional test script
-    message(WARNING "Skipping functional test script, couldn't find Bash Shell")
-endif()
