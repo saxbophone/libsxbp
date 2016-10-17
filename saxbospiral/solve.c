@@ -33,7 +33,7 @@ static bool spiral_collides(spiral_t* spiral, size_t index) {
      * if there are less than 4 lines in the spiral, then there's no way it
      * can collide, so return false early
      */
-    if (spiral->size < 4) {
+    if(spiral->size < 4) {
         return false;
     } else {
         // initialise a counter to keep track of what line we're on
@@ -139,9 +139,7 @@ static length_t suggest_resize(
          * Apply the rules mentioned in collision_resolution_rules.txt to
          * calculate the correct length to set the previous line and return it.
          */
-        if(false) {
-            (void)0; // no-op
-        } else if((p.direction == UP) && (r.direction == UP)) {
+        if((p.direction == UP) && (r.direction == UP)) {
             return (ra.y - pa.y) + r.length + 1;
         } else if((p.direction == UP) && (r.direction == DOWN)) {
             return (rb.y - pa.y) + r.length + 1;
