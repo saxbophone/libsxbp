@@ -22,7 +22,7 @@ sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version) {
 }
 
 // vector direction constants
-const sxbp_vector_t VECTOR_DIRECTIONS[4] = {
+const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
     // UP       RIGHT       DOWN        LEFT
     { 0, 1, }, { 1, 0, }, { 0, -1, }, { -1, 0, },
 };

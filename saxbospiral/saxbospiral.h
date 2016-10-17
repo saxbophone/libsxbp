@@ -44,15 +44,15 @@ typedef struct sxbp_debug_t {
  * handy short-hand for debugging purposes
  * usage: debug_t debug = DEBUG;
  */
-#define DEBUG (sxbp_debug_t) { .line = __LINE__, .file = __FILE__, .function = __func__, }
+#define SXBP_DEBUG (sxbp_debug_t) { .line = __LINE__, .file = __FILE__, .function = __func__, }
 
 // enum for function error information
 typedef enum sxbp_diagnostic_t {
-    STATE_UNKNOWN = 0, // unknown, the default state
-    OPERATION_FAIL, // generic failure state
-    MALLOC_REFUSED, // memory allocation or re-allocation was refused
-    IMPOSSIBLE_CONDITION, // condition thought to be impossible detected
-    OPERATION_OK, // no problem
+    SXBP_STATE_UNKNOWN = 0, // unknown, the default state
+    SXBP_OPERATION_FAIL, // generic failure state
+    SXBP_MALLOC_REFUSED, // memory allocation or re-allocation was refused
+    SXBP_IMPOSSIBLE_CONDITION, // condition thought to be impossible detected
+    SXBP_OPERATION_OK, // no problem
 } sxbp_diagnostic_t;
 
 // struct for storing generic diagnostics about function failure reasons
@@ -65,17 +65,17 @@ typedef struct sxbp_status_t {
 typedef uint8_t sxbp_direction_t;
 
 // cartesian direction constants
-#define UP 0
-#define RIGHT 1
-#define DOWN 2
-#define LEFT 3
+#define SXBP_UP 0
+#define SXBP_RIGHT 1
+#define SXBP_DOWN 2
+#define SXBP_LEFT 3
 
 // type for representing a rotational direction
 typedef int8_t sxbp_rotation_t;
 
 // rotational direction constants
-#define CLOCKWISE 1
-#define ANTI_CLOCKWISE -1
+#define SXBP_CLOCKWISE 1
+#define SXBP_ANTI_CLOCKWISE -1
 
 // type for representing the length of a line segment of a spiral
 typedef uint32_t sxbp_length_t;
@@ -132,7 +132,7 @@ typedef struct sxbp_buffer_t {
 } sxbp_buffer_t;
 
 // vector direction constants
-extern const sxbp_vector_t VECTOR_DIRECTIONS[4];
+extern const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4];
 
 #ifdef __cplusplus
 } // extern "C"

@@ -79,8 +79,8 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     image->pixels = malloc(image->width * sizeof(bool*));
     // check for malloc fail
     if(image->pixels == NULL) {
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         return result;
     }
     for(size_t i = 0; i < image->width; i++) {
@@ -91,8 +91,8 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
             for(size_t j = i; j > 0; j--) {
                 free(image->pixels[j]);
             }
-            result.location = DEBUG;
-            result.diagnostic = MALLOC_REFUSED;
+            result.location = SXBP_DEBUG;
+            result.diagnostic = SXBP_MALLOC_REFUSED;
             return result;
         }
     }
@@ -104,7 +104,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     // plot the lines of the spiral as points
     for(size_t i = 0; i < spiral.size; i++) {
         // get current direction
-        sxbp_vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
         for(uint64_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
@@ -123,7 +123,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
         }
     }
     // status ok
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 

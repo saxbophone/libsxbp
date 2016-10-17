@@ -40,8 +40,8 @@ sxbp_status_t sxbp_spiral_points(
     // catch malloc error
     if(output->items == NULL) {
         // set error information then early return
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         return result;
     }
     output->size = size;
@@ -53,7 +53,7 @@ sxbp_status_t sxbp_spiral_points(
     // calculate all the specified co-ords
     for(size_t i = start; i < end; i++) {
         // get current direction
-        sxbp_vector_t direction = VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
         for(sxbp_length_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
@@ -63,7 +63,7 @@ sxbp_status_t sxbp_spiral_points(
         }
     }
     // all good
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 
@@ -99,8 +99,8 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
     // catch malloc failure
     if(spiral->co_ord_cache.co_ords.items == NULL) {
         // set error information then early return
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         return result;
     }
     spiral->co_ord_cache.co_ords.size = size;
@@ -129,7 +129,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
         *spiral, &missing, current, smallest, limit
     );
     // return errors from previous call if needed
-    if(calculate_result.diagnostic != OPERATION_OK) {
+    if(calculate_result.diagnostic != SXBP_OPERATION_OK) {
         return calculate_result;
     }
     // add the missing co-ords to the cache
@@ -145,7 +145,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
         limit > spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
     // return ok
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 

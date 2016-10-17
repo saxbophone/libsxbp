@@ -139,21 +139,21 @@ static sxbp_length_t suggest_resize(
          * Apply the rules mentioned in collision_resolution_rules.txt to
          * calculate the correct length to set the previous line and return it.
          */
-        if((p.direction == UP) && (r.direction == UP)) {
+        if((p.direction == SXBP_UP) && (r.direction == SXBP_UP)) {
             return (ra.y - pa.y) + r.length + 1;
-        } else if((p.direction == UP) && (r.direction == DOWN)) {
+        } else if((p.direction == SXBP_UP) && (r.direction == SXBP_DOWN)) {
             return (rb.y - pa.y) + r.length + 1;
-        } else if((p.direction == RIGHT) && (r.direction == RIGHT)) {
+        } else if((p.direction == SXBP_RIGHT) && (r.direction == SXBP_RIGHT)) {
             return (ra.x - pa.x) + r.length + 1;
-        } else if((p.direction == RIGHT) && (r.direction == LEFT)) {
+        } else if((p.direction == SXBP_RIGHT) && (r.direction == SXBP_LEFT)) {
             return (rb.x - pa.x) + r.length + 1;
-        } else if((p.direction == DOWN) && (r.direction == UP)) {
+        } else if((p.direction == SXBP_DOWN) && (r.direction == SXBP_UP)) {
             return (pa.y - rb.y) + r.length + 1;
-        } else if((p.direction == DOWN) && (r.direction == DOWN)) {
+        } else if((p.direction == SXBP_DOWN) && (r.direction == SXBP_DOWN)) {
             return (pa.y - ra.y) + r.length + 1;
-        } else if((p.direction == LEFT) && (r.direction == RIGHT)) {
+        } else if((p.direction == SXBP_LEFT) && (r.direction == SXBP_RIGHT)) {
             return (pa.x - rb.x) + r.length + 1;
-        } else if((p.direction == LEFT) && (r.direction == LEFT)) {
+        } else if((p.direction == SXBP_LEFT) && (r.direction == SXBP_LEFT)) {
             return (pa.x - ra.x) + r.length + 1;
         } else {
             // this is the catch-all case, where no way to optimise was found
@@ -201,7 +201,7 @@ sxbp_status_t sxbp_resize_spiral(
         // update the spiral's co-ord cache, and catch any errors
         result = sxbp_cache_spiral_points(spiral, current_index + 1);
         // return if errors
-        if(result.diagnostic != OPERATION_OK) {
+        if(result.diagnostic != SXBP_OPERATION_OK) {
             return result;
         }
         spiral->collides = spiral_collides(spiral, current_index);
@@ -230,7 +230,7 @@ sxbp_status_t sxbp_resize_spiral(
              * Return OPERATION_OK from function.
              */
             spiral->solved_count = index + 1;
-            result.diagnostic = OPERATION_OK;
+            result.diagnostic = SXBP_OPERATION_OK;
             return result;
         }
     }
@@ -265,7 +265,7 @@ sxbp_status_t sxbp_plot_spiral(
     for(size_t i = 0; i < max_index; i++) {
         result = sxbp_resize_spiral(spiral, i, 1, perfection_threshold);
         // catch and return error if any
-        if(result.diagnostic != OPERATION_OK) {
+        if(result.diagnostic != SXBP_OPERATION_OK) {
             return result;
         }
         // call callback if given
@@ -274,7 +274,7 @@ sxbp_status_t sxbp_plot_spiral(
         }
     }
     // all ok
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 

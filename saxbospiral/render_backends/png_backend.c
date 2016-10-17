@@ -77,8 +77,8 @@ sxbp_status_t sxbp_write_png_image(
     png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     // catch malloc fail
     if(png_ptr == NULL) {
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         // cleanup
         cleanup_png_lib(png_ptr, info_ptr, row);
         return result;
@@ -87,8 +87,8 @@ sxbp_status_t sxbp_write_png_image(
     info_ptr = png_create_info_struct(png_ptr);
     // catch malloc fail
     if(info_ptr == NULL) {
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         // cleanup
         cleanup_png_lib(png_ptr, info_ptr, row);
         return result;
@@ -137,8 +137,8 @@ sxbp_status_t sxbp_write_png_image(
     row = (png_bytep) malloc(bitmap.width * sizeof(png_byte));
     // catch malloc fail
     if(row == NULL) {
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         // cleanup
         cleanup_png_lib(png_ptr, info_ptr, row);
         return result;
@@ -156,7 +156,7 @@ sxbp_status_t sxbp_write_png_image(
     // cleanup
     cleanup_png_lib(png_ptr, info_ptr, row);
     // status ok
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 

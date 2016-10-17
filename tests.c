@@ -11,17 +11,17 @@
 
 
 bool test_sxbp_change_direction() {
-    if(sxbp_change_direction(UP, CLOCKWISE) != RIGHT) {
+    if(sxbp_change_direction(SXBP_UP, SXBP_CLOCKWISE) != SXBP_RIGHT) {
         return false;
-    } else if(sxbp_change_direction(UP, ANTI_CLOCKWISE) != LEFT) {
+    } else if(sxbp_change_direction(SXBP_UP, SXBP_ANTI_CLOCKWISE) != SXBP_LEFT) {
         return false;
-    } else if(sxbp_change_direction(LEFT, CLOCKWISE) != UP) {
+    } else if(sxbp_change_direction(SXBP_LEFT, SXBP_CLOCKWISE) != SXBP_UP) {
         return false;
-    } else if(sxbp_change_direction(LEFT, ANTI_CLOCKWISE) != DOWN) {
+    } else if(sxbp_change_direction(SXBP_LEFT, SXBP_ANTI_CLOCKWISE) != SXBP_DOWN) {
         return false;
-    } else if(sxbp_change_direction(DOWN, CLOCKWISE) != LEFT) {
+    } else if(sxbp_change_direction(SXBP_DOWN, SXBP_CLOCKWISE) != SXBP_LEFT) {
         return false;
-    } else if(sxbp_change_direction(RIGHT, ANTI_CLOCKWISE) != UP) {
+    } else if(sxbp_change_direction(SXBP_RIGHT, SXBP_ANTI_CLOCKWISE) != SXBP_UP) {
         return false;
     } else {
         return true;
@@ -39,8 +39,9 @@ bool test_sxbp_init_spiral() {
     sxbp_spiral_t expected = { .size = 17, };
     expected.lines = calloc(sizeof(sxbp_line_t), 17);
     sxbp_direction_t directions[17] = {
-        UP, RIGHT, UP, LEFT, UP, LEFT, DOWN, LEFT,
-        DOWN, RIGHT, UP, RIGHT, DOWN, LEFT, DOWN, RIGHT, UP
+        SXBP_UP, SXBP_RIGHT, SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_LEFT, SXBP_DOWN,
+        SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN,
+        SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP
     };
     for(uint8_t i = 0; i < 17; i++) {
         expected.lines[i].direction = directions[i];
@@ -82,8 +83,8 @@ bool test_sxbp_spiral_points() {
         .lines = calloc(sizeof(sxbp_line_t), 16),
     };
     sxbp_direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -136,8 +137,8 @@ bool test_sxbp_cache_spiral_points_blank() {
         .lines = calloc(sizeof(sxbp_line_t), 16),
     };
     sxbp_direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -190,8 +191,8 @@ bool test_sxbp_plot_spiral() {
     spiral.lines = calloc(sizeof(sxbp_line_t), 16);
     expected.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -234,8 +235,8 @@ bool test_sxbp_plot_spiral_partial() {
     spiral.lines = calloc(sizeof(sxbp_line_t), 16);
     expected.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -313,8 +314,8 @@ bool test_sxbp_load_spiral() {
     };
     expected.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -369,8 +370,8 @@ bool test_sxbp_load_spiral_rejects_missing_magic_number() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
-        (serialise_result.diagnostic != DESERIALISE_BAD_MAGIC_NUMBER)
+        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_MAGIC_NUMBER)
     ) {
         result = false;
     }
@@ -392,8 +393,8 @@ bool test_sxbp_load_spiral_rejects_too_small_for_header() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
-        (serialise_result.diagnostic != DESERIALISE_BAD_HEADER_SIZE)
+        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_HEADER_SIZE)
     ) {
         result = false;
     }
@@ -432,8 +433,8 @@ bool test_sxbp_load_spiral_rejects_too_small_data_section() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
-        (serialise_result.diagnostic != DESERIALISE_BAD_DATA_SIZE)
+        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_DATA_SIZE)
     ) {
         result = false;
     }
@@ -472,8 +473,8 @@ bool test_sxbp_load_spiral_rejects_wrong_version() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != OPERATION_FAIL) ||
-        (serialise_result.diagnostic != DESERIALISE_BAD_VERSION)
+        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_VERSION)
     ) {
         result = false;
     }
@@ -492,8 +493,8 @@ bool test_sxbp_dump_spiral() {
     };
     input.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        UP, LEFT, DOWN, LEFT, DOWN, RIGHT, DOWN, RIGHT,
-        UP, LEFT, UP, RIGHT, DOWN, RIGHT, UP, LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,

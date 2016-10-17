@@ -45,12 +45,12 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
     spiral->lines = calloc(sizeof(sxbp_line_t), line_count);
     // check for memory allocation failure
     if(spiral->lines == NULL) {
-        result.location = DEBUG;
-        result.diagnostic = MALLOC_REFUSED;
+        result.location = SXBP_DEBUG;
+        result.diagnostic = SXBP_MALLOC_REFUSED;
         return result;
     }
     // First line is always an UP line - this is for orientation purposes
-    sxbp_direction_t current = UP;
+    sxbp_direction_t current = SXBP_UP;
     spiral->lines[0].direction = current;
     spiral->lines[0].length = 0;
     /*
@@ -66,7 +66,7 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
             size_t index = (s * 8) + b + 1; // line index
             sxbp_rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
-            rotation = (bit == 0) ? CLOCKWISE : ANTI_CLOCKWISE;
+            rotation = (bit == 0) ? SXBP_CLOCKWISE : SXBP_ANTI_CLOCKWISE;
             // calculate the change of direction
             current = sxbp_change_direction(current, rotation);
             // store direction in result struct
@@ -76,7 +76,7 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
         }
     }
     // all ok
-    result.diagnostic = OPERATION_OK;
+    result.diagnostic = SXBP_OPERATION_OK;
     return result;
 }
 

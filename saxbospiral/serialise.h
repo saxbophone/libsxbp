@@ -12,11 +12,11 @@ extern "C"{
 
 // for providing further error information specific to spiral deserialisation
 typedef enum sxbp_deserialise_diagnostic_t {
-    DESERIALISE_OK, // no problem
-    DESERIALISE_BAD_HEADER_SIZE, // header section too small to be valid
-    DESERIALISE_BAD_MAGIC_NUMBER, // wrong magic number in header section
-    DESERIALISE_BAD_VERSION, // unsupported data version (according to header)
-    DESERIALISE_BAD_DATA_SIZE, // data section too small to be valid
+    SXBP_DESERIALISE_OK, // no problem
+    SXBP_DESERIALISE_BAD_HEADER_SIZE, // header section too small to be valid
+    SXBP_DESERIALISE_BAD_MAGIC_NUMBER, // wrong magic number in header section
+    SXBP_DESERIALISE_BAD_VERSION, // unsupported data version (according to header)
+    SXBP_DESERIALISE_BAD_DATA_SIZE, // data section too small to be valid
 } sxbp_deserialise_diagnostic_t;
 
 /*
