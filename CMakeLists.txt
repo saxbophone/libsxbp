@@ -89,5 +89,3 @@ install(
 
 enable_testing()
 add_test(unit_tests sxp_test)
-# fetch a shell script runner
-find_program(COMMAND_INTERPRETER bash)
