@@ -16,18 +16,18 @@
 extern "C"{
 #endif
 
-typedef struct bitmap_t {
+typedef struct sxbp_bitmap_t {
     uint64_t width;
     uint64_t height;
     bool ** pixels;
-} bitmap_t;
+} sxbp_bitmap_t;
 
 /*
  * given a spiral struct and a pointer to a blank bitmap_t struct, writes data
  * representing a monochromatic image of the rendered spiral to the bitmap
  * returns a status struct with error information (if any)
  */
-status_t render_spiral(spiral_t spiral, bitmap_t* image);
+sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image);
 
 #ifdef __cplusplus
 } // extern "C"

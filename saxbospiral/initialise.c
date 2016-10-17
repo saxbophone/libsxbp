@@ -13,15 +13,17 @@ extern "C"{
  * when facing the direction specified by current, return the direction that
  * will be faced when turning in the rotational direction specified by turn.
  */
-direction_t change_direction(direction_t current, rotation_t turn) {
+sxbp_direction_t sxbp_change_direction(
+    sxbp_direction_t current, sxbp_rotation_t turn
+) {
     return (current + turn) % 4U;
 }
 
 /*
  * returns a spiral struct with all fields initialised to 0
  */
-spiral_t blank_spiral() {
-    return (spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
+sxbp_spiral_t sxbp_blank_spiral() {
+    return (sxbp_spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
 }
 
 /*
@@ -31,16 +33,16 @@ spiral_t blank_spiral() {
  * instructions which are then used to build the pattern.
  * returns a status_t struct with error information (if needed)
  */
-status_t init_spiral(buffer_t buffer, spiral_t* spiral) {
+sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
     // result status object
-    status_t result;
+    sxbp_status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line
     size_t line_count = (buffer.size * 8) + 1;
     // populate spiral struct
     spiral->size = line_count;
     spiral->collides = -1;
     // allocate enough memory for a line_t struct for each bit
-    spiral->lines = calloc(sizeof(line_t), line_count);
+    spiral->lines = calloc(sizeof(sxbp_line_t), line_count);
     // check for memory allocation failure
     if(spiral->lines == NULL) {
         result.location = DEBUG;
@@ -48,7 +50,7 @@ status_t init_spiral(buffer_t buffer, spiral_t* spiral) {
         return result;
     }
     // First line is always an UP line - this is for orientation purposes
-    direction_t current = UP;
+    sxbp_direction_t current = UP;
     spiral->lines[0].direction = current;
     spiral->lines[0].length = 0;
     /*
@@ -62,11 +64,11 @@ status_t init_spiral(buffer_t buffer, spiral_t* spiral) {
             uint8_t e = 7 - b; // which power of two to use with bit mask
             uint8_t bit = (buffer.bytes[s] & (1 << e)) >> e; // the current bit
             size_t index = (s * 8) + b + 1; // line index
-            rotation_t rotation; // the rotation we're going to make
+            sxbp_rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
             rotation = (bit == 0) ? CLOCKWISE : ANTI_CLOCKWISE;
             // calculate the change of direction
-            current = change_direction(current, rotation);
+            current = sxbp_change_direction(current, rotation);
             // store direction in result struct
             spiral->lines[index].direction = current;
             // set length to 0 initially

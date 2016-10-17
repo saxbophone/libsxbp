@@ -11,7 +11,7 @@ extern "C"{
 #endif
 
 // returns the sum of all line lengths within the given indexes
-size_t sum_lines(spiral_t spiral, size_t start, size_t end);
+size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end);
 
 /*
  * given a spiral_t struct, a pointer to a co_ord_array_t, a pair of co-ords
@@ -23,9 +23,9 @@ size_t sum_lines(spiral_t spiral, size_t start, size_t end);
  * lines longer than one unit.
  * returns a status struct with error information (if any)
  */
-status_t spiral_points(
-    spiral_t spiral, co_ord_array_t* output, co_ord_t start_point,
-    size_t start, size_t end
+sxbp_status_t sxbp_spiral_points(
+    sxbp_spiral_t spiral, sxbp_co_ord_array_t* output,
+    sxbp_co_ord_t start_point, size_t start, size_t end
 );
 
 /*
@@ -37,7 +37,7 @@ status_t spiral_points(
  * spiral's co_ord_cache member and are re-used if they are still valid
  * returns a status struct with error information (if any)
  */
-status_t cache_spiral_points(spiral_t* spiral, size_t limit);
+sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit);
 
 #ifdef __cplusplus
 } // extern "C"
