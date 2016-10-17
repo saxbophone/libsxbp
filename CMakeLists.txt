@@ -1,7 +1,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.16.0 LANGUAGES C)
+project(libsaxbospiral VERSION 0.16.1 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
@@ -63,6 +63,11 @@ file(
     "saxbospiral/render_backends/*.h"
 )
 add_library(saxbospiral ${LIB_SAXBOSPIRAL_SOURCES})
+# set up version for library objects
+set_target_properties(
+    saxbospiral PROPERTIES VERSION ${SAXBOSPIRAL_VERSION_STRING}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+)
 # Link libsaxbospiral with libpng so we get libpng symbols
 target_link_libraries(saxbospiral ${PNG_LIBRARY})
 
