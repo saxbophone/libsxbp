@@ -1,4 +1,4 @@
-# Saxbospiral ![saxbospiral](saxbospiral.png "saxbospiral")
+# Saxbospiral ![libsaxbospiral](libsaxbospiral.png "libsaxbospiral")
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
