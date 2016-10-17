@@ -63,6 +63,11 @@ file(
     "saxbospiral/render_backends/*.h"
 )
 add_library(saxbospiral ${LIB_SAXBOSPIRAL_SOURCES})
+# set up version for library objects
+set_target_properties(
+    saxbospiral PROPERTIES VERSION ${SAXBOSPIRAL_VERSION_STRING}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+)
 # Link libsaxbospiral with libpng so we get libpng symbols
 target_link_libraries(saxbospiral ${PNG_LIBRARY})
 
