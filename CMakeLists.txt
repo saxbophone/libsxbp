@@ -47,7 +47,7 @@ endif()
 # add custom dependencies directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
-find_package(PNG REQUIRED)
+find_package(PNG 1.2 REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 # Argtable
 find_package(Argtable REQUIRED)
