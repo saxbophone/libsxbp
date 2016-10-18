@@ -19,7 +19,7 @@ extern "C"{
  * returns a status struct (used for error information)
  */
 sxbp_status_t sxbp_resize_spiral(
-    sxbp_spiral_t* spiral, size_t index, sxbp_length_t length,
+    sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
     int perfection_threshold
 );
 
