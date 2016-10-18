@@ -1,7 +1,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.16.2 LANGUAGES C)
+project(libsaxbospiral VERSION 0.17.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
@@ -47,7 +47,7 @@ endif()
 # add custom dependencies directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
-find_package(PNG 1.2 EXACT REQUIRED)
+find_package(PNG 1 EXACT REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
 
 # C source files
