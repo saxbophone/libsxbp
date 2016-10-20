@@ -240,23 +240,28 @@ sxbp_status_t sxbp_resize_spiral(
  * given a pointer to a spiral spiral for which the length of all its lines are
  * not yet known, a perfection threshold (-1 for no perfection, or otherwise
  * the maximmum line length at which to allow aggressive optimisation), the
- * index of the highest line to plot to and a pointer to a callback function,
+ * index of the highest line to plot to, a pointer to a callback function and
+ * a void pointer to a user-defined data struct for use with the callback,
  * calculate the length needed for each line in the spiral up to this index
  * (to avoid line overlap) and store these in a the spiral struct that is
  * pointed to by the pointer. If the spiral has some lines already solved, the
  * algorithm will start at the next unsolved line.
- * the function pointer can be NULL, if it is not then it will be called every
- * time a new line of the spiral is solved. The function should be of return
- * type void and take three arguments: a pointer to a spiral_t struct, an
- * integer specifying the index of the latest solved line and an integer
- * specifying the index of the highest line that will be solved.
+ * the function pointer and the user data pointer can be NULL.
+ * If the function pointer is not NULL, then it will be called every time a new
+ * line of the spiral is solved. The function should be of return type void and
+ * take four arguments: a pointer to a spiral_t struct, an integer specifying
+ * the index of the latest solved line, an integer specifying the index of the
+ * highest line that will be solved and a void pointer used for accessing the
+ * user data.
  * returns a status struct (used for error information)
  */
 sxbp_status_t sxbp_plot_spiral(
     sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
-        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line
-    )
+        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+        void* progress_callback_user_data
+    ),
+    void* progress_callback_user_data
 ) {
     // set up result status
     sxbp_status_t result = {{0, 0, 0}, 0};
@@ -271,7 +276,7 @@ sxbp_status_t sxbp_plot_spiral(
         }
         // call callback if given
         if(progress_callback != NULL) {
-            progress_callback(spiral, i, max_index);
+            progress_callback(spiral, i, max_index, progress_callback_user_data);
         }
     }
     // all ok
