@@ -270,6 +270,12 @@ bool test_sxbp_plot_spiral_partial() {
     return result;
 }
 
+/*
+ * disable GCC warning about the unused parameters as this function by necessity
+ * requires these arguments in its signature, but it needn't use all of them.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 // test callback for next test case
 static void test_progress_callback(
     sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
@@ -278,6 +284,8 @@ static void test_progress_callback(
     // cast user data from void pointer to uint16_t pointer, deref and multiply
     *(uint16_t*)progress_callback_user_data *= 13;
 }
+// re-enable all warnings
+#pragma GCC diagnostic pop
 
 bool test_sxbp_plot_spiral_progress_callback() {
     // success / failure variable
@@ -289,9 +297,6 @@ bool test_sxbp_plot_spiral_progress_callback() {
         SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT,
         SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT,
         SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
-    };
-    sxbp_length_t lengths[16] = {
-        1, 1, 1, 1, 1, 1, 1, 1, 1,
     };
     for(uint8_t i = 0; i < 16; i++) {
         spiral.lines[i].direction = directions[i];
