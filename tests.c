@@ -205,7 +205,7 @@ bool test_sxbp_plot_spiral() {
     }
 
     // call plot_spiral on spiral
-    sxbp_plot_spiral(&spiral, 1, 16, NULL);
+    sxbp_plot_spiral(&spiral, 1, 16, NULL, NULL);
 
     // check solved count
     if(spiral.solved_count != expected.solved_count) {
@@ -249,7 +249,7 @@ bool test_sxbp_plot_spiral_partial() {
     }
 
     // call plot_spiral on spiral, with instruction to only plot up to line 9
-    sxbp_plot_spiral(&spiral, 1, 9, NULL);
+    sxbp_plot_spiral(&spiral, 1, 9, NULL, NULL);
 
     // check solved count
     if(spiral.solved_count != expected.solved_count) {
@@ -266,6 +266,58 @@ bool test_sxbp_plot_spiral_partial() {
     // free memory
     free(spiral.lines);
     free(expected.lines);
+
+    return result;
+}
+
+/*
+ * disable GCC warning about the unused parameters as this function by necessity
+ * requires these arguments in its signature, but it needn't use all of them.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+// test callback for next test case
+static void test_progress_callback(
+    sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+    void* progress_callback_user_data
+) {
+    // cast user data from void pointer to uint16_t pointer, deref and multiply
+    *(uint16_t*)progress_callback_user_data *= 13;
+}
+// re-enable all warnings
+#pragma GCC diagnostic pop
+
+bool test_sxbp_plot_spiral_progress_callback() {
+    // success / failure variable
+    bool result = true;
+    // build input structs
+    sxbp_spiral_t spiral = { .size = 16, };
+    spiral.lines = calloc(sizeof(sxbp_line_t), 16);
+    sxbp_direction_t directions[16] = {
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
+    };
+    for(uint8_t i = 0; i < 16; i++) {
+        spiral.lines[i].direction = directions[i];
+        spiral.lines[i].length = 0;
+    }
+    // create user data variable
+    uint16_t user_data = 17;
+
+    /*
+     * call plot_spiral on spiral, with instruction to only plot up to line 1
+     * supply our progress_callback function and a user data variable
+     */
+    sxbp_plot_spiral(&spiral, 1, 1, test_progress_callback, (void*)&user_data);
+
+    // user data variable should have been set to 221 (17 * 13) by callback
+    if(user_data != 221) {
+        result = false;
+    }
+
+    // free memory
+    free(spiral.lines);
 
     return result;
 }
@@ -598,6 +650,10 @@ int main() {
     );
     result = run_test_case(
         result, test_sxbp_plot_spiral_partial, "test_sxbp_plot_spiral_partial"
+    );
+    result = run_test_case(
+        result, test_sxbp_plot_spiral_progress_callback,
+        "test_sxbp_plot_spiral_progress_callback"
     );
     result = run_test_case(
         result, test_sxbp_load_spiral, "test_sxbp_load_spiral"
