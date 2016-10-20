@@ -30,7 +30,8 @@ sxbp_status_t sxbp_resize_spiral(
  * index of the highest line to plot to and a pointer to a callback function,
  * calculate the length needed for each line in the spiral up to this index
  * (to avoid line overlap) and store these in a the spiral struct that is
- * pointed to by the pointer
+ * pointed to by the pointer. If the spiral has some lines already solved, the
+ * algorithm will start at the next unsolved line.
  * the function pointer can be NULL, if it is not then it will be called every
  * time a new line of the spiral is solved. The function should be of return
  * type void and take three arguments: a pointer to a spiral_t struct, an
