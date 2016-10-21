@@ -1,5 +1,7 @@
 # libsaxbospiral ![libsaxbospiral](libsaxbospiral.png "libsaxbospiral")
 
+![AGPL v3 Logo](agplv3-155x51.png "A logo used to show the AGPL v3.0 License")
+
 Experimental generation of 2D spiralling lines based on input binary data.
 
 This a C library implementing an experimental idea I had for generating procedural shapes. The library takes input as sequences of bytes and turns the 1s and 0s into a kind of *right-angled spiral*, with the changes in direction of the line encoding the binary data in a lossless manner.
@@ -20,7 +22,7 @@ The algorithm is not limited to text however - any form of input binary data wil
 
 - As libsaxbospiral is currently at major version 0, expect the library API to be unstable. I will endeavour as much as possible to make sure breaking changes increment the minor version number whilst in the version 0.x.x series and bugfixes increment the patch version number, but no heavy reliance should be placed on this.
 
-## Licensing ![AGPL v3 Logo](agplv3-155x51.png "A logo used to show the AGPL v3.0 License")
+## Licensing
 
 Libsaxbospiral is released under version **3.0** of the **GNU Affero General Public License** (AGPLv3).
 
