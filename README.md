@@ -10,7 +10,7 @@ For example, the input text **`cabbages`**, encoded as ASCII gives us the follow
 
 When this is given as input data to the algorithm, the output is the shape shown below:
 
-!['cabbages', shown as a saxbospiral figure from encoded ASCII](examples/01_cabbages.png "cabbages', shown as a saxbospiral figure from encoded ASCII")
+!['cabbages', shown as a saxbospiral figure from encoded ASCII](example_01_cabbages.png "cabbages', shown as a saxbospiral figure from encoded ASCII")
 
 The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
@@ -20,11 +20,11 @@ The algorithm is not limited to text however - any form of input binary data wil
 
 - As libsaxbospiral is currently at major version 0, expect the library API to be unstable. I will endeavour as much as possible to make sure breaking changes increment the minor version number whilst in the version 0.x.x series and bugfixes increment the patch version number, but no heavy reliance should be placed on this.
 
-## Licensing
+## Licensing ![AGPL v3 Logo](agplv3-155x51.png "A logo used to show the AGPL v3.0 License")
 
 Libsaxbospiral is released under version **3.0** of the **GNU Affero General Public License** (AGPLv3).
 
-A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. If for some reason you have not received this file, you can view a copy of the license at [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
+A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. *You should almost certainly read it*. If for some reason you have not received this file, you can view a copy of the license at [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
 
 Note that as well as being under the same copyleft protections as the GPL License, the AGPL enforces these protections further by **including provision of the software via a network service (such as a website) as one of its definitions of distribution**, hence requiring those who integrate libsaxbospiral into their website or other network service to also release the software into which they are integrating libsaxbospiral under this same license (AGPLv3).
 
