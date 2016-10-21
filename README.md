@@ -2,48 +2,36 @@
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
-This is a library only, if you're looking for something that is immediately usable for the end-user, you probably want to look at [sxbp](https://github.com/saxbophone/sxbp) instead.
+This a C library implementing an experimental idea I had for generating procedural shapes. The library takes input as sequences of bytes and turns the 1s and 0s into a kind of *right-angled spiral*, with the changes in direction of the line encoding the binary data in a lossless manner.
 
-## Dependencies
+For example, the input text **`cabbages`**, encoded as ASCII gives us the following byte values:
 
-You will need:
+**`0x63 0x61 0x62 0x62 0x61 0x67 0x65 0x73`**
 
-- A compiler that can compile ISO C99 code
-- [Cmake](https://cmake.org/) - v3.0 or newer
-- [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes preinstalled with many modern unix-like systems)
+When this is given as input data to the algorithm, the output is the shape shown below:
 
-> ### Note:
+!['cabbages', shown as a saxbospiral figure from encoded ASCII](examples/01_cabbages.png "cabbages', shown as a saxbospiral figure from encoded ASCII")
 
-> These commands are for unix-like systems, without an IDE or other build system besides CMake. If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
+The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
-> Additionally, it is of worth noting that this library has only been thoroughly tested and developed on **Ubuntu GNU/Linux** with **GCC v5.4.0**, although every effort has been made to make it as cross-platform as possible (including reasonably strict **ISO C 99** compliance). It should compile under any POSIX-compliant system with the correct additional dependencies listed. **v0.8** is known to successfully cross-compile from Ubuntu to Windows (via [cygwin](https://www.cygwin.com/)) and Max OSX (using a locally-built compiler toolchain provided via [OSXCross](https://github.com/tpoechtrager/osxcross). It is highly likely that all other versions cross-compile as well (but I haven't yet verified this).
+## Please Note
 
-## Basic Build
+- This is a library only. If you're looking for something that is immediately usable for the end-user, you probably want to look at [sxbp](https://github.com/saxbophone/sxbp) instead, which is a command-line program I wrote which uses libsaxbospiral to render input binary files to PNG images.
 
-```sh
-cmake .
-make
-```
+- As libsaxbospiral is currently at major version 0, expect the library API to be unstable. I will endeavour as much as possible to make sure breaking changes increment the minor version number whilst in the version 0.x.x series and bugfixes increment the patch version number, but no heavy reliance should be placed on this.
 
-## Recommended Library Build
+## Licensing
 
-Add two custom options to CMake to build the library in release mode (with full optimisation) and as a shared dynamic library:
+Libsaxbospiral is released under version **3.0** of the **GNU Affero General Public License** (AGPLv3).
 
-```sh
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
-make
-```
+A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. If for some reason you have not received this file, you can view a copy of the license at [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
 
-## Test
+Note that as well as being under the same copyleft protections as the GPL License, the AGPL enforces these protections further by **including provision of the software via a network service (such as a website) as one of its definitions of distribution**, hence requiring those who integrate libsaxbospiral into their website or other network service to also release the software into which they are integrating libsaxbospiral under this same license (AGPLv3).
 
-```sh
-make test
-```
+## Installing
 
-## Install Library
+See [INSTALL.md](INSTALL.md) for instructions on how to build and/or install libsaxbospiral.
 
-This command might require `sudo`, but check your system configuration. For example, it installs to `/usr/local/` by default, which is user-writable on OSX if you use Homebrew, so not requiring admin privileges.
+## Contributing
 
-```
-make install
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to making contributions to libsaxbospiral.
