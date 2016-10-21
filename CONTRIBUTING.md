@@ -2,7 +2,7 @@
 
 Thanks for considering contributing to libsaxbospiral!
 
-Here are some tips and general info about contributing to this project.
+Here are some tips and general info about contributing to this project. Following these tips will increase the likelihood of getting a speedy PR :smile:
 
 ## Checklist
 
