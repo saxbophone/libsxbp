@@ -20,8 +20,8 @@ addons:
     packages:
       - cmake
       - cmake-data
-      # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5
+      # want gcc 6.x as 4.x gives incorrect warnings and 5.x won't install
+      - gcc-6
 # branches safelist
 branches:
   only:
