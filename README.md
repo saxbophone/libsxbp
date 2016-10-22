@@ -16,6 +16,8 @@ When this is given as input data to the algorithm, the output is the shape shown
 
 The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
+Although this project doesn't work in sprints, there is a [*sprint board*](https://github.com/saxbophone/libsaxbospiral/projects/1), which is used for organising issues.
+
 ## Please Note
 
 - This is a library only. If you're looking for something that is immediately usable for the end-user, you probably want to look at [sxbp](https://github.com/saxbophone/sxbp) instead, which is a command-line program I wrote which uses libsaxbospiral to render input binary files to PNG images.
@@ -30,7 +32,7 @@ A full verbatim of this license may be found in the [LICENSE](LICENSE) file in t
 
 Note that as well as being under the same copyleft protections as the GPL License, the AGPL enforces these protections further by **including provision of the software via a network service (such as a website) as one of its definitions of distribution**, hence requiring those who integrate libsaxbospiral into their website or other network service to also release the software into which they are integrating libsaxbospiral under this same license (AGPLv3).
 
-## Building + Installing
+## Building
 
 Libsaxbospiral can be built without installing for test purposes and for general usage, however if you plan on writing programs that use it I recommend you install it so it will be in your system's standard library and header include locations.
 
@@ -48,7 +50,7 @@ You will need:
 
 > Additionally, it is of worth noting that this library has only been thoroughly tested and developed on **Ubuntu GNU/Linux** with **GCC v5.4.0** and **Clang 3.8.0**. Although every effort has been made to make it as cross-platform as possible (including quite strict **ISO C 99** compliance), **Your Mileage May Vary**. Bug Reports and Patches for problems running on other systems, particularly **Microsoft Windows** and **Mac OSX** are most welcome.
 
-## Recommended Library Build
+### Recommended Library Build
 
 Invoke CMake within the root of this repository, with these arguments to make CMake build the library in release mode (with full optimisation) and as a shared library:
 
