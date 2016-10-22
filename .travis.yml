@@ -1,10 +1,21 @@
 language: c
+# build matrix with both OSes and Compilers
 os:
   - linux
   - osx
 compiler:
   - clang
   - gcc
+# exclude gcc on osx as this always points to clang
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
+# specify desired compiler versions
+env:
+  global:
+    - GCC_VERSION="5"
+    - CLANG_VERSION="3.8"
 cache:
   - ccache
 addons:
