@@ -2,7 +2,9 @@
 
 Thanks for considering contributing to libsaxbospiral!
 
-To get started, <a target="_blank" href="https://www.clahub.com/agreements/saxbophone/libsaxbospiral">sign the Contributor License Agreement</a>.
+To get started, [sign the Contributor License Agreement](https://www.clahub.com/agreements/saxbophone/libsaxbospiral).
+
+> [A copy of the CLA](CLA_INDIVIDUAL.md) is also available in this repository.
 
 Here are some tips and general info about contributing to this project. Following these tips will increase the likelihood of getting a speedy PR :smile:
 
