@@ -1,6 +1,6 @@
 # libsaxbospiral ![libsaxbospiral](libsaxbospiral.png "libsaxbospiral")
 
-![AGPL v3 Logo](agplv3-155x51.png "A logo used to show the AGPL v3.0 License")
+![AGPL v3 Logo](agplv3-88x31.png "A logo used to show the AGPL v3.0 License") [![Build Status](https://travis-ci.org/saxbophone/libsaxbospiral.svg?branch=develop)](https://travis-ci.org/saxbophone/libsaxbospiral)
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
