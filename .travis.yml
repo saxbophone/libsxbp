@@ -21,7 +21,7 @@ addons:
       - cmake
       - cmake-data
       # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5.8
+      - gcc-5
 # branches safelist
 branches:
   only:
