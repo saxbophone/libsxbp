@@ -5,7 +5,8 @@ os:
   - osx
 compiler:
   - clang
-  - gcc
+  # commenting out gcc until installing GCC v5.x+ actually works on Travis CI
+  # - gcc
 # exclude gcc on osx as this always points to clang
 matrix:
   exclude:
@@ -20,11 +21,9 @@ addons:
     packages:
       - cmake
       - cmake-data
+      # commenting out gcc until installing GCC v5.x+ actually works on Travis CI
       # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5
-# set gcc version
-env:
-  - GCC_VERSION=5
+      # - gcc-5
 # branches safelist
 branches:
   only:
