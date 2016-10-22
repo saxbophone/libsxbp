@@ -2,6 +2,8 @@
 
 Thanks for considering contributing to libsaxbospiral!
 
+To get started, <a target="_blank" href="https://www.clahub.com/agreements/saxbophone/libsaxbospiral">sign the Contributor License Agreement</a>.
+
 Here are some tips and general info about contributing to this project. Following these tips will increase the likelihood of getting a speedy PR :smile:
 
 ## Checklist
@@ -29,10 +31,4 @@ In addition, please make sure:
 
 The unit tests for libsaxbospiral currently all reside in one C source file, `tests.c`. This isn't ideal, and I'm planning to clean these up at some point. Build and run the unit tests when you first pull down the code, rebuild and run them again when you've made your changes. Changes adding larger pieces of functionality will likely have additional tests requested for them, or an offer made to write the tests for them.
 
-Pull requests will also *soon* be going through [Travis CI](https://travis-ci.org/) for automated testing.
-
-## Transfer of Copyright
-
-I've yet to create a CLA (Contributor License Agreement), but I will likely be doing so soon and definitely when I start getting external contributions.
-
-This will likely involve aggreeing of transfer of copyright ownership of contributed work to me (Joshua Saxby/@saxbophone), so I can be in the best position to defend copyright claims against me and also allow for dual-licensing should someone find this commercially valuable.
+Pull requests also go through [Travis CI](https://travis-ci.org/) for automated testing.
