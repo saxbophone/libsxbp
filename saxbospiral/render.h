@@ -23,11 +23,6 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_RENDER_H
 #define SAXBOPHONE_SAXBOSPIRAL_RENDER_H
 
-// sanity check for support of 64-bit integers
-#if __SIZEOF_SIZE_T__ < 8
-#warning "Please compile this code for a target with 64-bit words or greater."
-#endif
-
 #include <stdbool.h>
 #include <stdint.h>
 

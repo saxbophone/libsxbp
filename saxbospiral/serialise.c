@@ -21,12 +21,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-// sanity check for support of 64-bit integers
-#if __SIZEOF_SIZE_T__ < 8
-#warning "Please compile this code for a target with 64-bit words or greater."
-#endif
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

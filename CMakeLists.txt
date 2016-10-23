@@ -23,7 +23,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.19.1 LANGUAGES C)
+project(libsaxbospiral VERSION 0.19.2 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(
@@ -32,6 +32,14 @@ set(
 )
 set(SAXBOSPIRAL_ESCAPED_VERSION_STRING "\"${SAXBOSPIRAL_VERSION_STRING}\"")
 # end basic metadata
+
+# this is a 64-bit project, so check now to make sure we're 64-bit, issue warning if not
+if(CMAKE_SIZEOF_VOID_P LESS 8)
+    message(
+        WARNING
+        "It looks like this system's architecture is not at least 64-bit.\n"
+        "libsaxbospiral requires a system with an architecture of at least 64 bits!")
+endif()
 
 # pass in version of library as preprocessor definitions
 add_definitions(-DSAXBOSPIRAL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
