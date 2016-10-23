@@ -483,8 +483,8 @@ bool test_sxbp_load_spiral_rejects_too_small_data_section() {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    sxbp_buffer_t buffer = { .size = 41, };
-    buffer.bytes = calloc(1, buffer.size);
+    sxbp_buffer_t buffer = { .size = 0xffffffffffffffffu, }; // max 64-bit uint
+    buffer.bytes = calloc(1, 41); // set allocation size to actual data size
     // construct data header
     sprintf(
         (char*)buffer.bytes,
