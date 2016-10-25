@@ -23,6 +23,8 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
+project(libsaxbospiral VERSION 0.19.3 LANGUAGES C)
+
 # set default C standard to use (C99)
 set(SAXBOSPIRAL_C_STANDARD "99")
 # if env variable LIBSAXBOSPIRAL_C_STANDARD is set and valid, override version
@@ -33,10 +35,9 @@ if(DEFINED ENV{LIBSAXBOSPIRAL_C_STANDARD})
     endif()
 endif()
 message(STATUS "C Standard set to C${SAXBOSPIRAL_C_STANDARD}")
-
-project(libsaxbospiral VERSION 0.19.2 LANGUAGES C)
 set(CMAKE_C_STANDARD ${SAXBOSPIRAL_C_STANDARD})
 set(CMAKE_C_STANDARD_REQUIRED ON)
+
 set(
     SAXBOSPIRAL_VERSION_STRING
     "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
