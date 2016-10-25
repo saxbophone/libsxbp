@@ -42,7 +42,7 @@ Libsaxbospiral can be built without installing for test purposes and for general
 
 You will need:
 
-- A compiler that can compile ISO C99 code
+- A compiler that can compile ISO C99 or C11 code
 - [Cmake](https://cmake.org/) - v3.0 or newer
 - [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes preinstalled with many modern unix-like systems)
 
@@ -50,7 +50,7 @@ You will need:
 
 > These commands are for unix-like systems, without an IDE or other build system besides CMake. If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
 
-> Additionally, it is of worth noting that this library has only been thoroughly tested and developed on **Ubuntu GNU/Linux** with **GCC v5.4.0** and **Clang 3.8.0**. Although every effort has been made to make it as cross-platform as possible (including quite strict **ISO C 99** compliance), **Your Mileage May Vary**. Bug Reports and Patches for problems running on other systems, particularly **Microsoft Windows** and **Mac OSX** are most welcome.
+> Additionally, it is of worth noting that this library has only been thoroughly tested and developed on **Ubuntu GNU/Linux** with **GCC v5.4.0** and **Clang 3.8.0**. Although every effort has been made to make it as cross-platform as possible (including quite strict **ISO C99** and **ISO C11** compliance), **Your Mileage May Vary**. Bug Reports and Patches for problems running on other systems, particularly **Microsoft Windows** and **Mac OSX** are most welcome.
 
 ### Recommended Library Build
 
@@ -59,6 +59,14 @@ Invoke CMake within the root of this repository, with these arguments to make CM
 ```sh
 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 make
+```
+
+The above builds in C99 mode by default. The standard to use is controlled by the `LIBSAXBOSPIRAL_C_STANDARD` environment variable.
+
+You can build in C11 mode if you want with the following:
+
+```sh
+LIBSAXBOSPIRAL_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 ```
 
 > ### Note:

@@ -25,6 +25,7 @@ In addition, please make sure:
 
 - You commit files with Unix Line-endings (`\n` `<LF>` `0x0a`)
 - Each text file committed has a trailing newline at the end
+- Your C code is compliant to the ISO C99 and C11 standards
 - C source code is indented with 4 spaces per indentation level (no tabs)
 - Public functions are prototyped in the correct C Header file, all private declarations are declared `static`
 - Every public function (and ideally private too) has an accompanying explanatory comment

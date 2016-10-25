@@ -23,9 +23,21 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.19.2 LANGUAGES C)
-set(CMAKE_C_STANDARD 99)
+project(libsaxbospiral VERSION 0.19.3 LANGUAGES C)
+
+# set default C standard to use (C99)
+set(SAXBOSPIRAL_C_STANDARD "99")
+# if env variable LIBSAXBOSPIRAL_C_STANDARD is set and valid, override version
+if(DEFINED ENV{LIBSAXBOSPIRAL_C_STANDARD})
+    # not a very robust regex but ok for most purposes
+    if("$ENV{LIBSAXBOSPIRAL_C_STANDARD}" MATCHES "(99|11)")
+        set(SAXBOSPIRAL_C_STANDARD "$ENV{LIBSAXBOSPIRAL_C_STANDARD}")
+    endif()
+endif()
+message(STATUS "C Standard set to C${SAXBOSPIRAL_C_STANDARD}")
+set(CMAKE_C_STANDARD ${SAXBOSPIRAL_C_STANDARD})
 set(CMAKE_C_STANDARD_REQUIRED ON)
+
 set(
     SAXBOSPIRAL_VERSION_STRING
     "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
@@ -62,7 +74,7 @@ endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
-    message("Warnings Enabled")
+    message(STATUS "Warnings Enabled")
     # enable all warnings about 'questionable constructs'
     enable_c_compiler_flag_if_supported("-Wall")
     # issue 'pedantic' warnings for strict ISO compliance
