@@ -7,6 +7,10 @@ compiler:
   - clang
   # commenting out gcc until installing GCC v5.x+ actually works on Travis CI
   # - gcc
+# different C Standard versions - test on C99 and C11
+env:
+  - LIBSAXBOSPIRAL_C_STANDARD=99
+  - LIBSAXBOSPIRAL_C_STANDARD=11
 # exclude gcc on osx as this always points to clang
 matrix:
   exclude:
