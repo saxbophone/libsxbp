@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -34,10 +35,16 @@ extern "C"{
 /*
  * when facing the direction specified by current, return the direction that
  * will be faced when turning in the rotational direction specified by turn.
+ *
+ * Asserts:
+ * - That the input direction is a valid direction value (range 0->3)
+ * - That the input rotation is a valid value (range -1->1)
  */
 sxbp_direction_t sxbp_change_direction(
     sxbp_direction_t current, sxbp_rotation_t turn
 ) {
+    assert((0 <= current) && (current < 4));
+    assert((turn == -1) || (turn == 1));
     return (current + turn) % 4U;
 }
 
