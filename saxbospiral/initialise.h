@@ -49,6 +49,9 @@ sxbp_spiral_t sxbp_blank_spiral();
  * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
  * instructions which are then used to build the pattern.
  * returns a status_t struct with error information (if needed)
+ *
+ * Asserts:
+ * - That the spiral struct pointed to has its pointer attributes set to NULL
  */
 sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral);
 

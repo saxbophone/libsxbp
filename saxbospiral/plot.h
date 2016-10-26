@@ -33,7 +33,13 @@
 extern "C"{
 #endif
 
-// returns the sum of all line lengths within the given indexes
+/*
+ * returns the sum of all line lengths within the given indexes
+ *
+ * Asserts:
+ * - That the start index is less than end index
+ * - That end index is less than or equal to the spiral size
+ */
 size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end);
 
 /*

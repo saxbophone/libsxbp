@@ -21,6 +21,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdlib.h>
 
 #include "saxbospiral.h"
@@ -31,8 +32,17 @@
 extern "C"{
 #endif
 
-// returns the sum of all line lengths within the given indexes
+/*
+ * returns the sum of all line lengths within the given indexes
+ *
+ * Asserts:
+ * - That the start index is less than end index
+ * - That end index is less than or equal to the spiral size
+ */
 size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end) {
+    // preconditional assertions
+    assert(start < end);
+    assert(end <= spiral.size);
     size_t size = 0;
     for(size_t i = start; i < end; i++) {
         size += spiral.lines[i].length;
