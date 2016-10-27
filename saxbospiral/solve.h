@@ -41,6 +41,10 @@ extern "C"{
  * aggressive optimisation) attempt to set the target line to that length,
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
+ *
+ * Asserts:
+ * - That spiral->lines is not NULL
+ * - That index is less than spiral->size
  */
 sxbp_status_t sxbp_resize_spiral(
     sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
@@ -65,6 +69,9 @@ sxbp_status_t sxbp_resize_spiral(
  * highest line that will be solved and a void pointer used for accessing the
  * user data.
  * returns a status struct (used for error information)
+ *
+ * Asserts:
+ * - That spiral->lines is not NULL
  */
 sxbp_status_t sxbp_plot_spiral(
     sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
