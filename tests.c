@@ -403,7 +403,7 @@ bool test_sxbp_load_spiral() {
     }
 
     // call load_spiral with buffer and write to output spiral
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_load_spiral(buffer, &output);
 
     if(output.size != expected.size) {
