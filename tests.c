@@ -73,7 +73,7 @@ bool test_sxbp_init_spiral() {
     }
 
     // call init_spiral with buffer and write to blank spiral
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_init_spiral(buffer, &output);
 
     if(output.size != expected.size) {
@@ -403,7 +403,7 @@ bool test_sxbp_load_spiral() {
     }
 
     // call load_spiral with buffer and write to output spiral
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_load_spiral(buffer, &output);
 
     if(output.size != expected.size) {
@@ -443,7 +443,7 @@ bool test_sxbp_load_spiral_rejects_missing_magic_number() {
     );
 
     // call load_spiral with buffer and blank spiral, store result
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
@@ -466,7 +466,7 @@ bool test_sxbp_load_spiral_rejects_too_small_for_header() {
     buffer.bytes = (uint8_t*)"SAXBOSPIRAL";
 
     // call load_spiral with buffer and blank spiral, store result
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
@@ -506,7 +506,7 @@ bool test_sxbp_load_spiral_rejects_too_small_data_section() {
         buffer.bytes[i+25] = data[i];
     }
     // call load_spiral with buffer and blank spiral, store result
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
@@ -546,7 +546,7 @@ bool test_sxbp_load_spiral_rejects_wrong_version() {
         buffer.bytes[i+25] = data[i];
     }
     // call load_spiral with buffer and blank spiral, store result
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
@@ -617,7 +617,7 @@ bool test_sxbp_dump_spiral() {
     }
 
     // call dump_spiral with spiral and write to output buffer
-    sxbp_buffer_t output;
+    sxbp_buffer_t output = { .size = 0, .bytes = NULL, };
     sxbp_dump_spiral(input, &output);
 
     if(output.size != expected.size) {

@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -54,8 +55,14 @@ sxbp_spiral_t sxbp_blank_spiral() {
  * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
  * instructions which are then used to build the pattern.
  * returns a status_t struct with error information (if needed)
+ *
+ * Asserts:
+ * - That the spiral struct pointed to has its pointer attributes set to NULL
  */
 sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
+    // preconditional assertions
+    assert(spiral->lines == NULL);
+    assert(spiral->co_ord_cache.co_ords.items == NULL);
     // result status object
     sxbp_status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line

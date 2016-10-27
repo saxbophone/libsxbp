@@ -61,6 +61,10 @@ extern const size_t SXBP_LINE_T_PACK_SIZE;
  * returns a serialise_result_t struct, which will contain information about
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
+ *
+ * Asserts:
+ * - That buffer.bytes is not NULL
+ * - That spiral->lines is NULL
  */
 sxbp_serialise_result_t sxbp_load_spiral(
     sxbp_buffer_t buffer, sxbp_spiral_t* spiral
@@ -72,6 +76,10 @@ sxbp_serialise_result_t sxbp_load_spiral(
  * returns a serialise_result_t struct, which will contain information about
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
+ *
+ * Asserts:
+ * - That spiral.lines is not NULL
+ * - That buffer->bytes is NULL
  */
 sxbp_serialise_result_t sxbp_dump_spiral(
     sxbp_spiral_t spiral, sxbp_buffer_t* buffer

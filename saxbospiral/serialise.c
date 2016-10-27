@@ -21,6 +21,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +39,15 @@ extern "C"{
 const size_t SXBP_FILE_HEADER_SIZE = 37;
 const size_t SXBP_LINE_T_PACK_SIZE = 4;
 
-// loads a 64-bit unsigned integer from buffer starting at given index
+/*
+ * loads a 64-bit unsigned integer from buffer starting at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     uint64_t value = 0;
     for(size_t i = 0; i < 8; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
@@ -47,8 +55,15 @@ static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
     return value;
 }
 
-// loads a 32-bit unsigned integer from buffer starting at given index
+/*
+ * loads a 32-bit unsigned integer from buffer starting at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     uint32_t value = 0;
     for(size_t i = 0; i < 4; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
@@ -56,10 +71,17 @@ static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
     return value;
 }
 
-// dumps a 64-bit unsigned integer of value to buffer at given index
+/*
+ * dumps a 64-bit unsigned integer of value to buffer at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static void dump_uint64_t(
     uint64_t value, sxbp_buffer_t* buffer, size_t start_index
 ) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     for(uint8_t i = 0; i < 8; i++) {
         uint8_t shift = (8 * (7 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
@@ -68,10 +90,17 @@ static void dump_uint64_t(
     }
 }
 
-// dumps a 32-bit unsigned integer of value to buffer at given index
+/*
+ * dumps a 32-bit unsigned integer of value to buffer at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static void dump_uint32_t(
     uint32_t value, sxbp_buffer_t* buffer, size_t start_index
 ) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     for(uint8_t i = 0; i < 4; i++) {
         uint8_t shift = (8 * (3 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
@@ -86,10 +115,17 @@ static void dump_uint32_t(
  * returns a serialise_result_t struct, which will contain information about
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
+ *
+ * Asserts:
+ * - That buffer.bytes is not NULL
+ * - That spiral->lines is NULL
  */
 sxbp_serialise_result_t sxbp_load_spiral(
     sxbp_buffer_t buffer, sxbp_spiral_t* spiral
 ) {
+    // preconditional assertions
+    assert(buffer.bytes != NULL);
+    assert(spiral->lines == NULL);
     sxbp_serialise_result_t result; // build struct for returning success / failure
     // first, if header is too small for header + 1 line, then return early
     if(buffer.size < SXBP_FILE_HEADER_SIZE + SXBP_LINE_T_PACK_SIZE) {
@@ -177,10 +213,17 @@ sxbp_serialise_result_t sxbp_load_spiral(
  * returns a serialise_result_t struct, which will contain information about
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
+ *
+ * Asserts:
+ * - That spiral.lines is not NULL
+ * - That buffer->bytes is NULL
  */
 sxbp_serialise_result_t sxbp_dump_spiral(
     sxbp_spiral_t spiral, sxbp_buffer_t* buffer
 ) {
+    // preconditional assertions
+    assert(buffer->bytes == NULL);
+    assert(spiral.lines != NULL);
     sxbp_serialise_result_t result; // build struct for returning success / failure
     // populate buffer struct, base size on header + spiral size
     buffer->size = (SXBP_FILE_HEADER_SIZE + (SXBP_LINE_T_PACK_SIZE * spiral.size));

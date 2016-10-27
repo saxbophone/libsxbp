@@ -22,6 +22,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -46,8 +47,17 @@ extern "C"{
  * Returns boolean on whether or not the spiral collides or not. Also, sets the
  * collider field in the spiral struct to the index of the colliding line
  * (if any)
+ *
+ * Asserts:
+ * - That spiral->lines is not NULL
+ * - That spiral->co_ord_cache.co_ords.items is not NULL
+ * - That index is less than spiral->size
  */
 static bool spiral_collides(sxbp_spiral_t* spiral, size_t index) {
+    // preconditional assertions
+    assert(spiral->lines != NULL);
+    assert(spiral->co_ord_cache.co_ords.items != NULL);
+    assert(index < spiral->size);
     /*
      * if there are less than 4 lines in the spiral, then there's no way it
      * can collide, so return false early
@@ -115,10 +125,19 @@ static bool spiral_collides(sxbp_spiral_t* spiral, size_t index) {
  * NOTE: In the context of this function, 'rigid' or 'r' refers to the line that
  * the newly plotted line has collided with and 'previous' or 'p' refers to the
  * line before the newly plotted line.
+ *
+ * Asserts:
+ * - That spiral.lines is not NULL
+ * - That spiral.co_ord_cache.co_ords.items is not NULL
+ * - That index is less than spiral.size
  */
 static sxbp_length_t suggest_resize(
     sxbp_spiral_t spiral, size_t index, int perfection_threshold
 ) {
+    // preconditional assertions
+    assert(spiral.lines != NULL);
+    assert(spiral.co_ord_cache.co_ords.items != NULL);
+    assert(index < spiral.size);
     // check if collides or not, return same size if no collision
     if(spiral.collides) {
         /*
@@ -194,11 +213,18 @@ static sxbp_length_t suggest_resize(
  * aggressive optimisation) attempt to set the target line to that length,
  * back-tracking to resize the previous line if it collides.
  * returns a status struct (used for error information)
+ *
+ * Asserts:
+ * - That spiral->lines is not NULL
+ * - That index is less than spiral->size
  */
 sxbp_status_t sxbp_resize_spiral(
     sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
     int perfection_threshold
 ) {
+    // preconditional assertions
+    assert(spiral->lines != NULL);
+    assert(index < spiral->size);
     /*
      * setup state variables, these are used in place of recursion for managing
      * state of which line is being resized, and what size it should be.
@@ -273,6 +299,9 @@ sxbp_status_t sxbp_resize_spiral(
  * highest line that will be solved and a void pointer used for accessing the
  * user data.
  * returns a status struct (used for error information)
+ *
+ * Asserts:
+ * - That spiral->lines is not NULL
  */
 sxbp_status_t sxbp_plot_spiral(
     sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
@@ -282,6 +311,8 @@ sxbp_status_t sxbp_plot_spiral(
     ),
     void* progress_callback_user_data
 ) {
+    // preconditional assertions
+    assert(spiral->lines != NULL);
     // set up result status
     sxbp_status_t result = {{0, 0, 0}, 0};
     // get index of highest line to plot
