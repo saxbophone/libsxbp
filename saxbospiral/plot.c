@@ -36,13 +36,14 @@ extern "C"{
  * returns the sum of all line lengths within the given indexes
  *
  * Asserts:
- * - That the start index is less than end index
- * - That end index is less than or equal to the spiral size
+ * - That start and end indexes are less than or equal to the spiral size
+ * - That spiral.lines is not NULL
  */
 size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end) {
     // preconditional assertions
-    assert(start < end);
+    assert(start <= spiral.size);
     assert(end <= spiral.size);
+    assert(spiral.lines != NULL);
     size_t size = 0;
     for(size_t i = start; i < end; i++) {
         size += spiral.lines[i].length;
@@ -59,11 +60,21 @@ size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end) {
  * each line segment is only one unit long, meaning multiple ones are needed for
  * lines longer than one unit.
  * returns a status struct with error information (if any)
+ *
+ * Asserts:
+ * - That the output struct's items pointer is NULL
+ * - That start and end indexes are less than or equal to the spiral size
+ * - That spiral.lines is not NULL
  */
 sxbp_status_t sxbp_spiral_points(
     sxbp_spiral_t spiral, sxbp_co_ord_array_t* output,
     sxbp_co_ord_t start_point, size_t start, size_t end
 ) {
+    // preconditional assertions
+    assert(output->items == NULL);
+    assert(start <= spiral.size);
+    assert(end <= spiral.size);
+    assert(spiral.lines != NULL);
     // prepare result status
     sxbp_status_t result = {{0, 0, 0}, 0};
     // the amount of space needed is the sum of all line lengths + 1 for end
@@ -101,15 +112,22 @@ sxbp_status_t sxbp_spiral_points(
 }
 
 /*
- * given a pointer to a spiral struct an limit, which is the index of the last
+ * given a pointer to a spiral struct and limit, which is the index of the last
  * line to use, calculate and store the co-ordinates of all line segments that
  * would make up the spiral if the current lengths and directions were used.
  * each line segment is only one unit long, meaning multiple ones are needed for
  * lines longer than one unit. The co-ords are stored in the spiral's
  * co_ord_cache member and are re-used if they are still valid
  * returns a status struct with error information (if any)
+ *
+ * Asserts:
+ * - That spiral->lines is not NULL
+ * - That limit is less than or equal to spiral->size
  */
 sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
+    // preconditional assertions
+    assert(spiral->lines != NULL);
+    assert(limit <= spiral->size);
     // prepare result status
     sxbp_status_t result = {{0, 0, 0}, 0};
     // the amount of space needed is the sum of all line lengths + 1 for end

@@ -61,8 +61,8 @@ sxbp_spiral_t sxbp_blank_spiral() {
  */
 sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
     // preconditional assertions
-    // assert(spiral->lines == NULL);
-    // assert(spiral->co_ord_cache.co_ords.items == NULL);
+    assert(spiral->lines == NULL);
+    assert(spiral->co_ord_cache.co_ords.items == NULL);
     // result status object
     sxbp_status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line

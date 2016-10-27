@@ -73,7 +73,7 @@ bool test_sxbp_init_spiral() {
     }
 
     // call init_spiral with buffer and write to blank spiral
-    sxbp_spiral_t output;
+    sxbp_spiral_t output = sxbp_blank_spiral();
     sxbp_init_spiral(buffer, &output);
 
     if(output.size != expected.size) {
