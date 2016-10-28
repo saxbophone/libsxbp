@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -39,8 +40,13 @@ extern "C"{
  * corners of the square needed to contain the points.
  * NOTE: This should NEVER be called with a pointer to anything other than a
  * 2-item struct of type co_ord_t
+ *
+ * Asserts:
+ * - That spiral.co_ord_cache.co_ords.items is not NULL
  */
 static void get_bounds(sxbp_spiral_t spiral, sxbp_co_ord_t* bounds) {
+    // preconditional assertions
+    assert(spiral.co_ord_cache.co_ords.items != NULL);
     sxbp_tuple_item_t min_x = 0;
     sxbp_tuple_item_t min_y = 0;
     sxbp_tuple_item_t max_x = 0;
@@ -70,10 +76,17 @@ static void get_bounds(sxbp_spiral_t spiral, sxbp_co_ord_t* bounds) {
  * given a spiral struct and a pointer to a blank bitmap_t struct, writes data
  * representing a monochromatic image of the rendered spiral to the bitmap
  * returns a status struct with error information (if any)
+ *
+ * Asserts:
+ * - That image->pixels is NULL
+ * - That spiral.lines is not NULL
  */
 sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
+    // preconditional assertions
+    assert(image->pixels == NULL);
+    assert(spiral.lines != NULL);
     // create result status struct
-    sxbp_status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result;
     // plot co-ords of spiral into it's cache
     sxbp_cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
@@ -96,8 +109,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     image->pixels = malloc(image->width * sizeof(bool*));
     // check for malloc fail
     if(image->pixels == NULL) {
-        result.location = SXBP_DEBUG;
-        result.diagnostic = SXBP_MALLOC_REFUSED;
+        result = SXBP_MALLOC_REFUSED;
         return result;
     }
     for(size_t i = 0; i < image->width; i++) {
@@ -108,8 +120,9 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
             for(size_t j = i; j > 0; j--) {
                 free(image->pixels[j]);
             }
-            result.location = SXBP_DEBUG;
-            result.diagnostic = SXBP_MALLOC_REFUSED;
+            // now we need to free() the top-level array
+            free(image->pixels);
+            result = SXBP_MALLOC_REFUSED;
             return result;
         }
     }
@@ -140,7 +153,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
         }
     }
     // status ok
-    result.diagnostic = SXBP_OPERATION_OK;
+    result = SXBP_OPERATION_OK;
     return result;
 }
 

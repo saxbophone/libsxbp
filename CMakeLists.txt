@@ -23,7 +23,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.19.3 LANGUAGES C)
+project(libsaxbospiral VERSION 0.20.0 LANGUAGES C)
 
 # set default C standard to use (C99)
 set(SAXBOSPIRAL_C_STANDARD "99")
@@ -50,7 +50,9 @@ if(CMAKE_SIZEOF_VOID_P LESS 8)
     message(
         WARNING
         "It looks like this system's architecture is not at least 64-bit.\n"
-        "libsaxbospiral requires a system with an architecture of at least 64 bits!")
+        "libsaxbospiral requires a system with an architecture of at least 64 bits!\n"
+        "We'll continue trying to compile anyway, be sure to run the unit tests after."
+    )
 endif()
 
 # pass in version of library as preprocessor definitions
@@ -123,15 +125,37 @@ install(
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
 )
-# Install main library header files
+
+# Generate rough (nearest major) version-dependent header installation folder
+set(
+    LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION
+    "saxbospiral-${PROJECT_VERSION_MAJOR}"
+)
+# Generate precise (major and minor) version-dependent header installation folder
+set(
+    LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION
+    "saxbospiral-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+)
+
+# Install main library header files, both to rough and precise install locations
 install(
     FILES ${LIB_SAXBOSPIRAL_HEADERS}
-    DESTINATION include/saxbospiral
+    DESTINATION "include/${LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION}"
 )
 # Install render_backends header files
 install(
     FILES ${LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS}
-    DESTINATION include/saxbospiral/render_backends
+    DESTINATION "include/${LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION}/render_backends"
+)
+
+install(
+    FILES ${LIB_SAXBOSPIRAL_HEADERS}
+    DESTINATION "include/${LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION}"
+)
+# Install render_backends header files
+install(
+    FILES ${LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS}
+    DESTINATION "include/${LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION}/render_backends"
 )
 
 enable_testing()

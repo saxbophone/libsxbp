@@ -21,6 +21,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +39,15 @@ extern "C"{
 const size_t SXBP_FILE_HEADER_SIZE = 37;
 const size_t SXBP_LINE_T_PACK_SIZE = 4;
 
-// loads a 64-bit unsigned integer from buffer starting at given index
+/*
+ * loads a 64-bit unsigned integer from buffer starting at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     uint64_t value = 0;
     for(size_t i = 0; i < 8; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
@@ -47,8 +55,15 @@ static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
     return value;
 }
 
-// loads a 32-bit unsigned integer from buffer starting at given index
+/*
+ * loads a 32-bit unsigned integer from buffer starting at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     uint32_t value = 0;
     for(size_t i = 0; i < 4; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
@@ -56,10 +71,17 @@ static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
     return value;
 }
 
-// dumps a 64-bit unsigned integer of value to buffer at given index
+/*
+ * dumps a 64-bit unsigned integer of value to buffer at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static void dump_uint64_t(
     uint64_t value, sxbp_buffer_t* buffer, size_t start_index
 ) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     for(uint8_t i = 0; i < 8; i++) {
         uint8_t shift = (8 * (7 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
@@ -68,10 +90,17 @@ static void dump_uint64_t(
     }
 }
 
-// dumps a 32-bit unsigned integer of value to buffer at given index
+/*
+ * dumps a 32-bit unsigned integer of value to buffer at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
 static void dump_uint32_t(
     uint32_t value, sxbp_buffer_t* buffer, size_t start_index
 ) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
     for(uint8_t i = 0; i < 4; i++) {
         uint8_t shift = (8 * (3 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
@@ -86,22 +115,27 @@ static void dump_uint32_t(
  * returns a serialise_result_t struct, which will contain information about
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
+ *
+ * Asserts:
+ * - That buffer.bytes is not NULL
+ * - That spiral->lines is NULL
  */
 sxbp_serialise_result_t sxbp_load_spiral(
     sxbp_buffer_t buffer, sxbp_spiral_t* spiral
 ) {
+    // preconditional assertions
+    assert(buffer.bytes != NULL);
+    assert(spiral->lines == NULL);
     sxbp_serialise_result_t result; // build struct for returning success / failure
     // first, if header is too small for header + 1 line, then return early
     if(buffer.size < SXBP_FILE_HEADER_SIZE + SXBP_LINE_T_PACK_SIZE) {
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_HEADER_SIZE; // failure reason
         return result;
     }
     // check for magic number and return early if not right
     if(strncmp((char*)buffer.bytes, "SAXBOSPIRAL", 11) != 0) {
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_MAGIC_NUMBER; // failure reason
         return result;
     }
@@ -116,8 +150,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     // check for version compatibility
     if(sxbp_version_hash(buffer_version) < sxbp_version_hash(min_version)) {
         // check failed
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_VERSION; // failure reason
         return result;
     }
@@ -126,8 +159,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     // Check that the file data section is large enough for the spiral size
     if((buffer.size - SXBP_FILE_HEADER_SIZE) != (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_DATA_SIZE; // failure reason
         return result;
     }
@@ -140,8 +172,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     spiral->lines = calloc(sizeof(sxbp_line_t), spiral->size);
     // catch allocation error
     if(spiral->lines == NULL) {
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_MALLOC_REFUSED; // flag failure
+        result.status = SXBP_MALLOC_REFUSED; // flag failure
         return result;
     }
     // convert each serialised line segment in buffer into a line_t struct
@@ -167,7 +198,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
         }
     }
     // return ok status
-    result.status.diagnostic = SXBP_OPERATION_OK;
+    result.status = SXBP_OPERATION_OK;
     return result;
 }
 
@@ -177,10 +208,17 @@ sxbp_serialise_result_t sxbp_load_spiral(
  * returns a serialise_result_t struct, which will contain information about
  * whether the operation was successful or not and information about what went
  * wrong if it was not successful
+ *
+ * Asserts:
+ * - That spiral.lines is not NULL
+ * - That buffer->bytes is NULL
  */
 sxbp_serialise_result_t sxbp_dump_spiral(
     sxbp_spiral_t spiral, sxbp_buffer_t* buffer
 ) {
+    // preconditional assertions
+    assert(buffer->bytes == NULL);
+    assert(spiral.lines != NULL);
     sxbp_serialise_result_t result; // build struct for returning success / failure
     // populate buffer struct, base size on header + spiral size
     buffer->size = (SXBP_FILE_HEADER_SIZE + (SXBP_LINE_T_PACK_SIZE * spiral.size));
@@ -188,8 +226,7 @@ sxbp_serialise_result_t sxbp_dump_spiral(
     buffer->bytes = calloc(1, buffer->size);
     // catch memory allocation failure
     if(buffer->bytes == NULL) {
-        result.status.location = SXBP_DEBUG;
-        result.status.diagnostic = SXBP_MALLOC_REFUSED;
+        result.status = SXBP_MALLOC_REFUSED;
         return result;
     }
     // write first part of data header (magic number and version info)
@@ -224,7 +261,7 @@ sxbp_serialise_result_t sxbp_dump_spiral(
         }
     }
     // return ok status
-    result.status.diagnostic = SXBP_OPERATION_OK;
+    result.status = SXBP_OPERATION_OK;
     return result;
 }
 

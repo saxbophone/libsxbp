@@ -43,6 +43,10 @@ typedef struct sxbp_bitmap_t {
  * given a spiral struct and a pointer to a blank bitmap_t struct, writes data
  * representing a monochromatic image of the rendered spiral to the bitmap
  * returns a status struct with error information (if any)
+ *
+ * Asserts:
+ * - That image->pixels is NULL
+ * - That spiral.lines is not NULL
  */
 sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image);
 

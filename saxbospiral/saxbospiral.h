@@ -51,32 +51,13 @@ typedef uint32_t sxbp_version_hash_t;
  */
 sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version);
 
-// struct for storing the location of a DEBUG invocation
-typedef struct sxbp_debug_t {
-    size_t line;
-    char* file;
-    const char* function;
-} sxbp_debug_t;
-
-/*
- * handy short-hand for debugging purposes
- * usage: debug_t debug = DEBUG;
- */
-#define SXBP_DEBUG (sxbp_debug_t) { .line = __LINE__, .file = __FILE__, .function = __func__, }
-
 // enum for function error information
-typedef enum sxbp_diagnostic_t {
+typedef enum sxbp_status_t {
     SXBP_STATE_UNKNOWN = 0, // unknown, the default state
     SXBP_OPERATION_FAIL, // generic failure state
     SXBP_MALLOC_REFUSED, // memory allocation or re-allocation was refused
     SXBP_IMPOSSIBLE_CONDITION, // condition thought to be impossible detected
     SXBP_OPERATION_OK, // no problem
-} sxbp_diagnostic_t;
-
-// struct for storing generic diagnostics about function failure reasons
-typedef struct sxbp_status_t {
-    sxbp_debug_t location; // for storing location of error
-    sxbp_diagnostic_t diagnostic; // for storing error information (if any)
 } sxbp_status_t;
 
 // type for representing a cartesian direction
