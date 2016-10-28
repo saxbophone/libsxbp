@@ -129,15 +129,13 @@ sxbp_serialise_result_t sxbp_load_spiral(
     sxbp_serialise_result_t result; // build struct for returning success / failure
     // first, if header is too small for header + 1 line, then return early
     if(buffer.size < SXBP_FILE_HEADER_SIZE + SXBP_LINE_T_PACK_SIZE) {
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_HEADER_SIZE; // failure reason
         return result;
     }
     // check for magic number and return early if not right
     if(strncmp((char*)buffer.bytes, "SAXBOSPIRAL", 11) != 0) {
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_MAGIC_NUMBER; // failure reason
         return result;
     }
@@ -152,8 +150,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     // check for version compatibility
     if(sxbp_version_hash(buffer_version) < sxbp_version_hash(min_version)) {
         // check failed
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_VERSION; // failure reason
         return result;
     }
@@ -162,8 +159,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     // Check that the file data section is large enough for the spiral size
     if((buffer.size - SXBP_FILE_HEADER_SIZE) != (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_OPERATION_FAIL; // flag failure
+        result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_DATA_SIZE; // failure reason
         return result;
     }
@@ -176,8 +172,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     spiral->lines = calloc(sizeof(sxbp_line_t), spiral->size);
     // catch allocation error
     if(spiral->lines == NULL) {
-        result.status.location = SXBP_DEBUG; // catch location of error
-        result.status.diagnostic = SXBP_MALLOC_REFUSED; // flag failure
+        result.status = SXBP_MALLOC_REFUSED; // flag failure
         return result;
     }
     // convert each serialised line segment in buffer into a line_t struct
@@ -203,7 +198,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
         }
     }
     // return ok status
-    result.status.diagnostic = SXBP_OPERATION_OK;
+    result.status = SXBP_OPERATION_OK;
     return result;
 }
 
@@ -231,8 +226,7 @@ sxbp_serialise_result_t sxbp_dump_spiral(
     buffer->bytes = calloc(1, buffer->size);
     // catch memory allocation failure
     if(buffer->bytes == NULL) {
-        result.status.location = SXBP_DEBUG;
-        result.status.diagnostic = SXBP_MALLOC_REFUSED;
+        result.status = SXBP_MALLOC_REFUSED;
         return result;
     }
     // write first part of data header (magic number and version info)
@@ -267,7 +261,7 @@ sxbp_serialise_result_t sxbp_dump_spiral(
         }
     }
     // return ok status
-    result.status.diagnostic = SXBP_OPERATION_OK;
+    result.status = SXBP_OPERATION_OK;
     return result;
 }
 

@@ -74,8 +74,7 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
     spiral->lines = calloc(sizeof(sxbp_line_t), line_count);
     // check for memory allocation failure
     if(spiral->lines == NULL) {
-        result.location = SXBP_DEBUG;
-        result.diagnostic = SXBP_MALLOC_REFUSED;
+        result = SXBP_MALLOC_REFUSED;
         return result;
     }
     // First line is always an UP line - this is for orientation purposes
@@ -105,7 +104,7 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
         }
     }
     // all ok
-    result.diagnostic = SXBP_OPERATION_OK;
+    result = SXBP_OPERATION_OK;
     return result;
 }
 

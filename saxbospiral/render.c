@@ -86,7 +86,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     assert(image->pixels == NULL);
     assert(spiral.lines != NULL);
     // create result status struct
-    sxbp_status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result;
     // plot co-ords of spiral into it's cache
     sxbp_cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
@@ -109,8 +109,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     image->pixels = malloc(image->width * sizeof(bool*));
     // check for malloc fail
     if(image->pixels == NULL) {
-        result.location = SXBP_DEBUG;
-        result.diagnostic = SXBP_MALLOC_REFUSED;
+        result = SXBP_MALLOC_REFUSED;
         return result;
     }
     for(size_t i = 0; i < image->width; i++) {
@@ -123,8 +122,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
             }
             // now we need to free() the top-level array
             free(image->pixels);
-            result.location = SXBP_DEBUG;
-            result.diagnostic = SXBP_MALLOC_REFUSED;
+            result = SXBP_MALLOC_REFUSED;
             return result;
         }
     }
@@ -155,7 +153,7 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
         }
     }
     // status ok
-    result.diagnostic = SXBP_OPERATION_OK;
+    result = SXBP_OPERATION_OK;
     return result;
 }
 

@@ -76,7 +76,7 @@ sxbp_status_t sxbp_spiral_points(
     assert(end <= spiral.size);
     assert(spiral.lines != NULL);
     // prepare result status
-    sxbp_status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result;
     // the amount of space needed is the sum of all line lengths + 1 for end
     size_t size = sxbp_sum_lines(spiral, start, end) + 1;
     // allocate memory
@@ -84,8 +84,7 @@ sxbp_status_t sxbp_spiral_points(
     // catch malloc error
     if(output->items == NULL) {
         // set error information then early return
-        result.location = SXBP_DEBUG;
-        result.diagnostic = SXBP_MALLOC_REFUSED;
+        result = SXBP_MALLOC_REFUSED;
         return result;
     }
     output->size = size;
@@ -107,7 +106,7 @@ sxbp_status_t sxbp_spiral_points(
         }
     }
     // all good
-    result.diagnostic = SXBP_OPERATION_OK;
+    result = SXBP_OPERATION_OK;
     return result;
 }
 
@@ -129,7 +128,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
     assert(spiral->lines != NULL);
     assert(limit <= spiral->size);
     // prepare result status
-    sxbp_status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result;
     // the amount of space needed is the sum of all line lengths + 1 for end
     size_t size = sxbp_sum_lines(*spiral, 0, limit) + 1;
     // allocate / reallocate memory
@@ -150,8 +149,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
     // catch malloc failure
     if(spiral->co_ord_cache.co_ords.items == NULL) {
         // set error information then early return
-        result.location = SXBP_DEBUG;
-        result.diagnostic = SXBP_MALLOC_REFUSED;
+        result = SXBP_MALLOC_REFUSED;
         return result;
     }
     spiral->co_ord_cache.co_ords.size = size;
@@ -180,7 +178,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
         *spiral, &missing, current, smallest, limit
     );
     // return errors from previous call if needed
-    if(calculate_result.diagnostic != SXBP_OPERATION_OK) {
+    if(calculate_result != SXBP_OPERATION_OK) {
         return calculate_result;
     }
     // add the missing co-ords to the cache
@@ -196,7 +194,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
         limit > spiral->co_ord_cache.validity
     ) ? limit : spiral->co_ord_cache.validity;
     // return ok
-    result.diagnostic = SXBP_OPERATION_OK;
+    result = SXBP_OPERATION_OK;
     return result;
 }
 

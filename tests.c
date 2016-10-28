@@ -447,7 +447,7 @@ bool test_sxbp_load_spiral_rejects_missing_magic_number() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.status != SXBP_OPERATION_FAIL) ||
         (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_MAGIC_NUMBER)
     ) {
         result = false;
@@ -470,7 +470,7 @@ bool test_sxbp_load_spiral_rejects_too_small_for_header() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.status != SXBP_OPERATION_FAIL) ||
         (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_HEADER_SIZE)
     ) {
         result = false;
@@ -510,7 +510,7 @@ bool test_sxbp_load_spiral_rejects_too_small_data_section() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.status != SXBP_OPERATION_FAIL) ||
         (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_DATA_SIZE)
     ) {
         result = false;
@@ -550,7 +550,7 @@ bool test_sxbp_load_spiral_rejects_wrong_version() {
     sxbp_serialise_result_t serialise_result = sxbp_load_spiral(buffer, &output);
 
     if(
-        (serialise_result.status.diagnostic != SXBP_OPERATION_FAIL) ||
+        (serialise_result.status != SXBP_OPERATION_FAIL) ||
         (serialise_result.diagnostic != SXBP_DESERIALISE_BAD_VERSION)
     ) {
         result = false;
