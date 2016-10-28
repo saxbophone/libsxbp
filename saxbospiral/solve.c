@@ -230,7 +230,7 @@ sxbp_status_t sxbp_resize_spiral(
      * state of which line is being resized, and what size it should be.
      */
     // set result status
-    sxbp_status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result;
     size_t current_index = index;
     sxbp_length_t current_length = length;
     while(true) {
@@ -246,7 +246,7 @@ sxbp_status_t sxbp_resize_spiral(
         // update the spiral's co-ord cache, and catch any errors
         result = sxbp_cache_spiral_points(spiral, current_index + 1);
         // return if errors
-        if(result.diagnostic != SXBP_OPERATION_OK) {
+        if(result != SXBP_OPERATION_OK) {
             return result;
         }
         spiral->collides = spiral_collides(spiral, current_index);
@@ -275,7 +275,7 @@ sxbp_status_t sxbp_resize_spiral(
              * Return OPERATION_OK from function.
              */
             spiral->solved_count = index + 1;
-            result.diagnostic = SXBP_OPERATION_OK;
+            result = SXBP_OPERATION_OK;
             return result;
         }
     }
@@ -314,14 +314,14 @@ sxbp_status_t sxbp_plot_spiral(
     // preconditional assertions
     assert(spiral->lines != NULL);
     // set up result status
-    sxbp_status_t result = {{0, 0, 0}, 0};
+    sxbp_status_t result;
     // get index of highest line to plot
     uint64_t max_index = (max_line > spiral->size) ? spiral->size : max_line;
     // calculate the length of each line within range solved_count -> max_index
     for(size_t i = spiral->solved_count; i < max_index; i++) {
         result = sxbp_resize_spiral(spiral, i, 1, perfection_threshold);
         // catch and return error if any
-        if(result.diagnostic != SXBP_OPERATION_OK) {
+        if(result != SXBP_OPERATION_OK) {
             return result;
         }
         // call callback if given
@@ -330,7 +330,7 @@ sxbp_status_t sxbp_plot_spiral(
         }
     }
     // all ok
-    result.diagnostic = SXBP_OPERATION_OK;
+    result = SXBP_OPERATION_OK;
     return result;
 }
 
