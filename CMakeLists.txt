@@ -126,21 +126,36 @@ install(
     RUNTIME DESTINATION bin
 )
 
-# Generate version-dependent header installation folder
+# Generate rough (nearest major) version-dependent header installation folder
 set(
-    LIBSAXBOSPIRAL_HEADER_DESTINATION
+    LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION
+    "saxbospiral-${PROJECT_VERSION_MAJOR}"
+)
+# Generate precise (major and minor) version-dependent header installation folder
+set(
+    LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION
     "saxbospiral-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
 )
 
-# Install main library header files
+# Install main library header files, both to rough and precise install locations
 install(
     FILES ${LIB_SAXBOSPIRAL_HEADERS}
-    DESTINATION "include/${LIBSAXBOSPIRAL_HEADER_DESTINATION}"
+    DESTINATION "include/${LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION}"
 )
 # Install render_backends header files
 install(
     FILES ${LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS}
-    DESTINATION "include/${LIBSAXBOSPIRAL_HEADER_DESTINATION}/render_backends"
+    DESTINATION "include/${LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION}/render_backends"
+)
+
+install(
+    FILES ${LIB_SAXBOSPIRAL_HEADERS}
+    DESTINATION "include/${LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION}"
+)
+# Install render_backends header files
+install(
+    FILES ${LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS}
+    DESTINATION "include/${LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION}/render_backends"
 )
 
 enable_testing()
