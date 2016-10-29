@@ -23,7 +23,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.20.0 LANGUAGES C)
+project(libsaxbospiral VERSION 0.20.1 LANGUAGES C)
 
 # set default C standard to use (C99)
 set(SAXBOSPIRAL_C_STANDARD "99")
