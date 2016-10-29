@@ -20,6 +20,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -83,10 +84,17 @@ static void cleanup_png_lib(
  * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
  * data as a PNG image to the buffer, using libpng.
  * returns a status struct containing error information, if any
+ *
+ * Asserts:
+ * - That bitmap.pixels is not NULL
+ * - That buffer->bytes is NULL
  */
 sxbp_status_t sxbp_write_png_image(
     sxbp_bitmap_t bitmap, sxbp_buffer_t* buffer
 ) {
+    // preconditional assertsions
+    assert(bitmap.pixels != NULL);
+    assert(buffer->bytes == NULL);
     // result status
     sxbp_status_t result;
     // init buffer

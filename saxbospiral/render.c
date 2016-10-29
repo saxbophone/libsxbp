@@ -39,14 +39,16 @@ extern "C"{
  * 2-item-long array of type co_ord_t, find and store the co-ords for the
  * corners of the square needed to contain the points.
  * NOTE: This should NEVER be called with a pointer to anything other than a
- * 2-item struct of type co_ord_t
+ * 2-item array of type co_ord_t
  *
  * Asserts:
  * - That spiral.co_ord_cache.co_ords.items is not NULL
+ * - That bounds is not NULL
  */
 static void get_bounds(sxbp_spiral_t spiral, sxbp_co_ord_t* bounds) {
     // preconditional assertions
     assert(spiral.co_ord_cache.co_ords.items != NULL);
+    assert(bounds != NULL);
     sxbp_tuple_item_t min_x = 0;
     sxbp_tuple_item_t min_y = 0;
     sxbp_tuple_item_t max_x = 0;
