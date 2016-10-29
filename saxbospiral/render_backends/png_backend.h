@@ -35,6 +35,10 @@ extern "C"{
  * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
  * data as a PNG image to the buffer, using libpng.
  * returns a status struct containing error information, if any
+ *
+ * Asserts:
+ * - That bitmap.pixels is not NULL
+ * - That buffer->bytes is NULL
  */
 sxbp_status_t sxbp_write_png_image(sxbp_bitmap_t bitmap, sxbp_buffer_t* buffer);
 
