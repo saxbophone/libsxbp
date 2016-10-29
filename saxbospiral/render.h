@@ -48,7 +48,28 @@ typedef struct sxbp_bitmap_t {
  * - That image->pixels is NULL
  * - That spiral.lines is not NULL
  */
-sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image);
+sxbp_status_t sxbp_render_spiral_raw(
+    sxbp_spiral_t spiral, sxbp_bitmap_t* image
+);
+
+/*
+ * given a spiral struct, a pointer to a blank buffer and a pointer to a
+ * function with the appropriate signature, render the spiral as a bitmap and
+ * then call the pointed-to function to render the image to the buffer (in
+ * whatever format the function pointer is written for)
+ * returns a status struct with error information (if any)
+ *
+ * Asserts:
+ * - That spiral.lines is not NULL
+ * - That buffer->bytes is NULL
+ * - That the function pointer is not NULL
+ */
+sxbp_status_t sxbp_render_spiral_image(
+    sxbp_spiral_t spiral, sxbp_buffer_t* buffer,
+    sxbp_status_t(* image_writer_callback)(
+        sxbp_bitmap_t image, sxbp_buffer_t* buffer
+    )
+);
 
 #ifdef __cplusplus
 } // extern "C"
