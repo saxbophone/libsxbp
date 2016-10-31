@@ -122,8 +122,8 @@ sxbp_status_t sxbp_render_backend_pbm(
             // increment index so next row is written in the correct place
             index += bytes_per_row;
         }
+        return SXBP_OPERATION_OK;
     }
-    return SXBP_IMPOSSIBLE_CONDITION;
 }
 
 #ifdef __cplusplus
