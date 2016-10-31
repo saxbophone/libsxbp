@@ -116,6 +116,7 @@ sxbp_status_t sxbp_render_backend_pbm(
                 uint8_t bit_index = x % 8;
                 // write bits most-significant-bit first
                 buffer->bytes[byte_index] |= (
+                    // black pixel = bool true = 1, just like in PBM format
                     bitmap.pixels[x][y] << (7 - bit_index)
                 );
             }
