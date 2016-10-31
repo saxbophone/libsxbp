@@ -25,6 +25,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -65,8 +66,8 @@ sxbp_status_t sxbp_render_backend_pbm(
     // these are used to keep track of how many digits each is
     int width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, store lengths
-    width_string_length = sprintf(width_string, "%lu", bitmap.width);
-    height_string_length = sprintf(height_string, "%lu", bitmap.height);
+    width_string_length = sprintf(width_string, PRIu64, bitmap.width);
+    height_string_length = sprintf(height_string, PRIu64, bitmap.height);
     /*
      * now that we know the length of the image dimension strings, we can now
      * calculate how much memory we'll have to allocate for the image buffer
