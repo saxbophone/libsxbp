@@ -83,7 +83,9 @@ static void get_bounds(sxbp_spiral_t spiral, sxbp_co_ord_t* bounds) {
  * - That image->pixels is NULL
  * - That spiral.lines is not NULL
  */
-sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
+sxbp_status_t sxbp_render_spiral_raw(
+    sxbp_spiral_t spiral, sxbp_bitmap_t* image
+) {
     // preconditional assertions
     assert(image->pixels == NULL);
     assert(spiral.lines != NULL);
@@ -157,6 +159,40 @@ sxbp_status_t sxbp_render_spiral(sxbp_spiral_t spiral, sxbp_bitmap_t* image) {
     // status ok
     result = SXBP_OPERATION_OK;
     return result;
+}
+
+/*
+ * given a spiral struct, a pointer to a blank buffer and a pointer to a
+ * function with the appropriate signature, render the spiral as a bitmap and
+ * then call the pointed-to function to render the image to the buffer (in
+ * whatever format the function pointer is written for)
+ * returns a status struct with error information (if any)
+ *
+ * Asserts:
+ * - That spiral.lines is not NULL
+ * - That buffer->bytes is NULL
+ * - That the function pointer is not NULL
+ */
+sxbp_status_t sxbp_render_spiral_image(
+    sxbp_spiral_t spiral, sxbp_buffer_t* buffer,
+    sxbp_status_t(* image_writer_callback)(
+        sxbp_bitmap_t image, sxbp_buffer_t* buffer
+    )
+) {
+    // preconditional assertions
+    assert(spiral.lines != NULL);
+    assert(buffer->bytes == NULL);
+    assert(image_writer_callback != NULL);
+    // create bitmap to render raw image to
+    sxbp_bitmap_t raw_image = {0, 0, NULL};
+    // render spiral to raw image (and store success/failure)
+    sxbp_status_t result = sxbp_render_spiral_raw(spiral, &raw_image);
+    // check return status
+    if(result != SXBP_OPERATION_OK) {
+        return result;
+    }
+    // render to buffer using callback (and return its status code)
+    return image_writer_callback(raw_image, buffer);
 }
 
 #ifdef __cplusplus

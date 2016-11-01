@@ -2,7 +2,8 @@
  * This source file forms part of libsaxbospiral, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides functionality to render a bitmap struct to PNG
+ * This compilation unit provides functionality to render a bitmap struct to a
+ * PNG image (stored in a buffer).
  *
  *
  *
@@ -28,7 +29,7 @@
 
 #include "../saxbospiral.h"
 #include "../render.h"
-#include "png_backend.h"
+#include "backend_png.h"
 
 
 #ifdef __cplusplus
@@ -89,7 +90,7 @@ static void cleanup_png_lib(
  * - That bitmap.pixels is not NULL
  * - That buffer->bytes is NULL
  */
-sxbp_status_t sxbp_write_png_image(
+sxbp_status_t sxbp_render_backend_png(
     sxbp_bitmap_t bitmap, sxbp_buffer_t* buffer
 ) {
     // preconditional assertsions
