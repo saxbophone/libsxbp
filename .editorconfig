@@ -1,0 +1,25 @@
+# EditorConfig is awesome: http://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Settings for almost all files:
+# - Unix-style newlines
+# - newline at end of file
+# - charset utf8
+# - default indentation is 4 spaces
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# .travis.yml and markdown files use 2 spaces indentation
+[{.travis.yml,*.md}]
+indent_style = space
+indent_size = 2
+
+# Makefiles ALWAYS use tabs (even though these aren't in version control)
+[Makefile]
+indent_style = tab
