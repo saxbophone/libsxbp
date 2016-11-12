@@ -38,7 +38,7 @@ install:
   # add PPAs with more up-to-date toolchains
   - if [ "$CC" = "gcc" ]; then sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"; fi
   # update repository cache
-  - if [ "$CC" = "gcc" ]; then sudo -E apt-get -yq update &>> ~/apt-get-update.log; fi
+  - if [ "$CC" = "gcc" ]; then sudo -E apt-get -yq update; fi
   # install gcc-5
   - if [ "$CC" = "gcc" ]; then sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install gcc-5; fi
   # override $CC to use gcc-5
