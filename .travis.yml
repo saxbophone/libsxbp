@@ -25,13 +25,9 @@ addons:
   apt:
     sources:
       - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-      # add PPAs with more up-to-date toolchains
-      - ubuntu-toolchain-r-test
     packages:
       - cmake
       - cmake-data
-      # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5
 # branches safelist
 branches:
   only:
@@ -39,6 +35,10 @@ branches:
     - develop
     - /^test\/.*$/
 install:
+  # add PPAs with more up-to-date toolchains
+  - if [ "$CC" = "gcc" ]; then sudo -E apt-add-repository -y "ppa:ubuntu-toolchain-r/test"; fi
+  # install gcc-5
+  - if [ "$CC" = "gcc" ]; then sudo -E apt-get -yq --no-install-suggests --no-install-recommends --force-yes install gcc-5; fi
   # override $CC to use gcc-5
   - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
 before_script:
