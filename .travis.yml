@@ -1,21 +1,18 @@
 language: c
-# Ubuntu 14.04 Trusty support
-sudo: required
-dist: trusty
 # build matrix with both OSes and Compilers
 os:
   - linux
   - osx
 compiler:
   - clang
-  - gcc
+  # commenting out gcc until installing GCC v5.x+ actually works on Travis CI
+  # - gcc
 # different C Standard versions - test on C99 and C11
 env:
-  matrix:
-    - LIBSAXBOSPIRAL_C_STANDARD=99
-    - LIBSAXBOSPIRAL_C_STANDARD=11
+  - LIBSAXBOSPIRAL_C_STANDARD=99
+  - LIBSAXBOSPIRAL_C_STANDARD=11
+# exclude gcc on osx as this always points to clang
 matrix:
-  # exclude gcc on osx as this always points to clang
   exclude:
   - os: osx
     compiler: gcc
@@ -25,22 +22,18 @@ addons:
   apt:
     sources:
       - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
-      # add PPAs with more up-to-date toolchains
-      - ubuntu-toolchain-r-test
     packages:
       - cmake
       - cmake-data
+      # commenting out gcc until installing GCC v5.x+ actually works on Travis CI
       # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5
+      # - gcc-5
 # branches safelist
 branches:
   only:
     - master
     - develop
     - /^test\/.*$/
-install:
-  # override $CC to use gcc-5
-  - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
 before_script:
   - cmake .
 script:
