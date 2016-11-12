@@ -11,22 +11,13 @@ compiler:
   - gcc
 # different C Standard versions - test on C99 and C11
 env:
-  - LIBSAXBOSPIRAL_C_STANDARD=99
-  - LIBSAXBOSPIRAL_C_STANDARD=11
+  global:
+    # set gcc to version 5
+    - GCC_VERSION=5
+  matrix:
+    - LIBSAXBOSPIRAL_C_STANDARD=99
+    - LIBSAXBOSPIRAL_C_STANDARD=11
 matrix:
-  include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            # add PPAs with more up-to-date toolchains
-            - ubuntu-toolchain-r-test
-          packages:
-            # want gcc 5.x as 4.x gives incorrect warnings
-            - gcc-5
-      env:
-        # override compiler to gcc 5.x
-        - COMPILER=gcc-5
   # exclude gcc on osx as this always points to clang
   exclude:
   - os: osx
@@ -37,9 +28,13 @@ addons:
   apt:
     sources:
       - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
+      # add PPAs with more up-to-date toolchains
+      - ubuntu-toolchain-r-test
     packages:
       - cmake
       - cmake-data
+      # want gcc 5.x as 4.x gives incorrect warnings
+      - gcc-5
 # branches safelist
 branches:
   only:
