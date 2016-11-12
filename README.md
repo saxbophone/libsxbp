@@ -61,11 +61,17 @@ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 make
 ```
 
-The above builds in C99 mode by default. The standard to use is controlled by the `LIBSAXBOSPIRAL_C_STANDARD` environment variable.
+The above builds in C99 mode by default. The standard to use can be controlled by the `SAXBOSPIRAL_C_STANDARD` CMake variable or by the `LIBSAXBOSPIRAL_C_STANDARD` environment variable.
 
-You can build in C11 mode if you want with the following:
+You can build in C11 mode if you want with either of the following:
 
 ```sh
+# using CMake variable
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DSAXBOSPIRAL_C_STANDARD=11 .
+```
+
+```sh
+# using environment variable
 LIBSAXBOSPIRAL_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 ```
 
