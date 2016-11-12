@@ -25,8 +25,10 @@ cmake_minimum_required(VERSION 3.0)
 
 project(libsaxbospiral VERSION 0.21.0 LANGUAGES C)
 
-# set default C standard to use (C99)
-set(SAXBOSPIRAL_C_STANDARD "99")
+# set default C standard to use (C99) if not already set
+if(NOT DEFINED SAXBOSPIRAL_C_STANDARD)
+    set(SAXBOSPIRAL_C_STANDARD "99")
+endif()
 # if env variable LIBSAXBOSPIRAL_C_STANDARD is set and valid, override version
 if(DEFINED ENV{LIBSAXBOSPIRAL_C_STANDARD})
     # not a very robust regex but ok for most purposes
