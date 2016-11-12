@@ -11,9 +11,6 @@ compiler:
   - gcc
 # different C Standard versions - test on C99 and C11
 env:
-  global:
-    # set gcc to version 5
-    - GCC_VERSION=5
   matrix:
     - LIBSAXBOSPIRAL_C_STANDARD=99
     - LIBSAXBOSPIRAL_C_STANDARD=11
@@ -41,6 +38,9 @@ branches:
     - master
     - develop
     - /^test\/.*$/
+install:
+  # override $CC to use gcc-5
+  - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
 before_script:
   - cmake .
 script:
