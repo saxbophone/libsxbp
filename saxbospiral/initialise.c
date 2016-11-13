@@ -87,11 +87,11 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
      */
     for(size_t s = 0; s < buffer.size; s++) {
         // byte-level loop
-        for(size_t b = 0; b < 8; b++) {
+        for(uint8_t b = 0; b < 8; b++) {
             // bit level loop
             uint8_t e = 7 - b; // which power of two to use with bit mask
             uint8_t bit = (buffer.bytes[s] & (1 << e)) >> e; // the current bit
-            size_t index = (s * 8) + b + 1; // line index
+            size_t index = (s * 8) + (size_t)b + 1; // line index
             sxbp_rotation_t rotation; // the rotation we're going to make
             // set rotation direction based on the current bit
             rotation = (bit == 0) ? SXBP_CLOCKWISE : SXBP_ANTI_CLOCKWISE;

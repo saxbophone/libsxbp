@@ -49,7 +49,7 @@ static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
     uint64_t value = 0;
-    for(size_t i = 0; i < 8; i++) {
+    for(uint8_t i = 0; i < 8; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
     }
     return value;
@@ -65,7 +65,7 @@ static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
     uint32_t value = 0;
-    for(size_t i = 0; i < 4; i++) {
+    for(uint8_t i = 0; i < 4; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
     }
     return value;
