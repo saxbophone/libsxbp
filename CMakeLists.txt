@@ -145,6 +145,8 @@ set_target_properties(
     saxbospiral PROPERTIES VERSION ${SAXBOSPIRAL_VERSION_STRING}
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
+# link libsaxbospiral with C math library
+target_link_libraries(saxbospiral m)
 # Link libsaxbospiral with libpng so we get libpng symbols (if support enabled)
 if(SAXBOSPIRAL_PNG_SUPPORT)
     target_link_libraries(saxbospiral ${PNG_LIBRARY})
