@@ -44,6 +44,8 @@ You will need:
 
 - A compiler that can compile ISO C99 or C11 code
 - [Cmake](https://cmake.org/) - v3.0 or newer
+
+*If you also want to be able to produce images in PNG format with the library, you will need:*
 - [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes preinstalled with many modern unix-like systems)
 
 > ### Note:
@@ -73,6 +75,20 @@ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DSAXBOSPIRAL_C_STANDARD
 ```sh
 # using environment variable
 LIBSAXBOSPIRAL_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+```
+
+Also, by default the CMake build script will look for libpng. If it cannot find it then it will disable support for PNG output.
+
+You may choose to explicitly disable or enable PNG support with the `SAXBOSPIRAL_PNG_SUPPORT` CMake variable, which can be passed on the command-line like so:
+
+```sh
+# PNG support is required, build will fail if libpng can't be found
+cmake -DSAXBOSPIRAL_PNG_SUPPORT=ON .
+```
+
+```sh
+# PNG support is not included, even if libpng can be found
+cmake -DSAXBOSPIRAL_PNG_SUPPORT=OFF .
 ```
 
 > ### Note:
