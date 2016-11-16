@@ -21,6 +21,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <stdbool.h>
+
 #include "saxbospiral.h"
 
 
@@ -35,6 +37,12 @@ const sxbp_version_t LIB_SXBP_VERSION = {
     .patch = SAXBOSPIRAL_VERSION_PATCH,
     .string = SAXBOSPIRAL_VERSION_STRING,
 };
+// flag for whether PNG output support has been compiled in based, on macro
+#ifdef SAXBOSPIRAL_PNG_SUPPORT
+const bool SXBP_PNG_SUPPORT = true;
+#else
+const bool SXBP_PNG_SUPPORT = false;
+#endif
 
 /*
  * computes a version_hash_t for a given version_t,
