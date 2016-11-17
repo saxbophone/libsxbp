@@ -41,6 +41,8 @@ typedef struct sxbp_version_t {
 } sxbp_version_t;
 
 extern const sxbp_version_t LIB_SXBP_VERSION;
+// flag for whether PNG output support has been compiled in based, on macro
+extern const bool SXBP_PNG_SUPPORT;
 
 // used for indexing and comparing different versions in order
 typedef uint32_t sxbp_version_hash_t;
@@ -54,10 +56,11 @@ sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version);
 // enum for function error information
 typedef enum sxbp_status_t {
     SXBP_STATE_UNKNOWN = 0, // unknown, the default state
+    SXBP_OPERATION_OK, // no problem
     SXBP_OPERATION_FAIL, // generic failure state
     SXBP_MALLOC_REFUSED, // memory allocation or re-allocation was refused
     SXBP_IMPOSSIBLE_CONDITION, // condition thought to be impossible detected
-    SXBP_OPERATION_OK, // no problem
+    SXBP_NOT_IMPLEMENTED, // function is not implemented / enabled
 } sxbp_status_t;
 
 // type for representing a cartesian direction

@@ -89,12 +89,43 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
 
-# dependencies
+# begin dependencies
 # add custom dependencies directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
-find_package(PNG 1 EXACT REQUIRED)
-include_directories(${PNG_INCLUDE_DIR})
+# work out whether we have or have not requested PNG support, or don't care (default)
+if(NOT DEFINED SAXBOSPIRAL_PNG_SUPPORT)
+    # try and find libpng v1.x, but don't fail if we can't
+    message(STATUS "PNG output support will be enabled if possible")
+    find_package(PNG 1 EXACT)
+    # set SAXBOSPIRAL_PNG_SUPPORT based on value of PNG_FOUND
+    if(PNG_FOUND)
+        set(SAXBOSPIRAL_PNG_SUPPORT ON)
+    else()
+        set(SAXBOSPIRAL_PNG_SUPPORT OFF)
+    endif()
+elseif(SAXBOSPIRAL_PNG_SUPPORT)
+    # find libpng v1.x and fail the build if we can't
+    message(STATUS "PNG output support explicitly enabled")
+    find_package(PNG 1 EXACT REQUIRED)
+else()
+    # we've explicitly disabled PNG support, so don't include libpng
+    # issue a message saying so
+    message(STATUS "PNG output support explicitly disabled")
+endif()
+
+# include libpng directories and add feature test macro if support is enabled
+if(SAXBOSPIRAL_PNG_SUPPORT)
+    include_directories(${PNG_INCLUDE_DIR})
+    # feature test macro
+    add_definitions(-DSAXBOSPIRAL_PNG_SUPPORT)
+    # issue message
+    message(STATUS "PNG output support enabled")
+else()
+    # issue message
+    message(STATUS "PNG output support disabled")
+endif()
+# end dependencies
 
 # C source files
 file(
@@ -114,12 +145,16 @@ set_target_properties(
     saxbospiral PROPERTIES VERSION ${SAXBOSPIRAL_VERSION_STRING}
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
-# Link libsaxbospiral with libpng so we get libpng symbols
-target_link_libraries(saxbospiral ${PNG_LIBRARY})
+# link libsaxbospiral with C math library
+target_link_libraries(saxbospiral m)
+# Link libsaxbospiral with libpng so we get libpng symbols (if support enabled)
+if(SAXBOSPIRAL_PNG_SUPPORT)
+    target_link_libraries(saxbospiral ${PNG_LIBRARY})
+endif()
 
 add_executable(sxp_test tests.c)
 
-target_link_libraries(sxp_test saxbospiral ${PNG_LIBRARY})
+target_link_libraries(sxp_test saxbospiral)
 
 install(
     TARGETS saxbospiral

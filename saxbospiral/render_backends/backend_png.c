@@ -5,6 +5,11 @@
  * This compilation unit provides functionality to render a bitmap struct to a
  * PNG image (stored in a buffer).
  *
+ * NOTE: PNG output support may have not been enabled in the compiled version
+ * of libsaxbospiral that you have. If support is not enabled, the library
+ * boolean constant SXBP_PNG_SUPPORT will be set to false and the one public
+ * function defined in this library will return SXBP_NOT_IMPLEMENTED.
+ *
  *
  *
  * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
@@ -22,10 +27,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <assert.h>
+// only include these extra dependencies if support for PNG output was enabled
+#ifdef SAXBOSPIRAL_PNG_SUPPORT
 #include <stdlib.h>
 #include <string.h>
+#endif
 
+// only include libpng if support for it was enabled
+#ifdef SAXBOSPIRAL_PNG_SUPPORT
 #include <png.h>
+#endif
 
 #include "../saxbospiral.h"
 #include "../render.h"
@@ -36,6 +47,8 @@
 extern "C"{
 #endif
 
+// only define the following private functions if libpng support was enabled
+#ifdef SAXBOSPIRAL_PNG_SUPPORT
 // private custom libPNG buffer write function
 static void buffer_write_data(
     png_structp png_ptr, png_bytep data, png_size_t length
@@ -80,11 +93,13 @@ static void cleanup_png_lib(
         free(row);
     }
 }
+#endif // SAXBOSPIRAL_PNG_SUPPORT
 
 /*
  * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
  * data as a PNG image to the buffer, using libpng.
- * returns a status struct containing error information, if any
+ * returns a status struct containing error information
+ * returns SXBP_NOT_IMPLEMENTED if PNG support was not enabled
  *
  * Asserts:
  * - That bitmap.pixels is not NULL
@@ -96,6 +111,11 @@ sxbp_status_t sxbp_render_backend_png(
     // preconditional assertsions
     assert(bitmap.pixels != NULL);
     assert(buffer->bytes == NULL);
+    // only do PNG operations if support is enabled
+    #ifndef SAXBOSPIRAL_PNG_SUPPORT
+    // return SXBP_NOT_IMPLEMENTED
+    return SXBP_NOT_IMPLEMENTED;
+    #else
     // result status
     sxbp_status_t result;
     // init buffer
@@ -186,6 +206,7 @@ sxbp_status_t sxbp_render_backend_png(
     // status ok
     result = SXBP_OPERATION_OK;
     return result;
+    #endif // SAXBOSPIRAL_PNG_SUPPORT
 }
 
 #ifdef __cplusplus
