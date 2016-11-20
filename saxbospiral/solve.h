@@ -36,7 +36,7 @@ extern "C"{
 
 /*
  * given a pointer to a spiral struct, the index of one of it's lines and a
- * target length to set that line to and a perfection threshold (-1 for no
+ * target length to set that line to and a perfection threshold (0 for no
  * perfection, or otherwise the maximmum line length at which to allow
  * aggressive optimisation) attempt to set the target line to that length,
  * back-tracking to resize the previous line if it collides.
@@ -48,12 +48,12 @@ extern "C"{
  */
 sxbp_status_t sxbp_resize_spiral(
     sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
-    int perfection_threshold
+    sxbp_length_t perfection_threshold
 );
 
 /*
  * given a pointer to a spiral spiral for which the length of all its lines are
- * not yet known, a perfection threshold (-1 for no perfection, or otherwise
+ * not yet known, a perfection threshold (0 for no perfection, or otherwise
  * the maximmum line length at which to allow aggressive optimisation), the
  * index of the highest line to plot to, a pointer to a callback function and
  * a void pointer to a user-defined data struct for use with the callback,
@@ -74,7 +74,7 @@ sxbp_status_t sxbp_resize_spiral(
  * - That spiral->lines is not NULL
  */
 sxbp_status_t sxbp_plot_spiral(
-    sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
+    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
         sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
         void* progress_callback_user_data

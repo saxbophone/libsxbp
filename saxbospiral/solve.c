@@ -110,7 +110,7 @@ static bool spiral_collides(sxbp_spiral_t* spiral, size_t index) {
 /*
  * given a spiral struct that is known to collide, the index of the 'last'
  * segment in the spiral (i.e. the one that was found to be colliding) and a
- * perfection threshold (-1 for no perfection, or otherwise the maximmum line
+ * perfection threshold (0 for no perfection, or otherwise the maximmum line
  * length at which to allow aggressive optimisation), return a suggested length
  * to set the segment before this line to.
  *
@@ -131,7 +131,7 @@ static bool spiral_collides(sxbp_spiral_t* spiral, size_t index) {
  * - That index is less than spiral.size
  */
 static sxbp_length_t suggest_resize(
-    sxbp_spiral_t spiral, size_t index, int perfection_threshold
+    sxbp_spiral_t spiral, size_t index, sxbp_length_t perfection_threshold
 ) {
     // preconditional assertions
     assert(spiral.lines != NULL);
@@ -140,7 +140,7 @@ static sxbp_length_t suggest_resize(
     // check if collides or not, return same size if no collision
     if(spiral.collides) {
         /*
-         * if the perfection threshold is -1, then we can just use our
+         * if the perfection threshold is 0, then we can just use our
          * suggestion, as perfection is disabled.
          * otherwise, if the colliding line's length is greater than our
          * perfection threshold, we cannot make any intelligent suggestions on
@@ -149,8 +149,8 @@ static sxbp_length_t suggest_resize(
          * the previous line's length +1
          */
         if(
-            (perfection_threshold != -1) &&
-            (spiral.lines[index].length > (sxbp_length_t)perfection_threshold)
+            (perfection_threshold > 0) &&
+            (spiral.lines[index].length > perfection_threshold)
         ) {
             return spiral.lines[index - 1].length + 1;
         }
@@ -207,7 +207,7 @@ static sxbp_length_t suggest_resize(
 
 /*
  * given a pointer to a spiral struct, the index of one of it's lines and a
- * target length to set that line to and a perfection threshold (-1 for no
+ * target length to set that line to and a perfection threshold (0 for no
  * perfection, or otherwise the maximmum line length at which to allow
  * aggressive optimisation) attempt to set the target line to that length,
  * back-tracking to resize the previous line if it collides.
@@ -219,7 +219,7 @@ static sxbp_length_t suggest_resize(
  */
 sxbp_status_t sxbp_resize_spiral(
     sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
-    int perfection_threshold
+    sxbp_length_t perfection_threshold
 ) {
     // preconditional assertions
     assert(spiral->lines != NULL);
@@ -282,7 +282,7 @@ sxbp_status_t sxbp_resize_spiral(
 
 /*
  * given a pointer to a spiral spiral for which the length of all its lines are
- * not yet known, a perfection threshold (-1 for no perfection, or otherwise
+ * not yet known, a perfection threshold (0 for no perfection, or otherwise
  * the maximmum line length at which to allow aggressive optimisation), the
  * index of the highest line to plot to, a pointer to a callback function and
  * a void pointer to a user-defined data struct for use with the callback,
@@ -303,7 +303,7 @@ sxbp_status_t sxbp_resize_spiral(
  * - That spiral->lines is not NULL
  */
 sxbp_status_t sxbp_plot_spiral(
-    sxbp_spiral_t* spiral, int perfection_threshold, uint64_t max_line,
+    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint64_t max_line,
     void(* progress_callback)(
         sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
         void* progress_callback_user_data
