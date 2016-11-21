@@ -38,6 +38,7 @@ branches:
     - master
     - develop
     - /^test\/.*$/
+    - /^feature\/.*$/
 install:
   # override $CC to use gcc-5
   - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
