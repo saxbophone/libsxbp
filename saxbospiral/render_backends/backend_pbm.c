@@ -114,7 +114,7 @@ sxbp_status_t sxbp_render_backend_pbm(
                 // byte index is index + floor(x / 8)
                 size_t byte_index = index + (x / 8);
                 // bit index is x mod 8
-                uint8_t bit_index = x % 8;
+                size_t bit_index = x % 8;
                 // write bits most-significant-bit first
                 buffer->bytes[byte_index] |= (
                     // black pixel = bool true = 1, just like in PBM format
