@@ -49,7 +49,7 @@ static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
     uint64_t value = 0;
-    for(uint8_t i = 0; i < 8; i++) {
+    for(size_t i = 0; i < 8; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
     }
     return value;
@@ -65,7 +65,7 @@ static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
     uint32_t value = 0;
-    for(uint8_t i = 0; i < 4; i++) {
+    for(size_t i = 0; i < 4; i++) {
         value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
     }
     return value;
@@ -82,8 +82,8 @@ static void dump_uint64_t(
 ) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
-    for(uint8_t i = 0; i < 8; i++) {
-        uint8_t shift = (8 * (7 - i));
+    for(size_t i = 0; i < 8; i++) {
+        size_t shift = (8 * (7 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
             (value & (0xffUL << shift)) >> shift
         );
@@ -101,8 +101,8 @@ static void dump_uint32_t(
 ) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
-    for(uint8_t i = 0; i < 4; i++) {
-        uint8_t shift = (8 * (3 - i));
+    for(size_t i = 0; i < 4; i++) {
+        size_t shift = (8 * (3 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
             (value & (0xffUL << shift)) >> shift
         );
@@ -191,7 +191,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
             & 0x3f // <= binary value is 0b00111111
         ) << 24;
         // handle remaining 3 bytes in loop
-        for(uint8_t j = 0; j < 3; j++) {
+        for(size_t j = 0; j < 3; j++) {
             spiral->lines[i].length |= (
                 buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE) + 1 + j]
             ) << (8 * (2 - j));
@@ -254,7 +254,7 @@ sxbp_serialise_result_t sxbp_dump_spiral(
             SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)
         ] |= (spiral.lines[i].length >> 24);
         // handle remaining 3 bytes in a loop
-        for(uint8_t j = 0; j < 3; j++) {
+        for(size_t j = 0; j < 3; j++) {
             buffer->bytes[
                 SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE) + 1 + j
             ] = (uint8_t)(spiral.lines[i].length >> (8 * (2 - j)));
