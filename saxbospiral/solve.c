@@ -33,7 +33,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /*
@@ -241,7 +241,7 @@ sxbp_status_t sxbp_resize_spiral(
          */
         spiral->co_ord_cache.validity = (
             current_index < spiral->co_ord_cache.validity
-        ) ? current_index : spiral->co_ord_cache.validity;
+            ) ? current_index : spiral->co_ord_cache.validity;
         // update the spiral's co-ord cache, and catch any errors
         result = sxbp_cache_spiral_points(spiral, current_index + 1);
         // return if errors
@@ -257,7 +257,7 @@ sxbp_status_t sxbp_resize_spiral(
              */
             current_length = suggest_resize(
                 *spiral, current_index, perfection_threshold
-            );
+                );
             current_index--;
         } else if(current_index != index) {
             /*
@@ -303,10 +303,11 @@ sxbp_status_t sxbp_resize_spiral(
  * - That spiral->lines is not NULL
  */
 sxbp_status_t sxbp_plot_spiral(
-    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint64_t max_line,
-    void(* progress_callback)(
-        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
-        void* progress_callback_user_data
+    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint64_t
+    max_line,
+    void (* progress_callback)(
+    sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+    void* progress_callback_user_data
     ),
     void* progress_callback_user_data
 ) {
@@ -325,7 +326,8 @@ sxbp_status_t sxbp_plot_spiral(
         }
         // call callback if given
         if(progress_callback != NULL) {
-            progress_callback(spiral, i, max_index, progress_callback_user_data);
+            progress_callback(spiral, i, max_index,
+                progress_callback_user_data);
         }
     }
     // all ok

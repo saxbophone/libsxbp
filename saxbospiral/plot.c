@@ -29,7 +29,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /*
@@ -96,7 +96,8 @@ sxbp_status_t sxbp_spiral_points(
     // calculate all the specified co-ords
     for(size_t i = start; i < end; i++) {
         // get current direction
-        sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        sxbp_vector_t direction =
+            SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
         for(sxbp_length_t j = 0; j < spiral.lines[i].length; j++) {
             current.x += direction.x;
@@ -139,12 +140,12 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
          */
         spiral->co_ord_cache.co_ords.items = calloc(
             sizeof(sxbp_co_ord_t), size
-        );
+            );
     } else if(spiral->co_ord_cache.co_ords.size != size) {
         // if there isn't enough memory allocated, re-allocate memory instead
         spiral->co_ord_cache.co_ords.items = realloc(
             spiral->co_ord_cache.co_ords.items, sizeof(sxbp_co_ord_t) * size
-        );
+            );
     }
     // catch malloc failure
     if(spiral->co_ord_cache.co_ords.items == NULL) {
@@ -162,7 +163,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
      */
     size_t smallest = (
         limit < spiral->co_ord_cache.validity
-    ) ? limit : spiral->co_ord_cache.validity;
+        ) ? limit : spiral->co_ord_cache.validity;
     if(spiral->co_ord_cache.validity != 0) {
         // get index of the latest known co-ord
         result_index += sxbp_sum_lines(*spiral, 0, smallest);
@@ -173,17 +174,18 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
         spiral->co_ord_cache.co_ords.items[0] = current;
     }
     // calculate the missing co-ords
-    sxbp_co_ord_array_t missing= {0, 0};
+    sxbp_co_ord_array_t missing = { 0, 0 };
     sxbp_status_t calculate_result = sxbp_spiral_points(
         *spiral, &missing, current, smallest, limit
-    );
+        );
     // return errors from previous call if needed
     if(calculate_result != SXBP_OPERATION_OK) {
         return calculate_result;
     }
     // add the missing co-ords to the cache
     for(size_t i = result_index; i < size; i++) {
-        spiral->co_ord_cache.co_ords.items[i] = missing.items[i-result_index];
+        spiral->co_ord_cache.co_ords.items[i] = missing.items[i -
+            result_index];
     }
     // free dynamically allocated memory, if any was allocated
     if(missing.items != NULL) {
@@ -192,7 +194,7 @@ sxbp_status_t sxbp_cache_spiral_points(sxbp_spiral_t* spiral, size_t limit) {
     // set validity to the largest of limit and current validity
     spiral->co_ord_cache.validity = (
         limit > spiral->co_ord_cache.validity
-    ) ? limit : spiral->co_ord_cache.validity;
+        ) ? limit : spiral->co_ord_cache.validity;
     // return ok
     result = SXBP_OPERATION_OK;
     return result;

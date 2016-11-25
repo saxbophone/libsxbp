@@ -31,7 +31,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /*
@@ -94,7 +94,7 @@ sxbp_status_t sxbp_render_spiral_raw(
     // plot co-ords of spiral into it's cache
     sxbp_cache_spiral_points(&spiral, spiral.size);
     // get the min and max bounds of the spiral's co-ords
-    sxbp_co_ord_t bounds[2] = {{0, 0}};
+    sxbp_co_ord_t bounds[2] = { { 0, 0 } };
     get_bounds(spiral, bounds);
     // get the normalisation vector needed to make all values unsigned
     sxbp_tuple_t normalisation_vector = {
@@ -138,12 +138,15 @@ sxbp_status_t sxbp_render_spiral_raw(
     // plot the lines of the spiral as points
     for(size_t i = 0; i < spiral.size; i++) {
         // get current direction
-        sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
+        sxbp_vector_t direction =
+            SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
         for(uint64_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
-            sxbp_tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
-            sxbp_tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
+            sxbp_tuple_item_t x_pos = current.x + (normalisation_vector.x *
+                2) + 1;
+            sxbp_tuple_item_t y_pos = current.y + (normalisation_vector.y *
+                2) + 1;
             // skip the second pixel of the first line
             if(!((i == 0) && (j == 1))) {
                 // flip the y-axis otherwise they appear vertically mirrored
@@ -175,8 +178,8 @@ sxbp_status_t sxbp_render_spiral_raw(
  */
 sxbp_status_t sxbp_render_spiral_image(
     sxbp_spiral_t spiral, sxbp_buffer_t* buffer,
-    sxbp_status_t(* image_writer_callback)(
-        sxbp_bitmap_t image, sxbp_buffer_t* buffer
+    sxbp_status_t (* image_writer_callback)(
+    sxbp_bitmap_t image, sxbp_buffer_t* buffer
     )
 ) {
     // preconditional assertions
@@ -184,7 +187,7 @@ sxbp_status_t sxbp_render_spiral_image(
     assert(buffer->bytes == NULL);
     assert(image_writer_callback != NULL);
     // create bitmap to render raw image to
-    sxbp_bitmap_t raw_image = {0, 0, NULL};
+    sxbp_bitmap_t raw_image = { 0, 0, NULL };
     // render spiral to raw image (and store success/failure)
     sxbp_status_t result = sxbp_render_spiral_raw(spiral, &raw_image);
     // check return status

@@ -27,7 +27,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 // Version numbers are passed as preprocessor definitions by CMake
