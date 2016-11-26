@@ -32,7 +32,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 // constants related to how spiral data is packed in files - measured in bytes
@@ -86,7 +86,7 @@ static void dump_uint64_t(
         uint8_t shift = (8 * (7 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
             (value & (0xffUL << shift)) >> shift
-        );
+            );
     }
 }
 
@@ -105,7 +105,7 @@ static void dump_uint32_t(
         uint8_t shift = (8 * (3 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
             (value & (0xffUL << shift)) >> shift
-        );
+            );
     }
 }
 
@@ -140,7 +140,8 @@ sxbp_serialise_result_t sxbp_load_spiral(
         return result;
     }
     // grab file version from header
-    sxbp_version_t buffer_version = {
+    sxbp_version_t buffer_version =
+    {
         .major = buffer.bytes[12],
         .minor = buffer.bytes[13],
         .patch = buffer.bytes[14],
@@ -157,7 +158,8 @@ sxbp_serialise_result_t sxbp_load_spiral(
     // get size of spiral object contained in buffer
     uint64_t spiral_size = load_uint64_t(&buffer, 16);
     // Check that the file data section is large enough for the spiral size
-    if((buffer.size - SXBP_FILE_HEADER_SIZE) != (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
+    if((buffer.size - SXBP_FILE_HEADER_SIZE) !=
+        (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed
         result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_DATA_SIZE; // failure reason
@@ -179,8 +181,9 @@ sxbp_serialise_result_t sxbp_load_spiral(
     for(size_t i = 0; i < spiral_size; i++) {
         // direction is stored in 2 most significant bits of each 32-bit sequence
         spiral->lines[i].direction = (
-            buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)] >> 6
-        );
+            buffer.bytes[SXBP_FILE_HEADER_SIZE +
+            (i * SXBP_LINE_T_PACK_SIZE)] >> 6
+            );
         /*
          * length is stored as 30 least significant bits, so we have to unpack
          * it handle first byte on it's own as we only need least 6 bits of it
@@ -189,12 +192,13 @@ sxbp_serialise_result_t sxbp_load_spiral(
         spiral->lines[i].length = (
             buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)]
             & 0x3f // <= binary value is 0b00111111
-        ) << 24;
+            ) << 24;
         // handle remaining 3 bytes in loop
         for(uint8_t j = 0; j < 3; j++) {
             spiral->lines[i].length |= (
-                buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE) + 1 + j]
-            ) << (8 * (2 - j));
+                buffer.bytes[SXBP_FILE_HEADER_SIZE +
+                (i * SXBP_LINE_T_PACK_SIZE) + 1 + j]
+                ) << (8 * (2 - j));
         }
     }
     // return ok status
@@ -221,7 +225,8 @@ sxbp_serialise_result_t sxbp_dump_spiral(
     assert(spiral.lines != NULL);
     sxbp_serialise_result_t result; // build struct for returning success / failure
     // populate buffer struct, base size on header + spiral size
-    buffer->size = (SXBP_FILE_HEADER_SIZE + (SXBP_LINE_T_PACK_SIZE * spiral.size));
+    buffer->size =
+        (SXBP_FILE_HEADER_SIZE + (SXBP_LINE_T_PACK_SIZE * spiral.size));
     // allocate memory for buffer
     buffer->bytes = calloc(1, buffer->size);
     // catch memory allocation failure

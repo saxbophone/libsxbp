@@ -29,7 +29,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 /*
@@ -46,7 +46,11 @@ sxbp_direction_t sxbp_change_direction(
  * returns a spiral struct with all fields initialised to 0
  */
 sxbp_spiral_t sxbp_blank_spiral() {
-    return (sxbp_spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
+    return (sxbp_spiral_t) {
+               0, NULL, { {
+                              NULL, 0
+                          }, 0 }, false, 0, 0, 0
+    };
 }
 
 /*

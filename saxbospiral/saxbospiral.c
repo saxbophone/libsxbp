@@ -27,11 +27,12 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 // Version numbers are passed as preprocessor definitions by CMake
-const sxbp_version_t LIB_SXBP_VERSION = {
+const sxbp_version_t LIB_SXBP_VERSION =
+{
     .major = SAXBOSPIRAL_VERSION_MAJOR,
     .minor = SAXBOSPIRAL_VERSION_MINOR,
     .patch = SAXBOSPIRAL_VERSION_PATCH,
@@ -53,7 +54,8 @@ sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version) {
 }
 
 // vector direction constants
-const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
+const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] =
+{
     // UP       RIGHT       DOWN        LEFT
     { 0, 1, }, { 1, 0, }, { 0, -1, }, { -1, 0, },
 };
