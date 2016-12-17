@@ -1,7 +1,7 @@
-# This source file forms part of libsaxbospiral, a library which generates
+# This source file forms part of libsxbp, a library which generates
 # experimental 2D spiral-like shapes based on input binary data.
 #
-# This is the CMake build file for libsaxbospiral.
+# This is the CMake build file for libsxbp.
 # It requires CMake v3.0 or greater.
 #
 #
@@ -23,28 +23,28 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsaxbospiral VERSION 0.23.0 LANGUAGES C)
+project(libsxbp VERSION 0.23.0 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
-if(NOT DEFINED SAXBOSPIRAL_C_STANDARD)
-    set(SAXBOSPIRAL_C_STANDARD "99")
+if(NOT DEFINED LIBSXBP_C_STANDARD)
+    set(LIBSXBP_C_STANDARD "99")
 endif()
-# if env variable LIBSAXBOSPIRAL_C_STANDARD is set and valid, override version
-if(DEFINED ENV{LIBSAXBOSPIRAL_C_STANDARD})
+# if env variable LIBSXBP_C_STANDARD is set and valid, override version
+if(DEFINED ENV{LIBSXBP_C_STANDARD})
     # not a very robust regex but ok for most purposes
-    if("$ENV{LIBSAXBOSPIRAL_C_STANDARD}" MATCHES "(99|11)")
-        set(SAXBOSPIRAL_C_STANDARD "$ENV{LIBSAXBOSPIRAL_C_STANDARD}")
+    if("$ENV{LIBSXBP_C_STANDARD}" MATCHES "(99|11)")
+        set(LIBSXBP_C_STANDARD "$ENV{LIBSXBP_C_STANDARD}")
     endif()
 endif()
-message(STATUS "C Standard set to C${SAXBOSPIRAL_C_STANDARD}")
-set(CMAKE_C_STANDARD ${SAXBOSPIRAL_C_STANDARD})
+message(STATUS "C Standard set to C${LIBSXBP_C_STANDARD}")
+set(CMAKE_C_STANDARD ${LIBSXBP_C_STANDARD})
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(
-    SAXBOSPIRAL_VERSION_STRING
+    LIBSXBP_VERSION_STRING
     "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
 )
-set(SAXBOSPIRAL_ESCAPED_VERSION_STRING "\"${SAXBOSPIRAL_VERSION_STRING}\"")
+set(LIBSXBP_ESCAPED_VERSION_STRING "\"${LIBSXBP_VERSION_STRING}\"")
 # end basic metadata
 
 # this is a 64-bit project, so check now to make sure we're 64-bit, issue warning if not
@@ -52,16 +52,16 @@ if(CMAKE_SIZEOF_VOID_P LESS 8)
     message(
         WARNING
         "It looks like this system's architecture is not at least 64-bit.\n"
-        "libsaxbospiral requires a system with an architecture of at least 64 bits!\n"
+        "libsxbp requires a system with an architecture of at least 64 bits!\n"
         "We'll continue trying to compile anyway, be sure to run the unit tests after."
     )
 endif()
 
 # pass in version of library as preprocessor definitions
-add_definitions(-DSAXBOSPIRAL_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
-add_definitions(-DSAXBOSPIRAL_VERSION_MINOR=${PROJECT_VERSION_MINOR})
-add_definitions(-DSAXBOSPIRAL_VERSION_PATCH=${PROJECT_VERSION_PATCH})
-add_definitions(-DSAXBOSPIRAL_VERSION_STRING=${SAXBOSPIRAL_ESCAPED_VERSION_STRING})
+add_definitions(-DLIBSXBP_VERSION_MAJOR=${PROJECT_VERSION_MAJOR})
+add_definitions(-DLIBSXBP_VERSION_MINOR=${PROJECT_VERSION_MINOR})
+add_definitions(-DLIBSXBP_VERSION_PATCH=${PROJECT_VERSION_PATCH})
+add_definitions(-DLIBSXBP_VERSION_STRING=${LIBSXBP_ESCAPED_VERSION_STRING})
 
 # used for enabling additional compiler options if supported
 include(CheckCCompilerFlag)
@@ -94,17 +94,17 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
 # work out whether we have or have not requested PNG support, or don't care (default)
-if(NOT DEFINED SAXBOSPIRAL_PNG_SUPPORT)
+if(NOT DEFINED LIBSXBP_PNG_SUPPORT)
     # try and find libpng v1.x, but don't fail if we can't
     message(STATUS "PNG output support will be enabled if possible")
     find_package(PNG 1 EXACT)
-    # set SAXBOSPIRAL_PNG_SUPPORT based on value of PNG_FOUND
+    # set SXBP_PNG_SUPPORT based on value of PNG_FOUND
     if(PNG_FOUND)
-        set(SAXBOSPIRAL_PNG_SUPPORT ON)
+        set(LIBSXBP_PNG_SUPPORT ON)
     else()
-        set(SAXBOSPIRAL_PNG_SUPPORT OFF)
+        set(LIBSXBP_PNG_SUPPORT OFF)
     endif()
-elseif(SAXBOSPIRAL_PNG_SUPPORT)
+elseif(LIBSXBP_PNG_SUPPORT)
     # find libpng v1.x and fail the build if we can't
     message(STATUS "PNG output support explicitly enabled")
     find_package(PNG 1 EXACT REQUIRED)
@@ -115,10 +115,10 @@ else()
 endif()
 
 # include libpng directories and add feature test macro if support is enabled
-if(SAXBOSPIRAL_PNG_SUPPORT)
+if(LIBSXBP_PNG_SUPPORT)
     include_directories(${PNG_INCLUDE_DIR})
     # feature test macro
-    add_definitions(-DSAXBOSPIRAL_PNG_SUPPORT)
+    add_definitions(-DLIBSXBP_PNG_SUPPORT)
     # issue message
     message(STATUS "PNG output support enabled")
 else()
@@ -129,35 +129,35 @@ endif()
 
 # C source files
 file(
-    GLOB LIB_SAXBOSPIRAL_SOURCES
-    "saxbospiral/*.c" "saxbospiral/render_backends/*.c"
+    GLOB LIB_SXBP_SOURCES
+    "libsxbp/*.c" "libsxbp/render_backends/*.c"
 )
 # Header files
-file(GLOB LIB_SAXBOSPIRAL_HEADERS "saxbospiral/*.h")
+file(GLOB LIB_SXBP_HEADERS "libsxbp/*.h")
 # Header files for render_backends subdirectory
 file(
-    GLOB LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS
-    "saxbospiral/render_backends/*.h"
+    GLOB LIB_SXBP_RENDER_BACKENDS_HEADERS
+    "libsxbp/render_backends/*.h"
 )
-add_library(saxbospiral ${LIB_SAXBOSPIRAL_SOURCES})
+add_library(libsxbp ${LIB_SXBP_SOURCES})
 # set up version for library objects
 set_target_properties(
-    saxbospiral PROPERTIES VERSION ${SAXBOSPIRAL_VERSION_STRING}
+    libsxbp PROPERTIES VERSION ${LIBSXBP_VERSION_STRING}
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
-# link libsaxbospiral with C math library
-target_link_libraries(saxbospiral m)
-# Link libsaxbospiral with libpng so we get libpng symbols (if support enabled)
-if(SAXBOSPIRAL_PNG_SUPPORT)
-    target_link_libraries(saxbospiral ${PNG_LIBRARY})
+# link libsxbp with C math library
+target_link_libraries(libsxbp m)
+# Link libsxbp with libpng so we get libpng symbols (if support enabled)
+if(SXBP_PNG_SUPPORT)
+    target_link_libraries(libsxbp ${PNG_LIBRARY})
 endif()
 
 add_executable(sxp_test tests.c)
 
-target_link_libraries(sxp_test saxbospiral)
+target_link_libraries(sxp_test libsxbp)
 
 install(
-    TARGETS saxbospiral
+    TARGETS libsxbp
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
@@ -165,34 +165,34 @@ install(
 
 # Generate rough (nearest major) version-dependent header installation folder
 set(
-    LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION
-    "saxbospiral-${PROJECT_VERSION_MAJOR}"
+    LIBSXBP_ROUGH_HEADER_DESTINATION
+    "libsxbp-${PROJECT_VERSION_MAJOR}"
 )
 # Generate precise (major and minor) version-dependent header installation folder
 set(
-    LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION
-    "saxbospiral-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+    LIBSXBP_PRECISE_HEADER_DESTINATION
+    "libsxbp-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
 )
 
 # Install main library header files, both to rough and precise install locations
 install(
-    FILES ${LIB_SAXBOSPIRAL_HEADERS}
-    DESTINATION "include/${LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION}"
+    FILES ${LIB_SXBP_HEADERS}
+    DESTINATION "include/${LIBSXBP_ROUGH_HEADER_DESTINATION}"
 )
 # Install render_backends header files
 install(
-    FILES ${LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS}
-    DESTINATION "include/${LIBSAXBOSPIRAL_ROUGH_HEADER_DESTINATION}/render_backends"
+    FILES ${LIB_SXBP_RENDER_BACKENDS_HEADERS}
+    DESTINATION "include/${LIBSXBP_ROUGH_HEADER_DESTINATION}/render_backends"
 )
 
 install(
-    FILES ${LIB_SAXBOSPIRAL_HEADERS}
-    DESTINATION "include/${LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION}"
+    FILES ${LIB_SXBP_HEADERS}
+    DESTINATION "include/${LIBSXBP_PRECISE_HEADER_DESTINATION}"
 )
 # Install render_backends header files
 install(
-    FILES ${LIB_SAXBOSPIRAL_RENDER_BACKENDS_HEADERS}
-    DESTINATION "include/${LIBSAXBOSPIRAL_PRECISE_HEADER_DESTINATION}/render_backends"
+    FILES ${LIB_SXBP_RENDER_BACKENDS_HEADERS}
+    DESTINATION "include/${LIBSXBP_PRECISE_HEADER_DESTINATION}/render_backends"
 )
 
 enable_testing()

@@ -28,11 +28,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "saxbospiral/saxbospiral.h"
-#include "saxbospiral/initialise.h"
-#include "saxbospiral/plot.h"
-#include "saxbospiral/solve.h"
-#include "saxbospiral/serialise.h"
+#include "libsxbp/saxbospiral.h"
+#include "libsxbp/initialise.h"
+#include "libsxbp/plot.h"
+#include "libsxbp/solve.h"
+#include "libsxbp/serialise.h"
 
 
 bool test_sxbp_change_direction() {
