@@ -55,6 +55,12 @@ typedef struct sxbp_serialise_result_t {
 extern const size_t SXBP_FILE_HEADER_SIZE;
 extern const size_t SXBP_LINE_T_PACK_SIZE;
 
+// some macros for making file serialisation code more readable
+#define SXBP_SOH "\x01"
+#define SXBP_STX "\x02"
+#define SXBP_ETX "\x03"
+#define SXBP_US "\x1f"
+
 /*
  * given a buffer and a pointer to a blank spiral_t, create a spiral represented
  * by the data in the struct and write to the spiral

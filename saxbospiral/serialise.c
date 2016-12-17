@@ -36,7 +36,18 @@ extern "C"{
 #endif
 
 // constants related to how spiral data is packed in files - measured in bytes
-const size_t SXBP_FILE_HEADER_SIZE = 37;
+const size_t SXBP_FILE_HEADER_SIZE = (
+    4 // "sxbp" file magic number
+    + 6 // version number as 3x uint16_t
+    + 1 // Start of Header character
+    + 4 // number of lines in spiral, as a uint32_t
+    + 1 // Unit Separator character
+    + 4 // number of lines that have been solved, as a uint32_t
+    + 1 // Unit Separator character
+    + 4 // number of seconds spent solving the spiral, as a uint32_t
+    + 1 // Unit Separator character
+    + 4 // accuracy of previous field to the nearest x seconds, as a uint32_t
+);
 const size_t SXBP_LINE_T_PACK_SIZE = 4;
 
 /*
