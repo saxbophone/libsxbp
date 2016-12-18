@@ -12,8 +12,8 @@ compiler:
 # different C Standard versions - test on C99 and C11
 env:
   matrix:
-    - LIBSAXBOSPIRAL_C_STANDARD=99
-    - LIBSAXBOSPIRAL_C_STANDARD=11
+    - LIBSXBP_C_STANDARD=99
+    - LIBSXBP_C_STANDARD=11
 matrix:
   # exclude gcc on osx as this always points to clang
   exclude:
