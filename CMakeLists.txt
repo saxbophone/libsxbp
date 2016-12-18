@@ -129,17 +129,17 @@ endif()
 
 # C source files
 file(
-    GLOB LIB_SXBP_SOURCES
+    GLOB LIBSXBP_SOURCES
     "libsxbp/*.c" "libsxbp/render_backends/*.c"
 )
 # Header files
-file(GLOB LIB_SXBP_HEADERS "libsxbp/*.h")
+file(GLOB LIBSXBP_HEADERS "libsxbp/*.h")
 # Header files for render_backends subdirectory
 file(
-    GLOB LIB_SXBP_RENDER_BACKENDS_HEADERS
+    GLOB LIBSXBP_RENDER_BACKENDS_HEADERS
     "libsxbp/render_backends/*.h"
 )
-add_library(libsxbp ${LIB_SXBP_SOURCES})
+add_library(libsxbp ${LIBSXBP_SOURCES})
 # set up version for library objects
 set_target_properties(
     libsxbp PROPERTIES VERSION ${LIBSXBP_VERSION_STRING}
@@ -176,22 +176,22 @@ set(
 
 # Install main library header files, both to rough and precise install locations
 install(
-    FILES ${LIB_SXBP_HEADERS}
+    FILES ${LIBSXBP_HEADERS}
     DESTINATION "include/${LIBSXBP_ROUGH_HEADER_DESTINATION}"
 )
 # Install render_backends header files
 install(
-    FILES ${LIB_SXBP_RENDER_BACKENDS_HEADERS}
+    FILES ${LIBSXBP_RENDER_BACKENDS_HEADERS}
     DESTINATION "include/${LIBSXBP_ROUGH_HEADER_DESTINATION}/render_backends"
 )
 
 install(
-    FILES ${LIB_SXBP_HEADERS}
+    FILES ${LIBSXBP_HEADERS}
     DESTINATION "include/${LIBSXBP_PRECISE_HEADER_DESTINATION}"
 )
 # Install render_backends header files
 install(
-    FILES ${LIB_SXBP_RENDER_BACKENDS_HEADERS}
+    FILES ${LIBSXBP_RENDER_BACKENDS_HEADERS}
     DESTINATION "include/${LIBSXBP_PRECISE_HEADER_DESTINATION}/render_backends"
 )
 
