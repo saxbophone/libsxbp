@@ -139,25 +139,25 @@ file(
     GLOB LIBSXBP_RENDER_BACKENDS_HEADERS
     "libsxbp/render_backends/*.h"
 )
-add_library(libsxbp ${LIBSXBP_SOURCES})
+add_library(sxbp ${LIBSXBP_SOURCES})
 # set up version for library objects
 set_target_properties(
-    libsxbp PROPERTIES VERSION ${LIBSXBP_VERSION_STRING}
+    sxbp PROPERTIES VERSION ${LIBSXBP_VERSION_STRING}
     SOVERSION ${PROJECT_VERSION_MAJOR}
 )
 # link libsxbp with C math library
-target_link_libraries(libsxbp m)
+target_link_libraries(sxbp m)
 # Link libsxbp with libpng so we get libpng symbols (if support enabled)
 if(SXBP_PNG_SUPPORT)
-    target_link_libraries(libsxbp ${PNG_LIBRARY})
+    target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
 add_executable(sxp_test tests.c)
 
-target_link_libraries(sxp_test libsxbp)
+target_link_libraries(sxp_test sxbp)
 
 install(
-    TARGETS libsxbp
+    TARGETS sxbp
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
