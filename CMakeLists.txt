@@ -23,7 +23,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(libsxbp VERSION 0.23.0 LANGUAGES C)
+project(sxbp VERSION 0.23.0 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
 if(NOT DEFINED LIBSXBP_C_STANDARD)
@@ -130,14 +130,14 @@ endif()
 # C source files
 file(
     GLOB LIBSXBP_SOURCES
-    "libsxbp/*.c" "libsxbp/render_backends/*.c"
+    "sxbp/*.c" "sxbp/render_backends/*.c"
 )
 # Header files
-file(GLOB LIBSXBP_HEADERS "libsxbp/*.h")
+file(GLOB LIBSXBP_HEADERS "sxbp/*.h")
 # Header files for render_backends subdirectory
 file(
     GLOB LIBSXBP_RENDER_BACKENDS_HEADERS
-    "libsxbp/render_backends/*.h"
+    "sxbp/render_backends/*.h"
 )
 add_library(sxbp ${LIBSXBP_SOURCES})
 # set up version for library objects
@@ -166,12 +166,12 @@ install(
 # Generate rough (nearest major) version-dependent header installation folder
 set(
     LIBSXBP_ROUGH_HEADER_DESTINATION
-    "libsxbp-${PROJECT_VERSION_MAJOR}"
+    "sxbp-${PROJECT_VERSION_MAJOR}"
 )
 # Generate precise (major and minor) version-dependent header installation folder
 set(
     LIBSXBP_PRECISE_HEADER_DESTINATION
-    "libsxbp-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+    "sxbp-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
 )
 
 # Install main library header files, both to rough and precise install locations
