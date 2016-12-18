@@ -1,5 +1,5 @@
 /*
- * This source file consists of the unit tests for all of libsaxbospiral, a
+ * This source file consists of the unit tests for all of libsxbp, a
  * library which generates experimental 2D spiral-like shapes based on input
  * binary data.
  *
