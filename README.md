@@ -1,6 +1,6 @@
 # libsxbp ![libsxbp](libsxbp.png "libsxbp")
 
-![AGPL v3 Logo](agplv3-88x31.png "A logo used to show the AGPL v3.0 License") [![Build Status](https://travis-ci.org/saxbophone/libsaxbospiral.svg?branch=develop)](https://travis-ci.org/saxbophone/libsaxbospiral)
+![AGPL v3 Logo](agplv3-88x31.png "A logo used to show the AGPL v3.0 License") [![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp)
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
@@ -18,7 +18,7 @@ When this is given as input data to the algorithm, the output is the shape shown
 
 The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
-Although this project doesn't work in sprints, there is a [*sprint board*](https://github.com/saxbophone/libsaxbospiral/projects/1), which is used for organising issues.
+Although this project doesn't work in sprints, there is a [*sprint board*](https://github.com/saxbophone/libsxbp/projects/1), which is used for organising issues.
 
 ## Please Note
 
