@@ -1,5 +1,5 @@
 /*
- * This source file consists of the unit tests for all of libsaxbospiral, a
+ * This source file consists of the unit tests for all of libsxbp, a
  * library which generates experimental 2D spiral-like shapes based on input
  * binary data.
  *
@@ -28,11 +28,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "saxbospiral/saxbospiral.h"
-#include "saxbospiral/initialise.h"
-#include "saxbospiral/plot.h"
-#include "saxbospiral/solve.h"
-#include "saxbospiral/serialise.h"
+#include "sxbp/saxbospiral.h"
+#include "sxbp/initialise.h"
+#include "sxbp/plot.h"
+#include "sxbp/solve.h"
+#include "sxbp/serialise.h"
 
 
 bool test_sxbp_change_direction() {

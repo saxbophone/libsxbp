@@ -1,12 +1,12 @@
 /*
- * This source file forms part of libsaxbospiral, a library which generates
+ * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
  * This compilation unit provides functionality to render a bitmap struct to a
  * PNG image (stored in a buffer).
  *
  * NOTE: PNG output support may have not been enabled in the compiled version
- * of libsaxbospiral that you have. If support is not enabled, the library
+ * of libsxbp that you have. If support is not enabled, the library
  * boolean constant SXBP_PNG_SUPPORT will be set to false and the one public
  * function defined in this library will return SXBP_NOT_IMPLEMENTED.
  *

@@ -1,12 +1,12 @@
 /*
- * This source file forms part of libsaxbospiral, a library which generates
+ * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
  * This compilation unit provides functionality to render a bitmap struct to a
  * PNG image (stored in a buffer).
  *
  * NOTE: PNG output support may have not been enabled in the compiled version
- * of libsaxbospiral that you have. If support is not enabled, the library
+ * of libsxbp that you have. If support is not enabled, the library
  * boolean constant SXBP_PNG_SUPPORT will be set to false and the one public
  * function defined in this library will return SXBP_NOT_IMPLEMENTED.
  *
@@ -167,9 +167,9 @@ sxbp_status_t sxbp_render_backend_png(
     metadata[2].text = "Copyright Joshua Saxby";
     metadata[3].key = "Software";
     // SAXBOSPIRAL_VERSION_STRING is a macro that expands to a double-quoted string
-    metadata[3].text = "libsaxbospiral v" SAXBOSPIRAL_VERSION_STRING;
+    metadata[3].text = "libsxbp v" SAXBOSPIRAL_VERSION_STRING;
     metadata[4].key = "Comment";
-    metadata[4].text = "https://github.com/saxbophone/libsaxbospiral";
+    metadata[4].text = "https://github.com/saxbophone/libsxbp";
     // set compression of each metadata key
     for(size_t i = 0; i < 5; i++) {
         metadata[i].compression = PNG_TEXT_COMPRESSION_NONE;

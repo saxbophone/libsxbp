@@ -1,5 +1,5 @@
 /*
- * This source file forms part of libsaxbospiral, a library which generates
+ * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
  * This compilation unit provides most of the data types used by the library, as
@@ -32,13 +32,13 @@ extern "C"{
 
 // Version numbers are passed as preprocessor definitions by CMake
 const sxbp_version_t LIB_SXBP_VERSION = {
-    .major = SAXBOSPIRAL_VERSION_MAJOR,
-    .minor = SAXBOSPIRAL_VERSION_MINOR,
-    .patch = SAXBOSPIRAL_VERSION_PATCH,
-    .string = SAXBOSPIRAL_VERSION_STRING,
+    .major = LIBSXBP_VERSION_MAJOR,
+    .minor = LIBSXBP_VERSION_MINOR,
+    .patch = LIBSXBP_VERSION_PATCH,
+    .string = LIBSXBP_VERSION_STRING,
 };
 // flag for whether PNG output support has been compiled in based, on macro
-#ifdef SAXBOSPIRAL_PNG_SUPPORT
+#ifdef LIBSXBP_PNG_SUPPORT
 const bool SXBP_PNG_SUPPORT = true;
 #else
 const bool SXBP_PNG_SUPPORT = false;

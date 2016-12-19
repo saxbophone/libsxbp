@@ -1,10 +1,12 @@
-# libsaxbospiral ![libsaxbospiral](libsaxbospiral.png "libsaxbospiral")
+# libsxbp ![libsxbp](libsxbp.png "libsxbp")
 
-![AGPL v3 Logo](agplv3-88x31.png "A logo used to show the AGPL v3.0 License") [![Build Status](https://travis-ci.org/saxbophone/libsaxbospiral.svg?branch=develop)](https://travis-ci.org/saxbophone/libsaxbospiral)
+![AGPL v3 Logo](agplv3-88x31.png "A logo used to show the AGPL v3.0 License") [![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp)
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
 This a C library implementing an experimental idea I had for generating procedural shapes. The library takes input as sequences of bytes and turns the 1s and 0s into a kind of *right-angled spiral*, with the changes in direction of the line encoding the binary data in a lossless manner.
+
+Following Linus Torvalds' example, I have egotistically named this invention the **_saxbospiral_**, after my own online handle. At the time of writing, I couldn't think of a better name for it.
 
 For example, the input text **`cabbages`**, encoded as ASCII gives us the following byte values:
 
@@ -16,15 +18,15 @@ When this is given as input data to the algorithm, the output is the shape shown
 
 The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
-Although this project doesn't work in sprints, there is a [*sprint board*](https://github.com/saxbophone/libsaxbospiral/projects/1), which is used for organising issues.
+Although this project doesn't work in sprints, there is a [*sprint board*](https://github.com/saxbophone/libsxbp/projects/1), which is used for organising issues.
 
 ## Please Note
 
 - This software only works on systems capable of running 64-bit code.
 
-- This is a library only. If you're looking for something that is immediately usable for the end-user, you probably want to look at [sxbp](https://github.com/saxbophone/sxbp) instead, which is a command-line program I wrote which uses libsaxbospiral to render input binary files to PNG images.
+- This is a library only. If you're looking for something that is immediately usable for the end-user, you probably want to look at [sxbp](https://github.com/saxbophone/sxbp) instead, which is a command-line program I wrote which uses libsxbp to render input binary files to PNG images.
 
-- As libsaxbospiral is currently at major version 0, expect the library API to be unstable. I will endeavour as much as possible to make sure breaking changes increment the minor version number whilst in the version 0.x.x series and bugfixes increment the patch version number, but no heavy reliance should be placed on this.
+- As libsxbp is currently at major version 0, expect the library API to be unstable. I will endeavour as much as possible to make sure breaking changes increment the minor version number whilst in the version 0.x.x series and bugfixes increment the patch version number, but no heavy reliance should be placed on this.
 
 ## Licensing
 
@@ -32,11 +34,11 @@ Libsaxbospiral is released under version **3.0** of the **GNU Affero General Pub
 
 A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. *You should almost certainly read it*. If for some reason you have not received this file, you can view a copy of the license at [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
 
-Note that as well as being under the same copyleft protections as the GPL License, the AGPL enforces these protections further by **including provision of the software via a network service (such as a website) as one of its definitions of distribution**, hence requiring those who integrate libsaxbospiral into their website or other network service to also release the software into which they are integrating libsaxbospiral under this same license (AGPLv3).
+Note that as well as being under the same copyleft protections as the GPL License, the AGPL enforces these protections further by **including provision of the software via a network service (such as a website) as one of its definitions of distribution**, hence requiring those who integrate libsxbp into their website or other network service to also release the software into which they are integrating libsxbp under this same license (AGPLv3).
 
 ## Building
 
-Libsaxbospiral can be built without installing for test purposes and for general usage, however if you plan on writing programs that use it I recommend you install it so it will be in your system's standard library and header include locations.
+Libsxbp can be built without installing for test purposes and for general usage, however if you plan on writing programs that use it I recommend you install it so it will be in your system's standard library and header include locations.
 
 ### Dependencies
 
@@ -63,41 +65,41 @@ cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 make
 ```
 
-The above builds in C99 mode by default. The standard to use can be controlled by the `SAXBOSPIRAL_C_STANDARD` CMake variable or by the `LIBSAXBOSPIRAL_C_STANDARD` environment variable.
+The above builds in C99 mode by default. The standard to use can be controlled by the `LIBSXBP_C_STANDARD` CMake variable or by the `LIBSXBP_C_STANDARD` environment variable.
 
 You can build in C11 mode if you want with either of the following:
 
 ```sh
 # using CMake variable
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DSAXBOSPIRAL_C_STANDARD=11 .
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DLIBSXBP_C_STANDARD=11 .
 ```
 
 ```sh
 # using environment variable
-LIBSAXBOSPIRAL_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+LIBSXBP_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
 ```
 
 Also, by default the CMake build script will look for libpng. If it cannot find it then it will disable support for PNG output.
 
-You may choose to explicitly disable or enable PNG support with the `SAXBOSPIRAL_PNG_SUPPORT` CMake variable, which can be passed on the command-line like so:
+You may choose to explicitly disable or enable PNG support with the `LIBSXBP_PNG_SUPPORT` CMake variable, which can be passed on the command-line like so:
 
 ```sh
 # PNG support is required, build will fail if libpng can't be found
-cmake -DSAXBOSPIRAL_PNG_SUPPORT=ON .
+cmake -DLIBSXBP_PNG_SUPPORT=ON .
 ```
 
 ```sh
 # PNG support is not included, even if libpng can be found
-cmake -DSAXBOSPIRAL_PNG_SUPPORT=OFF .
+cmake -DLIBSXBP_PNG_SUPPORT=OFF .
 ```
 
 > ### Note:
 
-> Building as a shared library is recommended as then binaries compiled from [sxbp](https://github.com/saxbophone/sxbp) or your own programs that are linked against the shared version can immediately use any installed upgraded versions of libsaxbospiral with compatible ABIs without needing re-compiling.
+> Building as a shared library is recommended as then binaries compiled from [sxbp](https://github.com/saxbophone/sxbp) or your own programs that are linked against the shared version can immediately use any installed upgraded versions of libsxbp with compatible ABIs without needing re-compiling.
 
 ## Test
 
-Building the library with the default Make target shown above also compiles the unit tests for libsaxbospiral, to an executable in the same directory. You can either run this directly, use `make test` or use **ctest** (comes bundled with CMake) to run these unit tests (recommended):
+Building the library with the default Make target shown above also compiles the unit tests for libsxbp, to an executable in the same directory. You can either run this directly, use `make test` or use **ctest** (comes bundled with CMake) to run these unit tests (recommended):
 
 ```sh
 ctest -V  # get verbose output from test running
@@ -121,4 +123,4 @@ make install
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to making contributions to libsaxbospiral.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for information related to making contributions to libsxbp.

@@ -1,5 +1,5 @@
 /*
- * This source file forms part of libsaxbospiral, a library which generates
+ * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
  * This compilation unit provides functionality to render a bitmap struct to a
