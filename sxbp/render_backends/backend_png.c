@@ -166,8 +166,8 @@ sxbp_status_t sxbp_render_backend_png(
     metadata[2].key = "Copyright";
     metadata[2].text = "Copyright Joshua Saxby";
     metadata[3].key = "Software";
-    // SAXBOSPIRAL_VERSION_STRING is a macro that expands to a double-quoted string
-    metadata[3].text = "libsxbp v" SAXBOSPIRAL_VERSION_STRING;
+    // LIBSXBP_VERSION_STRING is a macro that expands to a double-quoted string
+    metadata[3].text = "libsxbp v" LIBSXBP_VERSION_STRING;
     metadata[4].key = "Comment";
     metadata[4].text = "https://github.com/saxbophone/libsxbp";
     // set compression of each metadata key
