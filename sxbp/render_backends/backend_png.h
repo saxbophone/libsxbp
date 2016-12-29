@@ -37,6 +37,9 @@
 extern "C"{
 #endif
 
+// flag for whether PNG output support has been compiled in based, on macro
+extern const bool SXBP_PNG_SUPPORT;
+
 /*
  * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
  * data as a PNG image to the buffer, using libpng.

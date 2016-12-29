@@ -23,7 +23,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(sxbp VERSION 0.24.1 LANGUAGES C)
+project(sxbp VERSION 0.24.2 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
 if(NOT DEFINED LIBSXBP_C_STANDARD)
@@ -148,7 +148,7 @@ set_target_properties(
 # link libsxbp with C math library
 target_link_libraries(sxbp m)
 # Link libsxbp with libpng so we get libpng symbols (if support enabled)
-if(SXBP_PNG_SUPPORT)
+if(LIBSXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
