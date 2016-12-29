@@ -28,13 +28,10 @@
  */
 #include <assert.h>
 // only include these extra dependencies if support for PNG output was enabled
-#ifdef SAXBOSPIRAL_PNG_SUPPORT
+#ifdef LIBSXBP_PNG_SUPPORT
 #include <stdlib.h>
 #include <string.h>
-#endif
 
-// only include libpng if support for it was enabled
-#ifdef SAXBOSPIRAL_PNG_SUPPORT
 #include <png.h>
 #endif
 
@@ -48,7 +45,7 @@ extern "C"{
 #endif
 
 // only define the following private functions if libpng support was enabled
-#ifdef SAXBOSPIRAL_PNG_SUPPORT
+#ifdef LIBSXBP_PNG_SUPPORT
 // private custom libPNG buffer write function
 static void buffer_write_data(
     png_structp png_ptr, png_bytep data, png_size_t length
@@ -93,7 +90,14 @@ static void cleanup_png_lib(
         free(row);
     }
 }
-#endif // SAXBOSPIRAL_PNG_SUPPORT
+#endif // LIBSXBP_PNG_SUPPORT
+
+// flag for whether PNG output support has been compiled in based, on macro
+#ifdef LIBSXBP_PNG_SUPPORT
+const bool SXBP_PNG_SUPPORT = true;
+#else
+const bool SXBP_PNG_SUPPORT = false;
+#endif
 
 /*
  * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
@@ -112,7 +116,7 @@ sxbp_status_t sxbp_render_backend_png(
     assert(bitmap.pixels != NULL);
     assert(buffer->bytes == NULL);
     // only do PNG operations if support is enabled
-    #ifndef SAXBOSPIRAL_PNG_SUPPORT
+    #ifndef LIBSXBP_PNG_SUPPORT
     // return SXBP_NOT_IMPLEMENTED
     return SXBP_NOT_IMPLEMENTED;
     #else
@@ -206,7 +210,7 @@ sxbp_status_t sxbp_render_backend_png(
     // status ok
     result = SXBP_OPERATION_OK;
     return result;
-    #endif // SAXBOSPIRAL_PNG_SUPPORT
+    #endif // LIBSXBP_PNG_SUPPORT
 }
 
 #ifdef __cplusplus

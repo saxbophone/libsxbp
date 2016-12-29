@@ -41,8 +41,6 @@ typedef struct sxbp_version_t {
 } sxbp_version_t;
 
 extern const sxbp_version_t LIB_SXBP_VERSION;
-// flag for whether PNG output support has been compiled in based, on macro
-extern const bool SXBP_PNG_SUPPORT;
 
 // used for indexing and comparing different versions in order
 typedef uint32_t sxbp_version_hash_t;
