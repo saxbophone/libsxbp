@@ -148,7 +148,7 @@ set_target_properties(
 # link libsxbp with C math library
 target_link_libraries(sxbp m)
 # Link libsxbp with libpng so we get libpng symbols (if support enabled)
-if(SXBP_PNG_SUPPORT)
+if(LIBSXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
