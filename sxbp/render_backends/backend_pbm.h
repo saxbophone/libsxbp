@@ -1,28 +1,33 @@
 /*
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
+ */
+
+/**
+ * @file
  *
- * This compilation unit provides functionality to render a bitmap struct to a
- * PBM image (binary version, stored in a buffer).
+ * @brief This compilation unit provides functionality to render a bitmap struct
+ * to a PBM image (binary version, stored in a buffer).
  *
- * Reference materials used for the PBM format are located at
+ * @remark Reference materials used for the PBM format are located at
  * <http://netpbm.sourceforge.net/doc/pbm.html>
  *
+ * @author Joshua Saxby <joshua.a.saxby+TNOPLuc8vM==@gmail.com
+ * @date 2016
  *
+ * @copyright Copyright (C) Joshua Saxby 2016
  *
- * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
+ * @copyright This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * (version 3), as published by the Free Software Foundation.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License (version 3),
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
+ * @copyright This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright You should have received a copy of the GNU Affero General Public
+ * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef SAXBOPHONE_SAXBOSPIRAL_BACKEND_PBM_H
 #define SAXBOPHONE_SAXBOSPIRAL_BACKEND_PBM_H
@@ -35,12 +40,15 @@
 extern "C"{
 #endif
 
-/*
- * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
- * data as a PBM image to the buffer
- * returns a status struct containing error information, if any
+/**
+ * @brief Renders a bitmap image to a PBM image.
  *
- * Asserts:
+ * @param bitmap Bitmap containing the image to render.
+ * @param buffer [out] Buffer to write out the PBM image data to.
+ * @return SXBP_OPERATION_OK on success.
+ * @return SXBP_MALLOC_REFUSED on memory allocation failure.
+ *
+ * @note Asserts:
  * - That bitmap.pixels is not NULL
  * - That buffer->bytes is NULL
  */
