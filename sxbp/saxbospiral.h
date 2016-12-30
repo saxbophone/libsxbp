@@ -124,48 +124,97 @@ typedef struct sxbp_line_t {
     sxbp_length_t length : 30; /**< uses 30 bits for the length */
 } sxbp_line_t;
 
-// type for representing the range of one tuple item
+/** @brief Type for storing one of the items of a tuple. */
 typedef int64_t sxbp_tuple_item_t;
 
+/**
+ * @brief A generic Tuple type for storing a vector-based quantity.
+ */
 typedef struct sxbp_tuple_t {
-    sxbp_tuple_item_t x;
-    sxbp_tuple_item_t y;
+    sxbp_tuple_item_t x; /**< The x (across) value of the tuple */
+    sxbp_tuple_item_t y; /**< The y (down) value of the tuple */
 } sxbp_tuple_t;
 
+/** @brief A Vector type used for representing directions. */
 typedef sxbp_tuple_t sxbp_vector_t;
+/** @brief A co-ord type used for representing cartesian co-ordinates. */
 typedef sxbp_tuple_t sxbp_co_ord_t;
 
+/**
+ * @brief Struct type for holding a dynamically allocated array of co-ordinates.
+ */
 typedef struct sxbp_co_ord_array_t {
-    sxbp_co_ord_t* items;
-    size_t size;
+    sxbp_co_ord_t* items; /**< pointer to the array of co-ordinates */
+    size_t size; /**< size of the array in number of items */
 } sxbp_co_ord_array_t;
 
+/**
+ * @brief Struct type for holding a cached set of co-ords.
+ * @details This is useful for co-ords that are intended for re-use between
+ * operations which require co-ords which are certified as being correct up to a
+ * given line index.
+ */
 typedef struct sxbp_co_ord_cache_t {
+    /** @brief the co-ord array containing the cached co-ords */
     sxbp_co_ord_array_t co_ords;
+    /** @brief the index of the spiral line for which this set of cached co-ords
+     * is valid up to */
     size_t validity;
 } sxbp_co_ord_cache_t;
 
+/**
+ * @brief Struct type representing a Spiral figure, in any state of completion.
+ * @details This is the most important data type in the whole library, and is
+ * passed to and from many different library functions. A partially-complete
+ * spiral object may be produced from binary data, and a fully-complete spiral
+ * may be produced from the partially complete one via the routines in the
+ * library.
+ * @note The solved_count and seconds_spent fields are currently unused by the
+ * solver/generator code, but they are read to and written from files. They will
+ * be used by the rest of the code in future versions.
+ */
 typedef struct sxbp_spiral_t {
-    uint64_t size; // count of lines
-    sxbp_line_t* lines; // dynamic array of lines
-    sxbp_co_ord_cache_t co_ord_cache; // co-ord cache for lines
-    bool collides; // whether this spiral collides or not
-    uint64_t collider; // the index of the line causing collision, if any
-    /*
-     * NOTE: The remaining fields are currently unused by the solver/generator
-     * code, but they are read to and written from files. They will be used
-     * by the rest of the code in future versions.
+    uint64_t size; /**< count of lines in the spiral */
+    sxbp_line_t* lines; /**< dynamic array of lines in the spiral */
+    /**
+     * @brief co-ord cache for the lines
+     * @private
      */
-    uint64_t solved_count; // the count of lines solved so far (index of next)
-    uint32_t seconds_spent; // count of seconds spent solving the spiral
+    sxbp_co_ord_cache_t co_ord_cache;
+    bool collides; /**< whether this spiral collides or not */
+    /**
+     * @brief the index of the line causing collision, if any
+     * @private
+     */
+    uint64_t collider;
+    /**
+     * @brief the count of lines solved so far (index of next line to solve)
+     * @note Currently not used by solver/generator
+     */
+    uint64_t solved_count;
+    /**
+     * @brief count of seconds spent solving the spiral
+     * @note Currently not used by solver/generator
+     */
+    uint32_t seconds_spent;
 } sxbp_spiral_t;
 
+/** @brief A simple buffer type for storing arrays of bytes. */
 typedef struct sxbp_buffer_t {
-    uint8_t* bytes;
-    size_t size;
+    uint8_t* bytes; /**< pointer to array of bytes */
+    size_t size; /**< the size of the array of bytes */
 } sxbp_buffer_t;
 
 // vector direction constants
+/**
+ * @brief Vector direction constants.
+ * @details This is an array of vectors representing each cartesian direction as
+ * a vector direction. They can be indexed by the cartesian direction macros,
+ * for example:
+ * @code
+ * sxbp_vector_t up = SXBP_VECTOR_DIRECTIONS[SXBP_UP];
+ * @endcode
+ */
 extern const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4];
 
 #ifdef __cplusplus
