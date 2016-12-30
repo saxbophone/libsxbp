@@ -2,10 +2,6 @@
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides basic functions to initialise a spiral.
- *
- *
- *
  * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,33 +28,16 @@
 extern "C"{
 #endif
 
-/*
- * when facing the direction specified by current, return the direction that
- * will be faced when turning in the rotational direction specified by turn.
- */
 sxbp_direction_t sxbp_change_direction(
     sxbp_direction_t current, sxbp_rotation_t turn
 ) {
     return (current + turn) % 4U;
 }
 
-/*
- * returns a spiral struct with all fields initialised to 0
- */
 sxbp_spiral_t sxbp_blank_spiral() {
     return (sxbp_spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
 }
 
-/*
- * given a buffer_t full of data, and a pointer to a blank spiral_t
- * struct, populates the spiral struct from the data in the buffer
- * this converts the 0s and 1s in the data into UP, LEFT, DOWN, RIGHT
- * instructions which are then used to build the pattern.
- * returns a status_t struct with error information (if needed)
- *
- * Asserts:
- * - That the spiral struct pointed to has its pointer attributes set to NULL
- */
 sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
     // preconditional assertions
     assert(spiral->lines == NULL);

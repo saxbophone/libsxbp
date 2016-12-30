@@ -1,24 +1,29 @@
 /*
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
+ */
+
+/**
+ * @file
  *
- * This compilation unit provides basic functions to initialise a spiral.
+ * @brief This compilation unit provides basic functions to initialise a spiral.
  *
+ * @author Joshua Saxby <joshua.a.saxby+TNOPLuc8vM==@gmail.com
+ * @date 2016
  *
+ * @copyright Copyright (C) Joshua Saxby 2016
  *
- * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
+ * @copyright This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * (version 3), as published by the Free Software Foundation.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License (version 3),
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
+ * @copyright This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright You should have received a copy of the GNU Affero General Public
+ * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef SAXBOPHONE_SAXBOSPIRAL_INITIALISE_H
 #define SAXBOPHONE_SAXBOSPIRAL_INITIALISE_H
