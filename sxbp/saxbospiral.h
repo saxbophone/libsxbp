@@ -205,7 +205,6 @@ typedef struct sxbp_buffer_t {
     size_t size; /**< the size of the array of bytes */
 } sxbp_buffer_t;
 
-// vector direction constants
 /**
  * @brief Vector direction constants.
  * @details This is an array of vectors representing each cartesian direction as
