@@ -41,7 +41,7 @@ extern "C"{
 /**
  * @brief Calculates the sum of all line lengths in this spiral within the given
  * start and end indexes.
- * @detail params start and end specify the range of line indexes to use for the
+ * @details params start and end specify the range of line indexes to use for the
  * lines which are to be summed. These are inclusive of the lower bound but
  * exclusive of the upper bound.
  *

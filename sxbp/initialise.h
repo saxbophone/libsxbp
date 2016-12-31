@@ -38,7 +38,7 @@ extern "C"{
 /**
  * @brief Gets the direction which is clockwise or anti-clockwise to the current
  * direction.
- * @detail Given a current direction and a rotational direction, return the new
+ * @details Given a current direction and a rotational direction, return the new
  * direction which would be faced after turning 90 degrees in the given
  * rotational direction.
  *
@@ -52,7 +52,7 @@ sxbp_direction_t sxbp_change_direction(
 
 /**
  * @brief Builds a blank spiral struct.
- * @detail This is a convenience function, as the struct has many fields. This
+ * @details This is a convenience function, as the struct has many fields. This
  * function will create a spiral struct with all of these fields initialised to
  * 0 or their default 'blank' state. No memory is allocated.
  *
@@ -63,7 +63,7 @@ sxbp_spiral_t sxbp_blank_spiral();
 /**
  * @brief Builds a partially-complete spiral from binary input data stored in a
  * buffer.
- * @detail This converts the 0s and 1s in the buffer data into UP, LEFT, DOWN,
+ * @details This converts the 0s and 1s in the buffer data into UP, LEFT, DOWN,
  * RIGHT instructions which are then used to build the pattern. Only the line
  * directions are calculated at this point, all line lengths are 0.
  *
