@@ -39,7 +39,7 @@ extern "C"{
 #endif
 
 /**
- * @brief Pprovides further error information specific to spiral deserialisation
+ * @brief Provides further error information specific to spiral de-serialisation
  */
 typedef enum sxbp_deserialise_diagnostic_t {
     /** @brief no problem */
@@ -70,7 +70,7 @@ extern const size_t SXBP_FILE_HEADER_SIZE;
 extern const size_t SXBP_LINE_T_PACK_SIZE;
 
 /**
- * @brief Deserialises a spiral from a buffer.
+ * @brief De-serialises a spiral from a buffer.
  * @details Reads in a binary representation of a spiral and populates a given
  * spiral with the data which represents this spiral (if input data is valid).
  *
