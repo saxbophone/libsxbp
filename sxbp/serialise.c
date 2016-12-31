@@ -2,11 +2,6 @@
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides functions for serialising spirals to and from
- * byte sequences (which may be stored in files or any other form).
- *
- *
- *
  * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -109,17 +104,6 @@ static void dump_uint32_t(
     }
 }
 
-/*
- * given a buffer and a pointer to a blank spiral_t, create a spiral represented
- * by the data in the struct and write to the spiral
- * returns a serialise_result_t struct, which will contain information about
- * whether the operation was successful or not and information about what went
- * wrong if it was not successful
- *
- * Asserts:
- * - That buffer.bytes is not NULL
- * - That spiral->lines is NULL
- */
 sxbp_serialise_result_t sxbp_load_spiral(
     sxbp_buffer_t buffer, sxbp_spiral_t* spiral
 ) {
@@ -202,17 +186,6 @@ sxbp_serialise_result_t sxbp_load_spiral(
     return result;
 }
 
-/*
- * given a spiral_t struct and a pointer to a blank buffer_t, serialise a binary
- * representation of the spiral and write this to the data buffer pointer
- * returns a serialise_result_t struct, which will contain information about
- * whether the operation was successful or not and information about what went
- * wrong if it was not successful
- *
- * Asserts:
- * - That spiral.lines is not NULL
- * - That buffer->bytes is NULL
- */
 sxbp_serialise_result_t sxbp_dump_spiral(
     sxbp_spiral_t spiral, sxbp_buffer_t* buffer
 ) {
