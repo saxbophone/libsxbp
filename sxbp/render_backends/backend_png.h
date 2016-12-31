@@ -34,6 +34,8 @@
 #ifndef SAXBOPHONE_SAXBOSPIRAL_BACKEND_PNG_H
 #define SAXBOPHONE_SAXBOSPIRAL_BACKEND_PNG_H
 
+#include <stdbool.h>
+
 #include "../saxbospiral.h"
 #include "../render.h"
 
