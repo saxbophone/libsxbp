@@ -45,8 +45,10 @@ extern "C"{
  * 1-bit pixels which are either black or white.
  */
 typedef struct sxbp_bitmap_t {
-    uint64_t width; /**< The width of the bitmap in pixels */
-    uint64_t height; /**< The height of the bitmap in pixels */
+    /** @brief The width of the bitmap in pixels */
+    uint64_t width;
+    /** @brief The height of the bitmap in pixels */
+    uint64_t height;
     /**
      * @brief A 2-dimensional array of pixels.
      * @details false is black and true is white.

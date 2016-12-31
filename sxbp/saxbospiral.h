@@ -44,10 +44,14 @@ extern "C"{
  * @details Versions are of the format <MAJOR.MINOR.patch>
  */
 typedef struct sxbp_version_t {
-    uint8_t major; /**< The major version number of the version */
-    uint8_t minor; /**< The minor version number of the version */
-    uint8_t patch; /**< The patch version number of the version */
-    const char* string; /**< String form of the version (vX.Y.Z) */
+    /** @brief The major version number of the version */
+    uint8_t major;
+    /** @brief The minor version number of the version */
+    uint8_t minor;
+    /** @brief The patch version number of the version */
+    uint8_t patch;
+    /** @brief String form of the version (vX.Y.Z) */
+    const char* string;
 } sxbp_version_t;
 
 /** @brief Stores the current version of libsxbp. */
@@ -120,8 +124,10 @@ typedef uint32_t sxbp_length_t;
  * @note The whole struct uses bitfields to occupy 32 bits of memory.
  */
 typedef struct sxbp_line_t {
-    sxbp_direction_t direction : 2; /**< uses 2 bits as there's only 4 directions*/
-    sxbp_length_t length : 30; /**< uses 30 bits for the length */
+    /** @brief uses 2 bits as there's only 4 directions */
+    sxbp_direction_t direction : 2;
+    /** @brief uses 30 bits for the length, this is wide enough */
+    sxbp_length_t length : 30;
 } sxbp_line_t;
 
 /** @brief Type for storing one of the items of a tuple. */
@@ -131,8 +137,10 @@ typedef int64_t sxbp_tuple_item_t;
  * @brief A generic Tuple type for storing a vector-based quantity.
  */
 typedef struct sxbp_tuple_t {
-    sxbp_tuple_item_t x; /**< The x (across) value of the tuple */
-    sxbp_tuple_item_t y; /**< The y (down) value of the tuple */
+    /** @brief The x (across) value of the tuple */
+    sxbp_tuple_item_t x;
+    /** @brief The y (down) value of the tuple */
+    sxbp_tuple_item_t y;
 } sxbp_tuple_t;
 
 /** @brief A Vector type used for representing directions. */
@@ -144,8 +152,10 @@ typedef sxbp_tuple_t sxbp_co_ord_t;
  * @brief Struct type for holding a dynamically allocated array of co-ordinates.
  */
 typedef struct sxbp_co_ord_array_t {
-    sxbp_co_ord_t* items; /**< pointer to the array of co-ordinates */
-    size_t size; /**< size of the array in number of items */
+    /** @brief pointer to the array of co-ordinates */
+    sxbp_co_ord_t* items;
+    /** @brief size of the array in number of items */
+    size_t size;
 } sxbp_co_ord_array_t;
 
 /**
@@ -174,14 +184,17 @@ typedef struct sxbp_co_ord_cache_t {
  * be used by the rest of the code in future versions.
  */
 typedef struct sxbp_spiral_t {
-    uint64_t size; /**< count of lines in the spiral */
-    sxbp_line_t* lines; /**< dynamic array of lines in the spiral */
+    /** @brief count of lines in the spiral */
+    uint64_t size;
+    /** @brief dynamic array of lines in the spiral */
+    sxbp_line_t* lines;
     /**
      * @brief co-ord cache for the lines
      * @private
      */
     sxbp_co_ord_cache_t co_ord_cache;
-    bool collides; /**< whether this spiral collides or not */
+    /** @brief whether this spiral collides or not */
+    bool collides;
     /**
      * @brief the index of the line causing collision, if any
      * @private
@@ -201,8 +214,10 @@ typedef struct sxbp_spiral_t {
 
 /** @brief A simple buffer type for storing arrays of bytes. */
 typedef struct sxbp_buffer_t {
-    uint8_t* bytes; /**< pointer to array of bytes */
-    size_t size; /**< the size of the array of bytes */
+    /** @brief pointer to array of bytes */
+    uint8_t* bytes;
+    /** @brief the size of the array of bytes */
+    size_t size;
 } sxbp_buffer_t;
 
 /**

@@ -66,7 +66,16 @@ sxbp_status_t sxbp_resize_spiral(
 /**
  * @brief Solve the given incomplete spiral such that each line has a length of
  * at least 1 unit.
- * @details ...
+ * @details This function will solve a given spiral such that each line of the
+ * spiral has a length of at least 1 unit, and that none of these lines collide
+ * with one another. The algorithm operates recursively on the spiral to achieve
+ * this. A spiral at any point of completion may be passed to this function and
+ * the algorithm will solve just the parts which have yet to be solved if
+ * partial work has already been done to solve the spiral. A progress callback
+ * may optionally also be given to the function. If this is non-NULL, then this
+ * callback function will be called every time the algorithm finds the length of
+ * another line. Once this function has finished, it may be possible to render
+ * the spiral.
  *
  * @param spiral The spiral to solve. Function operates on the spiral in-place
  * (mutating operation).
@@ -78,7 +87,7 @@ sxbp_status_t sxbp_resize_spiral(
  * which gets called every time a new line length is successfully found. The
  * signature of the callback should be like so:
  * @code
- * void* callback_name(
+ * void callback_name(
  *     sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
  *     void* progress_callback_user_data
  * )
