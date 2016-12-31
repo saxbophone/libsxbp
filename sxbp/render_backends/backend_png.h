@@ -12,7 +12,7 @@
  * @note PNG output support may have not been enabled in the compiled version
  * of libsxbp that you have. If support is not enabled, the library
  * boolean constant SXBP_PNG_SUPPORT will be set to false and the one public
- * function defined in this library will return SXBP_NOT_IMPLEMENTED.
+ * function defined in this unit will return SXBP_NOT_IMPLEMENTED.
  *
  * @author Joshua Saxby <joshua.a.saxby+TNOPLuc8vM==@gmail.com
  * @date 2016
