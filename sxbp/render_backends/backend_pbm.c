@@ -2,14 +2,6 @@
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides functionality to render a bitmap struct to a
- * PBM image (binary version, stored in a buffer).
- *
- * Reference materials used for the PBM format are located at
- * <http://netpbm.sourceforge.net/doc/pbm.html>
- *
- *
- *
  * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,15 +34,6 @@
 extern "C"{
 #endif
 
-/*
- * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
- * data as a PBM image to the buffer
- * returns a status struct containing error information, if any
- *
- * Asserts:
- * - That bitmap.pixels is not NULL
- * - That buffer->bytes is NULL
- */
 sxbp_status_t sxbp_render_backend_pbm(
     sxbp_bitmap_t bitmap, sxbp_buffer_t* buffer
 ) {

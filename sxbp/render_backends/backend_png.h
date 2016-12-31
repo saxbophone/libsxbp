@@ -1,33 +1,40 @@
 /*
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
+ */
+
+/**
+ * @file
  *
- * This compilation unit provides functionality to render a bitmap struct to a
- * PNG image (stored in a buffer).
- *
- * NOTE: PNG output support may have not been enabled in the compiled version
+ * @brief This compilation unit provides functionality to render a bitmap struct
+ * to a PNG image (stored in a buffer).
+ * 
+ * @note PNG output support may have not been enabled in the compiled version
  * of libsxbp that you have. If support is not enabled, the library
  * boolean constant SXBP_PNG_SUPPORT will be set to false and the one public
- * function defined in this library will return SXBP_NOT_IMPLEMENTED.
+ * function defined in this unit will return SXBP_NOT_IMPLEMENTED.
  *
+ * @author Joshua Saxby <joshua.a.saxby+TNOPLuc8vM==@gmail.com
+ * @date 2016
  *
+ * @copyright Copyright (C) Joshua Saxby 2016
  *
- * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
+ * @copyright This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU Affero General Public License
+ * (version 3), as published by the Free Software Foundation.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License (version 3),
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
+ * @copyright This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright You should have received a copy of the GNU Affero General Public
+ * License along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef SAXBOPHONE_SAXBOSPIRAL_BACKEND_PNG_H
 #define SAXBOPHONE_SAXBOSPIRAL_BACKEND_PNG_H
+
+#include <stdbool.h>
 
 #include "../saxbospiral.h"
 #include "../render.h"
@@ -37,16 +44,24 @@
 extern "C"{
 #endif
 
-// flag for whether PNG output support has been compiled in based, on macro
+/**
+ * @brief Flag for whether PNG output support has been enabled.
+ * @details This is compiled into the library, based on a macro set at build
+ * time. The value of this constant is false if PNG support is not enabled and
+ * true if it is.
+ */
 extern const bool SXBP_PNG_SUPPORT;
 
-/*
- * given a bitmap_t struct and a pointer to a blank buffer_t, write the bitmap
- * data as a PNG image to the buffer, using libpng.
- * returns a status struct containing error information
- * returns SXBP_NOT_IMPLEMENTED if PNG support was not enabled
+/**
+ * @brief Renders a bitmap image to a PNG image.
  *
- * Asserts:
+ * @param bitmap Bitmap containing the image to render.
+ * @param buffer [out] Buffer to write out the PBM image data to.
+ * @return SXBP_OPERATION_OK on success.
+ * @return SXBP_NOT_IMPLEMENTED if PNG support has not been enabled.
+ * @return SXBP_MALLOC_REFUSED on memory allocation failure.
+ *
+ * @note Asserts:
  * - That bitmap.pixels is not NULL
  * - That buffer->bytes is NULL
  */
