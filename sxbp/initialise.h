@@ -58,7 +58,7 @@ sxbp_direction_t sxbp_change_direction(
  *
  * @return A blank spiral struct with all fields initialised to 0 or blank values.
  */
-sxbp_spiral_t sxbp_blank_spiral();
+sxbp_spiral_t sxbp_blank_spiral(void);
 
 /**
  * @brief Builds a partially-complete spiral from binary input data stored in a

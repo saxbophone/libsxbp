@@ -34,7 +34,7 @@ sxbp_direction_t sxbp_change_direction(
     return (current + turn) % 4U;
 }
 
-sxbp_spiral_t sxbp_blank_spiral() {
+sxbp_spiral_t sxbp_blank_spiral(void) {
     return (sxbp_spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0};
 }
 
