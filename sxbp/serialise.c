@@ -45,7 +45,7 @@ static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
     assert(buffer->bytes != NULL);
     uint64_t value = 0;
     for(uint8_t i = 0; i < 8; i++) {
-        value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
+        value |= (uint64_t)(buffer->bytes[start_index + i]) << (8 * (7 - i));
     }
     return value;
 }
@@ -61,7 +61,7 @@ static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
     assert(buffer->bytes != NULL);
     uint32_t value = 0;
     for(uint8_t i = 0; i < 4; i++) {
-        value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
+        value |= (uint32_t)(buffer->bytes[start_index + i]) << (8 * (3 - i));
     }
     return value;
 }
@@ -78,7 +78,7 @@ static void dump_uint64_t(
     // preconditional assertions
     assert(buffer->bytes != NULL);
     for(uint8_t i = 0; i < 8; i++) {
-        uint8_t shift = (8 * (7 - i));
+        uint8_t shift = (uint8_t)(8 * (7 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
             (value & (0xffUL << shift)) >> shift
         );
@@ -97,7 +97,7 @@ static void dump_uint32_t(
     // preconditional assertions
     assert(buffer->bytes != NULL);
     for(uint8_t i = 0; i < 4; i++) {
-        uint8_t shift = (8 * (3 - i));
+        uint8_t shift = (uint8_t)(8 * (3 - i));
         buffer->bytes[start_index + i] = (uint8_t)(
             (value & (0xffUL << shift)) >> shift
         );
@@ -161,6 +161,20 @@ sxbp_serialise_result_t sxbp_load_spiral(
     }
     // convert each serialised line segment in buffer into a line_t struct
     for(size_t i = 0; i < spiral_size; i++) {
+        /*
+         * disable GCC conversion warnings:
+         *
+         * - the first one won't overflow becaue of the bit-shift 6 places to
+         *   the right
+         *
+         * - the second one won't overflow because it is protected by the
+         *   bitmask which cuts out the top 2 bits
+         *
+         * - the third won't fail because it is only ever bit-shifted by a
+         *   controlled amount
+         */
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wconversion"
         // direction is stored in 2 most significant bits of each 32-bit sequence
         spiral->lines[i].direction = (
             buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)] >> 6
@@ -172,7 +186,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
          */
         spiral->lines[i].length = (
             buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)]
-            & 0x3f // <= binary value is 0b00111111
+            & 0x3fu // <= binary value is 0b00111111
         ) << 24;
         // handle remaining 3 bytes in loop
         for(uint8_t j = 0; j < 3; j++) {
@@ -180,6 +194,8 @@ sxbp_serialise_result_t sxbp_load_spiral(
                 buffer.bytes[SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE) + 1 + j]
             ) << (8 * (2 - j));
         }
+        // re-enable all warnings
+        #pragma GCC diagnostic pop
     }
     // return ok status
     result.status = SXBP_OPERATION_OK;
@@ -221,11 +237,11 @@ sxbp_serialise_result_t sxbp_dump_spiral(
          */
         buffer->bytes[
             SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)
-        ] = (spiral.lines[i].direction << 6);
+        ] = (uint8_t)(spiral.lines[i].direction << 6);
         // handle first 6 bits of the length
         buffer->bytes[
             SXBP_FILE_HEADER_SIZE + (i * SXBP_LINE_T_PACK_SIZE)
-        ] |= (spiral.lines[i].length >> 24);
+        ] |= (uint8_t)((sxbp_length_t)spiral.lines[i].length >> 24);
         // handle remaining 3 bytes in a loop
         for(uint8_t j = 0; j < 3; j++) {
             buffer->bytes[

@@ -31,7 +31,7 @@ extern "C"{
 sxbp_direction_t sxbp_change_direction(
     sxbp_direction_t current, sxbp_rotation_t turn
 ) {
-    return (current + turn) % 4U;
+    return (uint8_t)((int8_t)current + turn) % 4U;
 }
 
 sxbp_spiral_t sxbp_blank_spiral() {
