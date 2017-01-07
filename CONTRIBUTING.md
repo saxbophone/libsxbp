@@ -2,9 +2,16 @@
 
 Thanks for considering contributing to libsxbp!
 
-To get started, [sign the Contributor License Agreement](https://www.clahub.com/agreements/saxbophone/libsxbp).
+First of all, please read and make sure that you agree to this project's **Contributor License Agreement**:
 
-> [A copy of the CLA](CLA_INDIVIDUAL.md) is also available in this repository.
+- If you are contributing as an individual, please read and sign [this document](CLA_INDIVIDUAL.md).
+- If you are contributing as an entity (e.g. a company or organisation), please read and sign [this document](CLA_ENTITY.md).
+
+Signed copies of the above agreements should be emailed to me (@saxbophone / Joshua Saxby) at &lt;joshua.a.saxby@gmail.com&gt;.
+
+I will then add your details (full name and email address) to the [CONTRIBUTORS.md](CONTRIBUTORS.md) file in this repository.
+
+**If you do not want me to put your email address in this file, then tell me so and I will use another public handle of yours (most likely your Github username).**
 
 Here are some tips and general info about contributing to this project. Following these tips will increase the likelihood of getting a speedy PR :smile:
 

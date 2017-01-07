@@ -1,6 +1,6 @@
 # libsxbp ![libsxbp](libsxbp.png "libsxbp")
 
-![AGPL v3 Logo](agplv3-88x31.png "A logo used to show the AGPL v3.0 License") [![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp)
+[![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp)
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
@@ -30,11 +30,11 @@ Although this project doesn't work in sprints, there is a [*sprint board*](https
 
 ## Licensing
 
-Libsaxbospiral is released under version **3.0** of the **GNU Affero General Public License** (AGPLv3).
+As of **v0.25.0**, libsxbp is licensed under the **Mozilla Public License Version 2.0** (`MPL-2.0`).
 
-A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. *You should almost certainly read it*. If for some reason you have not received this file, you can view a copy of the license at [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
+This is a permissive software license which puts copyleft protections only on the original source files of the project themselves, but does not extend this copyleft to other sources which use the library. In other words, the library may be used and integrated into other projects regardless of whether they are open-source or commercial, but any modifications to the library itself must be made available under the same or an equivalent license (see license for further details on the nuances of this).
 
-Note that as well as being under the same copyleft protections as the GPL License, the AGPL enforces these protections further by **including provision of the software via a network service (such as a website) as one of its definitions of distribution**, hence requiring those who integrate libsxbp into their website or other network service to also release the software into which they are integrating libsxbp under this same license (AGPLv3).
+A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. If for some reason you have not received this file, you can view a copy of the license at [https://www.mozilla.org/MPL/2.0/](https://www.mozilla.org/MPL/2.0/).
 
 ## Building
 
@@ -48,7 +48,7 @@ You will need:
 - [Cmake](https://cmake.org/) - v3.0 or newer
 
 *If you also want to be able to produce images in PNG format with the library, you will need:*
-- [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes preinstalled with many modern unix-like systems)
+- [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes pre-installed with many modern unix-like systems)
 
 > ### Note:
 
@@ -107,11 +107,11 @@ ctest -V  # get verbose output from test running
 
 > ### Note:
 
-> It's recommended that if testing for development purposes (rather than just verification that all is working), you run CMake in `Debug` mode instead. This will pass more strict options to your compiler if it supports them (GCC and Clang do), leading to a higher chance of bugs being caught before commital.
+> It's recommended that if testing for development purposes (rather than just verification that all is working), you run CMake in `Debug` mode instead. This will pass more strict options to your compiler if it supports them (GCC and Clang do), leading to a higher chance of bugs being caught before committal.
 
 ## Install Library
 
-Use the `make install` target to install the compiled library and the neccessary header files to your system's standard location for these files.
+Use the `make install` target to install the compiled library and the necessary header files to your system's standard location for these files.
 
 ```
 make install
@@ -119,7 +119,7 @@ make install
 
 > ### Note:
 
-> This may or may not require admin priveleges. Typically does on GNU/Linux, typically doesn't on Mac OSX *with Homebrew installed* and *probably doesn't* on Microsoft Windows.
+> This may or may not require admin privileges, depending on where the files are installed to. Typically does on GNU/Linux, typically doesn't on Mac OSX *with Homebrew installed* and *may or may not* on Microsoft Windows. The CMake variable `CMAKE_INSTALL_PREFIX` may be used to change this destination.
 
 ## Contributing
 
