@@ -86,19 +86,16 @@ Agreement</h1>
 <p>6.5 If any provision of this Agreement is found void and unenforceable, such provision will be replaced to the extent possible with a provision that comes closest to the meaning of the original provision and which is enforceable.  The terms and conditions set forth in this Agreement shall apply notwithstanding any failure of essential purpose of this Agreement or any limited remedy to the maximum extent possible under law.</p>
 
 <p>You<br />
-________________________<br />
-Name: __________________<br />
-Title: ___________________<br />
-Address: ________________<br />
-________________________<br />
+Name: ________________________________________<br />
+Title: ________________________________________<br />
+Email: ________________________________________<br />
 </p>
 
 <p>Us<br />
-________________________<br />
-Name: __________________<br />
-Title: ___________________<br />
-Address: ________________<br />
-________________________<br />
+Name: Joshua Saxby____________________________<br />
+Title: Project Maintainer______________________<br />
+Email: joshua.a.saxby@gmail.com________________<br />
 </p>
+
 
 <p align=right>Harmony (HA-CLA-E-OSI) Version 1.0</p>
