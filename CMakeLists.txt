@@ -8,22 +8,14 @@
 #
 # Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License (version 3),
-# as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(sxbp VERSION 0.24.2 LANGUAGES C)
+project(sxbp VERSION 0.25.0 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
 if(NOT DEFINED LIBSXBP_C_STANDARD)
