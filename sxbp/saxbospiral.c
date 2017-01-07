@@ -2,24 +2,11 @@
  * This source file forms part of libsxbp, a library which generates
  * experimental 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides most of the data types used by the library, as
- * well as defining some library constants and versioning functionality.
- *
- *
- *
  * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License (version 3),
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <stdbool.h>
 
@@ -38,10 +25,6 @@ const sxbp_version_t LIB_SXBP_VERSION = {
     .string = LIBSXBP_VERSION_STRING,
 };
 
-/*
- * computes a version_hash_t for a given version_t,
- * to be used for indexing and ordering
- */
 sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version) {
     return (version.major * 65536) + (version.minor * 256) + version.patch;
 }

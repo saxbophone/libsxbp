@@ -1,6 +1,6 @@
 <h1>libsxbp
 
-Individual
+Entity
 
 Contributor
 
@@ -12,11 +12,11 @@ Agreement</h1>
 
 <h2>1. Definitions</h2>
 
-<p>"You" means the individual who Submits a Contribution to Us.</p>
+<p>"You" means any Legal Entity on behalf of whom a Contribution has been received by Us. "Legal Entity" means an entity which is not a natural person. "Affiliates" means other Legal Entities that control, are controlled by, or under common control with that Legal Entity. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such Legal Entity, whether by contract or otherwise, (ii) ownership of fifty percent (50%) or more of the outstanding shares or securities which vote to elect the management or other persons who direct such Legal Entity or (iii) beneficial ownership of such entity.</p>
 
 <p>"Contribution" means any work of authorship that is Submitted by You to Us in which You own or assert ownership of the Copyright. If You do not own the Copyright in the entire work of authorship, please follow the instructions in https://github.com/saxbophone/libsxbp/blob/master/CONTRIBUTING.md.</p>
 
-<p>"Copyright" means all rights protecting works of authorship owned or controlled by You, including copyright, moral and neighboring rights, as appropriate, for the full term of their existence including any extensions by You.</p>
+<p>"Copyright" means all rights protecting works of authorship owned or controlled by You or Your Affiliates, including copyright, moral and neighboring rights, as appropriate, for the full term of their existence including any extensions by You.</p>
 
 <p>"Material" means the work of authorship which is made available by Us to third parties. When this Agreement covers more than one software project, the Material means the work of authorship to which the Contribution was Submitted. After You Submit the Contribution, it may be included in the Material.</p>
 
@@ -38,7 +38,7 @@ Agreement</h1>
 
 <h3>2.2 Patent License</h3>
 
-<p>For patent claims including, without limitation, method, process, and apparatus claims which You  own, control or have the right to grant, now or in the future, You grant to Us a perpetual, worldwide, non-exclusive, transferable, royalty-free, irrevocable patent license, with the right to sublicense these rights to multiple tiers of sublicensees, to make, have made, use, sell, offer for sale, import and otherwise transfer the Contribution and the Contribution in combination with the Material (and portions of such combination). This license is granted only to the extent that the exercise of the licensed rights infringes such patent claims; and provided that this license is conditioned upon compliance with Section 2.3.</p>
+<p>For patent claims including, without limitation, method, process, and apparatus claims which You or Your Affiliates own, control or have the right to grant, now or in the future, You grant to Us a perpetual, worldwide, non-exclusive, transferable, royalty-free, irrevocable patent license, with the right to sublicense these rights to multiple tiers of sublicensees, to make, have made, use, sell, offer for sale, import and otherwise transfer the Contribution and the Contribution in combination with the Material (and portions of such combination). This license is granted only to the extent that the exercise of the licensed rights infringes such patent claims; and provided that this license is conditioned upon compliance with Section 2.3.</p>
 
 <h3>2.3 Outbound License</h3>
 
@@ -58,9 +58,10 @@ Agreement</h1>
 
 <p>(a) You have the legal authority to enter into this Agreement.</p>
 
-<p>(b) You  own the Copyright and patent claims covering the Contribution which are required to grant the rights under Section 2.</p>
+<p>(b) You or Your Affiliates own the Copyright and patent claims covering the Contribution which are required to grant the rights under Section 2.</p>
 
-<p>(c) The grant of rights under Section 2 does not violate any grant of rights which You have made to third parties, including Your employer.  If You are an employee, You have had Your employer approve this Agreement or sign the Entity version of this document.  If You are less than eighteen years old, please have Your parents or guardian sign the Agreement.</p>
+<p>(c) The grant of rights under Section 2 does not violate any grant of rights which You or Your Affiliates have made to third parties.</p>
+
 
 <p>(d) You have followed the instructions in https://github.com/saxbophone/libsxbp/blob/master/CONTRIBUTING.md, if You do not own the Copyright in the entire work of authorship Submitted.</p>
 
@@ -86,6 +87,7 @@ Agreement</h1>
 
 <p>You<br />
 Name: ________________________________________<br />
+Title: ________________________________________<br />
 Email: ________________________________________<br />
 </p>
 
@@ -95,4 +97,5 @@ Title: Project Maintainer______________________<br />
 Email: joshua.a.saxby@gmail.com________________<br />
 </p>
 
-<p align=right>Harmony (HA-CLA-I-OSI) Version 1.0</p>
+
+<p align=right>Harmony (HA-CLA-E-OSI) Version 1.0</p>

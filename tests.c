@@ -11,17 +11,9 @@
  *
  * Copyright (C) 2016, Joshua Saxby joshua.a.saxby+TNOPLuc8vM==@gmail.com
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License (version 3),
- * as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <stdbool.h>
 #include <stdint.h>
@@ -35,7 +27,7 @@
 #include "sxbp/serialise.h"
 
 
-bool test_sxbp_change_direction() {
+static bool test_sxbp_change_direction(void) {
     if(sxbp_change_direction(SXBP_UP, SXBP_CLOCKWISE) != SXBP_RIGHT) {
         return false;
     } else if(sxbp_change_direction(SXBP_UP, SXBP_ANTI_CLOCKWISE) != SXBP_LEFT) {
@@ -53,7 +45,7 @@ bool test_sxbp_change_direction() {
     }
 }
 
-bool test_sxbp_init_spiral() {
+static bool test_sxbp_init_spiral(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -99,7 +91,7 @@ bool test_sxbp_init_spiral() {
     return result;
 }
 
-bool test_sxbp_spiral_points() {
+static bool test_sxbp_spiral_points(void) {
     // success variable
     bool success = true;
     // prepare input spiral struct
@@ -153,7 +145,7 @@ bool test_sxbp_spiral_points() {
     return success;
 }
 
-bool test_sxbp_cache_spiral_points_blank() {
+static bool test_sxbp_cache_spiral_points_blank(void) {
     // success variable
     bool success = true;
     // prepare input spiral struct
@@ -207,7 +199,7 @@ bool test_sxbp_cache_spiral_points_blank() {
     return success;
 }
 
-bool test_sxbp_plot_spiral() {
+static bool test_sxbp_plot_spiral(void) {
     // success / failure variable
     bool result = true;
     // build input and output structs
@@ -251,7 +243,7 @@ bool test_sxbp_plot_spiral() {
     return result;
 }
 
-bool test_sxbp_plot_spiral_partial() {
+static bool test_sxbp_plot_spiral_partial(void) {
     // success / failure variable
     bool result = true;
     // build input and output structs
@@ -312,7 +304,7 @@ static void test_progress_callback(
 // re-enable all warnings
 #pragma GCC diagnostic pop
 
-bool test_sxbp_plot_spiral_progress_callback() {
+static bool test_sxbp_plot_spiral_progress_callback(void) {
     // success / failure variable
     bool result = true;
     // build input structs
@@ -347,7 +339,7 @@ bool test_sxbp_plot_spiral_progress_callback() {
     return result;
 }
 
-bool test_sxbp_load_spiral() {
+static bool test_sxbp_load_spiral(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -431,7 +423,7 @@ bool test_sxbp_load_spiral() {
     return result;
 }
 
-bool test_sxbp_load_spiral_rejects_missing_magic_number() {
+static bool test_sxbp_load_spiral_rejects_missing_magic_number(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -456,7 +448,7 @@ bool test_sxbp_load_spiral_rejects_missing_magic_number() {
     return result;
 }
 
-bool test_sxbp_load_spiral_rejects_too_small_for_header() {
+static bool test_sxbp_load_spiral_rejects_too_small_for_header(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data - should be smaller than 26
@@ -479,7 +471,7 @@ bool test_sxbp_load_spiral_rejects_too_small_for_header() {
     return result;
 }
 
-bool test_sxbp_load_spiral_rejects_too_small_data_section() {
+static bool test_sxbp_load_spiral_rejects_too_small_data_section(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -519,7 +511,7 @@ bool test_sxbp_load_spiral_rejects_too_small_data_section() {
     return result;
 }
 
-bool test_sxbp_load_spiral_rejects_wrong_version() {
+static bool test_sxbp_load_spiral_rejects_wrong_version(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
@@ -559,7 +551,7 @@ bool test_sxbp_load_spiral_rejects_wrong_version() {
     return result;
 }
 
-bool test_sxbp_dump_spiral() {
+static bool test_sxbp_dump_spiral(void) {
     // success / failure variable
     bool result = true;
     // build input struct
@@ -643,7 +635,7 @@ bool test_sxbp_dump_spiral() {
 // a function pointer to a test case function, and a string containing the
 // test case's name. it will run the test case function and return the success
 // or failure status, which should be stored in the test suite status bool.
-bool run_test_case(
+static bool run_test_case(
     bool test_suite_state, bool (*test_case_func)(), char* test_case_name
 ) {
     printf("%s: ", test_case_name);
@@ -653,7 +645,7 @@ bool run_test_case(
     return test_suite_state && test_result;
 }
 
-int main() {
+int main(void) {
     // set up test suite status flag
     bool result = true;
     // call run_test_case() for each test case
