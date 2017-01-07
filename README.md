@@ -42,10 +42,14 @@ Libsxbp can be built without installing for test purposes and for general usage,
 
 ### Dependencies
 
-You will need:
+There are no compulsory library dependencies beyond the C99 standard library. *Yay!*
+
+#### Build Tools
 
 - A compiler that can compile ISO C99 or C11 code
 - [Cmake](https://cmake.org/) - v3.0 or newer
+
+#### Optional Libraries
 
 *If you also want to be able to produce images in PNG format with the library, you will need:*
 - [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes pre-installed with many modern unix-like systems)
