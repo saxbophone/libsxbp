@@ -42,6 +42,3 @@ Makefile
 cmake_install.cmake
 CTestTestfile.cmake
 install_manifest.txt
-
-# Doxygen build folder
-doc/
