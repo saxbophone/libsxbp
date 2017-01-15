@@ -15,7 +15,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(sxbp VERSION 0.25.1 LANGUAGES C)
+project(sxbp VERSION 0.25.2 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
 if(NOT DEFINED LIBSXBP_C_STANDARD)
