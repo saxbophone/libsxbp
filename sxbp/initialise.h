@@ -11,7 +11,7 @@
  * @author Joshua Saxby <joshua.a.saxby+TNOPLuc8vM==@gmail.com
  * @date 2016, 2017
  *
- * @copyright Copyright (C) Joshua Saxby 2016
+ * @copyright Copyright (C) Joshua Saxby 2016, 2017
  *
  * @copyright
  * This Source Code Form is subject to the terms of the Mozilla Public

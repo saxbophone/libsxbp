@@ -1,6 +1,6 @@
 # libsxbp ![libsxbp](libsxbp.png "libsxbp")
 
-[![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp)
+[![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp) [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [**[Documentation]**](http://saxbophone.github.io/libsxbp/)
 
 Experimental generation of 2D spiralling lines based on input binary data.
 
