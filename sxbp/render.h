@@ -46,7 +46,7 @@ typedef struct sxbp_bitmap_t {
      * @brief A 2-dimensional array of pixels.
      * @details false is black and true is white.
      */
-    bool ** pixels;
+    bool** pixels;
 } sxbp_bitmap_t;
 
 /**

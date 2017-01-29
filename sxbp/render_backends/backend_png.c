@@ -171,7 +171,7 @@ sxbp_status_t sxbp_render_backend_png(
     for(size_t y = 0 ; y < bitmap.height; y++) {
         for(size_t x = 0; x < bitmap.width; x++) {
             // set to black if there is a point here, white if not
-            row[x] = (bitmap.pixels[x][y] == true) ? 0 : 1;
+            row[x] = bitmap.pixels[x][y] ? 0 : 1;
         }
        png_write_row(png_ptr, row);
     }
