@@ -200,9 +200,9 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 <p>The lines of the spiral are plotted on a white background and the pixel data representing the resulting shape is written as data in a given image file format, using the callback function to achieve this conversion. The callback function should inspect the pixels of the bitmap passed to it and write the file data representing the bitmap in it's respective file format out to the buffer.</p>
 <p>The function signature of the callback is the same as that of the image rendering functions provided by the library: sxbp_render_backend_pbm and sxbp_render_backend_png. This allows one of these to be provided as the callback function, a convenient use of function chaining can achieve this like so: </p><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sxbp_render_spiral_image(spiral, buffer, sxbp_render_backend_pbm);</div></div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">spiral</td><td>The spiral which should be rendered. </td></tr>
-    <tr><td class="paramname">buffer</td><td>[out] The data buffer to which the bytes of the image file should be written. </td></tr>
-    <tr><td class="paramname">image_writer_callback</td><td>A function pointer with the following signature: <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sxbp_status_t callback_name(sxbp_bitmap_t image, sxbp_buffer_t* buffer)</div></div><!-- fragment --> </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">spiral</td><td>The spiral which should be rendered. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">buffer</td><td>The data buffer to which the bytes of the image file should be written. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">image_writer_callback</td><td>A function pointer with the following signature: <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;sxbp_status_t callback_name(sxbp_bitmap_t image, sxbp_buffer_t* buffer)</div></div><!-- fragment --> </td></tr>
   </table>
   </dd>
 </dl>
@@ -246,8 +246,8 @@ Any other valid value of the enumeration sxbp_status_t on error.</dd></dl>
 <p>The lines of the spiral are plotted on a white background and the pixel data representing the resulting shape is written to the given image.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">spiral</td><td>The spiral which should be rendered. </td></tr>
-    <tr><td class="paramname">image</td><td>The bitmap to write the pixel data out to. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">spiral</td><td>The spiral which should be rendered. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">image</td><td>The bitmap to write the pixel data out to. </td></tr>
   </table>
   </dd>
 </dl>

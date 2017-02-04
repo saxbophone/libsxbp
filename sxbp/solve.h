@@ -38,7 +38,7 @@ extern "C"{
  * collision, then backtrack and re-size the previous lines recursively until a
  * non-colliding conclusion can be found.
  *
- * @param spiral The spiral for which the line should be resized.
+ * @param[in, out] spiral The spiral for which the line should be resized.
  * @param index The index of the line to resize.
  * @param length The length to attempt to resize the line to.
  * @param perfection_threshold The maximum line length of colliding lines at
@@ -70,8 +70,8 @@ sxbp_status_t sxbp_resize_spiral(
  * another line. Once this function has finished, it may be possible to render
  * the spiral.
  *
- * @param spiral The spiral to solve. Function operates on the spiral in-place
- * (mutating operation).
+ * @param[in,out] spiral The spiral to solve. Function operates on the spiral
+ * in-place (mutating operation).
  * @param perfection_threshold The maximum line length of colliding lines at
  * which aggressive optimisations are allowed (or 0 to disable these
  * optimisations completely).

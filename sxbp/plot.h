@@ -61,7 +61,7 @@ size_t sxbp_sum_lines(sxbp_spiral_t spiral, size_t start, size_t end);
  * This is controlled by specifying which line to start at and which to end at.
  * 
  * @param spiral The spiral for which line co-ords should be calculated.
- * @param output [out] The co-ords array which calculated co-ords should be
+ * @param[out] output The co-ords array which calculated co-ords should be
  * written to.
  * @param start_point The x/y co-ordinates at which the line being plotted
  * originates at.
@@ -97,7 +97,7 @@ sxbp_status_t sxbp_spiral_points(
  * re-calculating these co-ords, provided the lengths of any of the spiral's
  * lines are not changed in the process.
  *
- * @param spiral The spiral for which co-ords should be cached.
+ * @param[in, out] spiral The spiral for which co-ords should be cached.
  * @param limit The highest index of line for which co-ords should be cached to.
  * @return SXBP_OPERATION_OK on success.
  * @return SXBP_MALLOC_REFUSED on memory allocation failure.

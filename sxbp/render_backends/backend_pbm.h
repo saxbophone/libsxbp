@@ -37,7 +37,7 @@ extern "C"{
  * @brief Renders a bitmap image to a PBM image.
  *
  * @param bitmap Bitmap containing the image to render.
- * @param buffer [out] Buffer to write out the PBM image data to.
+ * @param[out] buffer Buffer to write out the PBM image data to.
  * @return SXBP_OPERATION_OK on success.
  * @return SXBP_MALLOC_REFUSED on memory allocation failure.
  *

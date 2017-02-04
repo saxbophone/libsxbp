@@ -172,17 +172,17 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 <p>This function will solve a given spiral such that each line of the spiral has a length of at least 1 unit, and that none of these lines collide with one another. The algorithm operates recursively on the spiral to achieve this. A spiral at any point of completion may be passed to this function and the algorithm will solve just the parts which have yet to be solved if partial work has already been done to solve the spiral. A progress callback may optionally also be given to the function. If this is non-NULL, then this callback function will be called every time the algorithm finds the length of another line. Once this function has finished, it may be possible to render the spiral.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">spiral</td><td>The spiral to solve. Function operates on the spiral in-place (mutating operation). </td></tr>
-    <tr><td class="paramname">perfection_threshold</td><td>The maximum line length of colliding lines at which aggressive optimisations are allowed (or 0 to disable these optimisations completely). </td></tr>
-    <tr><td class="paramname">max_line</td><td>The index of the highest line to plot to. </td></tr>
-    <tr><td class="paramname">progress_callback</td><td>An optional function pointer to use as a callback which gets called every time a new line length is successfully found. The signature of the callback should be like so: <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;void callback_name(</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;    sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;    void* progress_callback_user_data</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;)</div></div><!-- fragment --> If a callback is not required, this argument should be NULL. The callback takes four arguments, where:<ul>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">spiral</td><td>The spiral to solve. Function operates on the spiral in-place (mutating operation). </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">perfection_threshold</td><td>The maximum line length of colliding lines at which aggressive optimisations are allowed (or 0 to disable these optimisations completely). </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">max_line</td><td>The index of the highest line to plot to. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">progress_callback</td><td>An optional function pointer to use as a callback which gets called every time a new line length is successfully found. The signature of the callback should be like so: <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;void callback_name(</div><div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;    sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,</div><div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;    void* progress_callback_user_data</div><div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;)</div></div><!-- fragment --> If a callback is not required, this argument should be NULL. The callback takes four arguments, where:<ul>
 <li>spiral is the spiral being solved</li>
 <li>latest_line is the index of the latest line to be solved</li>
 <li>target_line is the index of the highest line that will be solved</li>
 <li>progress_callback_user_data is a void pointer to some data of user-defined type. </li>
 </ul>
 </td></tr>
-    <tr><td class="paramname">progress_callback_user_data</td><td>An optional void pointer to a user-defined type, useful for passing context or state to the callback function if it needs to do something requiring file handles or some other context handle. This argument should be NULL if not required. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">progress_callback_user_data</td><td>An optional void pointer to a user-defined type, useful for passing context or state to the callback function if it needs to do something requiring file handles or some other context handle. This argument should be NULL if not required. </td></tr>
   </table>
   </dd>
 </dl>
@@ -239,10 +239,10 @@ Any other failure code on failure.</dd></dl>
 <p>If this cannot be done because the operation would cause a line collision, then backtrack and re-size the previous lines recursively until a non-colliding conclusion can be found.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">spiral</td><td>The spiral for which the line should be resized. </td></tr>
-    <tr><td class="paramname">index</td><td>The index of the line to resize. </td></tr>
-    <tr><td class="paramname">length</td><td>The length to attempt to resize the line to. </td></tr>
-    <tr><td class="paramname">perfection_threshold</td><td>The maximum line length of colliding lines at which aggressive optimisations are allowed (or 0 to disable these optimisations completely). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">spiral</td><td>The spiral for which the line should be resized. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">index</td><td>The index of the line to resize. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">length</td><td>The length to attempt to resize the line to. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">perfection_threshold</td><td>The maximum line length of colliding lines at which aggressive optimisations are allowed (or 0 to disable these optimisations completely). </td></tr>
   </table>
   </dd>
 </dl>
