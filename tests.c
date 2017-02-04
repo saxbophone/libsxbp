@@ -636,7 +636,7 @@ static bool test_sxbp_dump_spiral(void) {
 // test case's name. it will run the test case function and return the success
 // or failure status, which should be stored in the test suite status bool.
 static bool run_test_case(
-    bool test_suite_state, bool (*test_case_func)(), char* test_case_name
+    bool test_suite_state, bool(* test_case_func)(), char* test_case_name
 ) {
     printf("%s: ", test_case_name);
     fflush(stdout);

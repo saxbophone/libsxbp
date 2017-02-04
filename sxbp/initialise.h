@@ -62,7 +62,7 @@ sxbp_spiral_t sxbp_blank_spiral(void);
  *
  * @param buffer A buffer containing at least one byte of data, used to
  * determine the directions of the lines in the spiral it will create.
- * @param spiral [out] Spiral object which the line directions will be written
+ * @param[out] spiral Spiral object which the line directions will be written
  * to.
  * @return SXBP_OPERATION_OK on success.
  * @return SXBP_MALLOC_REFUSED on memory allocation failure.

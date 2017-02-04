@@ -157,8 +157,8 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v. 
 <p>If there are any outstanding co-ordinates which haven't been stored in the spiral's internal cache, then these will be calculated and stored in the cache. Subsequent identical calls will not incur the overhead of re-calculating these co-ords, provided the lengths of any of the spiral's lines are not changed in the process.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">spiral</td><td>The spiral for which co-ords should be cached. </td></tr>
-    <tr><td class="paramname">limit</td><td>The highest index of line for which co-ords should be cached to. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">spiral</td><td>The spiral for which co-ords should be cached. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">limit</td><td>The highest index of line for which co-ords should be cached to. </td></tr>
   </table>
   </dd>
 </dl>
@@ -219,11 +219,11 @@ SXBP_MALLOC_REFUSED on memory allocation failure.</dd></dl>
 <p>The whole spiral may be calculated, or just a given segment of it. This is controlled by specifying which line to start at and which to end at.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">spiral</td><td>The spiral for which line co-ords should be calculated. </td></tr>
-    <tr><td class="paramname">output</td><td>[out] The co-ords array which calculated co-ords should be written to. </td></tr>
-    <tr><td class="paramname">start_point</td><td>The x/y co-ordinates at which the line being plotted originates at. </td></tr>
-    <tr><td class="paramname">start</td><td>The index of the first line which makes up the segment which is being calculated. </td></tr>
-    <tr><td class="paramname">end</td><td>The index of the line after the last line which makes up the segment which is being calculated. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">spiral</td><td>The spiral for which line co-ords should be calculated. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The co-ords array which calculated co-ords should be written to. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">start_point</td><td>The x/y co-ordinates at which the line being plotted originates at. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">start</td><td>The index of the first line which makes up the segment which is being calculated. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">end</td><td>The index of the line after the last line which makes up the segment which is being calculated. </td></tr>
   </table>
   </dd>
 </dl>

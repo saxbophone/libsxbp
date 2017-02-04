@@ -46,7 +46,7 @@ typedef struct sxbp_bitmap_t {
      * @brief A 2-dimensional array of pixels.
      * @details false is black and true is white.
      */
-    bool ** pixels;
+    bool** pixels;
 } sxbp_bitmap_t;
 
 /**
@@ -55,7 +55,7 @@ typedef struct sxbp_bitmap_t {
  * pixel data representing the resulting shape is written to the given image.
  *
  * @param spiral The spiral which should be rendered.
- * @param image The bitmap to write the pixel data out to.
+ * @param[out] image The bitmap to write the pixel data out to.
  * @return SXBP_OPERATION_OK on success.
  * @return SXBP_MALLOC_REFUSED on memory allocation failure.
  *
@@ -86,7 +86,7 @@ sxbp_status_t sxbp_render_spiral_raw(
  * @endcode
  *
  * @param spiral The spiral which should be rendered.
- * @param buffer [out] The data buffer to which the bytes of the image file
+ * @param[out] buffer The data buffer to which the bytes of the image file
  * should be written.
  * @param image_writer_callback A function pointer with the following signature:
  * @code

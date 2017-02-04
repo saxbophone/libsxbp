@@ -68,7 +68,7 @@ extern const size_t SXBP_LINE_T_PACK_SIZE;
  * spiral with the data which represents this spiral (if input data is valid).
  *
  * @param buffer The data buffer to load the spiral from.
- * @param spiral [out] The spiral to write the spiral data to.
+ * @param[out] spiral The spiral to write the spiral data to.
  * @return For information on return values, see the documentation of the return
  * types.
  *
@@ -89,7 +89,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
  * which can then be stored in a file or sent across the network as required.
  *
  * @param spiral The spiral which should be serialised to buffer.
- * @param buffer [out] The data buffer to write out the spiral data to.
+ * @param[out] buffer The data buffer to write out the spiral data to.
  * @return For information on return values, see the documentation of the return
  * types.
  *

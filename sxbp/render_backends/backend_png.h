@@ -49,7 +49,7 @@ extern const bool SXBP_PNG_SUPPORT;
  * @brief Renders a bitmap image to a PNG image.
  *
  * @param bitmap Bitmap containing the image to render.
- * @param buffer [out] Buffer to write out the PBM image data to.
+ * @param[out] buffer Buffer to write out the PBM image data to.
  * @return SXBP_OPERATION_OK on success.
  * @return SXBP_NOT_IMPLEMENTED if PNG support has not been enabled.
  * @return SXBP_MALLOC_REFUSED on memory allocation failure.
