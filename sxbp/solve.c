@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
 #include "saxbospiral.h"
 #include "plot.h"
@@ -264,6 +265,15 @@ sxbp_status_t sxbp_plot_spiral(
 ) {
     // preconditional assertions
     assert(spiral->lines != NULL);
+    // get current time
+    time_t start_time = time(NULL);
+    // get original number of seconds spent
+    uint32_t seconds_spent_so_far = spiral->seconds_spent;
+    /*
+     * update accuracy of the seconds spent field
+     * (every run time makes it one second less accurate).
+     */
+    spiral->seconds_accuracy++;
     // set up result status
     sxbp_status_t result;
     // get index of highest line to plot
@@ -275,11 +285,21 @@ sxbp_status_t sxbp_plot_spiral(
         if(result != SXBP_OPERATION_OK) {
             return result;
         }
+        // update time spent solving
+        spiral->seconds_spent = (
+            // amount of time spent previously + time spent during this run time
+            seconds_spent_so_far + (uint32_t)difftime(time(NULL), start_time)
+        );
         // call callback if given
         if(progress_callback != NULL) {
             progress_callback(spiral, i, max_index, progress_callback_user_data);
         }
     }
+    // update time spent solving
+    spiral->seconds_spent = (
+        // amount of time spent previously + time spent during this run time
+        seconds_spent_so_far + (uint32_t)difftime(time(NULL), start_time)
+    );
     // all ok
     result = SXBP_OPERATION_OK;
     return result;

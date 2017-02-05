@@ -184,9 +184,6 @@ typedef struct sxbp_co_ord_cache_t {
  * spiral object may be produced from binary data, and a fully-complete spiral
  * may be produced from the partially complete one via the routines in the
  * library.
- * @note The solved_count and seconds_spent fields are currently unused by the
- * solver/generator code, but they are read to and written from files. They will
- * be used by the rest of the code in future versions.
  */
 typedef struct sxbp_spiral_t {
     /** @brief count of lines in the spiral */
@@ -205,16 +202,15 @@ typedef struct sxbp_spiral_t {
      * @private
      */
     uint32_t collider;
-    /**
-     * @brief the count of lines solved so far (index of next line to solve)
-     * @note Currently not used by solver/generator
-     */
+    /** @brief the count of lines solved so far (index of next line to solve) */
     uint32_t solved_count;
-    /**
-     * @brief count of seconds spent solving the spiral
-     * @note Currently not used by solver/generator
-     */
+    /** @brief count of seconds spent solving the spiral */
     uint32_t seconds_spent;
+    /**
+     * @brief stores the number of seconds' accuracy of the `seconds_spent`
+     * field
+     */
+    uint32_t seconds_accuracy;
 } sxbp_spiral_t;
 
 /** @brief A simple buffer type for storing arrays of bytes. */
