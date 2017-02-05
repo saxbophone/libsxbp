@@ -151,6 +151,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
     spiral->size = spiral_size;
     spiral->solved_count = load_uint32_t(&buffer, 14);
     spiral->seconds_spent = load_uint32_t(&buffer, 18);
+    spiral->seconds_accuracy = load_uint32_t(&buffer, 22);
     // allocate memory
     spiral->lines = calloc(sizeof(sxbp_line_t), spiral->size);
     // catch allocation error
@@ -211,6 +212,7 @@ sxbp_serialise_result_t sxbp_dump_spiral(
     dump_uint32_t(spiral.size, buffer, 10);
     dump_uint32_t(spiral.solved_count, buffer, 14);
     dump_uint32_t(spiral.seconds_spent, buffer, 18);
+    dump_uint32_t(spiral.seconds_accuracy, buffer, 22);
     // now write the data section
     for(size_t i = 0; i < spiral.size; i++) {
         /*

@@ -393,7 +393,10 @@ static bool test_sxbp_load_spiral(void) {
     }
     // build expected output struct
     sxbp_spiral_t expected = {
-        .size = 16, .solved_count = 5, .seconds_spent = 3125,
+        .size = 16,
+        .solved_count = 5,
+        .seconds_spent = 3125,
+        .seconds_accuracy = 1,
     };
     expected.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
@@ -418,6 +421,8 @@ static bool test_sxbp_load_spiral(void) {
     } else if(output.solved_count != expected.solved_count) {
         result = false;
     } else if(output.seconds_spent != expected.seconds_spent) {
+        result = false;
+    } else if(output.seconds_accuracy != expected.seconds_accuracy) {
         result = false;
     } else {
         // compare with expected struct
@@ -593,6 +598,7 @@ static bool test_sxbp_dump_spiral(void) {
         .size = 16,
         .solved_count = 5,
         .seconds_spent = 3125,
+        .seconds_accuracy = 1,
     };
     input.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
@@ -629,7 +635,7 @@ static bool test_sxbp_dump_spiral(void) {
         0, 0, 0, 16, // size
         0, 0, 0, 5, // solved count
         0, 0, 12, 53, // seconds spent
-        0, 0, 0, 0 // seconds accuracy - TODO: Change to something to test
+        0, 0, 0, 1 // seconds accuracy - TODO: Change to something to test
     );
     // construct expected data section
     uint8_t data[64] = {
