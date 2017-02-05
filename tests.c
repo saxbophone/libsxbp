@@ -27,6 +27,9 @@
 #include "sxbp/serialise.h"
 
 
+static const size_t EXPECTED_FILE_HEADER_SIZE = 26;
+
+
 static bool test_sxbp_change_direction(void) {
     if(sxbp_change_direction(SXBP_UP, SXBP_CLOCKWISE) != SXBP_RIGHT) {
         return false;
@@ -562,8 +565,9 @@ static bool test_sxbp_dump_spiral(void) {
     };
     input.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
-        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -573,16 +577,28 @@ static bool test_sxbp_dump_spiral(void) {
         input.lines[i].length = lengths[i];
     }
     // build buffer of bytes for expected output data
-    sxbp_buffer_t expected = { .size = 101, };
+    // size here is file header size + 16 lines' worth (4 bytes each)
+    sxbp_buffer_t expected = { .size = 26 + (4 * 16), };
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
         (char*)expected.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
-        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
-        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
-        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+        "sxbp" // magic number
+        "%c%c%c%c%c%c" // version major, minor, patch as 16-bit each
+        "%c%c%c%c" // total number of lines, 32-bit
+        "%c%c%c%c" // number of lines solved, 32-bit
+        "%c%c%c%c" // number of seconds spent solving, 32-bit
+        "%c%c%c%c", // number of seconds accuracy of solve time, 32-bit
+        (uint8_t)(LIB_SXBP_VERSION.major >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.major % 256),
+        (uint8_t)(LIB_SXBP_VERSION.minor >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.minor % 256),
+        (uint8_t)(LIB_SXBP_VERSION.patch >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.patch % 256),
+        0, 0, 0, 16, // size
+        0, 0, 0, 5, // solved count
+        0, 0, 12, 53, // seconds spent
+        0, 0, 0, 1 // seconds accuracy
     );
     // construct expected data section
     uint8_t data[64] = {
@@ -605,7 +621,7 @@ static bool test_sxbp_dump_spiral(void) {
     };
     // write data to expected buffer
     for(size_t i = 0; i < 64; i++) {
-        expected.bytes[i + SXBP_FILE_HEADER_SIZE] = data[i];
+        expected.bytes[i + EXPECTED_FILE_HEADER_SIZE] = data[i];
     }
 
     // call dump_spiral with spiral and write to output buffer
