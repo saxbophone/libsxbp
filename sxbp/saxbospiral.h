@@ -38,11 +38,11 @@ extern "C"{
  */
 typedef struct sxbp_version_t {
     /** @brief The major version number of the version */
-    uint8_t major;
+    uint16_t major;
     /** @brief The minor version number of the version */
-    uint8_t minor;
+    uint16_t minor;
     /** @brief The patch version number of the version */
-    uint8_t patch;
+    uint16_t patch;
     /** @brief String form of the version (vX.Y.Z) */
     const char* string;
 } sxbp_version_t;
@@ -51,19 +51,31 @@ typedef struct sxbp_version_t {
 extern const sxbp_version_t LIB_SXBP_VERSION;
 
 /**
- * @brief Used for indexing and comparing different versions in order.
- * @details Versions that are behind a given version will compare as less than
- * that version. Versions that are ahead will compare as greater than.
+ * @brief Checks if a version is less than another.
+ * @details Checks if version a is considered 'less than' version b.
+ * @param a The version on the left-hand side of this comparison.
+ * @param b The version on the right-hand side of this comparison.
+ * @return true or false telling if this condition is satisfied or not.
  */
-typedef uint32_t sxbp_version_hash_t;
+bool sxbp_version_less_than(sxbp_version_t a, sxbp_version_t b);
 
 /**
- * @brief Computes a comparison value for a given version.
- *
- * @param version The version to be computed.
- * @return A scalar value which can be used to order or index any two versions.
+ * @brief Checks if a version is greater than another.
+ * @details Checks if version a is considered 'greater than' version b.
+ * @param a The version on the left-hand side of this comparison.
+ * @param b The version on the right-hand side of this comparison.
+ * @return true or false telling if this condition is satisfied or not.
  */
-sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version);
+bool sxbp_version_greater_than(sxbp_version_t a, sxbp_version_t b);
+
+/**
+ * @brief Checks if a version is equal to another.
+ * @details Checks if version a is considered 'equal to' version b.
+ * @param a The version on the left-hand side of this comparison.
+ * @param b The version on the right-hand side of this comparison.
+ * @return true or false telling if this condition is satisfied or not.
+ */
+bool sxbp_version_equal_to(sxbp_version_t a, sxbp_version_t b);
 
 /**
  * @brief Represents the success or failure status of an executed function.
