@@ -39,13 +39,14 @@ set(
 set(LIBSXBP_ESCAPED_VERSION_STRING "\"${LIBSXBP_VERSION_STRING}\"")
 # end basic metadata
 
-# this is a 64-bit project, so check now to make sure we're 64-bit, issue warning if not
-if(CMAKE_SIZEOF_VOID_P LESS 8)
+# must be running on an architecture of at least 32 bits
+if(CMAKE_SIZEOF_VOID_P LESS 4)
     message(
         WARNING
-        "[sxbp] It looks like this system's architecture is not at least 64-bit.\n"
-        "libsxbp requires a system with an architecture of at least 64 bits!\n"
-        "We'll continue trying to compile anyway, be sure to run the unit tests after."
+        "[sxbp] It looks like this system's architecture is not at least 32-bit.\n"
+        "       libsxbp requires a system with an architecture of at least 32 bits!\n"
+        "       We'll continue trying to compile anyway, but may fail.\n"
+        "       Be sure to run the unit tests after!"
     )
 endif()
 
