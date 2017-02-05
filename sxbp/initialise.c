@@ -38,6 +38,7 @@ sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {
     sxbp_status_t result;
     // number of lines is number of bits of the data, + 1 for the first UP line
     size_t line_count = (buffer.size * 8) + 1;
+    // TODO: Check here for overflow condition
     // populate spiral struct
     spiral->size = line_count;
     spiral->collides = -1;

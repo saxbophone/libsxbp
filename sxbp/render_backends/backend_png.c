@@ -147,7 +147,7 @@ sxbp_status_t sxbp_render_backend_png(
     metadata[4].key = "Comment";
     metadata[4].text = "https://github.com/saxbophone/libsxbp";
     // set compression of each metadata key
-    for(size_t i = 0; i < 5; i++) {
+    for(uint8_t i = 0; i < 5; i++) {
         metadata[i].compression = PNG_TEXT_COMPRESSION_NONE;
     }
     // write metadata
