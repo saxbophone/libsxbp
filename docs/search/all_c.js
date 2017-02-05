@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['width',['width',['../structsxbp__bitmap__t.html#a9ef2620156cf0734aa79c73935a0d30c',1,'sxbp_bitmap_t']]]
+  ['width',['width',['../structsxbp__bitmap__t.html#a3c283355adf6b6e5fc473fe028153cba',1,'sxbp_bitmap_t']]]
 ];

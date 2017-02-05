@@ -13,9 +13,8 @@ var searchData=
   ['sxbp_5fserialise_5fresult_5ft',['sxbp_serialise_result_t',['../serialise_8h.html#a0a0d04a6e276bfe1908f623667985948',1,'serialise.h']]],
   ['sxbp_5fspiral_5ft',['sxbp_spiral_t',['../saxbospiral_8h.html#a1e5df2ba7fe55de1dc3b1f6ab9b815ef',1,'saxbospiral.h']]],
   ['sxbp_5fstatus_5ft',['sxbp_status_t',['../saxbospiral_8h.html#ae60c9139adc5fa3d67c50693051418aa',1,'saxbospiral.h']]],
-  ['sxbp_5ftuple_5fitem_5ft',['sxbp_tuple_item_t',['../saxbospiral_8h.html#a7f529bc74cfe2f8e427b3f4cb9b71ed5',1,'saxbospiral.h']]],
+  ['sxbp_5ftuple_5fitem_5ft',['sxbp_tuple_item_t',['../saxbospiral_8h.html#a52bc139e9281a4673cd0496f0a264e16',1,'saxbospiral.h']]],
   ['sxbp_5ftuple_5ft',['sxbp_tuple_t',['../saxbospiral_8h.html#af2877fac80ac7a2bbd27a2df8a98410d',1,'saxbospiral.h']]],
   ['sxbp_5fvector_5ft',['sxbp_vector_t',['../saxbospiral_8h.html#add2026634687b6c0ec88a14542ea28c1',1,'saxbospiral.h']]],
-  ['sxbp_5fversion_5fhash_5ft',['sxbp_version_hash_t',['../saxbospiral_8h.html#aa692e8390c7a9f174eaba846621792dc',1,'saxbospiral.h']]],
   ['sxbp_5fversion_5ft',['sxbp_version_t',['../saxbospiral_8h.html#a9dee23993bdb03f2c2f5b9406e4fde98',1,'saxbospiral.h']]]
 ];

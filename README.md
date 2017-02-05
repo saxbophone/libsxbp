@@ -22,8 +22,6 @@ Although this project doesn't work in sprints, there is a [*sprint board*](https
 
 ## Please Note
 
-- This software only works on systems capable of running 64-bit code.
-
 - This is a library only. If you're looking for something that is immediately usable for the end-user, you probably want to look at [sxbp](https://github.com/saxbophone/sxbp) instead, which is a command-line program I wrote which uses libsxbp to render input binary files to PNG images.
 
 - As libsxbp is currently at major version 0, expect the library API to be unstable. I will endeavour as much as possible to make sure breaking changes increment the minor version number whilst in the version 0.x.x series and bugfixes increment the patch version number, but no heavy reliance should be placed on this.
