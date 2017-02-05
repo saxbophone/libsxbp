@@ -124,14 +124,14 @@ sxbp_serialise_result_t sxbp_load_spiral(
     }
     // grab file version from header
     sxbp_version_t buffer_version = {
-        .major = (uint8_t)load_uint16_t(&buffer, 4),
-        .minor = (uint8_t)load_uint16_t(&buffer, 6),
-        .patch = (uint8_t)load_uint16_t(&buffer, 8),
+        .major = load_uint16_t(&buffer, 4),
+        .minor = load_uint16_t(&buffer, 6),
+        .patch = load_uint16_t(&buffer, 8),
     };
     // we don't accept anything less than v0.25.0, so the min is v0.25.0
     sxbp_version_t min_version = { .major = 0, .minor = 25, .patch = 0, };
     // check for version compatibility
-    if(sxbp_version_hash(buffer_version) < sxbp_version_hash(min_version)) {
+    if(sxbp_version_less_than(buffer_version, min_version)) {
         // check failed
         result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_VERSION; // failure reason
