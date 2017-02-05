@@ -119,7 +119,7 @@ sxbp_status_t sxbp_render_spiral_raw(
         // get current direction
         sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[spiral.lines[i].direction];
         // make as many jumps in this direction as this lines length
-        for(uint64_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
+        for(uint32_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
             sxbp_tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
             sxbp_tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;

@@ -25,8 +25,36 @@ const sxbp_version_t LIB_SXBP_VERSION = {
     .string = LIBSXBP_VERSION_STRING,
 };
 
-sxbp_version_hash_t sxbp_version_hash(sxbp_version_t version) {
-    return (version.major * 65536) + (version.minor * 256) + version.patch;
+bool sxbp_version_less_than(sxbp_version_t a, sxbp_version_t b) {
+    if(a.major < b.major) {
+        return true;
+    }
+    if((a.major == b.major) && (a.minor < b.minor)) {
+        return true;
+    }
+    if ((a.major == b.major) && (a.minor == b.minor) && (a.patch < b.patch)) {
+        return true;
+    }
+    return false;
+}
+
+bool sxbp_version_greater_than(sxbp_version_t a, sxbp_version_t b) {
+    if(a.major > b.major) {
+        return true;
+    }
+    if((a.major == b.major) && (a.minor > b.minor)) {
+        return true;
+    }
+    if ((a.major == b.major) && (a.minor == b.minor) && (a.patch > b.patch)) {
+        return true;
+    }
+    return false;
+}
+
+bool sxbp_version_equal_to(sxbp_version_t a, sxbp_version_t b) {
+    return (
+        (a.major == b.major) && (a.minor == b.minor) && (a.patch == b.patch)
+    );
 }
 
 // vector direction constants
