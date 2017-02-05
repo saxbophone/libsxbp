@@ -138,7 +138,7 @@ sxbp_serialise_result_t sxbp_load_spiral(
         return result;
     }
     // get size of spiral object contained in buffer
-    uint64_t spiral_size = load_uint32_t(&buffer, 10);
+    uint32_t spiral_size = load_uint32_t(&buffer, 10);
     // Check that the file data section is large enough for the spiral size
     if((buffer.size - SXBP_FILE_HEADER_SIZE) != (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed

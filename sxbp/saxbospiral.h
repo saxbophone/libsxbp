@@ -136,7 +136,7 @@ typedef struct sxbp_line_t {
 } sxbp_line_t;
 
 /** @brief Type for storing one of the items of a tuple. */
-typedef int64_t sxbp_tuple_item_t;
+typedef int32_t sxbp_tuple_item_t;
 
 /**
  * @brief A generic Tuple type for storing a vector-based quantity.
@@ -190,7 +190,7 @@ typedef struct sxbp_co_ord_cache_t {
  */
 typedef struct sxbp_spiral_t {
     /** @brief count of lines in the spiral */
-    uint64_t size;
+    uint32_t size;
     /** @brief dynamic array of lines in the spiral */
     sxbp_line_t* lines;
     /**
@@ -204,12 +204,12 @@ typedef struct sxbp_spiral_t {
      * @brief the index of the line causing collision, if any
      * @private
      */
-    uint64_t collider;
+    uint32_t collider;
     /**
      * @brief the count of lines solved so far (index of next line to solve)
      * @note Currently not used by solver/generator
      */
-    uint64_t solved_count;
+    uint32_t solved_count;
     /**
      * @brief count of seconds spent solving the spiral
      * @note Currently not used by solver/generator

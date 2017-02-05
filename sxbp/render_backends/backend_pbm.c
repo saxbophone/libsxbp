@@ -34,15 +34,15 @@ sxbp_status_t sxbp_render_backend_pbm(
     assert(buffer->bytes == NULL);
     /*
      * allocate two char arrays for the width and height strings - these may be
-     * up to 19 characters each (max uint64_t is 19 digits long), so allocate 2
-     * char arrays of 20 chars each (1 extra char for null-terminator)
+     * up to 10 characters each (max uint32_t is 10 digits long), so allocate 2
+     * char arrays of 11 chars each (1 extra char for null-terminator)
      */
-    char width_string[20], height_string[20];
+    char width_string[11], height_string[11];
     // these are used to keep track of how many digits each is
     int width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, store lengths
-    width_string_length = sprintf(width_string, "%" PRIu64, bitmap.width);
-    height_string_length = sprintf(height_string, "%" PRIu64, bitmap.height);
+    width_string_length = sprintf(width_string, "%" PRIu32, bitmap.width);
+    height_string_length = sprintf(height_string, "%" PRIu32, bitmap.height);
     /*
      * now that we know the length of the image dimension strings, we can now
      * calculate how much memory we'll have to allocate for the image buffer
