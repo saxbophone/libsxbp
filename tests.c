@@ -298,7 +298,7 @@ static bool test_sxbp_plot_spiral_partial(void) {
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 // test callback for next test case
 static void test_progress_callback(
-    sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+    sxbp_spiral_t* spiral, uint32_t latest_line, uint32_t target_line,
     void* progress_callback_user_data
 ) {
     // cast user data from void pointer to uint16_t pointer, deref and multiply

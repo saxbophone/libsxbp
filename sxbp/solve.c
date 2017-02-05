@@ -51,13 +51,13 @@ static bool spiral_collides(sxbp_spiral_t* spiral, size_t index) {
         return false;
     } else {
         // initialise a counter to keep track of what line we're on
-        uint64_t line_count = 0;
-        uint64_t ttl = spiral->lines[line_count].length + 1; // ttl of line
+        uint32_t line_count = 0;
+        uint32_t ttl = spiral->lines[line_count].length + 1; // ttl of line
         size_t last_co_ord = spiral->co_ord_cache.co_ords.size;
         sxbp_line_t last_line = spiral->lines[index];
-        uint64_t start_of_last_line = (last_co_ord - last_line.length) - 1;
+        uint32_t start_of_last_line = (last_co_ord - last_line.length) - 1;
         // check the co-ords of the last line segment against all the others
-        for(uint64_t i = 0; i < start_of_last_line; i++) {
+        for(uint32_t i = 0; i < start_of_last_line; i++) {
             for(size_t j = start_of_last_line; j < last_co_ord; j++) {
                 if(
                     (
@@ -192,7 +192,7 @@ static sxbp_length_t suggest_resize(
 }
 
 sxbp_status_t sxbp_resize_spiral(
-    sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
+    sxbp_spiral_t* spiral, uint32_t index, sxbp_length_t length,
     sxbp_length_t perfection_threshold
 ) {
     // preconditional assertions
@@ -255,9 +255,9 @@ sxbp_status_t sxbp_resize_spiral(
 }
 
 sxbp_status_t sxbp_plot_spiral(
-    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint64_t max_line,
+    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint32_t max_line,
     void(* progress_callback)(
-        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+        sxbp_spiral_t* spiral, uint32_t latest_line, uint32_t target_line,
         void* progress_callback_user_data
     ),
     void* progress_callback_user_data
@@ -267,7 +267,7 @@ sxbp_status_t sxbp_plot_spiral(
     // set up result status
     sxbp_status_t result;
     // get index of highest line to plot
-    uint64_t max_index = (max_line > spiral->size) ? spiral->size : max_line;
+    uint32_t max_index = (max_line > spiral->size) ? spiral->size : max_line;
     // calculate the length of each line within range solved_count -> max_index
     for(size_t i = spiral->solved_count; i < max_index; i++) {
         result = sxbp_resize_spiral(spiral, i, 1, perfection_threshold);
