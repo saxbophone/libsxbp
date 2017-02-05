@@ -629,7 +629,7 @@ static bool test_sxbp_dump_spiral(void) {
         0, 0, 0, 16, // size
         0, 0, 0, 5, // solved count
         0, 0, 12, 53, // seconds spent
-        0, 0, 0, 1 // seconds accuracy
+        0, 0, 0, 0 // seconds accuracy - TODO: Change to something to test
     );
     // construct expected data section
     uint8_t data[64] = {
