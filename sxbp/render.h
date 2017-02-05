@@ -39,9 +39,9 @@ extern "C"{
  */
 typedef struct sxbp_bitmap_t {
     /** @brief The width of the bitmap in pixels */
-    uint64_t width;
+    uint32_t width;
     /** @brief The height of the bitmap in pixels */
-    uint64_t height;
+    uint32_t height;
     /**
      * @brief A 2-dimensional array of pixels.
      * @details false is black and true is white.

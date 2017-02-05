@@ -22,9 +22,10 @@
 <table cellspacing="0" cellpadding="0">
  <tbody>
  <tr style="height: 56px;">
+  <td id="projectlogo"><img alt="Logo" src="libsxbp.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">libsxbp
-   &#160;<span id="projectnumber">v0.25</span>
+   &#160;<span id="projectnumber">v0.26</span>
    </div>
    <div id="projectbrief">Experimental generation of 2D spiralling lines based on input binary data.</div>
   </td>
@@ -106,10 +107,10 @@ Collaboration diagram for sxbp_spiral_t:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
-<tr class="memitem:a5e217e833efd775e3f5f594bc2724455"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5e217e833efd775e3f5f594bc2724455"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a5e217e833efd775e3f5f594bc2724455">size</a></td></tr>
-<tr class="memdesc:a5e217e833efd775e3f5f594bc2724455"><td class="mdescLeft">&#160;</td><td class="mdescRight">count of lines in the spiral <br /></td></tr>
-<tr class="separator:a5e217e833efd775e3f5f594bc2724455"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad67045703a797152a0eae6de49dda64c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad67045703a797152a0eae6de49dda64c"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#ad67045703a797152a0eae6de49dda64c">size</a></td></tr>
+<tr class="memdesc:ad67045703a797152a0eae6de49dda64c"><td class="mdescLeft">&#160;</td><td class="mdescRight">count of lines in the spiral <br /></td></tr>
+<tr class="separator:ad67045703a797152a0eae6de49dda64c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cb686c1a2d9af5e77a8401b48b9530b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0cb686c1a2d9af5e77a8401b48b9530b"></a>
 <a class="el" href="structsxbp__line__t.html">sxbp_line_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a0cb686c1a2d9af5e77a8401b48b9530b">lines</a></td></tr>
 <tr class="memdesc:a0cb686c1a2d9af5e77a8401b48b9530b"><td class="mdescLeft">&#160;</td><td class="mdescRight">dynamic array of lines in the spiral <br /></td></tr>
@@ -118,48 +119,23 @@ uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#ac25529f99fcdf7da131aed763af263d2">collides</a></td></tr>
 <tr class="memdesc:ac25529f99fcdf7da131aed763af263d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">whether this spiral collides or not <br /></td></tr>
 <tr class="separator:ac25529f99fcdf7da131aed763af263d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d79ebfea0fc03b4a48b364bd5585809"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a3d79ebfea0fc03b4a48b364bd5585809">solved_count</a></td></tr>
-<tr class="memdesc:a3d79ebfea0fc03b4a48b364bd5585809"><td class="mdescLeft">&#160;</td><td class="mdescRight">the count of lines solved so far (index of next line to solve)  <a href="#a3d79ebfea0fc03b4a48b364bd5585809">More...</a><br /></td></tr>
-<tr class="separator:a3d79ebfea0fc03b4a48b364bd5585809"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae68a77ca9421a76ee2a8880b1747a090"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#ae68a77ca9421a76ee2a8880b1747a090">seconds_spent</a></td></tr>
-<tr class="memdesc:ae68a77ca9421a76ee2a8880b1747a090"><td class="mdescLeft">&#160;</td><td class="mdescRight">count of seconds spent solving the spiral  <a href="#ae68a77ca9421a76ee2a8880b1747a090">More...</a><br /></td></tr>
+<tr class="memitem:a6d6c6ee0a1a53d75b3568f144e1dd726"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6d6c6ee0a1a53d75b3568f144e1dd726"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a6d6c6ee0a1a53d75b3568f144e1dd726">solved_count</a></td></tr>
+<tr class="memdesc:a6d6c6ee0a1a53d75b3568f144e1dd726"><td class="mdescLeft">&#160;</td><td class="mdescRight">the count of lines solved so far (index of next line to solve) <br /></td></tr>
+<tr class="separator:a6d6c6ee0a1a53d75b3568f144e1dd726"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae68a77ca9421a76ee2a8880b1747a090"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae68a77ca9421a76ee2a8880b1747a090"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#ae68a77ca9421a76ee2a8880b1747a090">seconds_spent</a></td></tr>
+<tr class="memdesc:ae68a77ca9421a76ee2a8880b1747a090"><td class="mdescLeft">&#160;</td><td class="mdescRight">count of seconds spent solving the spiral <br /></td></tr>
 <tr class="separator:ae68a77ca9421a76ee2a8880b1747a090"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cc77db86769a704a5e8582cd78f1de0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6cc77db86769a704a5e8582cd78f1de0"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a6cc77db86769a704a5e8582cd78f1de0">seconds_accuracy</a></td></tr>
+<tr class="memdesc:a6cc77db86769a704a5e8582cd78f1de0"><td class="mdescLeft">&#160;</td><td class="mdescRight">stores the number of seconds' accuracy of the <code>seconds_spent</code> field <br /></td></tr>
+<tr class="separator:a6cc77db86769a704a5e8582cd78f1de0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Struct type representing a Spiral figure, in any state of completion. </p>
-<p>This is the most important data type in the whole library, and is passed to and from many different library functions. A partially-complete spiral object may be produced from binary data, and a fully-complete spiral may be produced from the partially complete one via the routines in the library. </p><dl class="section note"><dt>Note</dt><dd>The solved_count and seconds_spent fields are currently unused by the solver/generator code, but they are read to and written from files. They will be used by the rest of the code in future versions. </dd></dl>
-</div><h2 class="groupheader">Field Documentation</h2>
-<a class="anchor" id="ae68a77ca9421a76ee2a8880b1747a090"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t sxbp_spiral_t::seconds_spent</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>count of seconds spent solving the spiral </p>
-<dl class="section note"><dt>Note</dt><dd>Currently not used by solver/generator </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a3d79ebfea0fc03b4a48b364bd5585809"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint64_t sxbp_spiral_t::solved_count</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>the count of lines solved so far (index of next line to solve) </p>
-<dl class="section note"><dt>Note</dt><dd>Currently not used by solver/generator </dd></dl>
-
-</div>
-</div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<p>This is the most important data type in the whole library, and is passed to and from many different library functions. A partially-complete spiral object may be produced from binary data, and a fully-complete spiral may be produced from the partially complete one via the routines in the library. </p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>sxbp/<a class="el" href="saxbospiral_8h_source.html">saxbospiral.h</a></li>
 </ul>
 </div><!-- contents -->

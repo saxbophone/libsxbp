@@ -23,23 +23,49 @@ extern "C"{
 #endif
 
 // constants related to how spiral data is packed in files - measured in bytes
-const size_t SXBP_FILE_HEADER_SIZE = 37;
+const size_t SXBP_FILE_HEADER_SIZE = (
+    4 + // 'sxbp' file magic number
+    6 + // file version, 3x 16-bit uints
+    4 + // total number of lines, 32 bit uint
+    4 + // number of lines solved, 32 bit uint
+    4 + // number of seconds spent solving, 32 bit uint
+    4 // number of seconds accuracy of solve time, 32 bit uint
+);
 const size_t SXBP_LINE_T_PACK_SIZE = 4;
 
 /*
- * loads a 64-bit unsigned integer from buffer starting at given index
+ * NOTE: The following load_x and dump_x functions all use big-endian
+ * representation in their serialised forms.
+ */
+
+/*
+ * loads a 16-bit unsigned integer from buffer starting at given index
  *
  * Asserts:
  * - That buffer->bytes is not NULL
  */
-static uint64_t load_uint64_t(sxbp_buffer_t* buffer, size_t start_index) {
+static uint16_t load_uint16_t(sxbp_buffer_t* buffer, size_t start_index) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
-    uint64_t value = 0;
-    for(uint8_t i = 0; i < 8; i++) {
-        value |= (buffer->bytes[start_index + i]) << (8 * (7 - i));
-    }
-    return value;
+    return (
+        ((uint16_t)buffer->bytes[start_index] << 8)
+        + (buffer->bytes[start_index + 1])
+    );
+}
+
+/*
+ * dumps a 16-bit unsigned integer of value to buffer at given index
+ *
+ * Asserts:
+ * - That buffer->bytes is not NULL
+ */
+static void dump_uint16_t(
+    uint16_t value, sxbp_buffer_t* buffer, size_t start_index
+) {
+    // preconditional assertions
+    assert(buffer->bytes != NULL);
+    buffer->bytes[start_index] = (uint8_t)(value >> 8);
+    buffer->bytes[start_index + 1] = (uint8_t)(value % 256);
 }
 
 /*
@@ -56,25 +82,6 @@ static uint32_t load_uint32_t(sxbp_buffer_t* buffer, size_t start_index) {
         value |= (buffer->bytes[start_index + i]) << (8 * (3 - i));
     }
     return value;
-}
-
-/*
- * dumps a 64-bit unsigned integer of value to buffer at given index
- *
- * Asserts:
- * - That buffer->bytes is not NULL
- */
-static void dump_uint64_t(
-    uint64_t value, sxbp_buffer_t* buffer, size_t start_index
-) {
-    // preconditional assertions
-    assert(buffer->bytes != NULL);
-    for(uint8_t i = 0; i < 8; i++) {
-        uint8_t shift = (8 * (7 - i));
-        buffer->bytes[start_index + i] = (uint8_t)(
-            (value & (0xffUL << shift)) >> shift
-        );
-    }
 }
 
 /*
@@ -110,28 +117,28 @@ sxbp_serialise_result_t sxbp_load_spiral(
         return result;
     }
     // check for magic number and return early if not right
-    if(strncmp((char*)buffer.bytes, "SAXBOSPIRAL", 11) != 0) {
+    if(strncmp((char*)buffer.bytes, "sxbp", 4) != 0) {
         result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_MAGIC_NUMBER; // failure reason
         return result;
     }
     // grab file version from header
     sxbp_version_t buffer_version = {
-        .major = buffer.bytes[12],
-        .minor = buffer.bytes[13],
-        .patch = buffer.bytes[14],
+        .major = load_uint16_t(&buffer, 4),
+        .minor = load_uint16_t(&buffer, 6),
+        .patch = load_uint16_t(&buffer, 8),
     };
-    // we don't accept anything less than v0.13.0, so the min is v0.13.0
-    sxbp_version_t min_version = { .major = 0, .minor = 13, .patch = 0, };
+    // we don't accept anything less than v0.25.0, so the min is v0.25.0
+    sxbp_version_t min_version = { .major = 0, .minor = 25, .patch = 0, };
     // check for version compatibility
-    if(sxbp_version_hash(buffer_version) < sxbp_version_hash(min_version)) {
+    if(sxbp_version_less_than(buffer_version, min_version)) {
         // check failed
         result.status = SXBP_OPERATION_FAIL; // flag failure
         result.diagnostic = SXBP_DESERIALISE_BAD_VERSION; // failure reason
         return result;
     }
     // get size of spiral object contained in buffer
-    uint64_t spiral_size = load_uint64_t(&buffer, 16);
+    uint32_t spiral_size = load_uint32_t(&buffer, 10);
     // Check that the file data section is large enough for the spiral size
     if((buffer.size - SXBP_FILE_HEADER_SIZE) != (SXBP_LINE_T_PACK_SIZE * spiral_size)) {
         // this check failed
@@ -142,8 +149,9 @@ sxbp_serialise_result_t sxbp_load_spiral(
     // good to go
     // populate spiral struct, loading some more values
     spiral->size = spiral_size;
-    spiral->solved_count = load_uint64_t(&buffer, 24);
-    spiral->seconds_spent = load_uint32_t(&buffer, 32);
+    spiral->solved_count = load_uint32_t(&buffer, 14);
+    spiral->seconds_spent = load_uint32_t(&buffer, 18);
+    spiral->seconds_accuracy = load_uint32_t(&buffer, 22);
     // allocate memory
     spiral->lines = calloc(sizeof(sxbp_line_t), spiral->size);
     // catch allocation error
@@ -194,17 +202,17 @@ sxbp_serialise_result_t sxbp_dump_spiral(
         result.status = SXBP_MALLOC_REFUSED;
         return result;
     }
-    // write first part of data header (magic number and version info)
-    sprintf(
-        (char*)buffer->bytes, "SAXBOSPIRAL\n%c%c%c\n",
-        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch
-    );
-    // write second part of data header (size, solved count and seconds fields)
-    dump_uint64_t(spiral.size, buffer, 16);
-    dump_uint64_t(spiral.solved_count, buffer, 24);
-    dump_uint32_t(spiral.seconds_spent, buffer, 32);
-    // write final newline at end of header
-    buffer->bytes[SXBP_FILE_HEADER_SIZE - 1] = '\n';
+    // write magic number to buffer
+    sprintf((char*)buffer->bytes, "sxbp");
+    // write out version info to buffer
+    dump_uint16_t(LIB_SXBP_VERSION.major, buffer, 4);
+    dump_uint16_t(LIB_SXBP_VERSION.minor, buffer, 6);
+    dump_uint16_t(LIB_SXBP_VERSION.patch, buffer, 8);
+    // write second part of data header
+    dump_uint32_t(spiral.size, buffer, 10);
+    dump_uint32_t(spiral.solved_count, buffer, 14);
+    dump_uint32_t(spiral.seconds_spent, buffer, 18);
+    dump_uint32_t(spiral.seconds_accuracy, buffer, 22);
     // now write the data section
     for(size_t i = 0; i < spiral.size; i++) {
         /*

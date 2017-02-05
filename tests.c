@@ -27,6 +27,9 @@
 #include "sxbp/serialise.h"
 
 
+static const size_t EXPECTED_FILE_HEADER_SIZE = 26;
+
+
 static bool test_sxbp_change_direction(void) {
     if(sxbp_change_direction(SXBP_UP, SXBP_CLOCKWISE) != SXBP_RIGHT) {
         return false;
@@ -295,7 +298,7 @@ static bool test_sxbp_plot_spiral_partial(void) {
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 // test callback for next test case
 static void test_progress_callback(
-    sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+    sxbp_spiral_t* spiral, uint32_t latest_line, uint32_t target_line,
     void* progress_callback_user_data
 ) {
     // cast user data from void pointer to uint16_t pointer, deref and multiply
@@ -343,16 +346,27 @@ static bool test_sxbp_load_spiral(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    sxbp_buffer_t buffer = { .size = 101, };
+    sxbp_buffer_t buffer = { .size = 26 + (16 * 4), };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     sprintf(
         (char*)buffer.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
-        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
-        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
-        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+        "sxbp" // magic number
+        "%c%c%c%c%c%c" // version major, minor, patch as 16-bit each
+        "%c%c%c%c" // total number of lines, 32-bit
+        "%c%c%c%c" // number of lines solved, 32-bit
+        "%c%c%c%c" // number of seconds spent solving, 32-bit
+        "%c%c%c%c", // number of seconds accuracy of solve time, 32-bit
+        (uint8_t)(LIB_SXBP_VERSION.major >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.major % 256),
+        (uint8_t)(LIB_SXBP_VERSION.minor >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.minor % 256),
+        (uint8_t)(LIB_SXBP_VERSION.patch >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.patch % 256),
+        0, 0, 0, 16, // size
+        0, 0, 0, 5, // solved count
+        0, 0, 12, 53, // seconds spent
+        0, 0, 0, 1 // seconds accuracy
     );
     // construct data section - each line of the array is one line of the spiral
     uint8_t data[64] = {
@@ -375,16 +389,20 @@ static bool test_sxbp_load_spiral(void) {
     };
     // write data to buffer
     for(size_t i = 0; i < 64; i++) {
-        buffer.bytes[i + SXBP_FILE_HEADER_SIZE] = data[i];
+        buffer.bytes[EXPECTED_FILE_HEADER_SIZE + i] = data[i];
     }
     // build expected output struct
     sxbp_spiral_t expected = {
-        .size = 16, .solved_count = 5, .seconds_spent = 3125,
+        .size = 16,
+        .solved_count = 5,
+        .seconds_spent = 3125,
+        .seconds_accuracy = 1,
     };
     expected.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
-        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -403,6 +421,8 @@ static bool test_sxbp_load_spiral(void) {
     } else if(output.solved_count != expected.solved_count) {
         result = false;
     } else if(output.seconds_spent != expected.seconds_spent) {
+        result = false;
+    } else if(output.seconds_accuracy != expected.seconds_accuracy) {
         result = false;
     } else {
         // compare with expected struct
@@ -431,7 +451,7 @@ static bool test_sxbp_load_spiral_rejects_missing_magic_number(void) {
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
     buffer.bytes = (uint8_t*)(
-        "not the header you were looking for eh? I think not surely?"
+        "SAXBOSPIRAL....NOT WHAT YOU WERE LOOKING FOR WAS IT????????"
     );
 
     // call load_spiral with buffer and blank spiral, store result
@@ -452,10 +472,10 @@ static bool test_sxbp_load_spiral_rejects_too_small_for_header(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data - should be smaller than 26
-    sxbp_buffer_t buffer = { .size = 12, };
+    sxbp_buffer_t buffer = { .size = 4, };
     buffer.bytes = calloc(1, buffer.size);
     // construct data header
-    buffer.bytes = (uint8_t*)"SAXBOSPIRAL";
+    buffer.bytes = (uint8_t*)"sxbp";
 
     // call load_spiral with buffer and blank spiral, store result
     sxbp_spiral_t output = sxbp_blank_spiral();
@@ -475,16 +495,27 @@ static bool test_sxbp_load_spiral_rejects_too_small_data_section(void) {
     // success / failure variable
     bool result = true;
     // build buffer of bytes for input data
-    sxbp_buffer_t buffer = { .size = 0xffffffffffffffffu, }; // max 64-bit uint
-    buffer.bytes = calloc(1, 41); // set allocation size to actual data size
+    sxbp_buffer_t buffer = { .size = 0xffffffffu, }; // max 32-bit uint
+    buffer.bytes = calloc(1, 42); // set allocation size to actual data size
     // construct data header
     sprintf(
         (char*)buffer.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
-        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
-        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
-        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+        "sxbp" // magic number
+        "%c%c%c%c%c%c" // version major, minor, patch as 16-bit each
+        "%c%c%c%c" // total number of lines, 32-bit
+        "%c%c%c%c" // number of lines solved, 32-bit
+        "%c%c%c%c" // number of seconds spent solving, 32-bit
+        "%c%c%c%c", // number of seconds accuracy of solve time, 32-bit
+        (uint8_t)(LIB_SXBP_VERSION.major >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.major % 256),
+        (uint8_t)(LIB_SXBP_VERSION.minor >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.minor % 256),
+        (uint8_t)(LIB_SXBP_VERSION.patch >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.patch % 256),
+        0, 0, 0, 16, // size
+        0, 0, 0, 5, // solved count
+        0, 0, 12, 53, // seconds spent
+        0, 0, 0, 1 // seconds accuracy
     );
     // construct data section - make it deliberately too short
     uint8_t data[16] = {
@@ -495,7 +526,7 @@ static bool test_sxbp_load_spiral_rejects_too_small_data_section(void) {
     };
     // write data to buffer
     for(size_t i = 0; i < 16; i++) {
-        buffer.bytes[i+25] = data[i];
+        buffer.bytes[EXPECTED_FILE_HEADER_SIZE + i] = data[i];
     }
     // call load_spiral with buffer and blank spiral, store result
     sxbp_spiral_t output = sxbp_blank_spiral();
@@ -520,11 +551,19 @@ static bool test_sxbp_load_spiral_rejects_wrong_version(void) {
     // construct data header
     sprintf(
         (char*)buffer.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        0, 12, 255,
-        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
-        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
-        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+        "sxbp" // magic number
+        "%c%c%c%c%c%c" // version major, minor, patch as 16-bit each
+        "%c%c%c%c" // total number of lines, 32-bit
+        "%c%c%c%c" // number of lines solved, 32-bit
+        "%c%c%c%c" // number of seconds spent solving, 32-bit
+        "%c%c%c%c", // number of seconds accuracy of solve time, 32-bit
+        0, 0, // major version
+        0, 1, // minor version
+        0, 1, // patch version
+        0, 0, 0, 16, // size
+        0, 0, 0, 5, // solved count
+        0, 0, 12, 53, // seconds spent
+        0, 0, 0, 1 // seconds accuracy
     );
     // construct data section - make it deliberately too short
     uint8_t data[16] = {
@@ -535,7 +574,7 @@ static bool test_sxbp_load_spiral_rejects_wrong_version(void) {
     };
     // write data to buffer
     for(size_t i = 0; i < 16; i++) {
-        buffer.bytes[i+25] = data[i];
+        buffer.bytes[EXPECTED_FILE_HEADER_SIZE + i] = data[i];
     }
     // call load_spiral with buffer and blank spiral, store result
     sxbp_spiral_t output = sxbp_blank_spiral();
@@ -559,11 +598,13 @@ static bool test_sxbp_dump_spiral(void) {
         .size = 16,
         .solved_count = 5,
         .seconds_spent = 3125,
+        .seconds_accuracy = 1,
     };
     input.lines = calloc(sizeof(sxbp_line_t), 16);
     sxbp_direction_t directions[16] = {
-        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT,
-        SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT, SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
+        SXBP_UP, SXBP_LEFT, SXBP_DOWN, SXBP_LEFT, SXBP_DOWN, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT, SXBP_UP, SXBP_RIGHT,
+        SXBP_DOWN, SXBP_RIGHT, SXBP_UP, SXBP_LEFT,
     };
     sxbp_length_t lengths[16] = {
         1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 1,
@@ -573,16 +614,28 @@ static bool test_sxbp_dump_spiral(void) {
         input.lines[i].length = lengths[i];
     }
     // build buffer of bytes for expected output data
-    sxbp_buffer_t expected = { .size = 101, };
+    // size here is file header size + 16 lines' worth (4 bytes each)
+    sxbp_buffer_t expected = { .size = 26 + (4 * 16), };
     expected.bytes = calloc(1, expected.size);
     // construct expected data header
     sprintf(
         (char*)expected.bytes,
-        "SAXBOSPIRAL\n%c%c%c\n%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
-        LIB_SXBP_VERSION.major, LIB_SXBP_VERSION.minor, LIB_SXBP_VERSION.patch,
-        0, 0, 0, 0, 0, 0, 0, 16, // size serialised as 64-bit
-        0, 0, 0, 0, 0, 0, 0, 5, // solved_count serialised as 64-bit
-        0, 0, 12, 53 // seconds_spent serialised as 32-bit
+        "sxbp" // magic number
+        "%c%c%c%c%c%c" // version major, minor, patch as 16-bit each
+        "%c%c%c%c" // total number of lines, 32-bit
+        "%c%c%c%c" // number of lines solved, 32-bit
+        "%c%c%c%c" // number of seconds spent solving, 32-bit
+        "%c%c%c%c", // number of seconds accuracy of solve time, 32-bit
+        (uint8_t)(LIB_SXBP_VERSION.major >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.major % 256),
+        (uint8_t)(LIB_SXBP_VERSION.minor >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.minor % 256),
+        (uint8_t)(LIB_SXBP_VERSION.patch >> 8),
+        (uint8_t)(LIB_SXBP_VERSION.patch % 256),
+        0, 0, 0, 16, // size
+        0, 0, 0, 5, // solved count
+        0, 0, 12, 53, // seconds spent
+        0, 0, 0, 1 // seconds accuracy - TODO: Change to something to test
     );
     // construct expected data section
     uint8_t data[64] = {
@@ -605,7 +658,7 @@ static bool test_sxbp_dump_spiral(void) {
     };
     // write data to expected buffer
     for(size_t i = 0; i < 64; i++) {
-        expected.bytes[i + SXBP_FILE_HEADER_SIZE] = data[i];
+        expected.bytes[EXPECTED_FILE_HEADER_SIZE + i] = data[i];
     }
 
     // call dump_spiral with spiral and write to output buffer

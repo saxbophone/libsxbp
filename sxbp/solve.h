@@ -52,7 +52,7 @@ extern "C"{
  * - That index is less than spiral->size
  */
 sxbp_status_t sxbp_resize_spiral(
-    sxbp_spiral_t* spiral, uint64_t index, sxbp_length_t length,
+    sxbp_spiral_t* spiral, uint32_t index, sxbp_length_t length,
     sxbp_length_t perfection_threshold
 );
 
@@ -81,7 +81,7 @@ sxbp_status_t sxbp_resize_spiral(
  * signature of the callback should be like so:
  * @code
  * void callback_name(
- *     sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+ *     sxbp_spiral_t* spiral, uint32_t latest_line, uint32_t target_line,
  *     void* progress_callback_user_data
  * )
  * @endcode
@@ -111,9 +111,9 @@ sxbp_status_t sxbp_resize_spiral(
  * @todo Improve the efficiency of this function so that it runs much faster.
  */
 sxbp_status_t sxbp_plot_spiral(
-    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint64_t max_line,
+    sxbp_spiral_t* spiral, sxbp_length_t perfection_threshold, uint32_t max_line,
     void(* progress_callback)(
-        sxbp_spiral_t* spiral, uint64_t latest_line, uint64_t target_line,
+        sxbp_spiral_t* spiral, uint32_t latest_line, uint32_t target_line,
         void* progress_callback_user_data
     ),
     void* progress_callback_user_data

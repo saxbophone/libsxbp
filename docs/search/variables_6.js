@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['major',['major',['../structsxbp__version__t.html#a5b9421636b1e60b9811ea98f3482e07e',1,'sxbp_version_t']]],
-  ['minor',['minor',['../structsxbp__version__t.html#a15aa8a4fb4ca94c3298b88b17d0e9e06',1,'sxbp_version_t']]]
+  ['major',['major',['../structsxbp__version__t.html#a62b053c9c456a4d59fae1567d7e55375',1,'sxbp_version_t']]],
+  ['minor',['minor',['../structsxbp__version__t.html#a3ef124a290f03c96186913500c01848c',1,'sxbp_version_t']]]
 ];

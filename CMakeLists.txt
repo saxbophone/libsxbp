@@ -15,7 +15,7 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
-project(sxbp VERSION 0.25.3 LANGUAGES C)
+project(sxbp VERSION 0.26.0 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
 if(NOT DEFINED LIBSXBP_C_STANDARD)
@@ -28,7 +28,7 @@ if(DEFINED ENV{LIBSXBP_C_STANDARD})
         set(LIBSXBP_C_STANDARD "$ENV{LIBSXBP_C_STANDARD}")
     endif()
 endif()
-message(STATUS "C Standard set to C${LIBSXBP_C_STANDARD}")
+message(STATUS "[sxbp] C Standard set to C${LIBSXBP_C_STANDARD}")
 set(CMAKE_C_STANDARD ${LIBSXBP_C_STANDARD})
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
@@ -39,13 +39,14 @@ set(
 set(LIBSXBP_ESCAPED_VERSION_STRING "\"${LIBSXBP_VERSION_STRING}\"")
 # end basic metadata
 
-# this is a 64-bit project, so check now to make sure we're 64-bit, issue warning if not
-if(CMAKE_SIZEOF_VOID_P LESS 8)
+# must be running on an architecture of at least 32 bits
+if(CMAKE_SIZEOF_VOID_P LESS 4)
     message(
         WARNING
-        "It looks like this system's architecture is not at least 64-bit.\n"
-        "libsxbp requires a system with an architecture of at least 64 bits!\n"
-        "We'll continue trying to compile anyway, be sure to run the unit tests after."
+        "[sxbp] It looks like this system's architecture is not at least 32-bit.\n"
+        "       libsxbp requires a system with an architecture of at least 32 bits!\n"
+        "       We'll continue trying to compile anyway, but may fail.\n"
+        "       Be sure to run the unit tests after!"
     )
 endif()
 
@@ -70,7 +71,7 @@ endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
-    message(STATUS "Warnings Enabled")
+    message(STATUS "[sxbp] Warnings Enabled")
     # enable all warnings about 'questionable constructs'
     enable_c_compiler_flag_if_supported("-Wall")
     # issue 'pedantic' warnings for strict ISO compliance
@@ -90,7 +91,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # work out whether we have or have not requested PNG support, or don't care (default)
 if(NOT DEFINED LIBSXBP_PNG_SUPPORT)
     # try and find libpng v1.x, but don't fail if we can't
-    message(STATUS "PNG output support will be enabled if possible")
+    message(STATUS "[sxbp] PNG output support will be enabled if possible")
     find_package(PNG 1 EXACT)
     # set SXBP_PNG_SUPPORT based on value of PNG_FOUND
     if(PNG_FOUND)
@@ -100,12 +101,12 @@ if(NOT DEFINED LIBSXBP_PNG_SUPPORT)
     endif()
 elseif(LIBSXBP_PNG_SUPPORT)
     # find libpng v1.x and fail the build if we can't
-    message(STATUS "PNG output support explicitly enabled")
+    message(STATUS "[sxbp] PNG output support explicitly enabled")
     find_package(PNG 1 EXACT REQUIRED)
 else()
     # we've explicitly disabled PNG support, so don't include libpng
     # issue a message saying so
-    message(STATUS "PNG output support explicitly disabled")
+    message(STATUS "[sxbp] PNG output support explicitly disabled")
 endif()
 
 # include libpng directories and add feature test macro if support is enabled
@@ -114,10 +115,10 @@ if(LIBSXBP_PNG_SUPPORT)
     # feature test macro
     add_definitions(-DLIBSXBP_PNG_SUPPORT)
     # issue message
-    message(STATUS "PNG output support enabled")
+    message(STATUS "[sxbp] PNG output support enabled")
 else()
     # issue message
-    message(STATUS "PNG output support disabled")
+    message(STATUS "[sxbp] PNG output support disabled")
 endif()
 # end dependencies
 
