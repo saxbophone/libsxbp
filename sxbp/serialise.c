@@ -128,8 +128,9 @@ sxbp_serialise_result_t sxbp_load_spiral(
         .minor = load_uint16_t(&buffer, 6),
         .patch = load_uint16_t(&buffer, 8),
     };
-    // we don't accept anything less than v0.25.0, so the min is v0.25.0
-    sxbp_version_t min_version = { .major = 0, .minor = 25, .patch = 0, };
+    // we don't accept anything less than v0.26.0, so the min is v0.26.0
+    // TODO: Add this as a library constant - to add in next minor release
+    sxbp_version_t min_version = { .major = 0, .minor = 26, .patch = 0, };
     // check for version compatibility
     if(sxbp_version_less_than(buffer_version, min_version)) {
         // check failed
