@@ -60,10 +60,12 @@ There are no compulsory library dependencies beyond the C99 standard library. *Y
 
 ### Recommended Library Build
 
-Invoke CMake within the root of this repository, with these arguments to make CMake build the library in release mode (with full optimisation) and as a shared library:
+> An **out of source build** is recommended, as CMake clutters the directory it is executed in with many files which are awkward to remove.
+
+Invoke CMake within the `build` directory of this repository, with these arguments to make CMake build the library in release mode (with full optimisation) and as a shared library:
 
 ```sh
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON ..
 make
 ```
 
@@ -73,12 +75,12 @@ You can build in C11 mode if you want with either of the following:
 
 ```sh
 # using CMake variable
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DLIBSXBP_C_STANDARD=11 .
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DLIBSXBP_C_STANDARD=11 ..
 ```
 
 ```sh
 # using environment variable
-LIBSXBP_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON .
+LIBSXBP_C_STANDARD=11 cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON ..
 ```
 
 Also, by default the CMake build script will look for libpng. If it cannot find it then it will disable support for PNG output.
@@ -87,12 +89,12 @@ You may choose to explicitly disable or enable PNG support with the `LIBSXBP_PNG
 
 ```sh
 # PNG support is required, build will fail if libpng can't be found
-cmake -DLIBSXBP_PNG_SUPPORT=ON .
+cmake -DLIBSXBP_PNG_SUPPORT=ON ..
 ```
 
 ```sh
 # PNG support is not included, even if libpng can be found
-cmake -DLIBSXBP_PNG_SUPPORT=OFF .
+cmake -DLIBSXBP_PNG_SUPPORT=OFF ..
 ```
 
 > ### Note:
