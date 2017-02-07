@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
 
 #ifdef __cplusplus
@@ -211,6 +212,18 @@ typedef struct sxbp_spiral_t {
      * field
      */
     uint32_t seconds_accuracy;
+    /**
+     * @brief stores the value of clock ticks since the last time it was sampled
+     * @private
+     */
+    clock_t current_clock_ticks;
+    /**
+     * @brief stores the number of accumulated fractional seconds since clock
+     * ticks were last sampled and up until this value reaches 1.0 or over at
+     * which point the integral part is stored and the fractional one remains
+     * @private
+     */
+    double elapsed_fractional_seconds;
 } sxbp_spiral_t;
 
 /** @brief A simple buffer type for storing arrays of bytes. */
