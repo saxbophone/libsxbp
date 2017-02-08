@@ -50,6 +50,9 @@ extern "C"{
  * @note Asserts:
  * - That spiral->lines is not NULL
  * - That index is less than spiral->size
+ *
+ * @deprecated This function is deprecated from the public interface and will be
+ * removed from the public interface in a future version (v1.0 at the latest).
  */
 sxbp_status_t sxbp_resize_spiral(
     sxbp_spiral_t* spiral, uint32_t index, sxbp_length_t length,
