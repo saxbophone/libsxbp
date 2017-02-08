@@ -12,8 +12,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <inttypes.h>
 #include <time.h>
 
 #include "saxbospiral.h"
@@ -59,7 +57,6 @@ static void synchronise_spiral_timing(sxbp_spiral_t* spiral) {
         spiral->seconds_spent += (spiral->elapsed_clock_ticks / CLOCKS_PER_SEC);
         // store the remainder in the elapsed_clock_ticks field
         spiral->elapsed_clock_ticks %= CLOCKS_PER_SEC;
-        printf("%" PRIu32 "\n", spiral->seconds_spent);
     }
 }
 
