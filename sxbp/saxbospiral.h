@@ -218,12 +218,13 @@ typedef struct sxbp_spiral_t {
      */
     clock_t current_clock_ticks;
     /**
-     * @brief stores the number of accumulated fractional seconds since clock
-     * ticks were last sampled and up until this value reaches 1.0 or over at
-     * which point the integral part is stored and the fractional one remains
+     * @brief stores the number of accumulated clock ticks since clock ticks
+     * were last sampled and up until this value reaches CLOCKS_PER_SEC
+     * (1 second) or over at which point the whole second(s) are added to
+     * `seconds_spent` and the accumulated seconds reduced to the remainder.
      * @private
      */
-    double elapsed_fractional_seconds;
+    clock_t elapsed_clock_ticks;
 } sxbp_spiral_t;
 
 /** @brief A simple buffer type for storing arrays of bytes. */

@@ -12,6 +12,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <inttypes.h>
 #include <time.h>
 
 #include "saxbospiral.h"
@@ -30,7 +32,7 @@ extern "C"{
  */
 static void initialise_spiral_timing(sxbp_spiral_t* spiral) {
     spiral->current_clock_ticks = clock(); // get clock ticks
-    spiral->elapsed_fractional_seconds = 0.0; // reset fractional seconds
+    spiral->elapsed_clock_ticks = 0; // reset accumulated ticks
 }
 
 /*
@@ -46,18 +48,18 @@ static void synchronise_spiral_timing(sxbp_spiral_t* spiral) {
     );
     // update the 'current' clock ticks to be stored in spiral
     spiral->current_clock_ticks = current_clock_ticks;
-    // convert elapsed clock ticks to fractional seconds
-    double fractional_seconds = (double)elapsed_clock_ticks / CLOCKS_PER_SEC;
-    // add to currently stored fractional seconds
-    spiral->elapsed_fractional_seconds += fractional_seconds;
-    // extract integral component
-    uint32_t integer_seconds = (uint32_t)spiral->elapsed_fractional_seconds;
-    // do last step only if there is at least one whole second available
-    if(integer_seconds > 0) {
-        // store in seconds_spent field
-        spiral->seconds_spent += integer_seconds;
-        // subtract from fractional
-        spiral->elapsed_fractional_seconds -= integer_seconds;
+    // add elapsed ticks to the field keeping track of this
+    spiral->elapsed_clock_ticks += elapsed_clock_ticks;
+    /*
+     * do last step only if there is at least one whole second's worth of clock
+     * ticks available
+     */
+    if(spiral->elapsed_clock_ticks >= CLOCKS_PER_SEC) {
+        // calculate whole seconds and store in seconds_spent field
+        spiral->seconds_spent += (spiral->elapsed_clock_ticks / CLOCKS_PER_SEC);
+        // store the remainder in the elapsed_clock_ticks field
+        spiral->elapsed_clock_ticks %= CLOCKS_PER_SEC;
+        printf("%" PRIu32 "\n", spiral->seconds_spent);
     }
 }
 
