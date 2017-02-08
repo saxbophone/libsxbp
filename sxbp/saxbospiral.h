@@ -205,7 +205,12 @@ typedef struct sxbp_spiral_t {
     uint32_t collider;
     /** @brief the count of lines solved so far (index of next line to solve) */
     uint32_t solved_count;
-    /** @brief count of seconds spent solving the spiral */
+    /**
+     * @brief the count of seconds spent solving the spiral
+     * @details This measures CPU compute-time, not wall-clock time. It is
+     * intended to give a semi-accurate figure for quantifying how much
+     * continuous compute-time was needed to generate a given spiral.
+     */
     uint32_t seconds_spent;
     /**
      * @brief stores the number of seconds' accuracy of the `seconds_spent`
