@@ -25,7 +25,7 @@
   <td id="projectlogo"><img alt="Logo" src="libsxbp.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">libsxbp
-   &#160;<span id="projectnumber">v0.26</span>
+   &#160;<span id="projectnumber">v0.27</span>
    </div>
    <div id="projectbrief">Experimental generation of 2D spiralling lines based on input binary data.</div>
   </td>
@@ -123,9 +123,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a6d6c6ee0a1a53d75b3568f144e1dd726">solved_count</a></td></tr>
 <tr class="memdesc:a6d6c6ee0a1a53d75b3568f144e1dd726"><td class="mdescLeft">&#160;</td><td class="mdescRight">the count of lines solved so far (index of next line to solve) <br /></td></tr>
 <tr class="separator:a6d6c6ee0a1a53d75b3568f144e1dd726"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae68a77ca9421a76ee2a8880b1747a090"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae68a77ca9421a76ee2a8880b1747a090"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#ae68a77ca9421a76ee2a8880b1747a090">seconds_spent</a></td></tr>
-<tr class="memdesc:ae68a77ca9421a76ee2a8880b1747a090"><td class="mdescLeft">&#160;</td><td class="mdescRight">count of seconds spent solving the spiral <br /></td></tr>
+<tr class="memitem:ae68a77ca9421a76ee2a8880b1747a090"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#ae68a77ca9421a76ee2a8880b1747a090">seconds_spent</a></td></tr>
+<tr class="memdesc:ae68a77ca9421a76ee2a8880b1747a090"><td class="mdescLeft">&#160;</td><td class="mdescRight">the count of seconds spent solving the spiral  <a href="#ae68a77ca9421a76ee2a8880b1747a090">More...</a><br /></td></tr>
 <tr class="separator:ae68a77ca9421a76ee2a8880b1747a090"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6cc77db86769a704a5e8582cd78f1de0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6cc77db86769a704a5e8582cd78f1de0"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsxbp__spiral__t.html#a6cc77db86769a704a5e8582cd78f1de0">seconds_accuracy</a></td></tr>
@@ -135,7 +134,23 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Struct type representing a Spiral figure, in any state of completion. </p>
 <p>This is the most important data type in the whole library, and is passed to and from many different library functions. A partially-complete spiral object may be produced from binary data, and a fully-complete spiral may be produced from the partially complete one via the routines in the library. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="ae68a77ca9421a76ee2a8880b1747a090"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t sxbp_spiral_t::seconds_spent</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>the count of seconds spent solving the spiral </p>
+<p>This measures CPU compute-time, not wall-clock time. It is intended to give a semi-accurate figure for quantifying how much continuous compute-time was needed to generate a given spiral. </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>sxbp/<a class="el" href="saxbospiral_8h_source.html">saxbospiral.h</a></li>
 </ul>
 </div><!-- contents -->

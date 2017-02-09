@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 
 
 #ifdef __cplusplus
@@ -204,13 +205,31 @@ typedef struct sxbp_spiral_t {
     uint32_t collider;
     /** @brief the count of lines solved so far (index of next line to solve) */
     uint32_t solved_count;
-    /** @brief count of seconds spent solving the spiral */
+    /**
+     * @brief the count of seconds spent solving the spiral
+     * @details This measures CPU compute-time, not wall-clock time. It is
+     * intended to give a semi-accurate figure for quantifying how much
+     * continuous compute-time was needed to generate a given spiral.
+     */
     uint32_t seconds_spent;
     /**
      * @brief stores the number of seconds' accuracy of the `seconds_spent`
      * field
      */
     uint32_t seconds_accuracy;
+    /**
+     * @brief stores the value of clock ticks since the last time it was sampled
+     * @private
+     */
+    clock_t current_clock_ticks;
+    /**
+     * @brief stores the number of accumulated clock ticks since clock ticks
+     * were last sampled and up until this value reaches CLOCKS_PER_SEC
+     * (1 second) or over at which point the whole second(s) are added to
+     * `seconds_spent` and the accumulated seconds reduced to the remainder.
+     * @private
+     */
+    clock_t elapsed_clock_ticks;
 } sxbp_spiral_t;
 
 /** @brief A simple buffer type for storing arrays of bytes. */

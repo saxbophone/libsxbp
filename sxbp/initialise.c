@@ -27,7 +27,7 @@ sxbp_direction_t sxbp_change_direction(
 }
 
 sxbp_spiral_t sxbp_blank_spiral(void) {
-    return (sxbp_spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0, 0};
+    return (sxbp_spiral_t){0, NULL, {{NULL, 0}, 0}, false, 0, 0, 0, 0, 0, 0, };
 }
 
 sxbp_status_t sxbp_init_spiral(sxbp_buffer_t buffer, sxbp_spiral_t* spiral) {

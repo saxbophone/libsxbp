@@ -24,6 +24,43 @@ extern "C"{
 #endif
 
 /*
+ * private function - takes a pointer to a spiral struct and captures the
+ * current CPU clock ticks (should only be called once - when timing is to be
+ * started).
+ */
+static void initialise_spiral_timing(sxbp_spiral_t* spiral) {
+    spiral->current_clock_ticks = clock(); // get clock ticks
+    spiral->elapsed_clock_ticks = 0; // reset accumulated ticks
+}
+
+/*
+ * private function - takes a pointer to a spiral struct and captures the CPU
+ * time elapsed since this function was called.
+ */
+static void synchronise_spiral_timing(sxbp_spiral_t* spiral) {
+    // get current clock ticks
+    clock_t current_clock_ticks = clock();
+    // get elapsed clock ticks since last time
+    clock_t elapsed_clock_ticks = (
+        current_clock_ticks - spiral->current_clock_ticks
+    );
+    // update the 'current' clock ticks to be stored in spiral
+    spiral->current_clock_ticks = current_clock_ticks;
+    // add elapsed ticks to the field keeping track of this
+    spiral->elapsed_clock_ticks += elapsed_clock_ticks;
+    /*
+     * do last step only if there is at least one whole second's worth of clock
+     * ticks available
+     */
+    if(spiral->elapsed_clock_ticks >= CLOCKS_PER_SEC) {
+        // calculate whole seconds and store in seconds_spent field
+        spiral->seconds_spent += (spiral->elapsed_clock_ticks / CLOCKS_PER_SEC);
+        // store the remainder in the elapsed_clock_ticks field
+        spiral->elapsed_clock_ticks %= CLOCKS_PER_SEC;
+    }
+}
+
+/*
  * private function, given a pointer to a spiral struct and the index of the
  * highest line to use, check if the latest line would collide with any of the
  * others, given their current directions and jump sizes (using co-ords stored
@@ -252,6 +289,8 @@ sxbp_status_t sxbp_resize_spiral(
             result = SXBP_OPERATION_OK;
             return result;
         }
+        // update time spent solving at every iteration
+        synchronise_spiral_timing(spiral);
     }
 }
 
@@ -265,10 +304,8 @@ sxbp_status_t sxbp_plot_spiral(
 ) {
     // preconditional assertions
     assert(spiral->lines != NULL);
-    // get current time
-    time_t start_time = time(NULL);
-    // get original number of seconds spent
-    uint32_t seconds_spent_so_far = spiral->seconds_spent;
+    // start up the CPU clock cycle timing
+    initialise_spiral_timing(spiral);
     /*
      * update accuracy of the seconds spent field
      * (every run time makes it one second less accurate).
@@ -286,20 +323,14 @@ sxbp_status_t sxbp_plot_spiral(
             return result;
         }
         // update time spent solving
-        spiral->seconds_spent = (
-            // amount of time spent previously + time spent during this run time
-            seconds_spent_so_far + (uint32_t)difftime(time(NULL), start_time)
-        );
+        synchronise_spiral_timing(spiral);
         // call callback if given
         if(progress_callback != NULL) {
             progress_callback(spiral, i, max_index, progress_callback_user_data);
         }
     }
     // update time spent solving
-    spiral->seconds_spent = (
-        // amount of time spent previously + time spent during this run time
-        seconds_spent_so_far + (uint32_t)difftime(time(NULL), start_time)
-    );
+    synchronise_spiral_timing(spiral);
     // all ok
     result = SXBP_OPERATION_OK;
     return result;
