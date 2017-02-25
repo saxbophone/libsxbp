@@ -18,6 +18,10 @@ When this is given as input data to the algorithm, the output is the shape shown
 
 The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
+> Despite feeling quite attached to this project (it totally was my baby, ironically for the same amount of time as the human gestation period!), I decided to open-source it in case anyone else out there is interested in my work (and maybe wants to or is able to help me improve it!).
+
+> If you find this interesting or useful, I'd love to know about it! Star the project on Github to let me know, it will make my day! :smiley:
+
 ## Possible Uses
 
 - A new kind of barcode (albeit not such a space-efficient one)
@@ -38,10 +42,6 @@ This is a permissive software license which puts copyleft protections only on th
 In other words, the library may be used and integrated into other projects regardless of whether they are open-source or commercial, but any modifications to the library itself must be made available under the same or an equivalent license (see license for further details on the nuances of this).
 
 A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. If for some reason you have not received this file, you can view a copy of the license at [https://www.mozilla.org/MPL/2.0/](https://www.mozilla.org/MPL/2.0/).
-
-Despite feeling quite attached to this project (it totally was my baby, ironically for the same amount of time as the human gestation period!), I decided to open-source it in case anyone else out there is interested in my work (and maybe wants to or is able to help me improve it!).
-
-If you find this interesting or useful, I'd love to know about it! Star the project on Github to let me know, it will make my day! :smiley:
 
 ## Building
 
@@ -66,6 +66,7 @@ There are no compulsory library dependencies beyond the C99 standard library. *Y
 > These commands are for unix-like systems, without an IDE or other build system besides CMake.
 >
 > If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
+
 
 > This library has been tested most often on **Ubuntu GNU/Linux** with both **GCC v5.4.0** and **Clang 3.8.0**.
 >
