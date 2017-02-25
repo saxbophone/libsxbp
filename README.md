@@ -63,18 +63,17 @@ There are no compulsory library dependencies beyond the C99 standard library. *Y
 
 > ### Note:
 
-> These commands are for unix-like systems, without an IDE or other build system besides CMake.
+> - These commands are for unix-like systems, without an IDE or other build system besides CMake.
 >
-> If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
-
-
-> This library has been tested most often on **Ubuntu GNU/Linux** with both **GCC v5.4.0** and **Clang 3.8.0**.
+>   If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
 >
-> It's also been tested on **Mac OSX** (aka _macOS_) with recent-ish versions of **Clang**.
+> - This library has been tested most often on **Ubuntu GNU/Linux** with both **GCC v5.4.0** and **Clang 3.8.0**.
 >
-> I haven't tested it properly on **Microsoft Windows** yet, but provided you have a compiler which can handle **ISO C99** at your disposal (**MSVC** won't cut it here I'm afraid :disappointed:), it should all work fine.
+>   It's also been tested on **Mac OSX** (aka _macOS_) with recent-ish versions of **Clang**.
 >
-> I've made my best efforts to keep this library as close to **ISO C99** as possible, so you shouldn't have a problem - but if you do, I want to hear about it!
+>   I haven't tested it properly on **Microsoft Windows** yet, but provided you have a compiler which can handle **ISO C99** at your disposal (**MSVC** won't cut it here I'm afraid :disappointed:), it should all work fine.
+>
+>   I've made my best efforts to keep this library as close to **ISO C99** as possible, so you shouldn't have a problem - but if you do, I want to hear about it!
 
 ### Recommended Library Build
 
