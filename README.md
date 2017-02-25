@@ -18,7 +18,10 @@ When this is given as input data to the algorithm, the output is the shape shown
 
 The algorithm is not limited to text however - any form of input binary data will work to produce a resulting figure, although the length of input data currently is a limiting factor in getting speedy results, if perfection is desired.
 
-Although this project doesn't work in sprints, there is a [*sprint board*](https://github.com/saxbophone/libsxbp/projects/1), which is used for organising issues.
+## Possible Uses
+
+- A new kind of barcode (albeit not such a space-efficient one)
+- Inclusion in larger pieces of artwork
 
 ## Please Note
 
@@ -30,9 +33,15 @@ Although this project doesn't work in sprints, there is a [*sprint board*](https
 
 As of **v0.25.0**, libsxbp is licensed under the **Mozilla Public License Version 2.0** (`MPL-2.0`).
 
-This is a permissive software license which puts copyleft protections only on the original source files of the project themselves, but does not extend this copyleft to other sources which use the library. In other words, the library may be used and integrated into other projects regardless of whether they are open-source or commercial, but any modifications to the library itself must be made available under the same or an equivalent license (see license for further details on the nuances of this).
+This is a permissive software license which puts copyleft protections only on the original source files of the project themselves, but does not extend this copyleft to other sources which use the library.
+
+In other words, the library may be used and integrated into other projects regardless of whether they are open-source or commercial, but any modifications to the library itself must be made available under the same or an equivalent license (see license for further details on the nuances of this).
 
 A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. If for some reason you have not received this file, you can view a copy of the license at [https://www.mozilla.org/MPL/2.0/](https://www.mozilla.org/MPL/2.0/).
+
+Despite feeling quite attached to this project (it totally was my baby, ironically for the same amount of time as the human gestation period!), I decided to open-source it in case anyone else out there is interested in my work (and maybe wants to or is able to help me improve it!).
+
+If you find this interesting or useful, I'd love to know about it! Star the project on Github to let me know, it will make my day! :smiley:
 
 ## Building
 
@@ -54,9 +63,17 @@ There are no compulsory library dependencies beyond the C99 standard library. *Y
 
 > ### Note:
 
-> These commands are for unix-like systems, without an IDE or other build system besides CMake. If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
+> These commands are for unix-like systems, without an IDE or other build system besides CMake.
+>
+> If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
 
-> Additionally, it is of worth noting that this library has only been thoroughly tested and developed on **Ubuntu GNU/Linux** with **GCC v5.4.0** and **Clang 3.8.0**. Although every effort has been made to make it as cross-platform as possible (including quite strict **ISO C99** and **ISO C11** compliance), **Your Mileage May Vary**. Bug Reports and Patches for problems running on other systems, particularly **Microsoft Windows** and **Mac OSX** are most welcome.
+> This library has been tested most often on **Ubuntu GNU/Linux** with both **GCC v5.4.0** and **Clang 3.8.0**.
+>
+> It's also been tested on **Mac OSX** (aka _macOS_) with recent-ish versions of **Clang**.
+>
+> I haven't tested it properly on **Microsoft Windows** yet, but provided you have a compiler which can handle **ISO C99** at your disposal (**MSVC** won't cut it here I'm afraid :disappointed:), it should all work fine.
+>
+> I've made my best efforts to keep this library as close to **ISO C99** as possible, so you shouldn't have a problem - but if you do, I want to hear about it!
 
 ### Recommended Library Build
 
