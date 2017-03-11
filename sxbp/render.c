@@ -85,7 +85,19 @@ sxbp_status_t sxbp_render_spiral_raw(
         .x = bounds[1].x + normalisation_vector.x,
         .y = bounds[1].y + normalisation_vector.y,
     };
-    // initialise image struct - image dimensions are twice the size + 1
+    // image dimensions are twice the size + 1
+    // get rough image size for checking if it will overflow
+    double image_width = ((bottom_right.x + 1) * 2) + 1;
+    double image_height = ((bottom_right.y + 1) * 2) + 1;
+    // if image size would be too big, exit early with error code
+    if(
+        (image_width >= UINT32_MAX) || (image_height >= UINT32_MAX) ||
+        (image_width <= 0) || (image_height <= 0)
+    ) {
+        result = SXBP_OUT_OF_BOUNDS;
+        return result;
+    }
+    // otherwise, initialise image struct dimensions
     image->width = ((bottom_right.x + 1) * 2) + 1;
     image->height = ((bottom_right.y + 1) * 2) + 1;
     // allocate dynamic memory to image struct - 2D array of bools
@@ -121,12 +133,12 @@ sxbp_status_t sxbp_render_spiral_raw(
         // make as many jumps in this direction as this lines length
         for(uint32_t j = 0; j < (spiral.lines[i].length * 2U) + 1U; j++) {
             // get output co-ords
-            sxbp_tuple_item_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
-            sxbp_tuple_item_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
+            uint32_t x_pos = current.x + (normalisation_vector.x * 2) + 1;
+            uint32_t y_pos = current.y + (normalisation_vector.y * 2) + 1;
             // skip the second pixel of the first line
             if(!((i == 0) && (j == 1))) {
                 // flip the y-axis otherwise they appear vertically mirrored
-                image->pixels[x_pos][image->height - 1 - y_pos] = true;
+                image->pixels[x_pos % image->width][(image->height - 1 - y_pos) % image->height] = true;
             }
             if(j != (spiral.lines[i].length * 2U)) {
                 // if we're not on the last line, advance the marker along

@@ -88,6 +88,7 @@ typedef enum sxbp_status_t {
     SXBP_STATE_UNKNOWN = 0, /**< unknown, the default state */
     SXBP_OPERATION_OK, /**< no problem */
     SXBP_OPERATION_FAIL, /**< generic failure state */
+    SXBP_OUT_OF_BOUNDS, /**< could not complete operation, value out of range */
     SXBP_MALLOC_REFUSED, /**< memory allocation or re-allocation was refused */
     SXBP_IMPOSSIBLE_CONDITION, /**< condition thought to be impossible detected */
     SXBP_NOT_IMPLEMENTED, /**< function is not implemented / enabled */
