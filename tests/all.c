@@ -20,11 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sxbp/saxbospiral.h"
-#include "sxbp/initialise.h"
-#include "sxbp/plot.h"
-#include "sxbp/solve.h"
-#include "sxbp/serialise.h"
+#include "../sxbp/saxbospiral.h"
+#include "../sxbp/initialise.h"
+#include "../sxbp/plot.h"
+#include "../sxbp/solve.h"
+#include "../sxbp/serialise.h"
 
 
 static const size_t EXPECTED_FILE_HEADER_SIZE = 26;

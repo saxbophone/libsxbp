@@ -147,9 +147,31 @@ if(LIBSXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
-add_executable(sxp_test tests.c)
+# Test Suite Harness Source Files
+file(GLOB UNIT_TEST_HARNESS_SOURCES "unit_test_harness/*.c")
+# Test Suite Harness Header Files
+file(GLOB UNIT_TEST_HARNESS_HEADERS "unit_test_harness/*.h")
 
-target_link_libraries(sxp_test sxbp)
+# Unit test C Source files
+file(GLOB TEST_LIBSXBP_SOURCES "tests/*.c")
+
+# test harness library
+add_library(unit_test_harness ${UNIT_TEST_HARNESS_SOURCES})
+
+enable_testing()
+# unit test executables
+foreach(test_source_file ${TEST_LIBSXBP_SOURCES})
+    # remove '.c' extension and parent directories
+    get_filename_component(test_name ${test_source_file} NAME_WE)
+    # append "test_" to test_name
+    set(test_name "test_${test_name}")
+    # create executable for test
+    add_executable(${test_name} ${test_source_file})
+    # link test with library and test harness library
+    target_link_libraries(${test_name} sxbp unit_test_harness)
+    # add test
+    add_test(${test_name} ${test_name})
+endforeach()
 
 install(
     TARGETS sxbp
@@ -189,6 +211,3 @@ install(
     FILES ${LIBSXBP_RENDER_BACKENDS_HEADERS}
     DESTINATION "include/${LIBSXBP_PRECISE_HEADER_DESTINATION}/render_backends"
 )
-
-enable_testing()
-add_test(unit_tests sxp_test)
