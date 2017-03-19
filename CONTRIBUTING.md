@@ -2,17 +2,6 @@
 
 Thanks for considering contributing to libsxbp!
 
-First of all, please read and make sure that you agree to this project's **Contributor License Agreement**:
-
-- If you are contributing as an individual, please read and sign [this document](CLA_INDIVIDUAL.md).
-- If you are contributing as an entity (e.g. a company or organisation), please read and sign [this document](CLA_ENTITY.md).
-
-Signed copies of the above agreements should be emailed to me (@saxbophone / Joshua Saxby) at &lt;joshua.a.saxby@gmail.com&gt;.
-
-I will then add your details (full name and email address) to the [CONTRIBUTORS.md](CONTRIBUTORS.md) file in this repository.
-
-**If you do not want me to put your email address in this file, then tell me so and I will use another public handle of yours (most likely your Github username).**
-
 Here are some tips and general info about contributing to this project. Following these tips will increase the likelihood of getting a speedy PR :smile:
 
 ## Checklist
@@ -26,16 +15,23 @@ Please also check that the work is not already being undertaken by someone else.
 
 ## Code Style
 
-I haven't yet formalised the style guide for this project, but this is something I plan to do in the future. Until then, if you could try your best to follow the style of existing code, that will help a great deal.
+I only have a rough style guide for this project, but there are certain things which I have a fairly concrete opinion of (most of which are listed below). Just try your best to follow the style of existing code and I will happily clarify with you if there is any ambiguity.
 
-In addition, please make sure:
+Concrete points of style:
 
 - You commit files with Unix Line-endings (`\n` `<LF>` `0x0a`)
 - Each text file committed has a trailing newline at the end
 - Your C code is compliant to the ISO C99 and C11 standards
 - C source code is indented with 4 spaces per indentation level (no tabs)
+- C source code lines are limited to 79 or 80 columns
 - Public functions are prototyped in the correct C Header file, all private declarations are declared `static`
-- Every public function (and ideally private too) has an accompanying explanatory comment
+- Every public function (and ideally private too) has an accompanying explanatory comment. Public function _must_ include Doxygen documentation
+- Use `snake_case` throughout for symbol-naming
+  - Variables and function names use `lower_snake_case`
+  - Constants and Preprocessor Macros use `UPPER_SNAKE_CASE`
+- Type names are suffixed with a `_t`
+- Public symbols are prefixed with `sxbp_` or `SXBP_`, depending on the capitalisation state of the symbol
+- The asterisk (`*`) in pointer types goes with the type, not the identifier
 
 ## Testing
 
