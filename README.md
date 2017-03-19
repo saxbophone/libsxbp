@@ -20,7 +20,7 @@ The algorithm is not limited to text however - any form of input binary data wil
 
 > Despite feeling quite attached to this project (it totally was my baby, ironically for the same amount of time as the human gestation period!), I decided to open-source it in case anyone else out there is interested in my work (and maybe wants to or is able to help me improve it!).
 
-> If you find this interesting or useful, I'd love to know about it! Star the project on Github to let me know, it will make my day! :smiley:
+> If you find this interesting or useful, I'd love to know about it! Star the project on Github or drop me an email to let me know, it will make my day! :smiley:
 
 ## Possible Uses
 
@@ -61,19 +61,21 @@ There are no compulsory library dependencies beyond the C99 standard library. *Y
 *If you also want to be able to produce images in PNG format with the library, you will need:*
 - [libpng](http://www.libpng.org/pub/png/libpng.html) - (this often comes pre-installed with many modern unix-like systems)
 
+> The library can render images in `PBM` format itself, without needing any external libraries, so _libpng_ is not essential for viewing the results. However, Mac OSX and Microsoft Windows typically don't support viewing this file in their native file-viewers, so it may be a bit awkward to view the results in this (admittedly rather obscure) image format.
+
 > ### Note:
 
 > - These commands are for unix-like systems, without an IDE or other build system besides CMake.
 >
 >   If building for a different system, or within an IDE or other environment, consult your IDE/System documentation on how to build CMake projects.
 >
-> - This library has been tested most often on **Ubuntu GNU/Linux** with both **GCC v5.4.0** and **Clang 3.8.0**.
+> - This library is known to compile on recent versions of **GNU/Linux**, **Mac OSX** and **Microsoft Windows**. You will need a C compiler which supports **ISO C99**.
 >
->   It's also been tested on **Mac OSX** (aka _macOS_) with recent-ish versions of **Clang**.
+>   - On _GNU/Linux_, it's been tested with **GCC v5.4.0** and **Clang 3.8.0**. Other newer versions of those compilers will probably also work fine.
+>   - On _Mac OSX_, it's been tested with a recent-ish version of **Clang** (_v3.x.x_).
+>   - On _Microsoft Windows_, it's been tested with the _GCC_ compilers from **MinGW** (32-bit).
 >
->   I haven't tested it properly on **Microsoft Windows** yet, but provided you have a compiler which can handle **ISO C99** at your disposal (**MSVC** won't cut it here I'm afraid :disappointed:), it should all work fine.
->
->   I've made my best efforts to keep this library as close to **ISO C99** as possible, so you shouldn't have a problem - but if you do, I want to hear about it!
+>   I've made my best efforts to keep this library as strictly conforming to **ISO C99** as possible, so you shouldn't have a problem - but if you do, I want to hear about it!
 
 ### Recommended Library Build
 
