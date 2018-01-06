@@ -63,38 +63,42 @@ bool sxbp_copy_buffer(sxbp_buffer_t* from, sxbp_buffer_t* to) {
     }
 }
 
-/*
- * disable GCC warning about the unused parameter, as figure doesn't have any
- * real members yet
- */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 bool sxbp_init_figure(sxbp_figure_t* figure) {
-    // there's no members that need to be allocated yet so this can never fail
-    return true;
+    // allocate the lines, using calloc to set all fields of each one to zero
+    figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
+    // if lines is not NULL, then the operation was successful
+    return figure->lines != NULL;
 }
 
 bool sxbp_free_figure(sxbp_figure_t* figure) {
-    // there are no members that need to be freed yet, so always return false
-    return false;
+    // if lines is not NULL, assume there's memory to be deallocated
+    if (figure->lines != NULL) {
+        free(figure->lines);
+        // set lines to NULL (be a good person)
+        figure->lines = NULL;
+        return true;
+    } else {
+        // nothing to deallocate
+        return false;
+    }
 }
 
 bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
-    // TODO: copy across static members
+    // copy across the static members
+    to->size = from->size;
+    to->lines_remaining = from->lines_remaining;
     // allocate the 'to' figure
     if (!sxbp_init_figure(to)) {
         // exit early if allocation failed
         return false;
     } else {
-        // allocation succeeded, so now copy the data
-        // TODO: copy across dynamic members
+        // allocation succeeded, so now copy the lines
+        memcpy(to->lines, from->lines, to->size);
         return true;
     }
 }
-// re-enable all warnings
-#pragma GCC diagnostic pop
 
 static bool sxbp_init_bitmap_row(bool* row, uint32_t size) {
     // allocate row with calloc

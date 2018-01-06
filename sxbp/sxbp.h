@@ -60,12 +60,57 @@ typedef struct sxbp_buffer_t {
 } sxbp_buffer_t;
 
 /**
+ * @brief Type for representing one of the cartesian directions.
+ * @since v0.54.0
+ */
+typedef enum sxbp_direction_t {
+    SXBP_UP = 0, /**< The cartesian direction 'UP' */
+    SXBP_RIGHT = 1, /**< The cartesian direction 'RIGHT' */
+    SXBP_DOWN = 2, /**< The cartesian direction 'DOWN' */
+    SXBP_LEFT = 3, /**< The cartesian direction 'LEFT' */
+} sxbp_direction_t;
+
+/**
+ * @brief Type for representing the length of a line segment of a spiral.
+ * @note Although the width of this type is 32 bits, it is actually only 30 bits
+ * when used in the sxbp_spiral_t struct type. This is because here it is a
+ * bitfield field with 30 bits allocated to it.
+ * @since v0.27.0
+ */
+typedef uint32_t sxbp_length_t;
+
+/**
+ * @brief Represents one line segment in the spiral structure.
+ * @details This includes the direction of the line and it's length
+ * (initially set to 0).
+ * @note The whole struct uses bitfields to occupy 32 bits of memory.
+ * @since v0.27.0
+ */
+typedef struct sxbp_line_t {
+    /** @brief uses 2 bits as there's only 4 directions */
+    sxbp_direction_t direction : 2;
+    /** @brief uses 30 bits for the length, this is wide enough */
+    sxbp_length_t length : 30;
+} sxbp_line_t;
+
+/**
  * @brief A structure representing an SXBP 'spiral' figure
+ * @details The figure can be in any state of completion or non-completion
  * @since v0.54.0
  */
 typedef struct sxbp_figure_t {
-    /** @todo Remove this placeholder member */
-    void* placeholder;
+    /** @brief The total number of lines in the figure */
+    uint32_t size;
+    /** @brief The lines that make up the figure */
+    sxbp_line_t* lines;
+    /**
+     * @brief The number of unsolved lines that are remaining
+     * @details A line that has not been 'solved' is a line that hasn't been
+     * shortened to its minimum possible length
+     * @note While this is greater than zero, it is the index of the next line
+     * that needs solving + 1
+     */
+    uint32_t lines_remaining;
 } sxbp_figure_t;
 
 /**
