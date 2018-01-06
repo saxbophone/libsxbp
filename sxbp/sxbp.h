@@ -93,6 +93,84 @@ typedef struct sxbp_bitmap_t {
  */
 extern const sxbp_version_t SXBP_VERSION;
 
+/**
+ * @brief Attempts to allocate memory for the bytes of the given buffer
+ * @details Attempts to allocate the amount of memory specified by the `size`
+ * member of the buffer
+ * @returns `true` if memory was allocated successfully
+ * @returns `false` if memory was not allocated successfully
+ * @since v0.54.0
+ */
+bool sxbp_init_buffer(sxbp_buffer_t* buffer);
+
+/**
+ * @brief Deallocates any allocated memory for the bytes of the given buffer
+ * @details It is safe to call this function multiple times on the same buffer
+ * @warning It is unsafe to call this function on a buffer that has been
+ * deallocated without setting the `bytes` pointer member to `NULL`.
+ * @returns `true` if memory was deallocated
+ * @returns `false` if memory did not need to be deallocated (this is not an
+ * error condition)
+ * @since v0.54.0
+ */
+bool sxbp_free_buffer(sxbp_buffer_t* buffer);
+
+/**
+ * @brief Attempts to copy one buffer to another
+ * @details All the data is copied from the buffer such that both are entirely
+ * separate at the completion of the operation. Any data in the `to` buffer
+ * will be overwritten or erased.
+ * @param from The buffer to copy the contents of
+ * @param[out] The buffer to copy the contents to
+ * @warning The buffer to copy the contents to must be in a consistent state,
+ * that is it must either not be allocated yet, or must be properly allocated.
+ * @returns `true` if the data was copied successfully
+ * @returns `false` if the data was not copied successfully, in which case `to`
+ * will be empty.
+ * @since v0.54.0
+ */
+bool sxbp_copy_buffer(sxbp_buffer_t* from, sxbp_buffer_t* to);
+
+/**
+ * @brief Attempts to allocate memory for dynamic members of the given figure
+ * @details Attempts to allocate the number of lines specified by the `size`
+ * member of the figure, and memory for other private fields of the structure
+ * as needed.
+ * @returns `true` if all memory was allocated successfully
+ * @returns `false` if any memory was not allocated successfully
+ * @since v0.54.0
+ */
+bool sxbp_init_figure(sxbp_figure_t* figure);
+
+/**
+ * @brief Deallocates any allocated memory for the given figure
+ * @details It is safe to call this function multiple times on the same figure
+ * @warning It is unsafe to call this function on a figure that has had any
+ * dynamically allocated members deallocated without setting their respective
+ * pointers to `NULL`.
+ * @returns `true` if any memory was deallocated
+ * @returns `false` if no memory needed to be deallocated (this is not an error
+ * condition)
+ * @since v0.54.0
+ */
+bool sxbp_free_figure(sxbp_figure_t* figure);
+
+/**
+ * @brief Attempts to copy one figure to another
+ * @details All the data is copied from the figure such that both are entirely
+ * separate at the completion of the operation. Any data in the `to` figure
+ * will be overwritten or erased.
+ * @param from The figure to copy the contents of
+ * @param[out] The figure to copy the contents to
+ * @warning The figure to copy the contents to must be in a consistent state,
+ * that is it must either not be allocated yet, or must be properly allocated.
+ * @returns `true` if the data was copied successfully
+ * @returns `false` if the data was not copied successfully, in which case `to`
+ * will be empty.
+ * @since v0.54.0
+ */
+bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

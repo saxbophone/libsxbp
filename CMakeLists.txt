@@ -140,10 +140,9 @@ if(SXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
-# NOTE: I feel guilty disabling this but it's a new version after all!
-# add_executable(sxp_test tests.c)
+add_executable(sxp_test tests.c)
 
-# target_link_libraries(sxp_test sxbp)
+target_link_libraries(sxp_test sxbp)
 
 install(
     TARGETS sxbp
@@ -184,5 +183,5 @@ install(
     DESTINATION "include/${SXBP_PRECISE_HEADER_DESTINATION}/render_backends"
 )
 
-# enable_testing()
-# add_test(unit_tests sxp_test)
+enable_testing()
+add_test(unit_tests sxp_test)

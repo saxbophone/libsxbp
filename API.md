@@ -5,7 +5,7 @@ A broad overview of what the public and private APIs of the library need
 
 - data types/structures
     - `sxbp_buffer`, `sxbp_figure`, `sxbp_bitmap`
-- functions for allocating and deallocating the library's data structures
+- functions for allocating, deallocating and copying the library's data structures
     - `sxbp_create_buffer`, `sxbp_destroy_buffer`, `sxbp_create_figure`, etc... (naming convention to be confirmed, but keep it consistent)
 - a function for converting an array of bytes into the directions of an SXBP figure, and populating an SXBP object with these directions
     - `sxbp_initialise_figure` (verb to be confirmed)
