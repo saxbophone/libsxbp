@@ -97,6 +97,8 @@ extern const sxbp_version_t SXBP_VERSION;
  * @brief Attempts to allocate memory for the bytes of the given buffer
  * @details Attempts to allocate the amount of memory specified by the `size`
  * member of the buffer
+ * @warning It is unsafe to call this function on a buffer that has already
+ * been allocated
  * @returns `true` if memory was allocated successfully
  * @returns `false` if memory was not allocated successfully
  * @since v0.54.0
