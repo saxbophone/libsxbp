@@ -9,3 +9,11 @@ A broad overview of what the public and private APIs of the library need
 - functions for saving and loading complete or partially-incomplete SXBP objects to and from arrays of bytes (serialisation and deseralisation)
 - a function for rendering a complete SXBP object to a simple data object representing a bitmap image of the shape the SXBP figure makes
 - function(s) for rendering a complete SXBP object to popular image formats (the current version of libsxbp supports PBM and PNG, the latter optionally)
+
+## Private API
+
+- a function for converting an array of bytes into an array of directions
+- a function for setting the length of a given line of a spiral shape to a given length
+- a function for evaluating if a spiral shape is currently colliding or not, with an optional index of the maximum line to check up to (or maybe instead of doing this, we treat lines with length 0 as 'not existing yet'?)
+- a function for getting the current dimensions of the shape as it has been plotted so far
+- a function for rasterising the spiral shape
