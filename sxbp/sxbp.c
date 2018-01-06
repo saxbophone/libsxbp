@@ -96,6 +96,69 @@ bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to) {
 // re-enable all warnings
 #pragma GCC diagnostic pop
 
+static bool sxbp_init_bitmap_row(bool* row, uint32_t size) {
+    // allocate row with calloc
+    row = calloc(size, sizeof(bool));
+    // if row is not NULL, then the operation was successful
+    return row != NULL;
+}
+
+bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
+    // first allocate pointers for the rows, using calloc to set each to NULL
+    bitmap->pixels = calloc(bitmap->height, sizeof(bool*));
+    if (bitmap->pixels == NULL) {
+        // catch allocation error and exit early
+        return false;
+    } else {
+        // allocation of row pointers succeeded, now try and allocate each row
+        for (uint32_t row = 0; row < bitmap->height; row++) {
+            if (!sxbp_init_bitmap_row(bitmap->pixels[row], bitmap->width)) {
+                // allocation of one row failed, so de-allocate the whole bitmap
+                sxbp_free_bitmap(bitmap);
+                // indicate allocation failure
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
+    // if pixels is not NULL, assume there are rows to be deallocated
+    if (bitmap->pixels != NULL) {
+        // deallocate each row that needs deallocating first
+        for (uint32_t row = 0; row < bitmap->height; row++) {
+            if (bitmap->pixels[row] != NULL) {
+                free(bitmap->pixels[row]);
+            }
+        }
+        // finally, deallocate the rows pointer
+        free(bitmap->pixels);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool sxbp_copy_bitmap(sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
+    // before we do anything else, make sure 'to' has been freed
+    sxbp_free_bitmap(to);
+    // copy across width and height
+    to->width = from->width;
+    to->height = from->height;
+    // allocate the 'to' bitmap
+    if (!sxbp_init_bitmap(to)) {
+        // exit early if allocation failed
+        return false;
+    } else {
+        // allocation succeeded, so now copy the pixels
+        for (uint32_t row = 0; row < to->height; row++) {
+            memcpy(to->pixels[row], from->pixels[row], to->width);
+        }
+        return true;
+    }
+}
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

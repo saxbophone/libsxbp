@@ -138,6 +138,8 @@ bool sxbp_copy_buffer(sxbp_buffer_t* from, sxbp_buffer_t* to);
  * @details Attempts to allocate the number of lines specified by the `size`
  * member of the figure, and memory for other private fields of the structure
  * as needed.
+ * @warning It is unsafe to call this function on a figure that has already
+ * been allocated
  * @returns `true` if all memory was allocated successfully
  * @returns `false` if any memory was not allocated successfully
  * @since v0.54.0
@@ -177,6 +179,8 @@ bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to);
  * @brief Attempts to allocate memory for the pixels of the given bitmap
  * @details Attempts to allocate the memory for the amount of pixels specified
  * by the `width` and `height` members of the bitmap
+ * @warning It is unsafe to call this function on a bitmap that has already
+ * been allocated
  * @returns `true` if memory was allocated successfully
  * @returns `false` if memory was not allocated successfully
  * @since v0.54.0
