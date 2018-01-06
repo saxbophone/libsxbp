@@ -8,14 +8,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/* INCLUDES GO HERE */
+#include "sxbp.h"
 
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-/* CODE GOES HERE */
+// Version numbers are passed as preprocessor definitions by CMake
+const sxbp_version_t SXBP_VERSION = {
+    .major = SXBP_VERSION_MAJOR,
+    .minor = SXBP_VERSION_MINOR,
+    .patch = SXBP_VERSION_PATCH,
+    .string = SXBP_VERSION_STRING,
+};
 
 #ifdef __cplusplus
 } // extern "C"
