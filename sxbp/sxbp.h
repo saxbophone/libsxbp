@@ -171,6 +171,44 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  */
 bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to);
 
+/**
+ * @brief Attempts to allocate memory for the pixels of the given bitmap
+ * @details Attempts to allocate the memory for the amount of pixels specified
+ * by the `width` and `height` members of the bitmap
+ * @returns `true` if memory was allocated successfully
+ * @returns `false` if memory was not allocated successfully
+ * @since v0.54.0
+ */
+bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
+
+/**
+ * @brief Deallocates any allocated memory for the pixels of the given bitmap
+ * @details It is safe to call this function multiple times on the same bitmap
+ * @warning It is unsafe to call this function on a bitmap that has been
+ * deallocated without setting the `pixels` pointer member to `NULL`.
+ * @returns `true` if memory was deallocated
+ * @returns `false` if memory did not need to be deallocated (this is not an
+ * error condition)
+ * @since v0.54.0
+ */
+bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
+
+/**
+ * @brief Attempts to copy one bitmap to another
+ * @details All the data is copied from the bitmap such that both are entirely
+ * separate at the completion of the operation. Any data in the `to` bitmap
+ * will be overwritten or erased.
+ * @param from The bitmap to copy the contents of
+ * @param[out] The bitmap to copy the contents to
+ * @warning The bitmap to copy the contents to must be in a consistent state,
+ * that is it must either not be allocated yet, or must be properly allocated.
+ * @returns `true` if the data was copied successfully
+ * @returns `false` if the data was not copied successfully, in which case `to`
+ * will be empty.
+ * @since v0.54.0
+ */
+bool sxbp_copy_bitmap(sxbp_bitmap_t* from, sxbp_bitmap_t* to);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
