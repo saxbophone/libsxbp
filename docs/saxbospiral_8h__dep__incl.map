@@ -1,9 +1,0 @@
-<map id="sxbp/saxbospiral.h" name="sxbp/saxbospiral.h">
-<area shape="rect" id="node2" href="$initialise_8h.html" title="This compilation unit provides basic functions to initialise a spiral. " alt="" coords="5,80,117,107"/>
-<area shape="rect" id="node3" href="$plot_8h.html" title="This compilation unit provides functions for plotting and caching the points which make up the lines ..." alt="" coords="142,80,229,107"/>
-<area shape="rect" id="node4" href="$render_8h.html" title="This compilation unit provides functions for rendering a spiral to a bitmap. " alt="" coords="304,80,405,107"/>
-<area shape="rect" id="node5" href="$backend__pbm_8h.html" title="This compilation unit provides functionality to render a bitmap struct to a PBM image (binary version..." alt="" coords="189,155,342,196"/>
-<area shape="rect" id="node6" href="$backend__png_8h.html" title="This compilation unit provides functionality to render a bitmap struct to a PNG image (stored in a bu..." alt="" coords="366,155,519,196"/>
-<area shape="rect" id="node7" href="$serialise_8h.html" title="This compilation unit provides functions for serialising spirals to and from byte sequences (which ma..." alt="" coords="481,80,594,107"/>
-<area shape="rect" id="node8" href="$solve_8h.html" title="This compilation unit provides functions for calculating the length of all lines in a spiral such tha..." alt="" coords="619,80,715,107"/>
-</map>
