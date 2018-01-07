@@ -186,6 +186,11 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             sxbp_update_bounds(location, &bounds);
         }
     }
+    // NOTE: DEBUG
+    printf(
+        "%" PRId32 ", %" PRId32 ", %" PRId32 ", %" PRId32 "\n",
+        bounds.x_min, bounds.y_min, bounds.x_max, bounds.y_max
+    );
 }
 
 bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
