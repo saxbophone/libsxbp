@@ -260,6 +260,22 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
  */
 bool sxbp_copy_bitmap(sxbp_bitmap_t* from, sxbp_bitmap_t* to);
 
+/**
+ * @brief Converts the given binary data into an early-draft SXBP figure
+ * @details The data in the given buffer is converted into a sequence of spiral
+ * directions and from these an unrefined rudimentary line is plotted in the
+ * figure (by setting the directions and lengths of the figure's lines).
+ * @param data The buffer containing data to generate the figure from
+ * @param[out] figure The figure in which to generate the line. This will be
+ * erased before data is written to it.
+ * @note The shape that can be derived from this data will waste a lot of visual
+ * space and should be refined by calling `sxbp_refine_figure`
+ * @returns `true` if the figure could be successfully generated
+ * @returns `false` if the figure could not be successfully generated
+ * @since v0.54.0
+ */
+bool sxbp_begin_figure(sxbp_buffer_t* data, sxbp_figure_t* figure);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
