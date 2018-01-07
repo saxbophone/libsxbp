@@ -302,7 +302,7 @@ bool sxbp_refine_figure(sxbp_figure_t* figure);
  * @returns `true` if the figure could be successfully serialised
  * @returns `false` if the figure could not be successfully serialised
  */
-bool sxbp_dump_figure(sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
+bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
 
 /**
  * @brief Attempts to deserialise an SXBP figure from the given buffer
@@ -315,7 +315,7 @@ bool sxbp_dump_figure(sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
  * @returns `true` if the figure could be successfully deserialised
  * @returns `false` if the figure could not be successfully deserialised
  */
-bool sxbp_load_figure(sxbp_bitmap_t* buffer, sxbp_figure_t* figure);
+bool sxbp_load_figure(const sxbp_bitmap_t* buffer, sxbp_figure_t* figure);
 
 #ifdef __cplusplus
 } // extern "C"
