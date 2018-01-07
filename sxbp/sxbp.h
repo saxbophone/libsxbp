@@ -6,11 +6,10 @@
 /**
  * @file
  *
- * @brief This compilation unit provides the public data types and symbols
- * exposed by the library.
+ * @brief This header file provides the entire public API of sxbp
  *
  * @author Joshua Saxby <joshua.a.saxby@gmail.com>
- * @date 2018
+ * @date 2016-2017, 2018
  *
  * @copyright Copyright (C) Joshua Saxby 2016-2017, 2018
  *
