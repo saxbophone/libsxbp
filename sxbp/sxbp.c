@@ -47,7 +47,7 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
     }
 }
 
-bool sxbp_copy_buffer(sxbp_buffer_t* from, sxbp_buffer_t* to) {
+bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_buffer(to);
     // copy across the size
@@ -83,7 +83,7 @@ bool sxbp_free_figure(sxbp_figure_t* figure) {
     }
 }
 
-bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to) {
+bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
     // copy across the static members
@@ -144,7 +144,7 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
     }
 }
 
-bool sxbp_copy_bitmap(sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
+bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_bitmap(to);
     // copy across width and height

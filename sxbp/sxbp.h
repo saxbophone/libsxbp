@@ -176,7 +176,7 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer);
  * will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_buffer(sxbp_buffer_t* from, sxbp_buffer_t* to);
+bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
 
 /**
  * @brief Attempts to allocate memory for dynamic members of the given figure
@@ -218,7 +218,7 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_figure(sxbp_figure_t* from, sxbp_figure_t* to);
+bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
 
 /**
  * @brief Attempts to allocate memory for the pixels of the given bitmap
@@ -258,7 +258,7 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
  * will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_bitmap(sxbp_bitmap_t* from, sxbp_bitmap_t* to);
+bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
 
 /**
  * @brief Converts the given binary data into an early-draft SXBP figure
@@ -274,7 +274,7 @@ bool sxbp_copy_bitmap(sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * @returns `false` if the figure could not be successfully generated
  * @since v0.54.0
  */
-bool sxbp_begin_figure(sxbp_buffer_t* data, sxbp_figure_t* figure);
+bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure);
 
 #ifdef __cplusplus
 } // extern "C"
