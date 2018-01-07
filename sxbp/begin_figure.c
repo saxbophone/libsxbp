@@ -11,6 +11,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <inttypes.h> // NOTE: DEBUG
+#include <stdio.h> // NOTE: DEBUG
 #include <stdlib.h>
 
 #include "sxbp.h"
@@ -145,8 +147,8 @@ static void sxbp_update_location(
  */
 static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
     // loop state variables
-    sxbp_co_ord_t location = { 0, 0, }; // where the end of the last line is
-    sxbp_bounds_t bounds; // the bounds of the line traced so far
+    sxbp_co_ord_t location = { 0 }; // where the end of the last line is
+    sxbp_bounds_t bounds = { 0 }; // the bounds of the line traced so far
     // the first line is always an up line - this is for orientation purposes
     sxbp_direction_t facing = SXBP_UP;
     // add first line to the figure
@@ -160,9 +162,9 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
      * make the spiral pattern, also deducing the length to set these to to
      * avoid any collisions
      */
-    for(uint32_t s = 0; s < data->size; s++) {
+    for (uint32_t s = 0; s < data->size; s++) {
         // byte-level loop
-        for(uint8_t b = 0; b < 8; b++) {
+        for (uint8_t b = 0; b < 8; b++) {
             // bit level loop - extract the bit
             uint8_t e = 7 - b; // which power of two to use with bit mask
             bool bit = (data->bytes[s] & (1 << e)) >> e; // the current bit
@@ -173,6 +175,8 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             facing = sxbp_change_line_direction(facing, rotation);
             // calculate what length this line should be
             sxbp_length_t length = sxbp_next_length(location, facing, bounds);
+            // NOTE: DEBUG
+            printf("%" PRIu8 ", %" PRIu32 "\n", facing, length);
             // make line
             sxbp_line_t line = sxbp_make_line(facing, length);
             // add line to figure
