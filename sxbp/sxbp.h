@@ -152,7 +152,7 @@ bool sxbp_init_buffer(sxbp_buffer_t* buffer);
 
 /**
  * @brief Deallocates any allocated memory for the bytes of the given buffer
- * @details It is safe to call this function multiple times on the same buffer
+ * @note It is safe to call this function multiple times on the same buffer
  * @warning It is unsafe to call this function on a buffer that has been
  * deallocated without setting the `bytes` pointer member to `NULL`.
  * @returns `true` if memory was deallocated
@@ -193,7 +193,7 @@ bool sxbp_init_figure(sxbp_figure_t* figure);
 
 /**
  * @brief Deallocates any allocated memory for the given figure
- * @details It is safe to call this function multiple times on the same figure
+ * @note It is safe to call this function multiple times on the same figure
  * @warning It is unsafe to call this function on a figure that has had any
  * dynamically allocated members deallocated without setting their respective
  * pointers to `NULL`.
@@ -234,7 +234,7 @@ bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
 
 /**
  * @brief Deallocates any allocated memory for the pixels of the given bitmap
- * @details It is safe to call this function multiple times on the same bitmap
+ * @note It is safe to call this function multiple times on the same bitmap
  * @warning It is unsafe to call this function on a bitmap that has been
  * deallocated without setting the `pixels` pointer member to `NULL`.
  * @returns `true` if memory was deallocated
