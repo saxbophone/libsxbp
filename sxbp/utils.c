@@ -95,6 +95,7 @@ bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     }
 }
 
+// allocates memory for one row of a bitmap, returning whether it succeeded
 static bool sxbp_init_bitmap_row(bool* row, uint32_t size) {
     // allocate row with calloc
     row = calloc(size, sizeof(bool));
