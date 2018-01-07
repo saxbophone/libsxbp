@@ -301,6 +301,7 @@ bool sxbp_refine_figure(sxbp_figure_t* figure);
  * @param[out] buffer The buffer to store the serialised data in
  * @returns `true` if the figure could be successfully serialised
  * @returns `false` if the figure could not be successfully serialised
+ * @since v0.54.0
  */
 bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
 
@@ -314,8 +315,21 @@ bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
  * @param[out] figure The figure to store the deserialised SXBP figure in
  * @returns `true` if the figure could be successfully deserialised
  * @returns `false` if the figure could not be successfully deserialised
+ * @since v0.54.0
  */
 bool sxbp_load_figure(const sxbp_bitmap_t* buffer, sxbp_figure_t* figure);
+
+/**
+ * @brief Rasterises an image of the given figure to a basic bitmap object
+ * @details A 1-bit black/white bitmap image of the line formed by the SXBP
+ * figure is rendered to the given bitmap object
+ * @note The bitmap is erased before the output is written to it
+ * @param figure The SXBP figure to render
+ * @param[out] bitmap The bitmap to write the output to
+ * @returns `true` if the figure could be rendered successfully
+ * @returns `false` if the figure could not be rendered successfully
+ */
+bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap);
 
 #ifdef __cplusplus
 } // extern "C"
