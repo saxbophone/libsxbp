@@ -176,7 +176,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             // calculate what length this line should be
             sxbp_length_t length = sxbp_next_length(location, facing, bounds);
             // NOTE: DEBUG
-            printf("%" PRIu8 ", %" PRIu32 "\n", facing, length);
+            printf("%i, %" PRIu32 "\n", facing, length);
             // make line
             sxbp_line_t line = sxbp_make_line(facing, length);
             // add line to figure
