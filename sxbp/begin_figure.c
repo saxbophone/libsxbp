@@ -11,8 +11,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include <inttypes.h> // NOTE: DEBUG
-#include <stdio.h> // NOTE: DEBUG
 #include <stdlib.h>
 
 #include "sxbp.h"
@@ -175,8 +173,6 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             facing = sxbp_change_line_direction(facing, rotation);
             // calculate what length this line should be
             sxbp_length_t length = sxbp_next_length(location, facing, bounds);
-            // NOTE: DEBUG
-            printf("%i, %" PRIu32 "\n", facing, length);
             // make line
             sxbp_line_t line = sxbp_make_line(facing, length);
             // add line to figure
@@ -186,11 +182,6 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             sxbp_update_bounds(location, &bounds);
         }
     }
-    // NOTE: DEBUG
-    printf(
-        "%" PRId32 ", %" PRId32 ", %" PRId32 ", %" PRId32 "\n",
-        bounds.x_min, bounds.y_min, bounds.x_max, bounds.y_max
-    );
 }
 
 bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
