@@ -59,10 +59,10 @@ typedef struct sxbp_bounds_t {
  * these can be indexed by the cartesian direction constants
  */
 static const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
-    {  0,  1, }, /* SXBP_UP    (0) */
-    {  1,  0, }, /* SXBP_RIGHT (1) */
-    {  0, -1, }, /* SXBP_DOWN  (2) */
-    { -1,  0, }, /* SXBP_LEFT  (3) */
+    [SXBP_UP]    = {  0,  1, },
+    [SXBP_RIGHT] = {  1,  0, },
+    [SXBP_DOWN]  = {  0, -1, },
+    [SXBP_LEFT]  = { -1,  0, },
 };
 
 // private, builds a line from a direction and length

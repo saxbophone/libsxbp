@@ -82,6 +82,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wmissing-prototypes")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
+    # turn off spurious warnings from clang about missing field initialisers
+    enable_c_compiler_flag_if_supported("-Wno-missing-field-initializers")
 endif()
 
 # begin dependencies
