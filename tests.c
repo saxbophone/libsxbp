@@ -8,7 +8,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "sxbp/sxbp.h"
 
@@ -19,7 +21,18 @@ extern "C"{
 
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
-    return 0;
+    const char* string = "SXBP";
+    size_t length = strlen(string);
+    sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
+    if (!sxbp_init_buffer(&buffer)) {
+        return -1;
+    } else {
+        memcpy(buffer.bytes, string, length);
+        sxbp_figure_t figure = { 0 };
+        sxbp_begin_figure(&buffer, &figure);
+        sxbp_free_buffer(&buffer);
+        return 0;
+    }
 }
 
 #ifdef __cplusplus
