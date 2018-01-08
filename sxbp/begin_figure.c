@@ -107,7 +107,7 @@ static sxbp_length_t sxbp_next_length(
             return abs(bounds.x_min - location.x) + 1;
         default:
             // NOTE: should never happen
-            return 1;
+            return 0;
     }
 }
 
