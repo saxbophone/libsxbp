@@ -21,7 +21,7 @@ extern "C"{
 
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
-    const char* string = "SXBP";
+    const char* string = "rjfowofinwo3non3wordrjfowofinwo3non3word";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
     if (!sxbp_init_buffer(&buffer)) {
@@ -31,9 +31,6 @@ int main(void) {
         sxbp_figure_t figure = { 0 };
         sxbp_begin_figure(&buffer, &figure);
         sxbp_refine_figure(&figure);
-        for (size_t i = 0; i < figure.size; i++) {
-            printf("%02zu: %d, %02i\n", i, figure.lines[i].direction, figure.lines[i].length);
-        }
         sxbp_free_buffer(&buffer);
         return 0;
     }

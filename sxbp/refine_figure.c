@@ -15,23 +15,72 @@
  */
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "sxbp.h"
+#include "sxbp_internal.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 // private, returns true if the figure collides with itself or false if not
 static bool sxbp_figure_collides(sxbp_figure_t* figure) {
-    // TODO: add actual implementation of this function
-    return true;
+    // get spiral bounds first
+    sxbp_bounds_t bounds = sxbp_get_bounds(figure);
+    // now build an empty bitmap with the dimensions of the bounds + 1
+    sxbp_bitmap_t bitmap = {
+        // HACK: I have no idea why these need to be + 1, needs investigating
+        .width = (bounds.x_max - bounds.x_min) + 1,
+        .height = (bounds.y_max - bounds.y_min) + 1,
+        .pixels = NULL,
+    };
+    // allocate memory for the bitmap and check this succeeded
+    if (!sxbp_init_bitmap(&bitmap)) {
+        // XXX: of course this isn't a good idea
+        abort();
+    } else {
+        /*
+         * the transformation vector for all coördinates is the negative of the min
+         * bounds
+         * the start location is the transformation vector
+         * (avoids extra calculations)
+         */
+        sxbp_co_ord_t location = {
+            .x = -bounds.x_min,
+            .y = -bounds.y_min,
+        };
+        // plot a pixel at the start location first of all
+        bitmap.pixels[location.x][location.y] = true;
+        /*
+         * walk the spiral's line and plot the coördinates of each
+         * quit and return false early if any collide (if pixel exists already)
+         */
+        for (uint32_t i = 0; i < figure->size; i++) {
+            sxbp_line_t line = figure->lines[i];
+            sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[line.direction];
+            // plot as many pixels as the length of the line
+            for (sxbp_length_t l = 0; l < line.length; l++) {
+                location.x += direction.x;
+                location.y += direction.y;
+                // if there's no pixel here, plot it
+                if (bitmap.pixels[location.x][location.y] == false) {
+                    bitmap.pixels[location.x][location.y] = true;
+                } else {
+                    // otherwise, cleanup and return true to mark collision
+                    sxbp_free_bitmap(&bitmap);
+                    return true;
+                }
+            }
+        }
+        // free the memory allocated for the bitmap
+        sxbp_free_bitmap(&bitmap);
+        // return false, we found no collisions
+        return false;
+    }
 }
-#pragma GCC diagnostic pop
 
 /*
  * private, attempts to shorten the line of the figure at index l
@@ -64,6 +113,8 @@ static void sxbp_attempt_line_shorten(
          * shorten the lines after this one, in reverse order.
          */
         if (line->length < original_length) {
+            // NOTE: DEBUG
+            printf("\t%03u: %03i\n", l, figure->lines[l].length);
             // try and shorten other lines some more
             for (uint32_t i = max; i >= l; i--) {
                 sxbp_attempt_line_shorten(figure, i, max);
@@ -82,6 +133,8 @@ bool sxbp_refine_figure(sxbp_figure_t* figure) {
         for (uint32_t i = figure->size - 1; i > 0; i--) {
             // try and shorten it
             sxbp_attempt_line_shorten(figure, i, figure->size);
+            // NOTE: DEBUG
+            printf("%03u: %03i\n", i, figure->lines[i].length);
         }
         // signal to caller that the call was valid
         return true;
