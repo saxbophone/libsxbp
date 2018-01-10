@@ -1,0 +1,93 @@
+/*
+ * This source file forms part of sxbp, a library which generates experimental
+ * 2D spiral-like shapes based on input binary data.
+ *
+ * This compilation unit provides the definition of `sxbp_refine_figure`, a
+ * public function used to shorten the lines of an SXBP figure to something less
+ * space-consuming, while still maintaining a pattern that has no collisions
+ * between lines.
+ *
+ * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#include "sxbp.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+// private, returns true if the figure collides with itself or false if not
+static bool sxbp_figure_collides(sxbp_figure_t* figure) {
+    // TODO: add actual implementation of this function
+    return true;
+}
+#pragma GCC diagnostic pop
+
+/*
+ * private, attempts to shorten the line of the figure at index l
+ * if it succeeds, it will call itself recursively for each line after l from
+ * max to l, in that order.
+ */
+static void sxbp_attempt_line_shorten(
+    sxbp_figure_t* figure,
+    uint32_t l,
+    uint32_t max
+) {
+    sxbp_line_t* line = &figure->lines[l];
+    // it only makes sense to try and shorten lines longer than 1
+    if (line->length > 1) {
+        // we'll need this later to check if we were actually able to shorten it
+        sxbp_length_t original_length = line->length;
+        // as an ambitious first step, set to 1 (try best case scenario first)
+        line->length = 1;
+        /*
+         * if that caused a collision, keep extending it until it no longer
+         * collides (or we reach the original length) --we can quit in that case
+         * as we already know it doesn't collide
+         */
+        while (line->length < original_length && sxbp_figure_collides(figure)) {
+            line->length++;
+        }
+        /*
+         * at this point, the shape now no longer collides. now, we check to see
+         * if we were able to shorten the line at all. If so, we then try and
+         * shorten the lines after this one, in reverse order.
+         */
+        if (line->length < original_length) {
+            // try and shorten other lines some more
+            for (uint32_t i = max; i >= l; i--) {
+                sxbp_attempt_line_shorten(figure, i, max);
+            }
+        }
+    }
+}
+
+bool sxbp_refine_figure(sxbp_figure_t* figure) {
+    // we can't refine a figure that has no lines allocated, so check this first
+    if (figure->lines == NULL) {
+        // bail early, we can't do anything with this
+        return false;
+    } else {
+        // iterate over lines backwards - we don't care about line 0
+        for (uint32_t i = figure->size - 1; i > 0; i--) {
+            // try and shorten it
+            sxbp_attempt_line_shorten(figure, i, figure->size);
+        }
+        // signal to caller that the call was valid
+        return true;
+    }
+}
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

@@ -30,6 +30,10 @@ int main(void) {
         memcpy(buffer.bytes, string, length);
         sxbp_figure_t figure = { 0 };
         sxbp_begin_figure(&buffer, &figure);
+        sxbp_refine_figure(&figure);
+        for (size_t i = 0; i < figure.size; i++) {
+            printf("%02zu: %d, %02i\n", i, figure.lines[i].direction, figure.lines[i].length);
+        }
         sxbp_free_buffer(&buffer);
         return 0;
     }
