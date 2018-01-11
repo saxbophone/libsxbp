@@ -21,7 +21,7 @@ extern "C"{
 
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
-    const char* string = "rjfowofinwo3non3wordrjfowofinwo3non3word";
+    const char* string = "SXBP";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
     if (!sxbp_init_buffer(&buffer)) {
