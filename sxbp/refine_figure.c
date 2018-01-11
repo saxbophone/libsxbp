@@ -25,25 +25,31 @@
 extern "C" {
 #endif
 
+// private, builds a bitmap large enough to fit coördinates in the given bounds
+static bool sxbp_make_bitmap_for_bounds(
+    const sxbp_bounds_t bounds, sxbp_bitmap_t* bitmap
+) {
+    /*
+     * the width and height are the difference of the max and min dimensions
+     * + 1.
+     * this makes sense because for example from 1 to 10 there are 10 values
+     * and the difference of these is 9 so the number of values is 9+1 = 10
+     */
+    bitmap->width = (bounds.x_max - bounds.x_min) + 1;
+    bitmap->height = (bounds.y_max - bounds.y_min) + 1;
+    bitmap->pixels = NULL;
+    // allocate memory for the bitmap and return whether this succeeded or not
+    return sxbp_init_bitmap(bitmap);
+}
+
 // private, returns true if the figure collides with itself or false if not
-static bool sxbp_figure_collides(sxbp_figure_t* figure) {
+static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
     // get spiral bounds first
     sxbp_bounds_t bounds = sxbp_get_bounds(figure);
-    // now build an empty bitmap with the dimensions of the bounds + 1
-    sxbp_bitmap_t bitmap = {
-        /*
-         * the width and height are the difference of the max and min dimensions
-         * + 1.
-         * this makes sense because for example from 1 to 10 there are 10 values
-         * and the difference of these is 9 so the number of values is 9+1 = 10
-         */
-        .width = (bounds.x_max - bounds.x_min) + 1,
-        .height = (bounds.y_max - bounds.y_min) + 1,
-        .pixels = NULL,
-    };
-    // allocate memory for the bitmap and check this succeeded
-    if (!sxbp_init_bitmap(&bitmap)) {
-        // XXX: of course this isn't a good idea
+    // build bitmap for bounds
+    sxbp_bitmap_t bitmap =  { 0 };
+    if (!sxbp_make_bitmap_for_bounds(bounds, &bitmap)) {
+        // TODO: implment better error-handling than this
         abort();
     } else {
         /*
@@ -93,8 +99,8 @@ static bool sxbp_figure_collides(sxbp_figure_t* figure) {
  */
 static void sxbp_attempt_line_shorten(
     sxbp_figure_t* figure,
-    uint32_t l,
-    uint32_t max
+    const uint32_t l,
+    const uint32_t max
 ) {
     sxbp_line_t* line = &figure->lines[l];
     // it only makes sense to try and shorten lines longer than 1
