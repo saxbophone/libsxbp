@@ -15,7 +15,6 @@
  */
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "sxbp.h"
@@ -32,7 +31,12 @@ static bool sxbp_figure_collides(sxbp_figure_t* figure) {
     sxbp_bounds_t bounds = sxbp_get_bounds(figure);
     // now build an empty bitmap with the dimensions of the bounds + 1
     sxbp_bitmap_t bitmap = {
-        // HACK: I have no idea why these need to be + 1, needs investigating
+        /*
+         * the width and height are the difference of the max and min dimensions
+         * + 1.
+         * this makes sense because for example from 1 to 10 there are 10 values
+         * and the difference of these is 9 so the number of values is 9+1 = 10
+         */
         .width = (bounds.x_max - bounds.x_min) + 1,
         .height = (bounds.y_max - bounds.y_min) + 1,
         .pixels = NULL,
@@ -113,8 +117,6 @@ static void sxbp_attempt_line_shorten(
          * shorten the lines after this one, in reverse order.
          */
         if (line->length < original_length) {
-            // NOTE: DEBUG
-            printf("\t%03u: %03i\n", l, figure->lines[l].length);
             // try and shorten other lines some more
             for (uint32_t i = max; i >= l; i--) {
                 sxbp_attempt_line_shorten(figure, i, max);
@@ -133,8 +135,6 @@ bool sxbp_refine_figure(sxbp_figure_t* figure) {
         for (uint32_t i = figure->size - 1; i > 0; i--) {
             // try and shorten it
             sxbp_attempt_line_shorten(figure, i, figure->size - 1);
-            // NOTE: DEBUG
-            printf("%03u: %03i\n", i, figure->lines[i].length);
         }
         // signal to caller that the call was valid
         return true;
