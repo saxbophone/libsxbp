@@ -31,6 +31,7 @@ int main(void) {
         sxbp_figure_t figure = { 0 };
         sxbp_begin_figure(&buffer, &figure);
         sxbp_refine_figure(&figure);
+        sxbp_free_figure(&figure);
         sxbp_free_buffer(&buffer);
         return 0;
     }

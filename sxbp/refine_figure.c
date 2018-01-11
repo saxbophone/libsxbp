@@ -132,7 +132,7 @@ bool sxbp_refine_figure(sxbp_figure_t* figure) {
         // iterate over lines backwards - we don't care about line 0
         for (uint32_t i = figure->size - 1; i > 0; i--) {
             // try and shorten it
-            sxbp_attempt_line_shorten(figure, i, figure->size);
+            sxbp_attempt_line_shorten(figure, i, figure->size - 1);
             // NOTE: DEBUG
             printf("%03u: %03i\n", i, figure->lines[i].length);
         }
