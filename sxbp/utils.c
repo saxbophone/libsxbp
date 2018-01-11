@@ -11,6 +11,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -95,25 +96,25 @@ bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     }
 }
 
-// allocates memory for one row of a bitmap, returning whether it succeeded
-static bool sxbp_init_bitmap_row(bool* row, uint32_t size) {
-    // allocate row with calloc
-    row = calloc(size, sizeof(bool));
-    // if row is not NULL, then the operation was successful
-    return row != NULL;
+// allocates memory for one column of a bitmap, returning whether it succeeded
+static bool sxbp_init_bitmap_col(bool** col, uint32_t size) {
+    // allocate col with calloc
+    *col = calloc(size, sizeof(bool));
+    // if col is not NULL, then the operation was successful
+    return *col != NULL;
 }
 
 bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
-    // first allocate pointers for the rows, using calloc to set each to NULL
-    bitmap->pixels = calloc(bitmap->height, sizeof(bool*));
+    // first allocate pointers for the columns
+    bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
         // catch allocation error and exit early
         return false;
     } else {
-        // allocation of row pointers succeeded, now try and allocate each row
-        for (uint32_t row = 0; row < bitmap->height; row++) {
-            if (!sxbp_init_bitmap_row(bitmap->pixels[row], bitmap->width)) {
-                // allocation of one row failed, so de-allocate the whole bitmap
+        // allocation of col pointers succeeded, now try and allocate each col
+        for (uint32_t col = 0; col < bitmap->width; col++) {
+            if (!sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)) {
+                // allocation of one col failed, so de-allocate the whole bitmap
                 sxbp_free_bitmap(bitmap);
                 // indicate allocation failure
                 return false;
@@ -124,12 +125,12 @@ bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
 }
 
 bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
-    // if pixels is not NULL, assume there are rows to be deallocated
+    // if pixels is not NULL, assume there are cols to be deallocated
     if (bitmap->pixels != NULL) {
-        // deallocate each row that needs deallocating first
-        for (uint32_t row = 0; row < bitmap->height; row++) {
-            if (bitmap->pixels[row] != NULL) {
-                free(bitmap->pixels[row]);
+        // deallocate each col that needs deallocating first
+        for (uint32_t col = 0; col < bitmap->width; col++) {
+            if (bitmap->pixels[col] != NULL) {
+                free(bitmap->pixels[col]);
             }
         }
         // finally, deallocate the rows pointer

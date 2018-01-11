@@ -11,9 +11,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "sxbp.h"
+#include "sxbp_internal.h"
 
 
 #ifdef __cplusplus
@@ -29,39 +32,6 @@ typedef enum sxbp_rotation_t {
     SXBP_ANTI_CLOCKWISE = -1, // The rotational direction 'ANTI-CLOCKWISE'
     SXBP_CLOCKWISE = 1, // The rotational direction 'CLOCKWISE'
 } sxbp_rotation_t;
-
-// private type for storing one of the items of a tuple
-typedef int32_t sxbp_tuple_item_t;
-
-// private generic tuple type for storing a vector-based quantity
-typedef struct sxbp_tuple_t {
-    sxbp_tuple_item_t x; // the x (horizontal) value of the tuple
-    sxbp_tuple_item_t y; // the y (vertical) value of the tuple
-} sxbp_tuple_t;
-
-// private vector type used for representing directions
-typedef sxbp_tuple_t sxbp_vector_t;
-// private coördinate type used for representing cartesian coördinates
-typedef sxbp_tuple_t sxbp_co_ord_t;
-
-// private structure for storing figure's bounds (when line is plotted out)
-typedef struct sxbp_bounds_t {
-    sxbp_tuple_item_t x_min; // the smallest value x has been so far
-    sxbp_tuple_item_t x_max; // the largest value x has been so far
-    sxbp_tuple_item_t y_min; // the smallest value y has been so far
-    sxbp_tuple_item_t y_max; // the largest value y has been so far
-} sxbp_bounds_t;
-
-/*
- * vector direction constants (private)
- * these can be indexed by the cartesian direction constants
- */
-static const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
-    [SXBP_UP]    = {  0,  1, },
-    [SXBP_RIGHT] = {  1,  0, },
-    [SXBP_DOWN]  = {  0, -1, },
-    [SXBP_LEFT]  = { -1,  0, },
-};
 
 // private, builds a line from a direction and length
 static sxbp_line_t sxbp_make_line(
@@ -109,33 +79,6 @@ static sxbp_length_t sxbp_next_length(
             // NOTE: should never happen
             return 0;
     }
-}
-
-/*
- * private, updates the current figure bounds given the location of the end of
- * the most recently-plotted line
- */
-static void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds) {
-    if (location.x > bounds->x_max) {
-        bounds->x_max = location.x;
-    } else if (location.x < bounds->x_min) {
-        bounds->x_min = location.x;
-    }
-    if (location.y > bounds->y_max) {
-        bounds->y_max = location.y;
-    } else if (location.y < bounds->y_min) {
-        bounds->y_min = location.y;
-    }
-}
-
-// private, 'move' the given location along the given line
-static void sxbp_update_location(
-    sxbp_co_ord_t* location,
-    sxbp_line_t line
-) {
-    sxbp_vector_t direction_vector = SXBP_VECTOR_DIRECTIONS[line.direction];
-    location->x += direction_vector.x * line.length;
-    location->y += direction_vector.y * line.length;
 }
 
 /*
