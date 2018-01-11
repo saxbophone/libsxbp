@@ -46,4 +46,4 @@ before_script:
   - cmake .
 script:
   - make -j -k
-  - ctest -V
+  - valgrind --error-exitcode=143 --leak-check=full ./sxp_test
