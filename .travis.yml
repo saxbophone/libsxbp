@@ -32,6 +32,7 @@ addons:
       - cmake-data
       # want gcc 5.x as 4.x gives incorrect warnings
       - gcc-5
+      - valgrind
 # branches safelist
 branches:
   only:
