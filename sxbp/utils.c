@@ -153,8 +153,8 @@ bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
         return false;
     } else {
         // allocation succeeded, so now copy the pixels
-        for (uint32_t row = 0; row < to->height; row++) {
-            memcpy(to->pixels[row], from->pixels[row], to->width);
+        for (uint32_t col = 0; col < to->width; col++) {
+            memcpy(to->pixels[col], from->pixels[col], to->height);
         }
         return true;
     }
