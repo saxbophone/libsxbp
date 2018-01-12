@@ -1,7 +1,4 @@
 language: c
-# Ubuntu 14.04 Trusty support
-sudo: required
-dist: trusty
 # build matrix with both OSes and Compilers
 os:
   - linux
@@ -15,10 +12,14 @@ env:
     - SXBP_C_STANDARD=99
     - SXBP_C_STANDARD=11
 matrix:
-  # exclude gcc on osx as this always points to clang
-  exclude:
-  - os: osx
-    compiler: gcc
+  include:
+    # Ubuntu 14.04 Trusty support
+    - os: linux
+      dist: trusty
+      sudo: required
+    # use actual GCC on OSX (not Clang!)
+    - os: osx
+      osx_image: xcode8
 cache:
   - ccache
 addons:
@@ -42,6 +43,9 @@ branches:
 install:
   # override $CC to use gcc-5
   - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
+before_install:
+  # install gcc-5 on OSX
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install gcc5; fi
 before_script:
   - cmake .
 script:
