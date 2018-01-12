@@ -46,12 +46,14 @@ static bool sxbp_make_bitmap_for_bounds(
 static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
     // get spiral bounds first
     sxbp_bounds_t bounds = sxbp_get_bounds(figure);
+    sxbp_bitmap_t initmap =  { 0 };
     // build bitmap for bounds
     sxbp_bitmap_t bitmap =  { 0 };
-    if (!sxbp_make_bitmap_for_bounds(bounds, &bitmap)) {
+    if (!sxbp_make_bitmap_for_bounds(bounds, &initmap)) {
         // TODO: implment better error-handling than this
         abort();
     } else {
+        sxbp_copy_bitmap(&initmap, &bitmap);
         /*
          * the transformation vector for all coördinates is the negative of the min
          * bounds
@@ -86,6 +88,7 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
             }
         }
         // free the memory allocated for the bitmap
+        sxbp_free_bitmap(&initmap);
         sxbp_free_bitmap(&bitmap);
         // return false, we found no collisions
         return false;
