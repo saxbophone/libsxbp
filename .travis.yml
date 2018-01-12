@@ -32,7 +32,6 @@ addons:
       - cmake-data
       # want gcc 5.x as 4.x gives incorrect warnings
       - gcc-5
-      - valgrind
 # branches safelist
 branches:
   only:
@@ -47,4 +46,4 @@ before_script:
   - cmake .
 script:
   - make -j -k
-  - valgrind --error-exitcode=143 --leak-check=full ./sxp_test
+  - ctest -V

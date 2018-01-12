@@ -216,7 +216,6 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * @returns `false` if the data was not copied successfully, in which case `to`
  * will be empty.
  * @since v0.54.0
- * @bug Raises a stack traceback and aborts when used correctly
  */
 bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
 
