@@ -1,4 +1,9 @@
 language: c
+# Ubuntu 14.04 Trusty support
+dist: trusty
+sudo: required
+# helps to use actual GCC on OSX (not Clang!)
+osx_image: xcode8
 # build matrix with both OSes and Compilers
 os:
   - linux
@@ -11,15 +16,6 @@ env:
   matrix:
     - SXBP_C_STANDARD=99
     - SXBP_C_STANDARD=11
-matrix:
-  include:
-    # Ubuntu 14.04 Trusty support
-    - os: linux
-      dist: trusty
-      sudo: required
-    # use actual GCC on OSX (not Clang!)
-    - os: osx
-      osx_image: xcode8
 cache:
   - ccache
 addons:
