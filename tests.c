@@ -23,22 +23,16 @@ int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
     const char* string = "SXBP";
     size_t length = strlen(string);
-    sxbp_buffer_t input = { .size = length, .bytes = NULL, };
-    if (!sxbp_init_buffer(&input)) {
+    sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
+    if (!sxbp_init_buffer(&buffer)) {
         return -1;
     } else {
-        memcpy(input.bytes, string, length);
-        sxbp_buffer_t buffer = { 0 };
-        sxbp_copy_buffer(&input, &buffer);
-        sxbp_figure_t begin = { 0 };
-        sxbp_begin_figure(&buffer, &begin);
+        memcpy(buffer.bytes, string, length);
         sxbp_figure_t figure = { 0 };
-        sxbp_copy_figure(&begin, &figure);
+        sxbp_begin_figure(&buffer, &figure);
         sxbp_refine_figure(&figure);
         sxbp_free_figure(&figure);
-        sxbp_free_figure(&begin);
         sxbp_free_buffer(&buffer);
-        sxbp_free_buffer(&input);
         return 0;
     }
 }
