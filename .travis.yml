@@ -32,12 +32,11 @@ branches:
     - /^test\/.*$/
     - /^feature\/.*$/
 install:
-  # override $CC to use gcc-5
-  - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
-before_install:
   # install gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install gcc5; fi
 before_script:
+  # override $CC to use gcc-5
+  - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
   - cmake .
 script:
   - make -j -k
