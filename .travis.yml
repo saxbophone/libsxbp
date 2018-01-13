@@ -2,6 +2,8 @@ language: c
 # Ubuntu 14.04 Trusty support
 dist: trusty
 sudo: required
+# helps to use actual GCC on OSX (not Clang!)
+osx_image: xcode8
 # build matrix with both OSes and Compilers
 os:
   - linux
