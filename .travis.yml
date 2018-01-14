@@ -33,6 +33,9 @@ branches:
     - develop
     - /^test\/.*$/
     - /^feature\/.*$/
+before_install:
+  # fix for homebrew failling on Travis-CI
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
 install:
   # install gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install gcc5; fi
