@@ -4,6 +4,7 @@
  */
 
 /**
+ * @internal
  * @file
  *
  * @brief This header file provides internal definitions for use within sxbp
