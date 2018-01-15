@@ -138,6 +138,14 @@ typedef struct sxbp_bitmap_t {
 extern const sxbp_version_t SXBP_VERSION;
 
 /**
+ * @brief Creates a blank empty buffer
+ * @details Ensures that all pointer fields are properly initialised to NULL
+ * @returns An `sxbp_buffer_t` object with all fields set to default/blank value
+ * @since v0.54.0
+ */
+sxbp_buffer_t sxbp_blank_buffer(void);
+
+/**
  * @brief Attempts to allocate memory for the bytes of the given buffer
  * @details Attempts to allocate the amount of memory specified by the `size`
  * member of the buffer
@@ -176,6 +184,14 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer);
  * @since v0.54.0
  */
 bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
+
+/**
+ * @brief Creates a blank empty figure
+ * @details Ensures that all pointer fields are properly initialised to NULL
+ * @returns An `sxbp_figure_t` object with all fields set to default/blank value
+ * @since v0.54.0
+ */
+sxbp_figure_t sxbp_blank_figure(void);
 
 /**
  * @brief Attempts to allocate memory for dynamic members of the given figure
@@ -218,6 +234,14 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * @since v0.54.0
  */
 bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
+
+/**
+ * @brief Creates a blank empty bitmap
+ * @details Ensures that all pointer fields are properly initialised to NULL
+ * @returns An `sxbp_bitmap_t` object with all fields set to default/blank value
+ * @since v0.54.0
+ */
+sxbp_bitmap_t sxbp_blank_bitmap(void);
 
 /**
  * @brief Attempts to allocate memory for the pixels of the given bitmap

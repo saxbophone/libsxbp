@@ -23,6 +23,10 @@
 extern "C"{
 #endif
 
+sxbp_buffer_t sxbp_blank_buffer(void) {
+    return (sxbp_buffer_t){ .size = 0, .bytes = NULL, };
+}
+
 bool sxbp_init_buffer(sxbp_buffer_t* buffer) {
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
@@ -57,6 +61,10 @@ bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
         memcpy(to->bytes, from->bytes, to->size);
         return true;
     }
+}
+
+sxbp_figure_t sxbp_blank_figure(void) {
+    return (sxbp_figure_t){ .size = 0, .lines = NULL, .lines_remaining = 0, };
 }
 
 bool sxbp_init_figure(sxbp_figure_t* figure) {
@@ -94,6 +102,10 @@ bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
         memcpy(to->lines, from->lines, to->size);
         return true;
     }
+}
+
+sxbp_bitmap_t sxbp_blank_bitmap(void) {
+    return (sxbp_bitmap_t){ .width = 0, .height = 0, .pixels = NULL, };
 }
 
 // allocates memory for one column of a bitmap, returning whether it succeeded
