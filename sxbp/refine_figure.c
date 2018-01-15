@@ -47,7 +47,7 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
     // get spiral bounds first
     sxbp_bounds_t bounds = sxbp_get_bounds(figure);
     // build bitmap for bounds
-    sxbp_bitmap_t bitmap =  { 0 };
+    sxbp_bitmap_t bitmap =  sxbp_blank_bitmap();
     if (!sxbp_make_bitmap_for_bounds(bounds, &bitmap)) {
         // TODO: implment better error-handling than this
         abort();

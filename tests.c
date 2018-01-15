@@ -28,7 +28,7 @@ int main(void) {
         return -1;
     } else {
         memcpy(buffer.bytes, string, length);
-        sxbp_figure_t figure = { 0 };
+        sxbp_figure_t figure = sxbp_blank_figure();
         sxbp_begin_figure(&buffer, &figure);
         sxbp_refine_figure(&figure);
         sxbp_free_figure(&figure);
