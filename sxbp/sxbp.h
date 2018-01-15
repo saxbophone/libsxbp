@@ -189,7 +189,7 @@ bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
 /**
  * @brief Attempts to read the contents of the given file into the given buffer
  * @details Allocates the buffer and copies all the bytes of the file into it
- * @warn The file should have been opened in `rb` mode
+ * @warning The file should have been opened in `rb` mode
  * @param file_handle The file to read data from
  * @param[out] buffer The buffer to write data to
  * @returns `true` on successfully copying the file contents
@@ -201,7 +201,7 @@ bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
 /**
  * @brief Attempts to write the contents of the given buffer to the given file
  * @details Writes all the bytes in the buffer out to the open file
- * @warn The file should have been opened in `wb` mode
+ * @warning The file should have been opened in `wb` mode
  * @param buffer The buffer to read data from
  * @param[out] file_handle The file to write data to
  * @returns `true` on successfully writing the file
