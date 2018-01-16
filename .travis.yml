@@ -1,7 +1,9 @@
 language: c
 # Ubuntu 14.04 Trusty support
-sudo: required
 dist: trusty
+sudo: required
+# helps to use actual GCC on OSX (not Clang!)
+osx_image: xcode8
 # build matrix with both OSes and Compilers
 os:
   - linux
@@ -14,22 +16,14 @@ env:
   matrix:
     - SXBP_C_STANDARD=99
     - SXBP_C_STANDARD=11
-matrix:
-  # exclude gcc on osx as this always points to clang
-  exclude:
-  - os: osx
-    compiler: gcc
 cache:
   - ccache
 addons:
   apt:
     sources:
-      - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
       # add PPAs with more up-to-date toolchains
       - ubuntu-toolchain-r-test
     packages:
-      - cmake
-      - cmake-data
       # want gcc 5.x as 4.x gives incorrect warnings
       - gcc-5
 # branches safelist
@@ -39,10 +33,15 @@ branches:
     - develop
     - /^test\/.*$/
     - /^feature\/.*$/
+before_install:
+  # fix for homebrew failling on Travis-CI
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
 install:
-  # override $CC to use gcc-5
-  - if [ "$CC" = "gcc" ]; then export CC="gcc-5"; fi
+  # install gcc-5 on OSX
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install gcc5; fi
 before_script:
+  # override $CC to use gcc-5
+  - if [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
   - cmake .
 script:
   - make -j -k
