@@ -35,10 +35,10 @@ branches:
     - /^feature\/.*$/
 before_install:
   # fix for homebrew failling on Travis-CI
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew update; fi
 install:
   # install gcc-5 on OSX
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install gcc5; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew install gcc5; fi
 before_script:
   # override $CC to use gcc-5
   - if [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
