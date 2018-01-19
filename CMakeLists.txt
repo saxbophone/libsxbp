@@ -143,8 +143,10 @@ if(SXBP_PNG_SUPPORT)
 endif()
 
 add_executable(sxp_test tests.c)
+add_executable(sxbp-cli cli.c)
 
 target_link_libraries(sxp_test sxbp)
+target_link_libraries(sxbp-cli sxbp)
 
 install(
     TARGETS sxbp
