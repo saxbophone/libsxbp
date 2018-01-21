@@ -25,49 +25,54 @@
 extern "C" {
 #endif
 
+// private datatype for passing context data into sxbp_walk_figure() callback
+typedef struct figure_collides_context {
+    sxbp_bitmap_t* image;
+    bool collided;
+} figure_collides_context;
+
+// private, callback function for sxbp_figure_collides()
+static bool sxbp_figure_collides_callback(sxbp_co_ord_t location, void* data) {
+    // cast void pointer to a pointer to our context structure
+    figure_collides_context* callback_data = (figure_collides_context*)data;
+    // check if there's already a pixel here
+    if (callback_data->image->pixels[location.x][location.y] == false) {
+        // if not, plot it
+        callback_data->image->pixels[location.x][location.y] = true;
+        // return true to tell the walk function that we want to continue
+        return true;
+    } else {
+        // otherwise, set collided to true to mark collision
+        callback_data->collided = true;
+        // return false to tell the walk function to stop early
+        return false;
+    }
+}
+
 // private, returns true if the figure collides with itself or false if not
 static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
     // get spiral bounds first
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
-    sxbp_bitmap_t bitmap =  sxbp_blank_bitmap();
+    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
     if (!sxbp_make_bitmap_for_bounds(bounds, &bitmap)) {
         // TODO: implment better error-handling than this
         abort();
     } else {
-        /*
-         * the transformation vector for all coördinates is the negative of the min
-         * bounds
-         * the start location is the transformation vector
-         * (avoids extra calculations)
-         */
-        sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
-        // plot a pixel at the start location first of all
-        bitmap.pixels[location.x][location.y] = true;
-        /*
-         * walk the spiral's line and plot the coördinates of each
-         * quit and return false early if any collide (if pixel exists already)
-         */
-        for (uint32_t i = 0; i < figure->size; i++) {
-            sxbp_line_t line = figure->lines[i];
-            // plot as many pixels as the length of the line
-            for (sxbp_length_t l = 0; l < line.length; l++) {
-                sxbp_move_location(&location, line.direction, 1);
-                // if there's no pixel here, plot it
-                if (bitmap.pixels[location.x][location.y] == false) {
-                    bitmap.pixels[location.x][location.y] = true;
-                } else {
-                    // otherwise, cleanup and return true to mark collision
-                    sxbp_free_bitmap(&bitmap);
-                    return true;
-                }
-            }
+        // construct callback context data
+        figure_collides_context data = {
+            .image = &bitmap, .collided = false,
+        };
+        // begin walking the figure, use our callback function to handle points
+        sxbp_walk_figure(figure, 1, sxbp_figure_collides_callback, (void*)&data);
+        // NOTE: debug printing
+        if (!data.collided) {
+            sxbp_print_bitmap(&bitmap, stdout);
         }
-        sxbp_print_bitmap(&bitmap, stdout);
         // free the memory allocated for the bitmap
         sxbp_free_bitmap(&bitmap);
-        // return false, we found no collisions
-        return false;
+        // return whether or not we found no collisions
+        return data.collided;
     }
 }
 
