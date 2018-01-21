@@ -20,15 +20,12 @@
 extern "C" {
 #endif
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap) {
     // erase the bitmap structure first just in case
     sxbp_free_bitmap(bitmap);
     // TODO: implement the rest of the rendering code
     return false;
 }
-#pragma GCC diagnostic pop
 
 #ifdef __cplusplus
 } // extern "C"
