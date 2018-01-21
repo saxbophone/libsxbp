@@ -13,6 +13,7 @@
  */
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -61,6 +62,65 @@ bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
         memcpy(to->bytes, from->bytes, to->size);
         return true;
     }
+}
+
+/*
+ * private, works out and returns the size of the file referred to by the given
+ * file handle
+ */
+static size_t sxbp_get_file_size(FILE* file_handle) {
+    // seek to end
+    // NOTE: This isn't portable due to lack of meaningful support of `SEEK_END`
+    fseek(file_handle, 0, SEEK_END);
+    // get size
+    size_t file_size = ftell(file_handle);
+    // seek to start again
+    fseek(file_handle, 0, SEEK_SET);
+    return file_size;
+}
+
+bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
+    // erase buffer
+    sxbp_free_buffer(buffer);
+    // get the file's size
+    buffer->size = sxbp_get_file_size(file_handle);
+    // allocate the buffer to this size and handle error if this failed
+    if (!sxbp_init_buffer(buffer)) {
+        // allocation failed
+        return false;
+    } else {
+        // allocation succeeded, so read the file contents into the buffer
+        size_t bytes_read = fread(
+            buffer->bytes,
+            sizeof(uint8_t),
+            buffer->size,
+            file_handle
+        );
+        /*
+         * check that the correct number of bytes were read and exit with error
+         * if it doesn't match the reported file size
+         */
+        if (bytes_read != buffer->size) {
+            // we didn't read the same number of bytes as the file's size
+            sxbp_free_buffer(buffer);
+            return false;
+        } else {
+            // we read the buffer successfully, so return success
+            return true;
+        }
+    }
+}
+
+bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle) {
+    // try and write the file contents
+    size_t bytes_written = fwrite(
+        buffer->bytes,
+        sizeof(uint8_t),
+        buffer->size,
+        file_handle
+    );
+    // return true/false if the correct number of bytes were written
+    return bytes_written == buffer->size;
 }
 
 sxbp_figure_t sxbp_blank_figure(void) {
