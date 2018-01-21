@@ -41,7 +41,6 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
          * the start location is the transformation vector
          * (avoids extra calculations)
          */
-        // TODO: replace with call to sxbp_get_origin_from_bounds()
         sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
         // plot a pixel at the start location first of all
         bitmap.pixels[location.x][location.y] = true;
