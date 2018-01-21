@@ -28,7 +28,7 @@ extern "C" {
 // private, returns true if the figure collides with itself or false if not
 static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
     // get spiral bounds first
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure);
+    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
     sxbp_bitmap_t bitmap =  sxbp_blank_bitmap();
     if (!sxbp_make_bitmap_for_bounds(bounds, &bitmap)) {

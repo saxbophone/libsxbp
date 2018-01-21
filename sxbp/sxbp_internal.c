@@ -67,14 +67,18 @@ void sxbp_move_location_along_line(
     sxbp_move_location(location, line.direction, line.length);
 }
 
-sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
+sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure, size_t scale) {
     // loop state variables
     sxbp_co_ord_t location = { 0 }; // where the end of the last line is
     sxbp_bounds_t bounds = { 0 }; // the bounds of the line walked so far
     // walk the line!
     for (uint32_t i = 0; i < figure->size; i++) {
-        // update the location
-        sxbp_move_location_along_line(&location, figure->lines[i]);
+        // update the location, scaling in proportion to scale
+        sxbp_move_location(
+            &location,
+            figure->lines[i].direction,
+            figure->lines[i].length * scale
+        );
         // update the bounds
         sxbp_update_bounds(location, &bounds);
     }
@@ -107,7 +111,7 @@ void sxbp_walk_figure(
     // preconditional assertions
     assert(plot_point_callback != NULL);
     // get figure's bounds
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure);
+    sxbp_bounds_t bounds = sxbp_get_bounds(figure, scale);
 }
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
@@ -130,8 +134,8 @@ bool sxbp_make_bitmap_for_bounds(
 }
 
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
-    for (uint32_t x = 0; x < bitmap->width; x++) {
-        for (uint32_t y = 0; y < bitmap->height; y++) {
+    for (uint32_t y = 0; y < bitmap->height; y++) {
+        for (uint32_t x = 0; x < bitmap->width; x++) {
             fprintf(stream, bitmap->pixels[x][bitmap->height - y] ? "█" : "░");
         }
         fprintf(stream, "\n");
