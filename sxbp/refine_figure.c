@@ -65,10 +65,6 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
         };
         // begin walking the figure, use our callback function to handle points
         sxbp_walk_figure(figure, 1, sxbp_figure_collides_callback, (void*)&data);
-        // NOTE: debug printing
-        if (!data.collided) {
-            sxbp_print_bitmap(&bitmap, stdout);
-        }
         // free the memory allocated for the bitmap
         sxbp_free_bitmap(&bitmap);
         // return whether or not we found no collisions
