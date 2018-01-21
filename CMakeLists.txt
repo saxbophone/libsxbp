@@ -78,6 +78,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-pedantic")
     # enable 'extra' strict warnings
     enable_c_compiler_flag_if_supported("-Wextra")
+    # enable enforcing of strict function prototypes (e.g. no empty parentheses)
+    enable_c_compiler_flag_if_supported("-Wstrict-prototypes")
     # enable warnings on missing prototypes of global functions
     enable_c_compiler_flag_if_supported("-Wmissing-prototypes")
     # convert all warnings into errors
