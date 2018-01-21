@@ -64,9 +64,12 @@ function(enable_c_compiler_flag_if_supported flag)
     if(flag_already_set EQUAL -1)
         check_c_compiler_flag("${flag}" flag_supported)
         if(flag_supported)
+            message(STATUS "[sxbp] Enabling warning flag ${flag}")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}" PARENT_SCOPE)
         endif()
     endif()
+    unset(flag_already_set CACHE)
+    unset(flag_supported CACHE)
 endfunction()
 
 # enable extra flags (warnings) if we're not in release mode
@@ -82,10 +85,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wstrict-prototypes")
     # enable warnings on missing prototypes of global functions
     enable_c_compiler_flag_if_supported("-Wmissing-prototypes")
-    # convert all warnings into errors
-    enable_c_compiler_flag_if_supported("-Werror")
     # turn off spurious warnings from clang about missing field initialisers
     enable_c_compiler_flag_if_supported("-Wno-missing-field-initializers")
+    # enable warnings about mistakes in Doxygen documentation
+    enable_c_compiler_flag_if_supported("-Wdocumentation")
+    # convert all warnings into errors
+    enable_c_compiler_flag_if_supported("-Werror")
 endif()
 
 # begin dependencies
@@ -129,7 +134,7 @@ endif()
 # C source files
 file(GLOB SXBP_SOURCES "sxbp/*.c")
 # Header files
-file(GLOB SXBP_HEADERS "sxbp/*.h")
+set(SXBP_HEADERS "sxbp/sxbp.h")
 
 add_library(sxbp ${SXBP_SOURCES})
 # set up version for library objects
@@ -171,20 +176,10 @@ install(
     FILES ${SXBP_HEADERS}
     DESTINATION "include/${SXBP_ROUGH_HEADER_DESTINATION}"
 )
-# Install render_backends header files
-install(
-    FILES ${SXBP_RENDER_BACKENDS_HEADERS}
-    DESTINATION "include/${SXBP_ROUGH_HEADER_DESTINATION}/render_backends"
-)
 
 install(
     FILES ${SXBP_HEADERS}
     DESTINATION "include/${SXBP_PRECISE_HEADER_DESTINATION}"
-)
-# Install render_backends header files
-install(
-    FILES ${SXBP_RENDER_BACKENDS_HEADERS}
-    DESTINATION "include/${SXBP_PRECISE_HEADER_DESTINATION}/render_backends"
 )
 
 enable_testing()
