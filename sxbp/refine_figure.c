@@ -70,11 +70,9 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
          */
         for (uint32_t i = 0; i < figure->size; i++) {
             sxbp_line_t line = figure->lines[i];
-            sxbp_vector_t direction = SXBP_VECTOR_DIRECTIONS[line.direction];
             // plot as many pixels as the length of the line
             for (sxbp_length_t l = 0; l < line.length; l++) {
-                location.x += direction.x;
-                location.y += direction.y;
+                sxbp_move_location(&location, line.direction, 1);
                 // if there's no pixel here, plot it
                 if (bitmap.pixels[location.x][location.y] == false) {
                     bitmap.pixels[location.x][location.y] = true;
@@ -85,6 +83,7 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
                 }
             }
         }
+        sxbp_print_bitmap(&bitmap, stdout);
         // free the memory allocated for the bitmap
         sxbp_free_bitmap(&bitmap);
         // return false, we found no collisions
