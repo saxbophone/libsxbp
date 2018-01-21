@@ -99,9 +99,6 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
     };
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-variable"
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,
     size_t scale,
@@ -112,9 +109,22 @@ void sxbp_walk_figure(
     assert(plot_point_callback != NULL);
     // get figure's bounds
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, scale);
+    // start the line at the origin
+    sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
+    // plot the first point of the line
+    plot_point_callback(location.x, location.y, callback_data);
+    // for each line, plot separate points along their length
+    for (uint32_t i = 0; i < figure->size; i++) {
+        sxbp_line_t line = figure->lines[i];
+        // scale the line's size
+        for (uint32_t l = 0; l < line.length * scale; l++) {
+            // move the location
+            sxbp_move_location(&location, line.direction, 1);
+            // plot a point
+            plot_point_callback(location.x, location.y, callback_data);
+        }
+    }
 }
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
 
 bool sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
