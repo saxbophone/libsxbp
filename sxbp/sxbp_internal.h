@@ -91,6 +91,8 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds);
  * coördinates of each point of space occupied by the line of the figure
  * the scale of the shape produced can be increased with the scale parameter
  * the shift parameter offsets the points produced
+ * the callback should return false if it does not want the function to continue
+ * walking the line, otherwise it should return true.
  */
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,

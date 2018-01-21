@@ -111,8 +111,10 @@ void sxbp_walk_figure(
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, scale);
     // start the line at the origin
     sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
-    // plot the first point of the line
-    plot_point_callback(location, callback_data);
+    // plot the first point of the line, if callback returned false then exit
+    if (!plot_point_callback(location, callback_data)) {
+        return;
+    }
     // for each line, plot separate points along their length
     for (uint32_t i = 0; i < figure->size; i++) {
         sxbp_line_t line = figure->lines[i];
@@ -120,8 +122,10 @@ void sxbp_walk_figure(
         for (uint32_t l = 0; l < line.length * scale; l++) {
             // move the location
             sxbp_move_location(&location, line.direction, 1);
-            // plot a point
-            plot_point_callback(location, callback_data);
+            // plot a point, if callback returned false then exit
+            if (!plot_point_callback(location, callback_data)) {
+                return;
+            }
         }
     }
 }
