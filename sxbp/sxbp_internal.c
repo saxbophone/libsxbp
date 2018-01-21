@@ -82,6 +82,9 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
     return bounds;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,
     size_t scale,
@@ -93,6 +96,8 @@ void sxbp_walk_figure(
     // get figure's bounds
     sxbp_bounds_t bounds = sxbp_get_bounds(figure);
 }
+#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
     for (uint32_t x = 0; x < bitmap->width; x++) {
