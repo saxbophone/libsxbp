@@ -82,6 +82,19 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
     return bounds;
 }
 
+sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
+    /*
+     * the origin (also known as the transformation vector) for all coördinates
+     * is the negative of the minimum bounds of the line
+     * starting the line at this non-negative point ensures that all coördinates
+     * of the line are positive
+     */
+    return (sxbp_co_ord_t){
+        .x = -bounds.x_min,
+        .y = -bounds.y_min,
+    };
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -98,6 +111,23 @@ void sxbp_walk_figure(
 }
 #pragma GCC diagnostic pop
 #pragma GCC diagnostic pop
+
+bool sxbp_make_bitmap_for_bounds(
+    const sxbp_bounds_t bounds,
+    sxbp_bitmap_t* bitmap
+) {
+    /*
+     * the width and height are the difference of the max and min dimensions
+     * + 1.
+     * this makes sense because for example from 1 to 10 there are 10 values
+     * and the difference of these is 9 so the number of values is 9+1 = 10
+     */
+    bitmap->width = (bounds.x_max - bounds.x_min) + 1;
+    bitmap->height = (bounds.y_max - bounds.y_min) + 1;
+    bitmap->pixels = NULL;
+    // allocate memory for the bitmap and return whether this succeeded or not
+    return sxbp_init_bitmap(bitmap);
+}
 
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
     for (uint32_t x = 0; x < bitmap->width; x++) {

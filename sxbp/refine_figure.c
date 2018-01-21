@@ -25,23 +25,6 @@
 extern "C" {
 #endif
 
-// private, builds a bitmap large enough to fit coördinates in the given bounds
-static bool sxbp_make_bitmap_for_bounds(
-    const sxbp_bounds_t bounds, sxbp_bitmap_t* bitmap
-) {
-    /*
-     * the width and height are the difference of the max and min dimensions
-     * + 1.
-     * this makes sense because for example from 1 to 10 there are 10 values
-     * and the difference of these is 9 so the number of values is 9+1 = 10
-     */
-    bitmap->width = (bounds.x_max - bounds.x_min) + 1;
-    bitmap->height = (bounds.y_max - bounds.y_min) + 1;
-    bitmap->pixels = NULL;
-    // allocate memory for the bitmap and return whether this succeeded or not
-    return sxbp_init_bitmap(bitmap);
-}
-
 // private, returns true if the figure collides with itself or false if not
 static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
     // get spiral bounds first
@@ -58,6 +41,7 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
          * the start location is the transformation vector
          * (avoids extra calculations)
          */
+        // TODO: replace with call to sxbp_get_origin_from_bounds()
         sxbp_co_ord_t location = {
             .x = -bounds.x_min,
             .y = -bounds.y_min,
