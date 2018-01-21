@@ -326,7 +326,7 @@ bool sxbp_refine_figure(sxbp_figure_t* figure);
  * @returns `false` if the figure could not be successfully serialised
  * @since v0.54.0
  */
-bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
+bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer);
 
 /**
  * @brief Attempts to deserialise an SXBP figure from the given buffer
@@ -340,7 +340,7 @@ bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* buffer);
  * @returns `false` if the figure could not be successfully deserialised
  * @since v0.54.0
  */
-bool sxbp_load_figure(const sxbp_bitmap_t* buffer, sxbp_figure_t* figure);
+bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure);
 
 /**
  * @brief Rasterises an image of the given figure to a basic bitmap object
