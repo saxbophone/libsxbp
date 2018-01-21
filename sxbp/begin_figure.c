@@ -95,7 +95,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
     // add first line to the figure
     figure->lines[0] = sxbp_make_line(facing, 1);
     // update the location
-    sxbp_update_location(&location, figure->lines[0]);
+    sxbp_move_location_along_line(&location, figure->lines[0]);
     // update the bounds
     sxbp_update_bounds(location, &bounds);
     /*
@@ -121,7 +121,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             // add line to figure
             figure->lines[index] = line;
             // update location and bounds
-            sxbp_update_location(&location, line);
+            sxbp_move_location_along_line(&location, line);
             sxbp_update_bounds(location, &bounds);
         }
     }

@@ -67,8 +67,15 @@ extern const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4];
  */
 void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds);
 
+// private, 'move' the given location in the given direction by the given amount
+void sxbp_move_location(
+    sxbp_co_ord_t* location,
+    sxbp_direction_t direction,
+    sxbp_length_t length
+);
+
 // private, 'move' the given location along the given line
-void sxbp_update_location(sxbp_co_ord_t* location, sxbp_line_t line);
+void sxbp_move_location_along_line(sxbp_co_ord_t* location, sxbp_line_t line);
 
 // private, calculates the figure's complete bounds in one step
 sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure);

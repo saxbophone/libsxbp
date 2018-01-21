@@ -49,13 +49,21 @@ void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds) {
     }
 }
 
-void sxbp_update_location(
+void sxbp_move_location(
+    sxbp_co_ord_t* location,
+    sxbp_direction_t direction,
+    sxbp_length_t length
+) {
+    sxbp_vector_t vector = SXBP_VECTOR_DIRECTIONS[direction];
+    location->x += vector.x * length;
+    location->y += vector.y * length;
+}
+
+void sxbp_move_location_along_line(
     sxbp_co_ord_t* location,
     sxbp_line_t line
 ) {
-    sxbp_vector_t direction_vector = SXBP_VECTOR_DIRECTIONS[line.direction];
-    location->x += direction_vector.x * line.length;
-    location->y += direction_vector.y * line.length;
+    sxbp_move_location(location, line.direction, line.length);
 }
 
 sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
@@ -65,7 +73,7 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
     // walk the line!
     for (uint32_t i = 0; i < figure->size; i++) {
         // update the location
-        sxbp_update_location(&location, figure->lines[i]);
+        sxbp_move_location_along_line(&location, figure->lines[i]);
         // update the bounds
         sxbp_update_bounds(location, &bounds);
     }
