@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include "sxbp/sxbp.h"
+#include "sxbp/sxbp_internal.h"
 
 
 #ifdef __cplusplus
@@ -30,12 +31,19 @@ int main(void) {
         memcpy(buffer.bytes, string, length);
         sxbp_figure_t figure = sxbp_blank_figure();
         sxbp_begin_figure(&buffer, &figure);
+        sxbp_free_buffer(&buffer);
+        // render incomplete figure to bitmap
+        sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+        sxbp_render_figure(&figure, &bitmap);
+        // NOTE: debug printing
+        sxbp_print_bitmap(&bitmap, stdout);
         sxbp_refine_figure(&figure);
-        sxbp_free_buffer(&buffer);
-        // NOTE: Re-using the buffer here, we just erased it though so all fine
-        sxbp_dump_figure(&figure, &buffer);
+        // render complete figure to bitmap
+        sxbp_render_figure(&figure, &bitmap);
+        // NOTE: debug printing
+        sxbp_print_bitmap(&bitmap, stdout);
         sxbp_free_figure(&figure);
-        sxbp_free_buffer(&buffer);
+        sxbp_free_bitmap(&bitmap);
         return 0;
     }
 }
