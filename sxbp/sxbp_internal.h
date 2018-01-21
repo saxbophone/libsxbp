@@ -80,6 +80,19 @@ void sxbp_move_location_along_line(sxbp_co_ord_t* location, sxbp_line_t line);
 // private, calculates the figure's complete bounds in one step
 sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure);
 
+/*
+ * private, walks the line of the figure, calling the callback with the
+ * coördinates of each point of space occupied by the line of the figure
+ * the scale of the shape produced can be increased with the scale parameter
+ * the shift parameter offsets the points produced
+ */
+void sxbp_walk_figure(
+    const sxbp_figure_t* figure,
+    size_t scale,
+    void(* plot_point_callback)(uint32_t x, uint32_t y, void* callback_data),
+    void* callback_data
+);
+
 // private, prints out a bitmap to the given stream, for debugging
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream);
 

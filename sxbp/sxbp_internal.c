@@ -19,6 +19,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <assert.h>
 #include <stdint.h>
 
 #include "sxbp.h"
@@ -79,6 +80,18 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
     }
     // now all lines have been walked, return the bounds
     return bounds;
+}
+
+void sxbp_walk_figure(
+    const sxbp_figure_t* figure,
+    size_t scale,
+    void(* plot_point_callback)(uint32_t x, uint32_t y, void* callback_data),
+    void* callback_data
+) {
+    // preconditional assertions
+    assert(plot_point_callback != NULL);
+    // get figure's bounds
+    sxbp_bounds_t bounds = sxbp_get_bounds(figure);
 }
 
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
