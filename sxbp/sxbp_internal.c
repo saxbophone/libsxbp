@@ -81,6 +81,16 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure) {
     return bounds;
 }
 
+void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
+    for (uint32_t x = 0; x < bitmap->width; x++) {
+        for (uint32_t y = 0; y < bitmap->height; y++) {
+            fprintf(stream, bitmap->pixels[x][bitmap->height - y] ? "█" : "░");
+        }
+        fprintf(stream, "\n");
+    }
+    fprintf(stream, "\n");
+}
+
 #ifdef __cplusplus
 } // extern "C"
 #endif

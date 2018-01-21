@@ -80,6 +80,9 @@ void sxbp_move_location_along_line(sxbp_co_ord_t* location, sxbp_line_t line);
 // private, calculates the figure's complete bounds in one step
 sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure);
 
+// private, prints out a bitmap to the given stream, for debugging
+void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
