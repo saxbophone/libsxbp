@@ -31,6 +31,9 @@ int main(void) {
         sxbp_figure_t figure = sxbp_blank_figure();
         sxbp_begin_figure(&buffer, &figure);
         sxbp_refine_figure(&figure);
+        sxbp_free_buffer(&buffer);
+        // NOTE: Re-using the buffer here, we just erased it though so all fine
+        sxbp_dump_figure(&figure, &buffer);
         sxbp_free_figure(&figure);
         sxbp_free_buffer(&buffer);
         return 0;
