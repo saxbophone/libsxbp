@@ -136,7 +136,7 @@ bool sxbp_make_bitmap_for_bounds(
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
     for (uint32_t y = 0; y < bitmap->height; y++) {
         for (uint32_t x = 0; x < bitmap->width; x++) {
-            fprintf(stream, bitmap->pixels[x][bitmap->height - y] ? "█" : "░");
+            fprintf(stream, bitmap->pixels[x][bitmap->height - 1 - y] ? "█" : "░");
         }
         fprintf(stream, "\n");
     }
