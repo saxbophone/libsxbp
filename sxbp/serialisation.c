@@ -125,22 +125,22 @@ static void sxbp_write_sxbp_data_header(
 static void sxbp_write_sxbp_data_line(
     const sxbp_line_t line,
     sxbp_buffer_t* buffer,
-    size_t* index
+    size_t* start_index
 ) {
-    size_t start_index = *index;
+    size_t index = *start_index;
     // the leading 2 bits of the first byte are used for the direction
-    buffer->bytes[start_index] = (line.direction << 6);
+    buffer->bytes[index] = (line.direction << 6);
     // the next 6 bits of the first byte are used for the first 6 bits of length
-    buffer->bytes[start_index] |= (line.length >> 24);
+    buffer->bytes[index] |= (line.length >> 24);
     // move on to the next byte
-    start_index++;
+    index++;
     // handle remaining 3 bytes in a loop
     for(uint8_t j = 0; j < 3; j++) {
-        buffer->bytes[start_index] = (uint8_t)(line.length >> (8 * (2 - j)));
-        start_index++;
+        buffer->bytes[index] = (uint8_t)(line.length >> (8 * (2 - j)));
+        index++;
     }
     // update index
-    *index = start_index;
+    *start_index = index;
 }
 
 // private, writes the body of a serialised figure to a buffer
@@ -154,8 +154,6 @@ static void sxbp_write_sxbp_data_body(
     }
 }
 
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic ignored "-Wunused-function"
 /*
  * private, loads a 16-bit unsigned integer from buffer starting at given index
  * increments index to point to the next byte after those read for the integer
@@ -163,7 +161,10 @@ static void sxbp_write_sxbp_data_body(
  * Asserts:
  * - That buffer->bytes is not NULL
  */
-static uint16_t sxbp_load_uint16_t(sxbp_buffer_t* buffer, size_t* start_index) {
+static uint16_t sxbp_load_uint16_t(
+    const sxbp_buffer_t* buffer,
+    size_t* start_index
+) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
     size_t index = *start_index;
@@ -183,7 +184,10 @@ static uint16_t sxbp_load_uint16_t(sxbp_buffer_t* buffer, size_t* start_index) {
  * Asserts:
  * - That buffer->bytes is not NULL
  */
-static uint32_t sxbp_load_uint32_t(sxbp_buffer_t* buffer, size_t* start_index) {
+static uint32_t sxbp_load_uint32_t(
+    const sxbp_buffer_t* buffer,
+    size_t* start_index
+) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
     size_t index = *start_index;
@@ -196,7 +200,82 @@ static uint32_t sxbp_load_uint32_t(sxbp_buffer_t* buffer, size_t* start_index) {
     *start_index += 4;
     return value;
 }
-#pragma GCC diagnostic push
+
+// private, checks that the version of the data in the buffer is compatible
+static bool sxbp_check_sxbp_data_version(const sxbp_buffer_t* buffer) {
+    // the version number is encoded starting at index 4 into the file
+    size_t index = 4;
+    // extract file version from header
+    sxbp_version_t buffer_version = {
+        .major = sxbp_load_uint16_t(buffer, &index),
+        .minor = sxbp_load_uint16_t(buffer, &index),
+        .patch = sxbp_load_uint16_t(buffer, &index),
+    };
+    // this is the minimum version supported by this version of sxbp
+    sxbp_version_t min_version = { .major = 0, .minor = 54, .patch = 0, };
+    // compare the extracted version with the minimum one
+    return (
+        buffer_version.major == min_version.major &&
+        buffer_version.minor >= min_version.minor
+    );
+}
+
+// private, checks if the data in given buffer is a valid serialised sxbp figure
+static bool sxbp_check_sxbp_data_is_valid(const sxbp_buffer_t* buffer) {
+    /*
+     * first, check if the file is big enough to contain the header
+     * if it is, then check the magic number
+     * finally, if both of those are valid, theh check the data version
+     */
+    if (
+        buffer->size < SXBP_FILE_HEADER_SIZE ||
+        strncmp((char*)buffer->bytes, "sxbp", 4) != 0 ||
+        !sxbp_check_sxbp_data_version(buffer)
+    ) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// private, extracts one line from a data buffer to a line object
+static void sxbp_read_sxbp_data_line(
+    const sxbp_buffer_t* buffer,
+    sxbp_line_t* line,
+    size_t* start_index
+) {
+    size_t index = *start_index;
+    // direction is stored in 2 most significant bits of each 32-bit sequence
+    line->direction = (
+        buffer->bytes[index] >> 6
+    );
+    /*
+     * length is stored as 30 least significant bits, so we have to unpack it
+     * handle first byte on it's own as we only need least 6 bits of it
+     * bit mask and shift 3 bytes to left
+     */
+    line->length = (buffer->bytes[index] & 0x3f) << 24; // 0x3f = 0b00111111
+    // next byte
+    index++;
+    // handle remaining 3 bytes in loop
+    for(uint8_t j = 0; j < 3; j++) {
+        line->length |= buffer->bytes[index] << (8 * (2 - j));
+        index++;
+    }
+    // update index
+    *start_index = index;
+}
+
+// private, reads in serialised figure lines from a buffer to a figure
+static void sxbp_read_sxbp_data_body(
+    const sxbp_buffer_t* buffer,
+    sxbp_figure_t* figure,
+    size_t* index
+) {
+    for (uint32_t i = 0; i < figure->size; i++) {
+        sxbp_read_sxbp_data_line(buffer, &figure->lines[i], index);
+    }
+}
 
 bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer) {
     // erase the buffer first of all just in case
@@ -219,7 +298,40 @@ bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer) {
     }
 }
 
-bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure);
+bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure) {
+    // erase the figure first of all just in case
+    sxbp_free_figure(figure);
+    // check that the buffer contains valid sxbp data
+    if (!sxbp_check_sxbp_data_is_valid(buffer)) {
+        // exit early as it's not valid
+        return false;
+    } else {
+        // the data body starts at index 10
+        size_t index = 10;
+        /*
+         * figure is apparently valid, but to be sure we finally need to extract
+         * the size field and compare this with the size of the buffer
+         */
+        figure->size = sxbp_load_uint32_t(buffer, &index);
+        if (buffer->size < sxbp_get_figure_serialised_size(figure)) {
+            // return early and signal error
+            return false;
+        } else {
+            // skip the next two 32-bit uints
+            index += 4 * 2;
+            // extract the lines_remaining field
+            figure->lines_remaining = sxbp_load_uint32_t(buffer, &index);
+            // allocate memory for the lines
+            if (!sxbp_init_figure(figure)) {
+                return false;
+            } else {
+                // finally, load all the lines
+                sxbp_read_sxbp_data_body(buffer, figure, &index);
+                return true;
+            }
+        }
+    }
+}
 
 #ifdef __cplusplus
 } // extern "C"
