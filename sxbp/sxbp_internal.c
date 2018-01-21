@@ -102,7 +102,7 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,
     size_t scale,
-    void(* plot_point_callback)(uint32_t x, uint32_t y, void* callback_data),
+    bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
     void* callback_data
 ) {
     // preconditional assertions
@@ -112,7 +112,7 @@ void sxbp_walk_figure(
     // start the line at the origin
     sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
     // plot the first point of the line
-    plot_point_callback(location.x, location.y, callback_data);
+    plot_point_callback(location, callback_data);
     // for each line, plot separate points along their length
     for (uint32_t i = 0; i < figure->size; i++) {
         sxbp_line_t line = figure->lines[i];
@@ -121,7 +121,7 @@ void sxbp_walk_figure(
             // move the location
             sxbp_move_location(&location, line.direction, 1);
             // plot a point
-            plot_point_callback(location.x, location.y, callback_data);
+            plot_point_callback(location, callback_data);
         }
     }
 }
