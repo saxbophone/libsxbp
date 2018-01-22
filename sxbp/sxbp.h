@@ -176,7 +176,7 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer);
  * separate at the completion of the operation. Any data in the `to` buffer
  * will be overwritten or erased.
  * @param from The buffer to copy the contents of
- * @param[out] The buffer to copy the contents to
+ * @param[out] to The buffer to copy the contents to
  * @warning The buffer to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
  * @returns `true` if the data was copied successfully
@@ -250,7 +250,7 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * separate at the completion of the operation. Any data in the `to` figure
  * will be overwritten or erased.
  * @param from The figure to copy the contents of
- * @param[out] The figure to copy the contents to
+ * @param[out] to The figure to copy the contents to
  * @warning The figure to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
  * @returns `true` if the data was copied successfully
@@ -298,7 +298,7 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
  * separate at the completion of the operation. Any data in the `to` bitmap
  * will be overwritten or erased.
  * @param from The bitmap to copy the contents of
- * @param[out] The bitmap to copy the contents to
+ * @param[out] to The bitmap to copy the contents to
  * @warning The bitmap to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
  * @returns `true` if the data was copied successfully
