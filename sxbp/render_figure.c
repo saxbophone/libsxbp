@@ -23,15 +23,32 @@ extern "C" {
 
 // private datatype for passing context data into sxbp_walk_figure() callback
 typedef struct render_figure_context {
-    sxbp_bitmap_t* image;
+    sxbp_bitmap_t* image; // the bitmap to draw to
+    /*
+     * the following unusual fields facilitate a low-tech way of skipping the
+     * second pixel --this is done to assist in orientation of the shape
+     */
+    bool first_pixel_complete; // whether the first pixel has been plotted yet
+    bool second_pixel_complete; // whether the second pixel has been plotted yet
 } render_figure_context;
 
 // private, callback function for sxbp_render_figure()
-static bool sxbp_render_figure_callback(sxbp_co_ord_t location, void* data) {
+static bool sxbp_render_figure_callback(
+    sxbp_co_ord_t location,
+    void* callback_data
+) {
     // cast void pointer to a pointer to our context structure
-    render_figure_context* callback_data = (render_figure_context*)data;
-    // plot the pixel
-    callback_data->image->pixels[location.x][location.y] = true;
+    render_figure_context* data = (render_figure_context*)callback_data;
+    // skip the plotting of the second pixel
+    if (data->first_pixel_complete && !data->second_pixel_complete) {
+        // mark second pixel as complete
+        data->second_pixel_complete = true;
+    } else {
+        // mark first pixel as complete if it isn't already
+        data->first_pixel_complete = true;
+        // plot the pixel
+        data->image->pixels[location.x][location.y] = true;
+    }
     // return true --we always want to continue
     return true;
 }
@@ -47,7 +64,11 @@ bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap) {
         return false;
     } else {
         // construct callback context data
-        render_figure_context data = { .image = bitmap, };
+        render_figure_context data = {
+            .image = bitmap,
+            .first_pixel_complete = false,
+            .second_pixel_complete = false,
+        };
         // walk the figure at scale 2, handle pixel plotting with callback
         sxbp_walk_figure(figure, 2, sxbp_render_figure_callback, (void*)&data);
     }
