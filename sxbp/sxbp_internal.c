@@ -72,7 +72,7 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure, size_t scale) {
     sxbp_co_ord_t location = { 0 }; // where the end of the last line is
     sxbp_bounds_t bounds = { 0 }; // the bounds of the line walked so far
     // walk the line!
-    for (uint32_t i = 0; i < figure->size; i++) {
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
         // update the location, scaling in proportion to scale
         sxbp_move_location(
             &location,
@@ -116,10 +116,10 @@ void sxbp_walk_figure(
         return;
     }
     // for each line, plot separate points along their length
-    for (uint32_t i = 0; i < figure->size; i++) {
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
         sxbp_line_t line = figure->lines[i];
         // scale the line's size
-        for (uint32_t l = 0; l < line.length * scale; l++) {
+        for (sxbp_figure_size_t l = 0; l < line.length * scale; l++) {
             // move the location
             sxbp_move_location(&location, line.direction, 1);
             // plot a point, if callback returned false then exit
@@ -148,8 +148,8 @@ bool sxbp_make_bitmap_for_bounds(
 }
 
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
-    for (uint32_t y = 0; y < bitmap->height; y++) {
-        for (uint32_t x = 0; x < bitmap->width; x++) {
+    for (sxbp_figure_size_t y = 0; y < bitmap->height; y++) {
+        for (sxbp_figure_size_t x = 0; x < bitmap->width; x++) {
             fprintf(stream, bitmap->pixels[x][bitmap->height - 1 - y] ? "█" : "░");
         }
         fprintf(stream, "\n");

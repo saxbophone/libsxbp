@@ -80,6 +80,14 @@ typedef enum sxbp_direction_t {
 typedef uint32_t sxbp_length_t;
 
 /**
+ * @brief Type for representing the size of an SXBP figure
+ * @details In other words, this is the type for storing the count of lines in
+ * the figure.
+ * @since v0.54.0
+ */
+typedef uint32_t sxbp_figure_size_t;
+
+/**
  * @brief Represents one line segment in the spiral structure.
  * @details This includes the direction of the line and it's length
  * (initially set to 0).
@@ -100,7 +108,7 @@ typedef struct sxbp_line_t {
  */
 typedef struct sxbp_figure_t {
     /** @brief The total number of lines in the figure */
-    uint32_t size;
+    sxbp_figure_size_t size;
     /** @brief The lines that make up the figure */
     sxbp_line_t* lines;
     /**
@@ -110,7 +118,7 @@ typedef struct sxbp_figure_t {
      * @note While this is greater than zero, it is the index of the next line
      * that needs solving + 1
      */
-    uint32_t lines_remaining;
+    sxbp_figure_size_t lines_remaining;
 } sxbp_figure_t;
 
 /**
