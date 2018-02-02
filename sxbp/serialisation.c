@@ -149,7 +149,7 @@ static void sxbp_write_sxbp_data_body(
     sxbp_buffer_t* buffer,
     size_t* index
 ) {
-    for (uint32_t i = 0; i < figure->size; i++) {
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
         sxbp_write_sxbp_data_line(figure->lines[i], buffer, index);
     }
 }
@@ -272,7 +272,7 @@ static void sxbp_read_sxbp_data_body(
     sxbp_figure_t* figure,
     size_t* index
 ) {
-    for (uint32_t i = 0; i < figure->size; i++) {
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
         sxbp_read_sxbp_data_line(buffer, &figure->lines[i], index);
     }
 }

@@ -103,13 +103,14 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
      * make the spiral pattern, also deducing the length to set these to to
      * avoid any collisions
      */
-    for (uint32_t s = 0; s < data->size; s++) {
+    for (sxbp_figure_size_t s = 0; s < data->size; s++) {
         // byte-level loop
         for (uint8_t b = 0; b < 8; b++) {
             // bit level loop - extract the bit
             uint8_t e = 7 - b; // which power of two to use with bit mask
             bool bit = (data->bytes[s] & (1 << e)) >> e; // the current bit
-            uint32_t index = (s * 8) + (uint32_t)b + 1; // line index
+            // this is the line index, derived from the bit of data we're on
+            sxbp_figure_size_t index = (s * 8) + (sxbp_figure_size_t)b + 1;
             // set rotation direction based on the current bit
             sxbp_rotation_t rotation = sxbp_rotation_from_bit(bit);
             // calculate the new direction

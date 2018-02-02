@@ -79,8 +79,8 @@ static bool sxbp_figure_collides(const sxbp_figure_t* figure) {
  */
 static void sxbp_attempt_line_shorten(
     sxbp_figure_t* figure,
-    const uint32_t l,
-    const uint32_t max
+    const sxbp_figure_size_t l,
+    const sxbp_figure_size_t max
 ) {
     sxbp_line_t* line = &figure->lines[l];
     // it only makes sense to try and shorten lines longer than 1
@@ -104,7 +104,7 @@ static void sxbp_attempt_line_shorten(
          */
         if (line->length < original_length) {
             // try and shorten other lines some more
-            for (uint32_t i = max; i >= l; i--) {
+            for (sxbp_figure_size_t i = max; i >= l; i--) {
                 sxbp_attempt_line_shorten(figure, i, max);
             }
         }
@@ -118,7 +118,7 @@ bool sxbp_refine_figure(sxbp_figure_t* figure) {
         return false;
     } else {
         // iterate over lines backwards - we don't care about line 0
-        for (uint32_t i = figure->size - 1; i > 0; i--) {
+        for (sxbp_figure_size_t i = figure->size - 1; i > 0; i--) {
             // try and shorten it
             sxbp_attempt_line_shorten(figure, i, figure->size - 1);
         }
