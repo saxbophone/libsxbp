@@ -220,12 +220,12 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer);
  * @param[out] to The buffer to copy the contents to
  * @warning The buffer to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
- * @returns `true` if the data was copied successfully
- * @returns `false` if the data was not copied successfully, in which case `to`
- * will be empty.
+ * @returns `SXBP_RESULT_OK` if the data was copied successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
+ * in which case `to` will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
+sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
 
 /**
  * @brief Attempts to read the contents of the given file into the given buffer

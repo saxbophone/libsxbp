@@ -48,19 +48,19 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
     }
 }
 
-bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
+sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_buffer(to);
     // copy across the size
     to->size = from->size;
     // allocate the 'to' buffer
-    if (!sxbp_init_buffer(to)) {
-        // exit early if allocation failed
-        return false;
+    if (!sxbp_success(sxbp_init_buffer(to), NULL)) {
+        // exit early if allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the data
         memcpy(to->bytes, from->bytes, to->size);
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 
