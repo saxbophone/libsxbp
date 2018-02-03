@@ -54,7 +54,7 @@ sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
     // copy across the size
     to->size = from->size;
     // allocate the 'to' buffer
-    if (!sxbp_success(sxbp_init_buffer(to), NULL)) {
+    if (!sxbp_success(sxbp_init_buffer(to))) {
         // exit early if allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
@@ -79,15 +79,15 @@ static size_t sxbp_get_file_size(FILE* file_handle) {
     return file_size;
 }
 
-bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
     // erase buffer
     sxbp_free_buffer(buffer);
     // get the file's size
     buffer->size = sxbp_get_file_size(file_handle);
     // allocate the buffer to this size and handle error if this failed
-    if (!sxbp_init_buffer(buffer)) {
-        // allocation failed
-        return false;
+    if (!sxbp_success(sxbp_init_buffer(buffer))) {
+        // allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so read the file contents into the buffer
         size_t bytes_read = fread(
@@ -103,10 +103,11 @@ bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
         if (bytes_read != buffer->size) {
             // we didn't read the same number of bytes as the file's size
             sxbp_free_buffer(buffer);
-            return false;
+            // return a file error
+            return SXBP_RESULT_FAIL_FILE;
         } else {
             // we read the buffer successfully, so return success
-            return true;
+            return SXBP_RESULT_OK;
         }
     }
 }

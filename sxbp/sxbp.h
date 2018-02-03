@@ -168,6 +168,16 @@ typedef enum sxbp_result_t {
 extern const sxbp_version_t SXBP_VERSION;
 
 /**
+ * @brief Returns if a given `sxbp_result_t` is successful or not
+ * @details This is intended to be used to easily check the return status of
+ * functions in SXBP that can raise errors.
+ * @param state The state to check for success/failure
+ * @returns `true` if the given status code was success
+ * @returns `false` if the given status code was not success
+ */
+bool sxbp_success(sxbp_result_t state);
+
+/**
  * @brief Checks if a given `sxbp_result_t` is successful or not
  * @details This is intended to be used to easily check the return status of
  * functions in SXBP that can raise errors.
@@ -177,7 +187,7 @@ extern const sxbp_version_t SXBP_VERSION;
  * @returns `true` if the given status code was success
  * @returns `false` if the given status code was not success
  */
-bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to);
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to);
 
 /**
  * @brief Creates a blank empty buffer
@@ -237,7 +247,7 @@ sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
  * @returns `false` on failure to copy the file contents
  * @since v0.54.0
  */
-bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
 
 /**
  * @brief Attempts to write the contents of the given buffer to the given file

@@ -29,9 +29,14 @@ const sxbp_version_t SXBP_VERSION = {
     .string = SXBP_VERSION_STRING,
 };
 
-bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to) {
+bool sxbp_success(sxbp_result_t state) {
+    // return whether state was 'OK or not'
+    return state == SXBP_RESULT_OK;
+}
+
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to) {
     // return true immediately if the state is 'OK'
-    if (state == SXBP_RESULT_OK) {
+    if (sxbp_success(state)) {
         return true;
     } else {
         // otherwise, store it in the location at `report_to` if not NULL
