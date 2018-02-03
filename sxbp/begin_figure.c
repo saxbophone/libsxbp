@@ -132,7 +132,10 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
     }
 }
 
-bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
+sxbp_result_t sxbp_begin_figure(
+    const sxbp_buffer_t* data,
+    sxbp_figure_t* figure
+) {
     // erase the figure first to ensure it's blank
     sxbp_free_figure(figure);
     /*
@@ -141,13 +144,13 @@ bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
      */
     figure->size = data->size * 8 + 1;
     // allocate memory for the figure
-    if (!sxbp_init_figure(figure)) {
-        // exit early and signal error status
-        return false;
+    if (!sxbp_success(sxbp_init_figure(figure))) {
+        // exit early and signal error status - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, now populate the lines
         sxbp_plot_lines(data, figure);
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 

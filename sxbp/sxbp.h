@@ -374,11 +374,15 @@ sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * @note The shape that can be derived from this data will waste a lot of visual
  * space and should be refined by calling `sxbp_refine_figure`
  * @todo Add options struct (at least one option, max number of lines)
- * @returns `true` if the figure could be successfully generated
- * @returns `false` if the figure could not be successfully generated
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully generated
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
+ * generated
  * @since v0.54.0
  */
-bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure);
+sxbp_result_t sxbp_begin_figure(
+    const sxbp_buffer_t* data,
+    sxbp_figure_t* figure
+);
 
 /**
  * @brief Refines the line lengths of the given SXBP figure
