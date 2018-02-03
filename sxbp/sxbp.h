@@ -168,6 +168,18 @@ typedef enum sxbp_result_t {
 extern const sxbp_version_t SXBP_VERSION;
 
 /**
+ * @brief Checks if a given `sxbp_result_t` is successful or not
+ * @details This is intended to be used to easily check the return status of
+ * functions in SXBP that can raise errors.
+ * @param state The state to check for success/failure
+ * @param[out] An optional pointer to a `sxbp_result_t` to store the result in,
+ * if it was failure.
+ * @returns `true` if the given status code was success
+ * @returns `false` if the given status code was not success
+ */
+bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to);
+
+/**
  * @brief Creates a blank empty buffer
  * @details Ensures that all pointer fields are properly initialised to NULL
  * @returns An `sxbp_buffer_t` object with all fields set to default/blank value
