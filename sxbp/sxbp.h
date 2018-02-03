@@ -173,11 +173,11 @@ extern const sxbp_version_t SXBP_VERSION;
  * functions in SXBP that can raise errors.
  * @param state The state to check for success/failure
  * @param[out] An optional pointer to a `sxbp_result_t` to store the result in,
- * if it was failure.
+ * if it was failure. This is ignored if `NULL`.
  * @returns `true` if the given status code was success
  * @returns `false` if the given status code was not success
  */
-bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to);
+bool sxbp_success(const sxbp_result_t state, sxbp_result_t* report_to);
 
 /**
  * @brief Creates a blank empty buffer
