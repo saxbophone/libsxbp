@@ -393,11 +393,14 @@ sxbp_result_t sxbp_begin_figure(
  * @warning This function may take a long time to execute
  * @todo Add extended options (as struct) including progress callback (most
  * important)
- * @returns `true` if the figure could be successfully refined
- * @returns `false` if the figure could not be successfully refined
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully refined
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if called on a figure with no lines
+ * allocated
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred when
+ * refining the figure
  * @since v0.54.0
  */
-bool sxbp_refine_figure(sxbp_figure_t* figure);
+sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure);
 
 /**
  * @brief Serialises the given figure to data, stored in the given buffer
