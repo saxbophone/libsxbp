@@ -180,15 +180,6 @@ extern const sxbp_version_t SXBP_VERSION;
 bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to);
 
 /**
- * @brief Helper function-like macro for 'raising' errors to caller
- * @details Calls to functions that can return errors can be wrapped in this
- * macro, to the effect of returning the error early to the caller's calling
- * function.
- * @warnning This macro returns within the context of use if given an error
- */
-#define SXBP_RETURN_ON_ERROR(result) if (!sxbp_success(result, NULL)) { return result; }
-
-/**
  * @brief Creates a blank empty buffer
  * @details Ensures that all pointer fields are properly initialised to NULL
  * @returns An `sxbp_buffer_t` object with all fields set to default/blank value
@@ -202,11 +193,11 @@ sxbp_buffer_t sxbp_blank_buffer(void);
  * member of the buffer
  * @warning It is unsafe to call this function on a buffer that has already
  * been allocated
- * @returns `true` if memory was allocated successfully
- * @returns `false` if memory was not allocated successfully
+ * @returns `SXBP_RESULT_OK` if memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @since v0.54.0
  */
-bool sxbp_init_buffer(sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer);
 
 /**
  * @brief Deallocates any allocated memory for the bytes of the given buffer

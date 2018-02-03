@@ -28,11 +28,11 @@ sxbp_buffer_t sxbp_blank_buffer(void) {
     return (sxbp_buffer_t){ .size = 0, .bytes = NULL, };
 }
 
-bool sxbp_init_buffer(sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer) {
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
     // if bytes is not NULL, then the operation was successful
-    return buffer->bytes != NULL;
+    return buffer->bytes != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
 bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
