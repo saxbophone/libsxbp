@@ -277,15 +277,18 @@ static void sxbp_read_sxbp_data_body(
     }
 }
 
-bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_dump_figure(
+    const sxbp_figure_t* figure,
+    sxbp_buffer_t* buffer
+) {
     // erase the buffer first of all just in case
     sxbp_free_buffer(buffer);
     // set buffer size to that needed for figure
     buffer->size = sxbp_get_figure_serialised_size(figure);
     // try and allocate memory for the buffer
-    if (!sxbp_init_buffer(buffer)) {
-        // handle error
-        return false;
+    if (!sxbp_success(sxbp_init_buffer(buffer))) {
+        // handle error - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // initialise an index used to assist writing to the buffer
         size_t index = 0;
@@ -294,17 +297,20 @@ bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer) {
         // now write the file body -serialisation of the lines - to the buffer
         sxbp_write_sxbp_data_body(figure, buffer, &index);
         // all done!
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 
-bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure) {
+sxbp_result_t sxbp_load_figure(
+    const sxbp_buffer_t* buffer,
+    sxbp_figure_t* figure
+) {
     // erase the figure first of all just in case
     sxbp_free_figure(figure);
     // check that the buffer contains valid sxbp data
     if (!sxbp_check_sxbp_data_is_valid(buffer)) {
         // exit early as it's not valid
-        return false;
+        return SXBP_RESULT_FAIL_PRECONDITION;
     } else {
         // the data body starts at index 10
         size_t index = 10;
@@ -322,12 +328,13 @@ bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure) {
             // extract the lines_remaining field
             figure->lines_remaining = sxbp_load_uint32_t(buffer, &index);
             // allocate memory for the lines
-            if (!sxbp_init_figure(figure)) {
-                return false;
+            if (!sxbp_success(sxbp_init_figure(figure))) {
+                // handle error - this can only be a memory error
+                return SXBP_RESULT_FAIL_MEMORY;
             } else {
                 // finally, load all the lines
                 sxbp_read_sxbp_data_body(buffer, figure, &index);
-                return true;
+                return SXBP_RESULT_OK;
             }
         }
     }

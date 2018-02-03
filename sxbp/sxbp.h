@@ -409,11 +409,15 @@ sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure);
  * @note The buffer is erased before being populated
  * @param figure The figure to serialise
  * @param[out] buffer The buffer to store the serialised data in
- * @returns `true` if the figure could be successfully serialised
- * @returns `false` if the figure could not be successfully serialised
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully serialised
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
+ * serialised
  * @since v0.54.0
  */
-bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_dump_figure(
+    const sxbp_figure_t* figure,
+    sxbp_buffer_t* buffer
+);
 
 /**
  * @brief Attempts to deserialise an SXBP figure from the given buffer
@@ -423,11 +427,18 @@ bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer);
  * @note The figure is overwritten in this process
  * @param buffer The buffer to load the SXBP figure from
  * @param[out] figure The figure to store the deserialised SXBP figure in
- * @returns `true` if the figure could be successfully deserialised
- * @returns `false` if the figure could not be successfully deserialised
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully deserialised
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be deserialised
+ * due to a memory error
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if the figure could not be
+ * deserialised because the buffer contains invalid data or data for a version
+ * of SXBP that this version cannot read
  * @since v0.54.0
  */
-bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure);
+sxbp_result_t sxbp_load_figure(
+    const sxbp_buffer_t* buffer,
+    sxbp_figure_t* figure
+);
 
 /**
  * @brief Rasterises an image of the given figure to a basic bitmap object
