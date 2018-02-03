@@ -11,6 +11,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -66,6 +67,9 @@ static sxbp_length_t sxbp_next_length(
     sxbp_direction_t direction,
     sxbp_bounds_t bounds
 ) {
+    // preconditional assertions --direction should be one of the enum values
+    assert(direction >= SXBP_UP);
+    assert(direction <= SXBP_LEFT);
     switch (direction) {
         case SXBP_UP:
             return abs(bounds.y_max - location.y) + 1;
