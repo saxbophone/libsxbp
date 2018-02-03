@@ -243,8 +243,8 @@ sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
  * @warning The file should have been opened in `rb` mode
  * @param file_handle The file to read data from
  * @param[out] buffer The buffer to write data to
- * @returns `true` on successfully copying the file contents
- * @returns `false` on failure to copy the file contents
+ * @returns `SXBP_RESULT_OK` on successfully copying the file contents
+ * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_FILE` on failure to copy the file contents
  * @since v0.54.0
  */
 sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
@@ -255,11 +255,14 @@ sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
  * @warning The file should have been opened in `wb` mode
  * @param buffer The buffer to read data from
  * @param[out] file_handle The file to write data to
- * @returns `true` on successfully writing the file
- * @returns `false` on failure to write the file
+ * @returns `SXBP_RESULT_OK` on successfully writing the file
+ * @returns `SXBP_RESULT_FAIL_FILE` on failure to write the file
  * @since v0.54.0
  */
-bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle);
+sxbp_result_t sxbp_buffer_to_file(
+    const sxbp_buffer_t* buffer,
+    FILE* file_handle
+);
 
 /**
  * @brief Creates a blank empty figure

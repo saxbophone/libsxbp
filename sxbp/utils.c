@@ -112,7 +112,10 @@ sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
     }
 }
 
-bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle) {
+sxbp_result_t sxbp_buffer_to_file(
+    const sxbp_buffer_t* buffer,
+    FILE* file_handle
+) {
     // try and write the file contents
     size_t bytes_written = fwrite(
         buffer->bytes,
@@ -120,8 +123,8 @@ bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle) {
         buffer->size,
         file_handle
     );
-    // return true/false if the correct number of bytes were written
-    return bytes_written == buffer->size;
+    // return success/failure if the correct number of bytes were written
+    return bytes_written == buffer->size ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_FILE;
 }
 
 sxbp_figure_t sxbp_blank_figure(void) {
