@@ -131,11 +131,11 @@ sxbp_figure_t sxbp_blank_figure(void) {
     return (sxbp_figure_t){ .size = 0, .lines = NULL, .lines_remaining = 0, };
 }
 
-bool sxbp_init_figure(sxbp_figure_t* figure) {
+sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure) {
     // allocate the lines, using calloc to set all fields of each one to zero
     figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
     // if lines is not NULL, then the operation was successful
-    return figure->lines != NULL;
+    return figure->lines != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
 bool sxbp_free_figure(sxbp_figure_t* figure) {
@@ -151,7 +151,7 @@ bool sxbp_free_figure(sxbp_figure_t* figure) {
     }
 }
 
-bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
+sxbp_result_t sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
     // copy across the static members
@@ -159,12 +159,12 @@ bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     to->lines_remaining = from->lines_remaining;
     // allocate the 'to' figure
     if (!sxbp_init_figure(to)) {
-        // exit early if allocation failed
-        return false;
+        // exit early if allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the lines
         memcpy(to->lines, from->lines, to->size);
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 

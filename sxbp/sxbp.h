@@ -279,11 +279,12 @@ sxbp_figure_t sxbp_blank_figure(void);
  * as needed.
  * @warning It is unsafe to call this function on a figure that has already
  * been allocated
- * @returns `true` if all memory was allocated successfully
- * @returns `false` if any memory was not allocated successfully
+ * @returns `SXBP_RESULT_OK` if all memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if any memory was not allocated
+ * successfully
  * @since v0.54.0
  */
-bool sxbp_init_figure(sxbp_figure_t* figure);
+sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure);
 
 /**
  * @brief Deallocates any allocated memory for the given figure
@@ -307,12 +308,12 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * @param[out] to The figure to copy the contents to
  * @warning The figure to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
- * @returns `true` if the data was copied successfully
- * @returns `false` if the data was not copied successfully, in which case `to`
- * will be empty.
+ * @returns `SXBP_RESULT_OK` if the data was copied successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
+ * in which case `to` will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
+sxbp_result_t sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
 
 /**
  * @brief Creates a blank empty bitmap
