@@ -180,23 +180,27 @@ static bool sxbp_init_bitmap_col(bool** col, uint32_t size) {
     return *col != NULL;
 }
 
-bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
+sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
     // first allocate pointers for the columns
     bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
         // catch allocation error and exit early
-        return false;
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation of col pointers succeeded, now try and allocate each col
         for (uint32_t col = 0; col < bitmap->width; col++) {
-            if (!sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)) {
+            if (
+                !sxbp_success(
+                    sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)
+                )
+            ) {
                 // allocation of one col failed, so de-allocate the whole bitmap
                 sxbp_free_bitmap(bitmap);
                 // indicate allocation failure
-                return false;
+                return SXBP_RESULT_FAIL_MEMORY;
             }
         }
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 
@@ -217,22 +221,22 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
     }
 }
 
-bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
+sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_bitmap(to);
     // copy across width and height
     to->width = from->width;
     to->height = from->height;
     // allocate the 'to' bitmap
-    if (!sxbp_init_bitmap(to)) {
-        // exit early if allocation failed
-        return false;
+    if (!sxbp_success(sxbp_init_bitmap(to))) {
+        // exit early if allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the pixels
         for (uint32_t col = 0; col < to->width; col++) {
             memcpy(to->pixels[col], from->pixels[col], to->height);
         }
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 

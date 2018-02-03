@@ -329,11 +329,11 @@ sxbp_bitmap_t sxbp_blank_bitmap(void);
  * by the `width` and `height` members of the bitmap
  * @warning It is unsafe to call this function on a bitmap that has already
  * been allocated
- * @returns `true` if memory was allocated successfully
- * @returns `false` if memory was not allocated successfully
+ * @returns `SXBP_RESULT_OK` if memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @since v0.54.0
  */
-bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
+sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
 
 /**
  * @brief Deallocates any allocated memory for the pixels of the given bitmap
@@ -356,12 +356,12 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
  * @param[out] to The bitmap to copy the contents to
  * @warning The bitmap to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
- * @returns `true` if the data was copied successfully
- * @returns `false` if the data was not copied successfully, in which case `to`
- * will be empty.
+ * @returns `SXBP_RESULT_OK` if the data was copied successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
+ * in which case `to` will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
+sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
 
 /**
  * @brief Converts the given binary data into an early-draft SXBP figure
