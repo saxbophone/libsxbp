@@ -177,7 +177,7 @@ extern const sxbp_version_t SXBP_VERSION;
  * @returns `true` if the given status code was success
  * @returns `false` if the given status code was not success
  */
-bool sxbp_success(const sxbp_result_t state, sxbp_result_t* report_to);
+bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to);
 
 /**
  * @brief Creates a blank empty buffer

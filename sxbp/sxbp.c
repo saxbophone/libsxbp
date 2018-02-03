@@ -29,7 +29,7 @@ const sxbp_version_t SXBP_VERSION = {
     .string = SXBP_VERSION_STRING,
 };
 
-bool sxbp_success(const sxbp_result_t state, sxbp_result_t* report_to) {
+bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to) {
     // return true immediately if the state is 'OK'
     if (state == SXBP_RESULT_OK) {
         return true;
