@@ -144,14 +144,21 @@ typedef struct sxbp_bitmap_t {
  * @brief Used to represent success/failure states for certain functions in SXBP
  * @details For functions which can encounter error conditions, this type
  * enumerates the possible error conditions that can occur
+ * @note Values `SXBP_RESULT_RESERVED_START` through `SXBP_RESULT_RESERVED_END`
+ * inclusive are reserved for future use. If a value equal to or greater than
+ * `SXBP_RESULT_RESERVED_START` is encountered, the caller can assume that
+ * either a new code for which it has no definition has been returned, or that
+ * the value is garbage.
  * @since v0.54.0
  */
 typedef enum sxbp_result_t {
-    SXBP_RESULT_UNKNOWN = 0, /**< unknown, the default */
+    SXBP_RESULT_UNKNOWN = 0u, /**< unknown, the default */
     SXBP_RESULT_OK, /**< success */
     SXBP_RESULT_FAIL_MEMORY, /**< failure to allocate or reallocate memory */
     SXBP_RESULT_FAIL_PRECONDITION, /**< a preconditional check failed */
     SXBP_RESULT_FAIL_FILE, /**< a file read/write operation failed */
+    SXBP_RESULT_RESERVED_START, /**< reserved for future use */
+    SXBP_RESULT_RESERVED_END = 255u, /**< reserved for future use */
 } sxbp_result_t;
 
 /**
