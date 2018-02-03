@@ -141,6 +141,20 @@ typedef struct sxbp_bitmap_t {
 } sxbp_bitmap_t;
 
 /**
+ * @brief Used to represent success/failure states for certain functions in SXBP
+ * @details For functions which can encounter error conditions, this type
+ * enumerates the possible error conditions that can occur
+ * @since v0.54.0
+ */
+typedef enum sxbp_result_t {
+    SXBP_RESULT_UNKNOWN = 0, /**< unknown, the default */
+    SXBP_RESULT_OK, /**< success */
+    SXBP_RESULT_FAIL_MEMORY, /**< failure to allocate or reallocate memory */
+    SXBP_RESULT_FAIL_PRECONDITION, /**< a preconditional check failed */
+    SXBP_RESULT_FAIL_FILE, /**< a file read/write operation failed */
+} sxbp_result_t;
+
+/**
  * @brief Stores the current version of sxbp.
  * @since v0.27.0
  */
