@@ -180,6 +180,15 @@ extern const sxbp_version_t SXBP_VERSION;
 bool sxbp_success(sxbp_result_t state, sxbp_result_t* report_to);
 
 /**
+ * @brief Helper function-like macro for 'raising' errors to caller
+ * @details Calls to functions that can return errors can be wrapped in this
+ * macro, to the effect of returning the error early to the caller's calling
+ * function.
+ * @warnning This macro returns within the context of use if given an error
+ */
+#define SXBP_RETURN_ON_ERROR(result) if (!sxbp_success(result, NULL)) { return result; }
+
+/**
  * @brief Creates a blank empty buffer
  * @details Ensures that all pointer fields are properly initialised to NULL
  * @returns An `sxbp_buffer_t` object with all fields set to default/blank value
