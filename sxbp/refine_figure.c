@@ -95,7 +95,8 @@ static sxbp_result_t sxbp_attempt_line_shorten(
         line->length = 1;
         // check if it collided
         bool collided = false;
-        sxbp_result_t status = 0;
+        // we'll store any errors encountered by this function here
+        sxbp_result_t status = SXBP_RESULT_UNKNOWN;
         if (!sxbp_check(sxbp_figure_collides(figure, &collided), &status)) {
             // handle error
             return status;
