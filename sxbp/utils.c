@@ -3,7 +3,8 @@
  * 2D spiral-like shapes based on input binary data.
  *
  * This compilation unit provides the definition of functions for allocating,
- * freeing and copying the public data types of sxbp.
+ * freeing and copying the public data types of sxbp and those for checking
+ * the error codes returned by certain functions in sxbp.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2018
  *
@@ -23,6 +24,25 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+bool sxbp_success(sxbp_result_t state) {
+    // return whether state was 'OK or not'
+    return state == SXBP_RESULT_OK;
+}
+
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to) {
+    // return true immediately if the state is 'OK'
+    if (sxbp_success(state)) {
+        return true;
+    } else {
+        // otherwise, store it in the location at `report_to` if not NULL
+        if (report_to != NULL) {
+            *report_to = state;
+        }
+        // return false to indicate some kind of error occurred
+        return false;
+    }
+}
 
 sxbp_buffer_t sxbp_blank_buffer(void) {
     return (sxbp_buffer_t){ .size = 0, .bytes = NULL, };
