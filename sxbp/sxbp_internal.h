@@ -102,7 +102,7 @@ void sxbp_walk_figure(
 );
 
 // private, builds a bitmap large enough to fit coördinates in the given bounds
-bool sxbp_make_bitmap_for_bounds(
+sxbp_result_t sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
     sxbp_bitmap_t* bitmap
 );
