@@ -147,10 +147,19 @@ sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure) {
         // bail early, we can't do anything with this
         return SXBP_RESULT_FAIL_PRECONDITION;
     } else {
+        // variable to store any errors in
+        sxbp_result_t status = SXBP_RESULT_UNKNOWN;
         // iterate over lines backwards - we don't care about line 0
         for (sxbp_figure_size_t i = figure->size - 1; i > 0; i--) {
-            // try and shorten it
-            sxbp_attempt_line_shorten(figure, i, figure->size - 1);
+            // try and shorten it, or return error if not
+            if (
+                !sxbp_check(
+                    sxbp_attempt_line_shorten(figure, i, figure->size - 1),
+                    &status
+                )
+            ) {
+                return status;
+            }
         }
         // signal to caller that the call succeeded
         return SXBP_RESULT_OK;
