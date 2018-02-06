@@ -58,7 +58,7 @@ static sxbp_result_t sxbp_figure_collides(
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-    if (!sxbp_make_bitmap_for_bounds(bounds, &bitmap)) {
+    if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, &bitmap))) {
         // a memory allocation error occurred
         return SXBP_RESULT_FAIL_MEMORY;
     } else {

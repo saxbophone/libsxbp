@@ -62,7 +62,7 @@ sxbp_result_t sxbp_render_figure(
     // get figure bounds, at scale 2
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
     // build bitmap for bounds
-    if (!sxbp_make_bitmap_for_bounds(bounds, bitmap)) {
+    if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, bitmap))) {
         // couldn't allocate memory, return error early
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
