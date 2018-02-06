@@ -447,10 +447,15 @@ sxbp_result_t sxbp_load_figure(
  * @note The bitmap is erased before the output is written to it
  * @param figure The SXBP figure to render
  * @param[out] bitmap The bitmap to write the output to
- * @returns `true` if the figure could be rendered successfully
- * @returns `false` if the figure could not be rendered successfully
+ * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be rendered
+ * successfully
+ * @since v0.54.0
  */
-bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap);
+sxbp_result_t sxbp_render_figure(
+    const sxbp_figure_t* figure,
+    sxbp_bitmap_t* bitmap
+);
 
 #ifdef __cplusplus
 } // extern "C"
