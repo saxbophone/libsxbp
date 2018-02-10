@@ -182,8 +182,8 @@ bool sxbp_success(sxbp_result_t state);
  * @details This is intended to be used to easily check the return status of
  * functions in SXBP that can raise errors.
  * @param state The state to check for success/failure
- * @param[out] An optional pointer to a `sxbp_result_t` to store the result in,
- * if it was failure. This is ignored if `NULL`.
+ * @param[out] report_to An optional pointer to a `sxbp_result_t` to store the
+ * result in, if it was failure. This is ignored if `NULL`.
  * @returns `true` if the given status code was success
  * @returns `false` if the given status code was not success
  */
