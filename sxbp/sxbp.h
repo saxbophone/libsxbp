@@ -141,10 +141,53 @@ typedef struct sxbp_bitmap_t {
 } sxbp_bitmap_t;
 
 /**
+ * @brief Used to represent success/failure states for certain functions in SXBP
+ * @details For functions which can encounter error conditions, this type
+ * enumerates the possible error conditions that can occur
+ * @note Values `SXBP_RESULT_RESERVED_START` through `SXBP_RESULT_RESERVED_END`
+ * inclusive are reserved for future use. If a value equal to or greater than
+ * `SXBP_RESULT_RESERVED_START` is encountered, the caller can assume that
+ * either a new code for which it has no definition has been returned, or that
+ * the value is garbage.
+ * @since v0.54.0
+ */
+typedef enum sxbp_result_t {
+    SXBP_RESULT_UNKNOWN = 0u, /**< unknown, the default */
+    SXBP_RESULT_OK, /**< success */
+    SXBP_RESULT_FAIL_MEMORY, /**< failure to allocate or reallocate memory */
+    SXBP_RESULT_FAIL_PRECONDITION, /**< a preconditional check failed */
+    SXBP_RESULT_FAIL_FILE, /**< a file read/write operation failed */
+    SXBP_RESULT_RESERVED_START, /**< reserved for future use */
+    SXBP_RESULT_RESERVED_END = 255u, /**< reserved for future use */
+} sxbp_result_t;
+
+/**
  * @brief Stores the current version of sxbp.
  * @since v0.27.0
  */
 extern const sxbp_version_t SXBP_VERSION;
+
+/**
+ * @brief Returns if a given `sxbp_result_t` is successful or not
+ * @details This is intended to be used to easily check the return status of
+ * functions in SXBP that can raise errors.
+ * @param state The state to check for success/failure
+ * @returns `true` if the given status code was success
+ * @returns `false` if the given status code was not success
+ */
+bool sxbp_success(sxbp_result_t state);
+
+/**
+ * @brief Checks if a given `sxbp_result_t` is successful or not
+ * @details This is intended to be used to easily check the return status of
+ * functions in SXBP that can raise errors.
+ * @param state The state to check for success/failure
+ * @param[out] report_to An optional pointer to a `sxbp_result_t` to store the
+ * result in, if it was failure. This is ignored if `NULL`.
+ * @returns `true` if the given status code was success
+ * @returns `false` if the given status code was not success
+ */
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to);
 
 /**
  * @brief Creates a blank empty buffer
@@ -160,11 +203,11 @@ sxbp_buffer_t sxbp_blank_buffer(void);
  * member of the buffer
  * @warning It is unsafe to call this function on a buffer that has already
  * been allocated
- * @returns `true` if memory was allocated successfully
- * @returns `false` if memory was not allocated successfully
+ * @returns `SXBP_RESULT_OK` if memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @since v0.54.0
  */
-bool sxbp_init_buffer(sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer);
 
 /**
  * @brief Deallocates any allocated memory for the bytes of the given buffer
@@ -187,12 +230,12 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer);
  * @param[out] to The buffer to copy the contents to
  * @warning The buffer to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
- * @returns `true` if the data was copied successfully
- * @returns `false` if the data was not copied successfully, in which case `to`
- * will be empty.
+ * @returns `SXBP_RESULT_OK` if the data was copied successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
+ * in which case `to` will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
+sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
 
 /**
  * @brief Attempts to read the contents of the given file into the given buffer
@@ -200,11 +243,11 @@ bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
  * @warning The file should have been opened in `rb` mode
  * @param file_handle The file to read data from
  * @param[out] buffer The buffer to write data to
- * @returns `true` on successfully copying the file contents
- * @returns `false` on failure to copy the file contents
+ * @returns `SXBP_RESULT_OK` on successfully copying the file contents
+ * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_FILE` on failure to copy the file contents
  * @since v0.54.0
  */
-bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
 
 /**
  * @brief Attempts to write the contents of the given buffer to the given file
@@ -212,11 +255,14 @@ bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
  * @warning The file should have been opened in `wb` mode
  * @param buffer The buffer to read data from
  * @param[out] file_handle The file to write data to
- * @returns `true` on successfully writing the file
- * @returns `false` on failure to write the file
+ * @returns `SXBP_RESULT_OK` on successfully writing the file
+ * @returns `SXBP_RESULT_FAIL_FILE` on failure to write the file
  * @since v0.54.0
  */
-bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle);
+sxbp_result_t sxbp_buffer_to_file(
+    const sxbp_buffer_t* buffer,
+    FILE* file_handle
+);
 
 /**
  * @brief Creates a blank empty figure
@@ -233,11 +279,12 @@ sxbp_figure_t sxbp_blank_figure(void);
  * as needed.
  * @warning It is unsafe to call this function on a figure that has already
  * been allocated
- * @returns `true` if all memory was allocated successfully
- * @returns `false` if any memory was not allocated successfully
+ * @returns `SXBP_RESULT_OK` if all memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if any memory was not allocated
+ * successfully
  * @since v0.54.0
  */
-bool sxbp_init_figure(sxbp_figure_t* figure);
+sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure);
 
 /**
  * @brief Deallocates any allocated memory for the given figure
@@ -261,12 +308,12 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * @param[out] to The figure to copy the contents to
  * @warning The figure to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
- * @returns `true` if the data was copied successfully
- * @returns `false` if the data was not copied successfully, in which case `to`
- * will be empty.
+ * @returns `SXBP_RESULT_OK` if the data was copied successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
+ * in which case `to` will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
+sxbp_result_t sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
 
 /**
  * @brief Creates a blank empty bitmap
@@ -282,11 +329,11 @@ sxbp_bitmap_t sxbp_blank_bitmap(void);
  * by the `width` and `height` members of the bitmap
  * @warning It is unsafe to call this function on a bitmap that has already
  * been allocated
- * @returns `true` if memory was allocated successfully
- * @returns `false` if memory was not allocated successfully
+ * @returns `SXBP_RESULT_OK` if memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @since v0.54.0
  */
-bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
+sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
 
 /**
  * @brief Deallocates any allocated memory for the pixels of the given bitmap
@@ -309,12 +356,12 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
  * @param[out] to The bitmap to copy the contents to
  * @warning The bitmap to copy the contents to must be in a consistent state,
  * that is it must either not be allocated yet, or must be properly allocated.
- * @returns `true` if the data was copied successfully
- * @returns `false` if the data was not copied successfully, in which case `to`
- * will be empty.
+ * @returns `SXBP_RESULT_OK` if the data was copied successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
+ * in which case `to` will be empty.
  * @since v0.54.0
  */
-bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
+sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
 
 /**
  * @brief Converts the given binary data into an early-draft SXBP figure
@@ -327,11 +374,15 @@ bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * @note The shape that can be derived from this data will waste a lot of visual
  * space and should be refined by calling `sxbp_refine_figure`
  * @todo Add options struct (at least one option, max number of lines)
- * @returns `true` if the figure could be successfully generated
- * @returns `false` if the figure could not be successfully generated
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully generated
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
+ * generated
  * @since v0.54.0
  */
-bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure);
+sxbp_result_t sxbp_begin_figure(
+    const sxbp_buffer_t* data,
+    sxbp_figure_t* figure
+);
 
 /**
  * @brief Refines the line lengths of the given SXBP figure
@@ -342,11 +393,14 @@ bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure);
  * @warning This function may take a long time to execute
  * @todo Add extended options (as struct) including progress callback (most
  * important)
- * @returns `true` if the figure could be successfully refined
- * @returns `false` if the figure could not be successfully refined
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully refined
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if called on a figure with no lines
+ * allocated
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred when
+ * refining the figure
  * @since v0.54.0
  */
-bool sxbp_refine_figure(sxbp_figure_t* figure);
+sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure);
 
 /**
  * @brief Serialises the given figure to data, stored in the given buffer
@@ -355,11 +409,15 @@ bool sxbp_refine_figure(sxbp_figure_t* figure);
  * @note The buffer is erased before being populated
  * @param figure The figure to serialise
  * @param[out] buffer The buffer to store the serialised data in
- * @returns `true` if the figure could be successfully serialised
- * @returns `false` if the figure could not be successfully serialised
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully serialised
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
+ * serialised
  * @since v0.54.0
  */
-bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_dump_figure(
+    const sxbp_figure_t* figure,
+    sxbp_buffer_t* buffer
+);
 
 /**
  * @brief Attempts to deserialise an SXBP figure from the given buffer
@@ -369,11 +427,18 @@ bool sxbp_dump_figure(const sxbp_figure_t* figure, sxbp_buffer_t* buffer);
  * @note The figure is overwritten in this process
  * @param buffer The buffer to load the SXBP figure from
  * @param[out] figure The figure to store the deserialised SXBP figure in
- * @returns `true` if the figure could be successfully deserialised
- * @returns `false` if the figure could not be successfully deserialised
+ * @returns `SXBP_RESULT_OK` if the figure could be successfully deserialised
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be deserialised
+ * due to a memory error
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if the figure could not be
+ * deserialised because the buffer contains invalid data or data for a version
+ * of SXBP that this version cannot read
  * @since v0.54.0
  */
-bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure);
+sxbp_result_t sxbp_load_figure(
+    const sxbp_buffer_t* buffer,
+    sxbp_figure_t* figure
+);
 
 /**
  * @brief Rasterises an image of the given figure to a basic bitmap object
@@ -382,10 +447,15 @@ bool sxbp_load_figure(const sxbp_buffer_t* buffer, sxbp_figure_t* figure);
  * @note The bitmap is erased before the output is written to it
  * @param figure The SXBP figure to render
  * @param[out] bitmap The bitmap to write the output to
- * @returns `true` if the figure could be rendered successfully
- * @returns `false` if the figure could not be rendered successfully
+ * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be rendered
+ * successfully
+ * @since v0.54.0
  */
-bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap);
+sxbp_result_t sxbp_render_figure(
+    const sxbp_figure_t* figure,
+    sxbp_bitmap_t* bitmap
+);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -53,15 +53,18 @@ static bool sxbp_render_figure_callback(
     return true;
 }
 
-bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap) {
+sxbp_result_t sxbp_render_figure(
+    const sxbp_figure_t* figure,
+    sxbp_bitmap_t* bitmap
+) {
     // erase the bitmap structure first just in case
     sxbp_free_bitmap(bitmap);
     // get figure bounds, at scale 2
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
     // build bitmap for bounds
-    if (!sxbp_make_bitmap_for_bounds(bounds, bitmap)) {
-        // couldn't allocate memory, return false early
-        return false;
+    if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, bitmap))) {
+        // couldn't allocate memory, return error early
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // construct callback context data
         render_figure_context data = {
@@ -72,7 +75,7 @@ bool sxbp_render_figure(const sxbp_figure_t* figure, sxbp_bitmap_t* bitmap) {
         // walk the figure at scale 2, handle pixel plotting with callback
         sxbp_walk_figure(figure, 2, sxbp_render_figure_callback, (void*)&data);
     }
-    return true;
+    return SXBP_RESULT_OK;
 }
 
 #ifdef __cplusplus

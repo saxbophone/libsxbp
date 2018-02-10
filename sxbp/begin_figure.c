@@ -11,6 +11,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -66,7 +67,10 @@ static sxbp_length_t sxbp_next_length(
     sxbp_direction_t direction,
     sxbp_bounds_t bounds
 ) {
-    switch (direction) {
+    // preconditional assertions --direction should be one of the enum values
+    assert(direction >= SXBP_UP);
+    assert(direction <= SXBP_LEFT);
+    switch (direction % 4u) {
         case SXBP_UP:
             return abs(bounds.y_max - location.y) + 1;
         case SXBP_RIGHT:
@@ -76,8 +80,12 @@ static sxbp_length_t sxbp_next_length(
         case SXBP_LEFT:
             return abs(bounds.x_min - location.x) + 1;
         default:
-            // NOTE: should never happen
-            return 0;
+            /*
+             * NOTE: this case should never happen
+             * it is only provided to placate the GCC compiler, which isn't
+             * smart enough to realise that this is unreachable code
+             */
+            assert(false);
     }
 }
 
@@ -128,7 +136,10 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
     }
 }
 
-bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
+sxbp_result_t sxbp_begin_figure(
+    const sxbp_buffer_t* data,
+    sxbp_figure_t* figure
+) {
     // erase the figure first to ensure it's blank
     sxbp_free_figure(figure);
     /*
@@ -137,13 +148,13 @@ bool sxbp_begin_figure(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
      */
     figure->size = data->size * 8 + 1;
     // allocate memory for the figure
-    if (!sxbp_init_figure(figure)) {
-        // exit early and signal error status
-        return false;
+    if (!sxbp_success(sxbp_init_figure(figure))) {
+        // exit early and signal error status - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, now populate the lines
         sxbp_plot_lines(data, figure);
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 

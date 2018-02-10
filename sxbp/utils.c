@@ -3,7 +3,8 @@
  * 2D spiral-like shapes based on input binary data.
  *
  * This compilation unit provides the definition of functions for allocating,
- * freeing and copying the public data types of sxbp.
+ * freeing and copying the public data types of sxbp and those for checking
+ * the error codes returned by certain functions in sxbp.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2018
  *
@@ -24,15 +25,34 @@
 extern "C"{
 #endif
 
+bool sxbp_success(sxbp_result_t state) {
+    // return whether state was 'OK or not'
+    return state == SXBP_RESULT_OK;
+}
+
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to) {
+    // return true immediately if the state is 'OK'
+    if (sxbp_success(state)) {
+        return true;
+    } else {
+        // otherwise, store it in the location at `report_to` if not NULL
+        if (report_to != NULL) {
+            *report_to = state;
+        }
+        // return false to indicate some kind of error occurred
+        return false;
+    }
+}
+
 sxbp_buffer_t sxbp_blank_buffer(void) {
     return (sxbp_buffer_t){ .size = 0, .bytes = NULL, };
 }
 
-bool sxbp_init_buffer(sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer) {
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
     // if bytes is not NULL, then the operation was successful
-    return buffer->bytes != NULL;
+    return buffer->bytes != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
 bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
@@ -48,19 +68,19 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
     }
 }
 
-bool sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
+sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_buffer(to);
     // copy across the size
     to->size = from->size;
     // allocate the 'to' buffer
-    if (!sxbp_init_buffer(to)) {
-        // exit early if allocation failed
-        return false;
+    if (!sxbp_success(sxbp_init_buffer(to))) {
+        // exit early if allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the data
         memcpy(to->bytes, from->bytes, to->size);
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 
@@ -79,15 +99,15 @@ static size_t sxbp_get_file_size(FILE* file_handle) {
     return file_size;
 }
 
-bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
     // erase buffer
     sxbp_free_buffer(buffer);
     // get the file's size
     buffer->size = sxbp_get_file_size(file_handle);
     // allocate the buffer to this size and handle error if this failed
-    if (!sxbp_init_buffer(buffer)) {
-        // allocation failed
-        return false;
+    if (!sxbp_success(sxbp_init_buffer(buffer))) {
+        // allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so read the file contents into the buffer
         size_t bytes_read = fread(
@@ -103,15 +123,19 @@ bool sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
         if (bytes_read != buffer->size) {
             // we didn't read the same number of bytes as the file's size
             sxbp_free_buffer(buffer);
-            return false;
+            // return a file error
+            return SXBP_RESULT_FAIL_FILE;
         } else {
             // we read the buffer successfully, so return success
-            return true;
+            return SXBP_RESULT_OK;
         }
     }
 }
 
-bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle) {
+sxbp_result_t sxbp_buffer_to_file(
+    const sxbp_buffer_t* buffer,
+    FILE* file_handle
+) {
     // try and write the file contents
     size_t bytes_written = fwrite(
         buffer->bytes,
@@ -119,19 +143,19 @@ bool sxbp_buffer_to_file(const sxbp_buffer_t* buffer, FILE* file_handle) {
         buffer->size,
         file_handle
     );
-    // return true/false if the correct number of bytes were written
-    return bytes_written == buffer->size;
+    // return success/failure if the correct number of bytes were written
+    return bytes_written == buffer->size ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_FILE;
 }
 
 sxbp_figure_t sxbp_blank_figure(void) {
     return (sxbp_figure_t){ .size = 0, .lines = NULL, .lines_remaining = 0, };
 }
 
-bool sxbp_init_figure(sxbp_figure_t* figure) {
+sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure) {
     // allocate the lines, using calloc to set all fields of each one to zero
     figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
     // if lines is not NULL, then the operation was successful
-    return figure->lines != NULL;
+    return figure->lines != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
 bool sxbp_free_figure(sxbp_figure_t* figure) {
@@ -147,7 +171,7 @@ bool sxbp_free_figure(sxbp_figure_t* figure) {
     }
 }
 
-bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
+sxbp_result_t sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
     // copy across the static members
@@ -155,12 +179,12 @@ bool sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
     to->lines_remaining = from->lines_remaining;
     // allocate the 'to' figure
     if (!sxbp_init_figure(to)) {
-        // exit early if allocation failed
-        return false;
+        // exit early if allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the lines
         memcpy(to->lines, from->lines, to->size);
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 
@@ -176,23 +200,27 @@ static bool sxbp_init_bitmap_col(bool** col, uint32_t size) {
     return *col != NULL;
 }
 
-bool sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
+sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
     // first allocate pointers for the columns
     bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
         // catch allocation error and exit early
-        return false;
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation of col pointers succeeded, now try and allocate each col
         for (uint32_t col = 0; col < bitmap->width; col++) {
-            if (!sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)) {
+            if (
+                !sxbp_success(
+                    sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)
+                )
+            ) {
                 // allocation of one col failed, so de-allocate the whole bitmap
                 sxbp_free_bitmap(bitmap);
                 // indicate allocation failure
-                return false;
+                return SXBP_RESULT_FAIL_MEMORY;
             }
         }
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 
@@ -213,22 +241,22 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
     }
 }
 
-bool sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
+sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_bitmap(to);
     // copy across width and height
     to->width = from->width;
     to->height = from->height;
     // allocate the 'to' bitmap
-    if (!sxbp_init_bitmap(to)) {
-        // exit early if allocation failed
-        return false;
+    if (!sxbp_success(sxbp_init_bitmap(to))) {
+        // exit early if allocation failed - this can only be a memory error
+        return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the pixels
         for (uint32_t col = 0; col < to->width; col++) {
             memcpy(to->pixels[col], from->pixels[col], to->height);
         }
-        return true;
+        return SXBP_RESULT_OK;
     }
 }
 

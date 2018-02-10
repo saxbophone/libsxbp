@@ -2,8 +2,7 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides the definition of core global symbols of sxbp,
- * currently just the version.
+ * This compilation unit provides the definition of core global symbols of sxbp.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *

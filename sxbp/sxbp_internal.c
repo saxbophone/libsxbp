@@ -130,7 +130,7 @@ void sxbp_walk_figure(
     }
 }
 
-bool sxbp_make_bitmap_for_bounds(
+sxbp_result_t sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
     sxbp_bitmap_t* bitmap
 ) {
@@ -143,7 +143,7 @@ bool sxbp_make_bitmap_for_bounds(
     bitmap->width = (bounds.x_max - bounds.x_min) + 1;
     bitmap->height = (bounds.y_max - bounds.y_min) + 1;
     bitmap->pixels = NULL;
-    // allocate memory for the bitmap and return whether this succeeded or not
+    // allocate memory for the bitmap and return the status of this operation
     return sxbp_init_bitmap(bitmap);
 }
 
