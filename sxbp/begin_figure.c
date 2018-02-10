@@ -70,7 +70,7 @@ static sxbp_length_t sxbp_next_length(
     // preconditional assertions --direction should be one of the enum values
     assert(direction >= SXBP_UP);
     assert(direction <= SXBP_LEFT);
-    switch (direction) {
+    switch (direction % 4u) {
         case SXBP_UP:
             return abs(bounds.y_max - location.y) + 1;
         case SXBP_RIGHT:
@@ -80,8 +80,12 @@ static sxbp_length_t sxbp_next_length(
         case SXBP_LEFT:
             return abs(bounds.x_min - location.x) + 1;
         default:
-            // NOTE: should never happen
-            return 0;
+            /*
+             * NOTE: this case should never happen
+             * it is only provided to placate the GCC compiler, which isn't
+             * smart enough to realise that this is unreachable code
+             */
+            assert(false);
     }
 }
 
