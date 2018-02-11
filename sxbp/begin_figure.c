@@ -138,6 +138,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
 
 sxbp_result_t sxbp_begin_figure(
     const sxbp_buffer_t* data,
+    const sxbp_begin_figure_options_t* options,
     sxbp_figure_t* figure
 ) {
     // check the buffer is not too large before doing anything else
@@ -151,6 +152,14 @@ sxbp_result_t sxbp_begin_figure(
          * (byte count * 8) + 1 (for the extra starting line)
          */
         figure->size = data->size * 8 + 1;
+        /*
+         * if options->max_lines is not 0 and is less than the figure's size,
+         * then this means we need to make the figure size the size specified
+         * by max_lines
+         */
+        if (options->max_lines != 0 && options->max_lines < figure->size) {
+            figure->size = options->max_lines;
+        }
         // allocate memory for the figure
         if (!sxbp_success(sxbp_init_figure(figure))) {
             // exit early and signal error status - can only be a memory error

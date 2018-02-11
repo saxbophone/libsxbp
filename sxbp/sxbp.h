@@ -128,7 +128,7 @@ typedef struct sxbp_figure_t {
 typedef struct sxbp_begin_figure_options_t {
     /**
      * @brief The maximum number of lines to create in the figure
-     * @details If 0, then the maximum number of lines possible (based on the
+     * @details If `0`, then the maximum number of lines possible (based on the
      * input data size) is used.
      * @note If this is greater than the maximum number of lines possible, then
      * the latter is used.
@@ -191,6 +191,11 @@ extern const sxbp_version_t SXBP_VERSION;
  * size or larger can be used to create a figure, but less than 1GiB is fine.
  */
 extern const size_t SXBP_BEGIN_BUFFER_MAX_SIZE;
+
+/**
+ * @brief The default options used for `sxbp_begin_figure()`
+ */
+extern const sxbp_begin_figure_options_t SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT;
 
 /**
  * @brief Returns if a given `sxbp_result_t` is successful or not
@@ -404,7 +409,6 @@ sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * @warning Figures cannot be created from buffers larger than
  * `SXBP_BEGIN_BUFFER_MAX_SIZE` -- an error will be returned if this is
  * attempted.
- * @todo Add options struct (at least one option, max number of lines)
  * @returns `SXBP_RESULT_OK` if the figure could be successfully generated
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
  * generated
