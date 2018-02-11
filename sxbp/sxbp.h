@@ -168,6 +168,16 @@ typedef enum sxbp_result_t {
 extern const sxbp_version_t SXBP_VERSION;
 
 /**
+ * @brief The maximum size of buffer that can be used to begin a figure
+ * @details This ensures that a figure will not produce a line which will exceed
+ * the maximum bounds of the grid in which it is plotted. It is derived like so:
+ * `(((2^32 - 1) × 2) - 1) ÷ 8 = 1073741823.625` and this is due to 32-bit
+ * bounds being used for the figure's grid. This means no file that is 1GiB in
+ * size or larger can be used to create a figure, but less than 1GiB is fine.
+ */
+extern const size_t SXBP_BEGIN_BUFFER_MAX_SIZE;
+
+/**
  * @brief Returns if a given `sxbp_result_t` is successful or not
  * @details This is intended to be used to easily check the return status of
  * functions in SXBP that can raise errors.
@@ -373,10 +383,14 @@ sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * erased before data is written to it.
  * @note The shape that can be derived from this data will waste a lot of visual
  * space and should be refined by calling `sxbp_refine_figure`
+ * @warning Figures cannot be created from buffers larger than
+ * `SXBP_BEGIN_BUFFER_MAX_SIZE` -- an error will be returned if this is
+ * attempted.
  * @todo Add options struct (at least one option, max number of lines)
  * @returns `SXBP_RESULT_OK` if the figure could be successfully generated
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
  * generated
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if the given buffer was too large
  * @since v0.54.0
  */
 sxbp_result_t sxbp_begin_figure(

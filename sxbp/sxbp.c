@@ -10,6 +10,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <stddef.h>
+
 #include "sxbp.h"
 
 
@@ -24,6 +26,8 @@ const sxbp_version_t SXBP_VERSION = {
     .patch = SXBP_VERSION_PATCH,
     .string = SXBP_VERSION_STRING,
 };
+
+const size_t SXBP_BEGIN_BUFFER_MAX_SIZE = 1073741823;
 
 #ifdef __cplusplus
 } // extern "C"
