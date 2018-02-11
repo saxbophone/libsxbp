@@ -30,7 +30,7 @@ int main(void) {
     } else {
         memcpy(buffer.bytes, string, length);
         sxbp_figure_t figure = sxbp_blank_figure();
-        sxbp_begin_figure(&buffer, &figure);
+        sxbp_begin_figure(&buffer, NULL, &figure);
         sxbp_free_buffer(&buffer);
         // render incomplete figure to bitmap
         sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
