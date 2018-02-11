@@ -122,6 +122,21 @@ typedef struct sxbp_figure_t {
 } sxbp_figure_t;
 
 /**
+ * @brief A structure used for providing options to `sxbp_begin_figure()`
+ * @since v0.54.0
+ */
+typedef struct sxbp_begin_figure_options_t {
+    /**
+     * @brief The maximum number of lines to create in the figure
+     * @details If 0, then the maximum number of lines possible (based on the
+     * input data size) is used.
+     * @note If this is greater than the maximum number of lines possible, then
+     * the latter is used.
+     */
+    sxbp_figure_size_t max_lines;
+} sxbp_begin_figure_options_t;
+
+/**
  * @brief Used to represent a basic 1-bit, pure black/white bitmap image.
  * @details The image has integer height and width, and a 2-dimensional array of
  * 1-bit pixels which are either black or white.
@@ -379,6 +394,9 @@ sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * directions and from these an unrefined rudimentary line is plotted in the
  * figure (by setting the directions and lengths of the figure's lines).
  * @param data The buffer containing data to generate the figure from
+ * @param options An optional options struct to specify additional options for
+ * starting the figure. This can be `NULL`, in which case the default options
+ * are used.
  * @param[out] figure The figure in which to generate the line. This will be
  * erased before data is written to it.
  * @note The shape that can be derived from this data will waste a lot of visual
@@ -395,6 +413,7 @@ sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  */
 sxbp_result_t sxbp_begin_figure(
     const sxbp_buffer_t* data,
+    const sxbp_begin_figure_options_t* options,
     sxbp_figure_t* figure
 );
 
