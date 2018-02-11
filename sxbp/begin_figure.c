@@ -119,6 +119,10 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             bool bit = (data->bytes[s] & (1 << e)) >> e; // the current bit
             // this is the line index, derived from the bit of data we're on
             sxbp_figure_size_t index = (s * 8) + (sxbp_figure_size_t)b + 1;
+            // do bounds-checking on the index, return early if out of bounds
+            if (index >= figure->size) {
+                return;
+            }
             // set rotation direction based on the current bit
             sxbp_rotation_t rotation = sxbp_rotation_from_bit(bit);
             // calculate the new direction
@@ -152,16 +156,16 @@ sxbp_result_t sxbp_begin_figure(
          * (byte count * 8) + 1 (for the extra starting line)
          */
         figure->size = data->size * 8 + 1;
+        // use default options if `options` is `NULL`
+        if (options == NULL) {
+            options = &SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT;
+        }
         /*
-         * if options is not NULL, options->max_lines is not 0 and is less than
-         * the figure's size, then this means we need to make the figure size
-         * the size specified by `max_lines`
+         * if options->max_lines is not 0 and is less than the figure's size,
+         * then this means we need to make the figure size the size specified by
+         * `max_lines`
          */
-        if (
-            options != NULL &&
-            options->max_lines != 0 &&
-            options->max_lines < figure->size
-        ) {
+        if (options->max_lines != 0 && options->max_lines < figure->size) {
             figure->size = options->max_lines;
         }
         // allocate memory for the figure
