@@ -153,11 +153,15 @@ sxbp_result_t sxbp_begin_figure(
          */
         figure->size = data->size * 8 + 1;
         /*
-         * if options->max_lines is not 0 and is less than the figure's size,
-         * then this means we need to make the figure size the size specified
-         * by max_lines
+         * if options is not NULL, options->max_lines is not 0 and is less than
+         * the figure's size, then this means we need to make the figure size
+         * the size specified by `max_lines`
          */
-        if (options->max_lines != 0 && options->max_lines < figure->size) {
+        if (
+            options != NULL &&
+            options->max_lines != 0 &&
+            options->max_lines < figure->size
+        ) {
             figure->size = options->max_lines;
         }
         // allocate memory for the figure
