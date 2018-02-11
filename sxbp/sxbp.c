@@ -29,6 +29,10 @@ const sxbp_version_t SXBP_VERSION = {
 
 const size_t SXBP_BEGIN_BUFFER_MAX_SIZE = 1073741823;
 
+const sxbp_begin_figure_options_t SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT = {
+    .max_lines = 0,
+};
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
