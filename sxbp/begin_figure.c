@@ -140,21 +140,26 @@ sxbp_result_t sxbp_begin_figure(
     const sxbp_buffer_t* data,
     sxbp_figure_t* figure
 ) {
-    // erase the figure first to ensure it's blank
-    sxbp_free_figure(figure);
-    /*
-     * the number of lines is the number of bits in the buffer (byte count * 8)
-     * + 1 (for the extra starting line)
-     */
-    figure->size = data->size * 8 + 1;
-    // allocate memory for the figure
-    if (!sxbp_success(sxbp_init_figure(figure))) {
-        // exit early and signal error status - this can only be a memory error
-        return SXBP_RESULT_FAIL_MEMORY;
-    } else {
-        // allocation succeeded, now populate the lines
-        sxbp_plot_lines(data, figure);
-        return SXBP_RESULT_OK;
+    // check the buffer is not too large before doing anything else
+    if (data->size > SXBP_BEGIN_BUFFER_MAX_SIZE) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    } {
+        // erase the figure to ensure it's blank
+        sxbp_free_figure(figure);
+        /*
+         * the number of lines is the number of bits in the buffer
+         * (byte count * 8) + 1 (for the extra starting line)
+         */
+        figure->size = data->size * 8 + 1;
+        // allocate memory for the figure
+        if (!sxbp_success(sxbp_init_figure(figure))) {
+            // exit early and signal error status - can only be a memory error
+            return SXBP_RESULT_FAIL_MEMORY;
+        } else {
+            // allocation succeeded, now populate the lines
+            sxbp_plot_lines(data, figure);
+            return SXBP_RESULT_OK;
+        }
     }
 }
 
