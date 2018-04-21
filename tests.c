@@ -20,6 +20,24 @@
 extern "C"{
 #endif
 
+
+/*
+ * disable GCC warning about the unused parameter, as this is a callback it must
+ * include all arguments specified by the `progress_callback`, even if not used
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+static void print_progress(const sxbp_figure_t* figure, void* context) {
+    printf("%u\n", figure->lines_remaining);
+    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_render_figure(figure, &bitmap);
+    sxbp_print_bitmap(&bitmap, stdout);
+    fflush(stdout);
+}
+// reënable all warnings
+#pragma GCC diagnostic pop
+
+
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
     const char* string = "SXBP";
@@ -35,13 +53,12 @@ int main(void) {
         // render incomplete figure to bitmap
         sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
         sxbp_render_figure(&figure, &bitmap);
-        // NOTE: debug printing
-        sxbp_print_bitmap(&bitmap, stdout);
-        sxbp_refine_figure(&figure, NULL);
+        sxbp_refine_figure_options_t options = {
+            .progress_callback = print_progress,
+        };
+        sxbp_refine_figure(&figure, &options);
         // render complete figure to bitmap
         sxbp_render_figure(&figure, &bitmap);
-        // NOTE: debug printing
-        sxbp_print_bitmap(&bitmap, stdout);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
         return 0;

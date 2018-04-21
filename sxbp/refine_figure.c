@@ -162,6 +162,16 @@ sxbp_result_t sxbp_refine_figure(
                 )
             ) {
                 return status;
+            } else {
+                /*
+                 * set which how many lines we have left to solve
+                 * NOTE: this value is -1 because line 0 never needs solving
+                 */
+                figure->lines_remaining = i - 1;
+                // call the progress callback if it's been given
+                if (options != NULL && options->progress_callback != NULL) {
+                    options->progress_callback(figure, options->callback_context);
+                }
             }
         }
         // signal to caller that the call succeeded

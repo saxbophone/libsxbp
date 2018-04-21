@@ -116,7 +116,7 @@ typedef struct sxbp_figure_t {
      * @details A line that has not been 'solved' is a line that hasn't been
      * shortened to its minimum possible length
      * @note While this is greater than zero, it is the index of the next line
-     * that needs solving + 1
+     * that needs solving
      */
     sxbp_figure_size_t lines_remaining;
 } sxbp_figure_t;
