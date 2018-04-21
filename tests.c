@@ -8,6 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,6 +20,24 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
+
+
+/*
+ * disable GCC warning about the unused parameter, as this is a callback it must
+ * include all arguments specified by the `progress_callback`, even if not used
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+static void print_progress(const sxbp_figure_t* figure, void* context) {
+    printf("%" PRIu32 "\n", figure->lines_remaining);
+    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_render_figure(figure, &bitmap);
+    sxbp_print_bitmap(&bitmap, stdout);
+    fflush(stdout);
+}
+// reënable all warnings
+#pragma GCC diagnostic pop
+
 
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
@@ -35,13 +54,12 @@ int main(void) {
         // render incomplete figure to bitmap
         sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
         sxbp_render_figure(&figure, &bitmap);
-        // NOTE: debug printing
-        sxbp_print_bitmap(&bitmap, stdout);
-        sxbp_refine_figure(&figure);
+        sxbp_refine_figure_options_t options = {
+            .progress_callback = print_progress,
+        };
+        sxbp_refine_figure(&figure, &options);
         // render complete figure to bitmap
         sxbp_render_figure(&figure, &bitmap);
-        // NOTE: debug printing
-        sxbp_print_bitmap(&bitmap, stdout);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
         return 0;

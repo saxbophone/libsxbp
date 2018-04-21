@@ -141,7 +141,10 @@ static sxbp_result_t sxbp_attempt_line_shorten(
     return SXBP_RESULT_OK;
 }
 
-sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure) {
+sxbp_result_t sxbp_refine_figure(
+    sxbp_figure_t* figure,
+    const sxbp_refine_figure_options_t* options
+) {
     // we can't refine a figure that has no lines allocated, so check this first
     if (figure->lines == NULL) {
         // bail early, we can't do anything with this
@@ -159,6 +162,16 @@ sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure) {
                 )
             ) {
                 return status;
+            } else {
+                /*
+                 * set which how many lines we have left to solve
+                 * NOTE: this value is -1 because line 0 never needs solving
+                 */
+                figure->lines_remaining = i - 1;
+                // call the progress callback if it's been given
+                if (options != NULL && options->progress_callback != NULL) {
+                    options->progress_callback(figure, options->callback_context);
+                }
             }
         }
         // signal to caller that the call succeeded
