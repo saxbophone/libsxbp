@@ -91,7 +91,7 @@ sxbp_result_t sxbp_copy_buffer(
  * private, works out and returns the size of the file referred to by the given
  * file handle
  */
-static size_t sxbp_get_file_size(FILE* file_handle) {
+static size_t sxbp_get_file_size(FILE* const file_handle) {
     // seek to end
     // NOTE: This isn't portable due to lack of meaningful support of `SEEK_END`
     fseek(file_handle, 0, SEEK_END);
@@ -103,7 +103,7 @@ static size_t sxbp_get_file_size(FILE* file_handle) {
 }
 
 sxbp_result_t sxbp_buffer_from_file(
-    FILE* file_handle,
+    FILE* const file_handle,
     sxbp_buffer_t* const buffer
 ) {
     // erase buffer
@@ -140,7 +140,7 @@ sxbp_result_t sxbp_buffer_from_file(
 
 sxbp_result_t sxbp_buffer_to_file(
     const sxbp_buffer_t* const buffer,
-    FILE* file_handle
+    FILE* const file_handle
 ) {
     // try and write the file contents
     size_t bytes_written = fwrite(

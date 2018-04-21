@@ -303,7 +303,7 @@ sxbp_result_t sxbp_copy_buffer(
  * @since v0.54.0
  */
 sxbp_result_t sxbp_buffer_from_file(
-    FILE* file_handle,
+    FILE* const file_handle,
     sxbp_buffer_t* const buffer
 );
 
@@ -319,7 +319,7 @@ sxbp_result_t sxbp_buffer_from_file(
  */
 sxbp_result_t sxbp_buffer_to_file(
     const sxbp_buffer_t* const buffer,
-    FILE* file_handle
+    FILE* const file_handle
 );
 
 /**
