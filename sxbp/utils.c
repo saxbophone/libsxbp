@@ -30,7 +30,7 @@ bool sxbp_success(sxbp_result_t state) {
     return state == SXBP_RESULT_OK;
 }
 
-bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to) {
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* const report_to) {
     // return true immediately if the state is 'OK'
     if (sxbp_success(state)) {
         return true;
@@ -48,14 +48,14 @@ sxbp_buffer_t sxbp_blank_buffer(void) {
     return (sxbp_buffer_t){ .size = 0, .bytes = NULL, };
 }
 
-sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
     // if bytes is not NULL, then the operation was successful
     return buffer->bytes != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
-bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
+bool sxbp_free_buffer(sxbp_buffer_t* const buffer) {
     // if bytes is not NULL, assume there's memory to be deallocated
     if (buffer->bytes != NULL) {
         free(buffer->bytes);
@@ -68,7 +68,10 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer) {
     }
 }
 
-sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to) {
+sxbp_result_t sxbp_copy_buffer(
+    const sxbp_buffer_t* const from,
+    sxbp_buffer_t* const to
+) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_buffer(to);
     // copy across the size
@@ -99,7 +102,10 @@ static size_t sxbp_get_file_size(FILE* file_handle) {
     return file_size;
 }
 
-sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
+sxbp_result_t sxbp_buffer_from_file(
+    FILE* file_handle,
+    sxbp_buffer_t* const buffer
+) {
     // erase buffer
     sxbp_free_buffer(buffer);
     // get the file's size
@@ -133,7 +139,7 @@ sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer) {
 }
 
 sxbp_result_t sxbp_buffer_to_file(
-    const sxbp_buffer_t* buffer,
+    const sxbp_buffer_t* const buffer,
     FILE* file_handle
 ) {
     // try and write the file contents
@@ -151,14 +157,14 @@ sxbp_figure_t sxbp_blank_figure(void) {
     return (sxbp_figure_t){ .size = 0, .lines = NULL, .lines_remaining = 0, };
 }
 
-sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure) {
+sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
     // allocate the lines, using calloc to set all fields of each one to zero
     figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
     // if lines is not NULL, then the operation was successful
     return figure->lines != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
-bool sxbp_free_figure(sxbp_figure_t* figure) {
+bool sxbp_free_figure(sxbp_figure_t* const figure) {
     // if lines is not NULL, assume there's memory to be deallocated
     if (figure->lines != NULL) {
         free(figure->lines);
@@ -171,7 +177,10 @@ bool sxbp_free_figure(sxbp_figure_t* figure) {
     }
 }
 
-sxbp_result_t sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to) {
+sxbp_result_t sxbp_copy_figure(
+    const sxbp_figure_t* const from,
+    sxbp_figure_t* const to
+) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
     // copy across the static members
@@ -200,7 +209,7 @@ static bool sxbp_init_bitmap_col(bool** col, uint32_t size) {
     return *col != NULL;
 }
 
-sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
+sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
     // first allocate pointers for the columns
     bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
@@ -224,7 +233,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap) {
     }
 }
 
-bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
+bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
     // if pixels is not NULL, assume there are cols to be deallocated
     if (bitmap->pixels != NULL) {
         // deallocate each col that needs deallocating first
@@ -241,7 +250,10 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap) {
     }
 }
 
-sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to) {
+sxbp_result_t sxbp_copy_bitmap(
+    const sxbp_bitmap_t* const from,
+    sxbp_bitmap_t* const to
+) {
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_bitmap(to);
     // copy across width and height
