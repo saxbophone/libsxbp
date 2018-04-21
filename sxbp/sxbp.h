@@ -151,6 +151,9 @@ typedef struct sxbp_refine_figure_options_t {
     /**
      * @brief An optional context to be given to the `progress_callback` when
      * called.
+     * @details Use this to provide any state required by your callback, if you
+     * have one. A common pattern is to pass a pointer to a struct containing
+     * state variables you might need to write out a message, save a file, etc.
      */
     void* callback_context;
 } sxbp_refine_figure_options_t;
