@@ -141,7 +141,10 @@ static sxbp_result_t sxbp_attempt_line_shorten(
     return SXBP_RESULT_OK;
 }
 
-sxbp_result_t sxbp_refine_figure(sxbp_figure_t* figure) {
+sxbp_result_t sxbp_refine_figure(
+    sxbp_figure_t* figure,
+    const sxbp_refine_figure_options_t* options
+) {
     // we can't refine a figure that has no lines allocated, so check this first
     if (figure->lines == NULL) {
         // bail early, we can't do anything with this

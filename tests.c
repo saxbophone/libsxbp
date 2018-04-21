@@ -37,7 +37,7 @@ int main(void) {
         sxbp_render_figure(&figure, &bitmap);
         // NOTE: debug printing
         sxbp_print_bitmap(&bitmap, stdout);
-        sxbp_refine_figure(&figure);
+        sxbp_refine_figure(&figure, NULL);
         // render complete figure to bitmap
         sxbp_render_figure(&figure, &bitmap);
         // NOTE: debug printing
