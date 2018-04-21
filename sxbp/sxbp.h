@@ -145,7 +145,7 @@ typedef struct sxbp_refine_figure_options_t {
      * @brief An optional callback to be called every time a new line is solved.
      */
     void(* progress_callback)(
-        const sxbp_figure_t* figure,
+        const sxbp_figure_t* const figure,
         void* callback_context
     );
     /**
@@ -239,7 +239,7 @@ bool sxbp_success(sxbp_result_t state);
  * @returns `true` if the given status code was success
  * @returns `false` if the given status code was not success
  */
-bool sxbp_check(sxbp_result_t state, sxbp_result_t* report_to);
+bool sxbp_check(sxbp_result_t state, sxbp_result_t* const report_to);
 
 /**
  * @brief Creates a blank empty buffer
@@ -259,7 +259,7 @@ sxbp_buffer_t sxbp_blank_buffer(void);
  * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @since v0.54.0
  */
-sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
 
 /**
  * @brief Deallocates any allocated memory for the bytes of the given buffer
@@ -271,7 +271,7 @@ sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* buffer);
  * error condition)
  * @since v0.54.0
  */
-bool sxbp_free_buffer(sxbp_buffer_t* buffer);
+bool sxbp_free_buffer(sxbp_buffer_t* const buffer);
 
 /**
  * @brief Attempts to copy one buffer to another
@@ -287,7 +287,10 @@ bool sxbp_free_buffer(sxbp_buffer_t* buffer);
  * in which case `to` will be empty.
  * @since v0.54.0
  */
-sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
+sxbp_result_t sxbp_copy_buffer(
+    const sxbp_buffer_t* const from,
+    sxbp_buffer_t* const to
+);
 
 /**
  * @brief Attempts to read the contents of the given file into the given buffer
@@ -299,7 +302,10 @@ sxbp_result_t sxbp_copy_buffer(const sxbp_buffer_t* from, sxbp_buffer_t* to);
  * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_FILE` on failure to copy the file contents
  * @since v0.54.0
  */
-sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
+sxbp_result_t sxbp_buffer_from_file(
+    FILE* file_handle,
+    sxbp_buffer_t* const buffer
+);
 
 /**
  * @brief Attempts to write the contents of the given buffer to the given file
@@ -312,7 +318,7 @@ sxbp_result_t sxbp_buffer_from_file(FILE* file_handle, sxbp_buffer_t* buffer);
  * @since v0.54.0
  */
 sxbp_result_t sxbp_buffer_to_file(
-    const sxbp_buffer_t* buffer,
+    const sxbp_buffer_t* const buffer,
     FILE* file_handle
 );
 
@@ -336,7 +342,7 @@ sxbp_figure_t sxbp_blank_figure(void);
  * successfully
  * @since v0.54.0
  */
-sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure);
+sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure);
 
 /**
  * @brief Deallocates any allocated memory for the given figure
@@ -349,7 +355,7 @@ sxbp_result_t sxbp_init_figure(sxbp_figure_t* figure);
  * condition)
  * @since v0.54.0
  */
-bool sxbp_free_figure(sxbp_figure_t* figure);
+bool sxbp_free_figure(sxbp_figure_t* const figure);
 
 /**
  * @brief Attempts to copy one figure to another
@@ -365,7 +371,10 @@ bool sxbp_free_figure(sxbp_figure_t* figure);
  * in which case `to` will be empty.
  * @since v0.54.0
  */
-sxbp_result_t sxbp_copy_figure(const sxbp_figure_t* from, sxbp_figure_t* to);
+sxbp_result_t sxbp_copy_figure(
+    const sxbp_figure_t* const from,
+    sxbp_figure_t* const to
+);
 
 /**
  * @brief Creates a blank empty bitmap
@@ -385,7 +394,7 @@ sxbp_bitmap_t sxbp_blank_bitmap(void);
  * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @since v0.54.0
  */
-sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
+sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap);
 
 /**
  * @brief Deallocates any allocated memory for the pixels of the given bitmap
@@ -397,7 +406,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* bitmap);
  * error condition)
  * @since v0.54.0
  */
-bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
+bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap);
 
 /**
  * @brief Attempts to copy one bitmap to another
@@ -413,7 +422,10 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* bitmap);
  * in which case `to` will be empty.
  * @since v0.54.0
  */
-sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
+sxbp_result_t sxbp_copy_bitmap(
+    const sxbp_bitmap_t* const from,
+    sxbp_bitmap_t* const to
+);
 
 /**
  * @brief Converts the given binary data into an early-draft SXBP figure
@@ -438,9 +450,9 @@ sxbp_result_t sxbp_copy_bitmap(const sxbp_bitmap_t* from, sxbp_bitmap_t* to);
  * @since v0.54.0
  */
 sxbp_result_t sxbp_begin_figure(
-    const sxbp_buffer_t* data,
-    const sxbp_begin_figure_options_t* options,
-    sxbp_figure_t* figure
+    const sxbp_buffer_t* const data,
+    const sxbp_begin_figure_options_t* const options,
+    sxbp_figure_t* const figure
 );
 
 /**
@@ -461,8 +473,8 @@ sxbp_result_t sxbp_begin_figure(
  * @since v0.54.0
  */
 sxbp_result_t sxbp_refine_figure(
-    sxbp_figure_t* figure,
-    const sxbp_refine_figure_options_t* options
+    sxbp_figure_t* const figure,
+    const sxbp_refine_figure_options_t* const options
 );
 
 /**
@@ -478,8 +490,8 @@ sxbp_result_t sxbp_refine_figure(
  * @since v0.54.0
  */
 sxbp_result_t sxbp_dump_figure(
-    const sxbp_figure_t* figure,
-    sxbp_buffer_t* buffer
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer
 );
 
 /**
@@ -499,8 +511,8 @@ sxbp_result_t sxbp_dump_figure(
  * @since v0.54.0
  */
 sxbp_result_t sxbp_load_figure(
-    const sxbp_buffer_t* buffer,
-    sxbp_figure_t* figure
+    const sxbp_buffer_t* const buffer,
+    sxbp_figure_t* const figure
 );
 
 /**
@@ -516,8 +528,8 @@ sxbp_result_t sxbp_load_figure(
  * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure(
-    const sxbp_figure_t* figure,
-    sxbp_bitmap_t* bitmap
+    const sxbp_figure_t* const figure,
+    sxbp_bitmap_t* const bitmap
 );
 
 #ifdef __cplusplus
