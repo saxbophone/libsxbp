@@ -33,6 +33,8 @@ static void print_progress(const sxbp_figure_t* figure, void* context) {
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
     sxbp_render_figure(figure, &bitmap);
     sxbp_print_bitmap(&bitmap, stdout);
+    // free the memory, be a good person!
+    sxbp_free_bitmap(&bitmap);
     fflush(stdout);
 }
 // reënable all warnings
