@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "sxbp.h"
+#include "sxbp_internal.h"
 
 
 #ifdef __cplusplus
@@ -281,6 +282,9 @@ sxbp_result_t sxbp_dump_figure(
     const sxbp_figure_t* figure,
     sxbp_buffer_t* buffer
 ) {
+    // figure and buffer must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(figure);
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
     // erase the buffer first of all just in case
     sxbp_free_buffer(buffer);
     // set buffer size to that needed for figure
@@ -305,6 +309,9 @@ sxbp_result_t sxbp_load_figure(
     const sxbp_buffer_t* buffer,
     sxbp_figure_t* figure
 ) {
+    // buffer and figure must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
+    SXBP_RETURN_FAIL_IF_NULL(figure);
     // erase the figure first of all just in case
     sxbp_free_figure(figure);
     // check that the buffer contains valid sxbp data

@@ -145,6 +145,9 @@ sxbp_result_t sxbp_begin_figure(
     const sxbp_begin_figure_options_t* options,
     sxbp_figure_t* figure
 ) {
+    // data and figure must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(data);
+    SXBP_RETURN_FAIL_IF_NULL(figure);
     // check the buffer is not too large before doing anything else
     if (data->size > SXBP_BEGIN_BUFFER_MAX_SIZE) {
         return SXBP_RESULT_FAIL_PRECONDITION;

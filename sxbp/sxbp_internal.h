@@ -110,6 +110,9 @@ sxbp_result_t sxbp_make_bitmap_for_bounds(
 // private, prints out a bitmap to the given stream, for debugging
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream);
 
+// private, macro to assist in 'return early if NULL pointer' error checks
+#define SXBP_RETURN_FAIL_IF_NULL(pointer) if (pointer == NULL) return SXBP_RESULT_FAIL_PRECONDITION
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
