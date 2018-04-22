@@ -257,6 +257,7 @@ sxbp_buffer_t sxbp_blank_buffer(void);
  * been allocated
  * @returns `SXBP_RESULT_OK` if memory was allocated successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
@@ -285,6 +286,7 @@ bool sxbp_free_buffer(sxbp_buffer_t* const buffer);
  * @returns `SXBP_RESULT_OK` if the data was copied successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
  * in which case `to` will be empty.
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `from` or `to` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_copy_buffer(
@@ -300,6 +302,8 @@ sxbp_result_t sxbp_copy_buffer(
  * @param[out] buffer The buffer to write data to
  * @returns `SXBP_RESULT_OK` on successfully copying the file contents
  * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_FILE` on failure to copy the file contents
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `file_handle` or `buffer` is
+ * `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_buffer_from_file(
@@ -315,6 +319,8 @@ sxbp_result_t sxbp_buffer_from_file(
  * @param[out] file_handle The file to write data to
  * @returns `SXBP_RESULT_OK` on successfully writing the file
  * @returns `SXBP_RESULT_FAIL_FILE` on failure to write the file
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` or `file_handle` is
+ * `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_buffer_to_file(
@@ -340,6 +346,7 @@ sxbp_figure_t sxbp_blank_figure(void);
  * @returns `SXBP_RESULT_OK` if all memory was allocated successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if any memory was not allocated
  * successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure);
@@ -369,6 +376,7 @@ bool sxbp_free_figure(sxbp_figure_t* const figure);
  * @returns `SXBP_RESULT_OK` if the data was copied successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
  * in which case `to` will be empty.
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `from` or `to` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_copy_figure(
@@ -392,6 +400,7 @@ sxbp_bitmap_t sxbp_blank_bitmap(void);
  * been allocated
  * @returns `SXBP_RESULT_OK` if memory was allocated successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `bitmap` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap);
@@ -420,6 +429,7 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap);
  * @returns `SXBP_RESULT_OK` if the data was copied successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
  * in which case `to` will be empty.
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `from` or `to` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_copy_bitmap(
@@ -447,6 +457,7 @@ sxbp_result_t sxbp_copy_bitmap(
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
  * generated
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if the given buffer was too large
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `data` or `figure` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_begin_figure(
@@ -470,6 +481,7 @@ sxbp_result_t sxbp_begin_figure(
  * allocated
  * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred when
  * refining the figure
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_refine_figure(
@@ -487,6 +499,7 @@ sxbp_result_t sxbp_refine_figure(
  * @returns `SXBP_RESULT_OK` if the figure could be successfully serialised
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be successfully
  * serialised
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `buffer` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_dump_figure(
@@ -508,6 +521,7 @@ sxbp_result_t sxbp_dump_figure(
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if the figure could not be
  * deserialised because the buffer contains invalid data or data for a version
  * of SXBP that this version cannot read
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` or `figure` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_load_figure(
@@ -525,6 +539,7 @@ sxbp_result_t sxbp_load_figure(
  * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the figure could not be rendered
  * successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `bitmap` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure(

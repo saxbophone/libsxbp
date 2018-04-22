@@ -57,6 +57,9 @@ sxbp_result_t sxbp_render_figure(
     const sxbp_figure_t* figure,
     sxbp_bitmap_t* bitmap
 ) {
+    // figure and bitmap must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(figure);
+    SXBP_RETURN_FAIL_IF_NULL(bitmap);
     // erase the bitmap structure first just in case
     sxbp_free_bitmap(bitmap);
     // get figure bounds, at scale 2

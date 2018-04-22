@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "sxbp.h"
+#include "sxbp_internal.h"
 
 
 #ifdef __cplusplus
@@ -49,6 +50,8 @@ sxbp_buffer_t sxbp_blank_buffer(void) {
 }
 
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
+    // check buffer isn't NULL
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
     // if bytes is not NULL, then the operation was successful
@@ -56,8 +59,8 @@ sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
 }
 
 bool sxbp_free_buffer(sxbp_buffer_t* const buffer) {
-    // if bytes is not NULL, assume there's memory to be deallocated
-    if (buffer->bytes != NULL) {
+    // if buffer and bytes are not NULL, assume there's memory to be deallocated
+    if (buffer != NULL && buffer->bytes != NULL) {
         free(buffer->bytes);
         // set bytes to NULL (be a good person)
         buffer->bytes = NULL;
@@ -72,6 +75,9 @@ sxbp_result_t sxbp_copy_buffer(
     const sxbp_buffer_t* const from,
     sxbp_buffer_t* const to
 ) {
+    // check both pointers to ensure they're not NULL
+    SXBP_RETURN_FAIL_IF_NULL(from);
+    SXBP_RETURN_FAIL_IF_NULL(to);
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_buffer(to);
     // copy across the size
@@ -106,6 +112,9 @@ sxbp_result_t sxbp_buffer_from_file(
     FILE* file_handle,
     sxbp_buffer_t* const buffer
 ) {
+    // check both pointers to ensure they're not NULL
+    SXBP_RETURN_FAIL_IF_NULL(file_handle);
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
     // erase buffer
     sxbp_free_buffer(buffer);
     // get the file's size
@@ -142,6 +151,9 @@ sxbp_result_t sxbp_buffer_to_file(
     const sxbp_buffer_t* const buffer,
     FILE* file_handle
 ) {
+    // check both pointers to ensure they're not NULL
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
+    SXBP_RETURN_FAIL_IF_NULL(file_handle);
     // try and write the file contents
     size_t bytes_written = fwrite(
         buffer->bytes,
@@ -158,6 +170,8 @@ sxbp_figure_t sxbp_blank_figure(void) {
 }
 
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
+    // check figure isn't NULL
+    SXBP_RETURN_FAIL_IF_NULL(figure);
     // allocate the lines, using calloc to set all fields of each one to zero
     figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
     // if lines is not NULL, then the operation was successful
@@ -165,8 +179,8 @@ sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
 }
 
 bool sxbp_free_figure(sxbp_figure_t* const figure) {
-    // if lines is not NULL, assume there's memory to be deallocated
-    if (figure->lines != NULL) {
+    // if figure and lines are not NULL, assume there's memory to be deallocated
+    if (figure != NULL && figure->lines != NULL) {
         free(figure->lines);
         // set lines to NULL (be a good person)
         figure->lines = NULL;
@@ -181,6 +195,9 @@ sxbp_result_t sxbp_copy_figure(
     const sxbp_figure_t* const from,
     sxbp_figure_t* const to
 ) {
+    // check both pointers to ensure they're not NULL
+    SXBP_RETURN_FAIL_IF_NULL(from);
+    SXBP_RETURN_FAIL_IF_NULL(to);
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
     // copy across the static members
@@ -210,6 +227,8 @@ static bool sxbp_init_bitmap_col(bool** col, uint32_t size) {
 }
 
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
+    // check bitmap isn't NULL
+    SXBP_RETURN_FAIL_IF_NULL(bitmap);
     // first allocate pointers for the columns
     bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
@@ -234,8 +253,8 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
 }
 
 bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
-    // if pixels is not NULL, assume there are cols to be deallocated
-    if (bitmap->pixels != NULL) {
+    // if bitmap and pixels aren't NULL, assume there are cols to be deallocated
+    if (bitmap != NULL && bitmap->pixels != NULL) {
         // deallocate each col that needs deallocating first
         for (uint32_t col = 0; col < bitmap->width; col++) {
             if (bitmap->pixels[col] != NULL) {
@@ -254,6 +273,9 @@ sxbp_result_t sxbp_copy_bitmap(
     const sxbp_bitmap_t* const from,
     sxbp_bitmap_t* const to
 ) {
+    // check both pointers to ensure they're not NULL
+    SXBP_RETURN_FAIL_IF_NULL(from);
+    SXBP_RETURN_FAIL_IF_NULL(to);
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_bitmap(to);
     // copy across width and height

@@ -145,6 +145,8 @@ sxbp_result_t sxbp_refine_figure(
     sxbp_figure_t* figure,
     const sxbp_refine_figure_options_t* options
 ) {
+    // figure must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(figure);
     // we can't refine a figure that has no lines allocated, so check this first
     if (figure->lines == NULL) {
         // bail early, we can't do anything with this
