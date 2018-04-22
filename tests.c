@@ -8,6 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <assert.h>
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -43,6 +44,24 @@ static void print_progress(const sxbp_figure_t* figure, void* context) {
 
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
+    // test that the public API is resistant to NULL-pointer-deref errors
+    assert(sxbp_init_buffer(NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_free_buffer(NULL) == false);
+    assert(sxbp_copy_buffer(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_buffer_from_file(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_buffer_to_file(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_init_figure(NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_free_figure(NULL) == false);
+    assert(sxbp_copy_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_init_bitmap(NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_free_bitmap(NULL) == false);
+    assert(sxbp_copy_bitmap(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_begin_figure(NULL, NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_refine_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_dump_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_load_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(sxbp_render_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    // now test normal usage of the public API
     const char* string = "SXBP";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
