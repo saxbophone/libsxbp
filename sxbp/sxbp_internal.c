@@ -4,9 +4,10 @@
  */
 
 /**
+ * @internal
  * @file
  *
- * @brief This header file provides internal definitions for use within sxbp
+ * @brief This source file provides internal definitions for use within sxbp
  * only
  *
  * @author Joshua Saxby <joshua.a.saxby@gmail.com>
