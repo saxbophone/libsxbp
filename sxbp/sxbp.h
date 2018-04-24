@@ -575,7 +575,7 @@ sxbp_result_t sxbp_load_figure(
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `bitmap` is `NULL`
  * @since v0.54.0
  */
-sxbp_result_t sxbp_render_figure(
+sxbp_result_t sxbp_render_figure_to_bitmap(
     const sxbp_figure_t* const figure,
     sxbp_bitmap_t* const bitmap
 );

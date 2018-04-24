@@ -32,7 +32,7 @@ extern "C"{
 static void print_progress(const sxbp_figure_t* figure, void* context) {
     printf("%" PRIu32 "\n", figure->lines_remaining);
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-    sxbp_render_figure(figure, &bitmap);
+    sxbp_render_figure_to_bitmap(figure, &bitmap);
     sxbp_print_bitmap(&bitmap, stdout);
     // free the memory, be a good person!
     sxbp_free_bitmap(&bitmap);
@@ -60,7 +60,10 @@ int main(void) {
     assert(sxbp_refine_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
     assert(sxbp_dump_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
     assert(sxbp_load_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_render_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(
+        sxbp_render_figure_to_bitmap(NULL, NULL)
+        == SXBP_RESULT_FAIL_PRECONDITION
+    );
     // now test normal usage of the public API
     const char* string = "SXBP";
     size_t length = strlen(string);
@@ -74,14 +77,14 @@ int main(void) {
         sxbp_free_buffer(&buffer);
         // render incomplete figure to bitmap
         sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-        sxbp_render_figure(&figure, &bitmap);
+        sxbp_render_figure_to_bitmap(&figure, &bitmap);
         sxbp_refine_figure_options_t options = {
             .progress_callback = print_progress,
         };
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
         assert(outcome == SXBP_RESULT_OK);
         // render complete figure to bitmap
-        sxbp_render_figure(&figure, &bitmap);
+        sxbp_render_figure_to_bitmap(&figure, &bitmap);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
         return 0;
