@@ -580,6 +580,31 @@ sxbp_result_t sxbp_render_figure_to_bitmap(
     sxbp_bitmap_t* const bitmap
 );
 
+/**
+ * @brief Renders an image of the given figure, using the given render callback
+ * @details The render callback should write out the bytes of the rendered image
+ * to the given buffer.
+ * @note The buffer is erased before the output is written to it
+ * @param figure The SXBP figure to render
+ * @param render_callback A callback function which can render figures out to
+ * a specific image format, outputting the serialised image data to the given
+ * buffer
+ * @param[out] buffer The buffer to write the image data out to
+ * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `bitmap` is `NULL`
+ * @returns Any other valid value for type `sxbp_result_t`, according to all
+ * the possible error codes that can be returned by the render callback.
+ * @since v0.54.0
+ */
+sxbp_result_t sxbp_render_figure(
+    const sxbp_figure_t* const figure,
+    sxbp_result_t(* render_callback)(
+        const sxbp_figure_t* const figure,
+        sxbp_buffer_t* const buffer
+    ),
+    sxbp_buffer_t* const buffer
+);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
