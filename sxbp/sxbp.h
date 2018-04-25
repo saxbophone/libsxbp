@@ -64,10 +64,10 @@ typedef struct sxbp_buffer_t {
  * @since v0.54.0
  */
 typedef enum sxbp_direction_t {
-    SXBP_UP = 0, /**< The cartesian direction 'UP' */
-    SXBP_RIGHT = 1, /**< The cartesian direction 'RIGHT' */
-    SXBP_DOWN = 2, /**< The cartesian direction 'DOWN' */
-    SXBP_LEFT = 3, /**< The cartesian direction 'LEFT' */
+    SXBP_UP = 0u, /**< The cartesian direction 'UP' */
+    SXBP_RIGHT = 1u, /**< The cartesian direction 'RIGHT' */
+    SXBP_DOWN = 2u, /**< The cartesian direction 'DOWN' */
+    SXBP_LEFT = 3u, /**< The cartesian direction 'LEFT' */
 } sxbp_direction_t;
 
 /**
@@ -137,10 +137,35 @@ typedef struct sxbp_begin_figure_options_t {
 } sxbp_begin_figure_options_t;
 
 /**
+ * @brief Used to specify which figure refinement method should be used
+ * @details There are a few different ways that a figure can be 'refined' to be
+ * smaller, this type is used to represent all of the methods currently
+ * implemented by the library
+ * @note Values `SXBP_REFINE_METHOD_RESERVED_START` through
+ * `SXBP_REFINE_METHOD_RESERVED_END` inclusive are reserved for future use.
+ * If a value equal to or greater than `SXBP_REFINE_METHOD_RESERVED_START` is
+ * encountered, the caller can assume that either a new code for which it has no
+ * definition has been returned, or that the value is garbage.
+ * @since v0.54.0
+ */
+typedef enum sxbp_refine_method_t {
+    SXBP_REFINE_METHOD_UNKNOWN = 0u, /**< unknown, the default */
+    SXBP_REFINE_METHOD_GROW_FROM_START, /**< the original refinement method */
+    SXBP_REFINE_METHOD_SHRINK_FROM_END, /**< the current refinement method */
+    SXBP_REFINE_METHOD_GROW_FROM_MIDDLE = 10u, /**< reserved for future use */
+    SXBP_REFINE_METHOD_RESERVED_START, /**< reserved for future use */
+    SXBP_REFINE_METHOD_RESERVED_END = 255u, /**< reserved for future use */
+} sxbp_refine_method_t;
+
+/**
  * @brief A structure used for providing options to `sxbp_refine_figure()`
  * @since v0.54.0
  */
 typedef struct sxbp_refine_figure_options_t {
+    /**
+     * @begin The method to be used to refine the figure
+     */
+    sxbp_refine_method_t refine_method;
     /**
      * @brief An optional callback to be called every time a new line is solved.
      */
@@ -218,6 +243,11 @@ extern const size_t SXBP_BEGIN_BUFFER_MAX_SIZE;
  * @brief The default options used for `sxbp_begin_figure()`
  */
 extern const sxbp_begin_figure_options_t SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT;
+
+/**
+ * @brief The default figure refinement method used by `sxbp_refine_figure()`
+ */
+extern const sxbp_refine_method_t SXBP_REFINE_METHOD_DEFAULT;
 
 /**
  * @brief Returns if a given `sxbp_result_t` is successful or not
