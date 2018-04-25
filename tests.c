@@ -78,7 +78,7 @@ int main(void) {
         sxbp_refine_figure_options_t options = {
             .progress_callback = print_progress,
         };
-        sxbp_refine_figure(&figure, &options);
+        assert(sxbp_refine_figure(&figure, &options) == SXBP_RESULT_OK);
         // render complete figure to bitmap
         sxbp_render_figure(&figure, &bitmap);
         sxbp_free_figure(&figure);

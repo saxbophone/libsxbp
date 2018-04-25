@@ -149,7 +149,7 @@ typedef struct sxbp_begin_figure_options_t {
  * @since v0.54.0
  */
 typedef enum sxbp_refine_method_t {
-    SXBP_REFINE_METHOD_UNKNOWN = 0u, /**< unknown, the default */
+    SXBP_REFINE_METHOD_ANY = 0u, /**< use any method, the default */
     SXBP_REFINE_METHOD_GROW_FROM_START, /**< the original refinement method */
     SXBP_REFINE_METHOD_SHRINK_FROM_END, /**< the current refinement method */
     SXBP_REFINE_METHOD_GROW_FROM_MIDDLE = 10u, /**< reserved for future use */
@@ -219,6 +219,7 @@ typedef enum sxbp_result_t {
     SXBP_RESULT_FAIL_MEMORY, /**< failure to allocate or reallocate memory */
     SXBP_RESULT_FAIL_PRECONDITION, /**< a preconditional check failed */
     SXBP_RESULT_FAIL_FILE, /**< a file read/write operation failed */
+    SXBP_RESULT_FAIL_UNIMPLEMENTED, /** requested action is not implemented */
     SXBP_RESULT_RESERVED_START, /**< reserved for future use */
     SXBP_RESULT_RESERVED_END = 255u, /**< reserved for future use */
 } sxbp_result_t;
@@ -507,11 +508,13 @@ sxbp_result_t sxbp_begin_figure(
  * to it has colliding lines, or no lines
  * @warning This function may take a long time to execute
  * @returns `SXBP_RESULT_OK` if the figure could be successfully refined
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` is `NULL`
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if called on a figure with no lines
  * allocated
+ * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED` if `options` specifies an
+ * unimplemented refinement method.
  * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred when
  * refining the figure
- * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` is `NULL`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_refine_figure(
