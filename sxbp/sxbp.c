@@ -33,6 +33,9 @@ const sxbp_begin_figure_options_t SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT = {
     .max_lines = 0,
 };
 
+const sxbp_refine_method_t SXBP_REFINE_METHOD_DEFAULT =
+    SXBP_REFINE_METHOD_SHRINK_FROM_END;
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
