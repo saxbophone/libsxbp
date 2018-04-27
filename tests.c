@@ -30,12 +30,7 @@ extern "C"{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 static void print_progress(const sxbp_figure_t* figure, void* context) {
-    printf("%" PRIu32 "\n", figure->lines_remaining);
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-    sxbp_render_figure_to_bitmap(figure, &bitmap);
-    sxbp_print_bitmap(&bitmap, stdout);
-    // free the memory, be a good person!
-    sxbp_free_bitmap(&bitmap);
+    printf("%" PRIu32 "|", figure->lines_remaining);
     fflush(stdout);
 }
 // reënable all warnings
@@ -64,6 +59,10 @@ int main(void) {
         sxbp_render_figure_to_bitmap(NULL, NULL)
         == SXBP_RESULT_FAIL_PRECONDITION
     );
+    assert(
+        sxbp_render_figure(NULL, NULL, NULL, NULL, NULL)
+        == SXBP_RESULT_FAIL_PRECONDITION
+    );
     // now test normal usage of the public API
     const char* string = "SXBP";
     size_t length = strlen(string);
@@ -83,8 +82,12 @@ int main(void) {
         };
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
         assert(outcome == SXBP_RESULT_OK);
+        // test null renderer can be called
+        sxbp_render_figure(&figure, &buffer, sxbp_render_to_null, NULL, NULL);
         // render complete figure to bitmap
         sxbp_render_figure_to_bitmap(&figure, &bitmap);
+        printf("\n");
+        sxbp_print_bitmap(&bitmap, stdout);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
         return 0;

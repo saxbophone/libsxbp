@@ -627,13 +627,24 @@ sxbp_result_t sxbp_render_figure_to_bitmap(
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure`, `buffer` or
  * `render_callback` is `NULL`
  * @returns Any other valid value for type `sxbp_result_t`, according to all
- * the possible error codes that can be returned by the render callback.
+ * the possible error codes that can be returned by the given render callback.
  * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer,
     sxbp_figure_renderer_t render_callback,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+);
+
+/**
+ * @brief A dummy renderer function that does nothing
+ * @details This exists for testing purposes only
+ */
+sxbp_result_t sxbp_render_to_null(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
     const sxbp_render_options_t* const render_options,
     const void* render_callback_options
 );
