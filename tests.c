@@ -64,7 +64,7 @@ int main(void) {
         == SXBP_RESULT_FAIL_PRECONDITION
     );
     assert(
-        sxbp_render_to_null(NULL, NULL, NULL, NULL)
+        sxbp_render_figure_to_null(NULL, NULL, NULL, NULL)
         == SXBP_RESULT_FAIL_UNIMPLEMENTED
     );
     // now test normal usage of the public API
@@ -87,7 +87,13 @@ int main(void) {
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
         assert(outcome == SXBP_RESULT_OK);
         // test null renderer can be called
-        sxbp_render_figure(&figure, &buffer, sxbp_render_to_null, NULL, NULL);
+        sxbp_render_figure(
+            &figure,
+            &buffer,
+            sxbp_render_figure_to_null,
+            NULL,
+            NULL
+        );
         // render complete figure to bitmap
         sxbp_render_figure_to_bitmap(&figure, &bitmap);
         printf("\n");

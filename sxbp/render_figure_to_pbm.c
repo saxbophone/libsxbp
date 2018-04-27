@@ -2,8 +2,8 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides the definition of `sxbp_render_figure_to_null`
- * , a dummy renderer callback function that does nothing.
+ * This compilation unit provides the definition of `sxbp_render_figure_to_pbm`,
+ * a public function used to render an SXBP figure to a PBM file buffer.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *
@@ -26,7 +26,7 @@ extern "C" {
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-sxbp_result_t sxbp_render_figure_to_null(
+sxbp_result_t sxbp_render_figure_to_pbm(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer,
     const sxbp_render_options_t* const render_options,

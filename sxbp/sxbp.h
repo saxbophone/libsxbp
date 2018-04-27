@@ -642,7 +642,7 @@ sxbp_result_t sxbp_render_figure(
  * @brief A dummy renderer function that does nothing
  * @details This exists for testing purposes only
  */
-sxbp_result_t sxbp_render_to_null(
+sxbp_result_t sxbp_render_figure_to_null(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer,
     const sxbp_render_options_t* const render_options,
@@ -652,7 +652,7 @@ sxbp_result_t sxbp_render_to_null(
 /**
  * @brief Renders figures to PBM images
  */
-sxbp_result_t sxbp_render_to_pbm(
+sxbp_result_t sxbp_render_figure_to_pbm(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer,
     const sxbp_render_options_t* const render_options,
