@@ -63,6 +63,10 @@ int main(void) {
         sxbp_render_figure(NULL, NULL, NULL, NULL, NULL)
         == SXBP_RESULT_FAIL_PRECONDITION
     );
+    assert(
+        sxbp_render_to_null(NULL, NULL, NULL, NULL)
+        == SXBP_RESULT_FAIL_UNIMPLEMENTED
+    );
     // now test normal usage of the public API
     const char* string = "SXBP";
     size_t length = strlen(string);
