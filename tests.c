@@ -113,9 +113,11 @@ int main(void) {
         FILE* output_file = fopen("sxbp-test.pbm", "wb");
         assert(output_file != NULL);
         outcome = sxbp_buffer_to_file(&buffer, output_file);
-        assert(output_file != NULL);
+        assert(outcome == SXBP_RESULT_OK);
+        fclose(output_file);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
+        sxbp_free_buffer(&buffer);
         return 0;
     }
 }

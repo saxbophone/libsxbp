@@ -190,7 +190,10 @@ sxbp_result_t sxbp_render_figure_to_pbm(
         return error;
     } else {
         // rasterisation was successful, now convert the raw bitmap to PBM
-        return sxbp_bitmap_to_pbm(&bitmap, buffer);
+        sxbp_result_t outcome = sxbp_bitmap_to_pbm(&bitmap, buffer);
+        // free the bitmap and return the result code
+        sxbp_free_bitmap(&bitmap);
+        return outcome;
     }
 }
 // reënable all warnings
