@@ -67,8 +67,12 @@ int main(void) {
         sxbp_render_figure_to_null(NULL, NULL, NULL, NULL)
         == SXBP_RESULT_FAIL_UNIMPLEMENTED
     );
+    assert(
+        sxbp_render_figure_to_pbm(NULL, NULL, NULL, NULL)
+        == SXBP_RESULT_FAIL_PRECONDITION
+    );
     // now test normal usage of the public API
-    const char* string = "SXBP";
+    const char* string = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
     if (!sxbp_init_buffer(&buffer)) {
@@ -98,6 +102,18 @@ int main(void) {
         sxbp_render_figure_to_bitmap(&figure, &bitmap);
         printf("\n");
         sxbp_print_bitmap(&bitmap, stdout);
+        outcome = sxbp_render_figure(
+            &figure,
+            &buffer,
+            sxbp_render_figure_to_pbm,
+            NULL,
+            NULL
+        );
+        assert(outcome == SXBP_RESULT_OK);
+        FILE* output_file = fopen("sxbp-test.pbm", "wb");
+        assert(output_file != NULL);
+        outcome = sxbp_buffer_to_file(&buffer, output_file);
+        assert(output_file != NULL);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
         return 0;

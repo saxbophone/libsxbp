@@ -47,8 +47,8 @@ static bool sxbp_render_figure_to_bitmap_callback(
     } else {
         // mark first pixel as complete if it isn't already
         data->first_pixel_complete = true;
-        // plot the pixel
-        data->image->pixels[location.x][location.y] = true;
+        // plot the pixel, but flip the y coördinate
+        data->image->pixels[location.x][data->image->height - 1 - location.y] = true;
     }
     // return true --we always want to continue
     return true;
