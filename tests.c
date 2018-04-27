@@ -72,7 +72,7 @@ int main(void) {
         == SXBP_RESULT_FAIL_PRECONDITION
     );
     // now test normal usage of the public API
-    const char* string = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+    const char* string = "sxbp";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
     if (!sxbp_init_buffer(&buffer)) {
