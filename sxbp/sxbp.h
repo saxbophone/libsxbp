@@ -184,6 +184,17 @@ typedef struct sxbp_refine_figure_options_t {
 } sxbp_refine_figure_options_t;
 
 /**
+ * @brief A structure used for providing options to `sxbp_render_figure()`
+ * @todo Add more options such as background and line colours (RGBA),
+ * alternative colour for the starting dot, etc...
+ * @since v0.54.0
+ */
+typedef struct sxbp_render_options_t {
+    /** @brief The scale factor to render the image to */
+    size_t scale;
+} sxbp_render_options_t;
+
+/**
  * @brief Used to represent a basic 1-bit, pure black/white bitmap image.
  * @details The image has integer height and width, and a 2-dimensional array of
  * 1-bit pixels which are either black or white.
@@ -223,6 +234,20 @@ typedef enum sxbp_result_t {
     SXBP_RESULT_RESERVED_START, /**< reserved for future use */
     SXBP_RESULT_RESERVED_END = 255u, /**< reserved for future use */
 } sxbp_result_t;
+
+/**
+ * @brief A convenience typedef for a callback function that renders a figure
+ * @details This is used in `sxbp_render_figure()` and should render a figure to
+ * an image, serialised and stored in the given buffer.
+ * @todo Try and use Doxygen's `at-param` syntax to document the arguments and
+ * use `at-returns` to document the return details.
+ */
+typedef sxbp_result_t(* sxbp_figure_renderer_t)(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+);
 
 /**
  * @brief Stores the current version of sxbp.
@@ -575,9 +600,63 @@ sxbp_result_t sxbp_load_figure(
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `bitmap` is `NULL`
  * @since v0.54.0
  */
-sxbp_result_t sxbp_render_figure(
+sxbp_result_t sxbp_render_figure_to_bitmap(
     const sxbp_figure_t* const figure,
     sxbp_bitmap_t* const bitmap
+);
+
+/**
+ * @brief Renders an image of the given figure, using the given render callback
+ * @details The render callback should write out the bytes of the rendered image
+ * to the given buffer.
+ * @note The buffer is erased before the output is written to it
+ * @param figure The SXBP figure to render
+ * @param[out] buffer The buffer to write the image data out to
+ * @param render_callback A callback function which can render figures out to
+ * a specific image format, outputting the serialised image data to the given
+ * buffer
+ * @param render_options An optional pointer to options affecting the rendered
+ * output
+ * @param render_callback_options Optional type-agnostic pointer to additional
+ * options that are specific to this particular render callback.
+ * @warn No type-checking is done for `render_callback_options`, as the accepted
+ * type (if any) is entirely dependent on the render callback being used. Care
+ * must be taken to only pass a pointer to a type accepted by the used render
+ * callback.
+ * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure`, `buffer` or
+ * `render_callback` is `NULL`
+ * @returns Any other valid value for type `sxbp_result_t`, according to all
+ * the possible error codes that can be returned by the given render callback.
+ * @since v0.54.0
+ */
+sxbp_result_t sxbp_render_figure(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    sxbp_figure_renderer_t render_callback,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+);
+
+/**
+ * @brief A dummy renderer function that does nothing
+ * @details This exists for testing purposes only
+ */
+sxbp_result_t sxbp_render_figure_to_null(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+);
+
+/**
+ * @brief Renders figures to PBM images
+ */
+sxbp_result_t sxbp_render_figure_to_pbm(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
 );
 
 #ifdef __cplusplus

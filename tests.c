@@ -30,12 +30,7 @@ extern "C"{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 static void print_progress(const sxbp_figure_t* figure, void* context) {
-    printf("%" PRIu32 "\n", figure->lines_remaining);
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-    sxbp_render_figure(figure, &bitmap);
-    sxbp_print_bitmap(&bitmap, stdout);
-    // free the memory, be a good person!
-    sxbp_free_bitmap(&bitmap);
+    printf("%" PRIu32 "|", figure->lines_remaining);
     fflush(stdout);
 }
 // reënable all warnings
@@ -60,9 +55,24 @@ int main(void) {
     assert(sxbp_refine_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
     assert(sxbp_dump_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
     assert(sxbp_load_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_render_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
+    assert(
+        sxbp_render_figure_to_bitmap(NULL, NULL)
+        == SXBP_RESULT_FAIL_PRECONDITION
+    );
+    assert(
+        sxbp_render_figure(NULL, NULL, NULL, NULL, NULL)
+        == SXBP_RESULT_FAIL_PRECONDITION
+    );
+    assert(
+        sxbp_render_figure_to_null(NULL, NULL, NULL, NULL)
+        == SXBP_RESULT_FAIL_UNIMPLEMENTED
+    );
+    assert(
+        sxbp_render_figure_to_pbm(NULL, NULL, NULL, NULL)
+        == SXBP_RESULT_FAIL_PRECONDITION
+    );
     // now test normal usage of the public API
-    const char* string = "SXBP";
+    const char* string = "sxbp";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
     if (!sxbp_init_buffer(&buffer)) {
@@ -74,16 +84,40 @@ int main(void) {
         sxbp_free_buffer(&buffer);
         // render incomplete figure to bitmap
         sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-        sxbp_render_figure(&figure, &bitmap);
+        sxbp_render_figure_to_bitmap(&figure, &bitmap);
         sxbp_refine_figure_options_t options = {
             .progress_callback = print_progress,
         };
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
         assert(outcome == SXBP_RESULT_OK);
+        // test null renderer can be called
+        sxbp_render_figure(
+            &figure,
+            &buffer,
+            sxbp_render_figure_to_null,
+            NULL,
+            NULL
+        );
         // render complete figure to bitmap
-        sxbp_render_figure(&figure, &bitmap);
+        sxbp_render_figure_to_bitmap(&figure, &bitmap);
+        printf("\n");
+        sxbp_print_bitmap(&bitmap, stdout);
+        outcome = sxbp_render_figure(
+            &figure,
+            &buffer,
+            sxbp_render_figure_to_pbm,
+            NULL,
+            NULL
+        );
+        assert(outcome == SXBP_RESULT_OK);
+        FILE* output_file = fopen("sxbp-test.pbm", "wb");
+        assert(output_file != NULL);
+        outcome = sxbp_buffer_to_file(&buffer, output_file);
+        assert(outcome == SXBP_RESULT_OK);
+        fclose(output_file);
         sxbp_free_figure(&figure);
         sxbp_free_bitmap(&bitmap);
+        sxbp_free_buffer(&buffer);
         return 0;
     }
 }

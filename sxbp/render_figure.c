@@ -1,9 +1,11 @@
 /*
- * This source file forms part of sxbp, a library which generates experimental
+ * This source file forms part of sxbp,
+ a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides the definition of `sxbp_render_figure`, a
- * public function used to render an SXBP figure to a basic bitmap structure.
+ * This compilation unit provides the definition of
+ * `sxbp_render_figure`, a public function used to render an SXBP figure to an
+ * image of its shape, using a user-specified rendering callback.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *
@@ -21,64 +23,24 @@
 extern "C" {
 #endif
 
-// private datatype for passing context data into sxbp_walk_figure() callback
-typedef struct render_figure_context {
-    sxbp_bitmap_t* image; // the bitmap to draw to
-    /*
-     * the following unusual fields facilitate a low-tech way of skipping the
-     * second pixel --this is done to assist in orientation of the shape
-     */
-    bool first_pixel_complete; // whether the first pixel has been plotted yet
-    bool second_pixel_complete; // whether the second pixel has been plotted yet
-} render_figure_context;
-
-// private, callback function for sxbp_render_figure()
-static bool sxbp_render_figure_callback(
-    sxbp_co_ord_t location,
-    void* callback_data
-) {
-    // cast void pointer to a pointer to our context structure
-    render_figure_context* data = (render_figure_context*)callback_data;
-    // skip the plotting of the second pixel
-    if (data->first_pixel_complete && !data->second_pixel_complete) {
-        // mark second pixel as complete
-        data->second_pixel_complete = true;
-    } else {
-        // mark first pixel as complete if it isn't already
-        data->first_pixel_complete = true;
-        // plot the pixel
-        data->image->pixels[location.x][location.y] = true;
-    }
-    // return true --we always want to continue
-    return true;
-}
-
 sxbp_result_t sxbp_render_figure(
-    const sxbp_figure_t* figure,
-    sxbp_bitmap_t* bitmap
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    sxbp_figure_renderer_t render_callback,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
 ) {
-    // figure and bitmap must not be NULL
+    // figure, buffer and render_callback must not be NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
-    SXBP_RETURN_FAIL_IF_NULL(bitmap);
-    // erase the bitmap structure first just in case
-    sxbp_free_bitmap(bitmap);
-    // get figure bounds, at scale 2
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
-    // build bitmap for bounds
-    if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, bitmap))) {
-        // couldn't allocate memory, return error early
-        return SXBP_RESULT_FAIL_MEMORY;
-    } else {
-        // construct callback context data
-        render_figure_context data = {
-            .image = bitmap,
-            .first_pixel_complete = false,
-            .second_pixel_complete = false,
-        };
-        // walk the figure at scale 2, handle pixel plotting with callback
-        sxbp_walk_figure(figure, 2, sxbp_render_figure_callback, (void*)&data);
-    }
-    return SXBP_RESULT_OK;
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
+    SXBP_RETURN_FAIL_IF_NULL(render_callback);
+    // use the callback to render the figure
+    return render_callback(
+        figure,
+        buffer,
+        render_options,
+        render_callback_options
+    );
 }
 
 #ifdef __cplusplus
