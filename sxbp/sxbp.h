@@ -239,8 +239,8 @@ typedef enum sxbp_result_t {
  * @brief A convenience typedef for a callback function that renders a figure
  * @details This is used in `sxbp_render_figure()` and should render a figure to
  * an image, serialised and stored in the given buffer.
- * @todo Try and use Doxygen's `@param` syntax to document the arguments and
- * use `@returns` to document the return details.
+ * @todo Try and use Doxygen's `at-param` syntax to document the arguments and
+ * use `at-returns` to document the return details.
  */
 typedef sxbp_result_t(* sxbp_figure_renderer_t)(
     const sxbp_figure_t* const figure,
