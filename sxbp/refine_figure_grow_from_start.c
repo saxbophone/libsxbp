@@ -28,6 +28,26 @@ extern "C" {
 // disable GCC warning about the unused parameter, as this is currently a stub
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+/*
+ * Algorithm:
+ *
+ * - FOR all lines, counting forwards:
+ *     - SetLineLength(CurrentLine, 1)
+ *
+ * - SetLineLength(line, length)
+ *     - Try and SET 'line' length to 'length'
+ *     - IF this causes a collision:
+ *         - NOTE the line that it collided with (CollidedLine)
+ *         - SetLineLength(
+ *               PreviousLine, EvadeDistance(CurrentLine, CollidedLine)
+ *           )
+ *
+ * - EvadeDistance(PreviousLine, CurrentLine, CollidedLine)
+ *     - COMPARE PreviousLine, CurrentLine and CollidedLine lengths, directions
+ *       and positions to work out what length PreviousLine should be in order
+ *       for CurrentLine to not collide with CollidedLine
+ *     - RETURN new distance for PreviousLine
+ */
 sxbp_result_t sxbp_refine_figure_grow_from_start(
     sxbp_figure_t* figure,
     const sxbp_refine_figure_options_t* options
