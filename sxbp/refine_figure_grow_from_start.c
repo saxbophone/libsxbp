@@ -52,8 +52,22 @@ sxbp_result_t sxbp_refine_figure_grow_from_start(
     sxbp_figure_t* figure,
     const sxbp_refine_figure_options_t* options
 ) {
-    // FIXME: This function is currently unimplemented!
-    return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    // variable to store any errors in
+    // sxbp_result_t status = SXBP_RESULT_UNKNOWN;
+    // try and set the length of each line in the figure (ascending) to 1
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+        // TODO: this line will be moved out into a separate function
+        figure->lines[i].length = 1;
+        // set which how many lines we have left to solve
+        figure->lines_remaining = figure->size - 1 - i;
+        // TODO: refactor the following code into sxbp_internal:
+        // call the progress callback if it's been given
+        if (options != NULL && options->progress_callback != NULL) {
+            options->progress_callback(figure, options->callback_context);
+        }
+    }
+    // signal to caller that the call succeeded
+    return SXBP_RESULT_OK;
 }
 // reënable all warnings
 #pragma GCC diagnostic pop

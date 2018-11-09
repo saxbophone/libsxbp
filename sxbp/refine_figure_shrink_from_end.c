@@ -164,6 +164,7 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
              * NOTE: this value is -1 because line 0 never needs solving
              */
             figure->lines_remaining = i - 1;
+            // TODO: refactor the following code into sxbp_internal:
             // call the progress callback if it's been given
             if (options != NULL && options->progress_callback != NULL) {
                 options->progress_callback(figure, options->callback_context);
