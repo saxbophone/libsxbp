@@ -129,6 +129,7 @@ static sxbp_result_t sxbp_init_line_map_from_bounds(
 
 // private, callback function for sxbp_figure_collides_with()
 static bool sxbp_figure_collides_with_callback(
+    sxbp_line_t* line,
     sxbp_co_ord_t location,
     void* data
 ) {
@@ -150,10 +151,9 @@ static bool sxbp_figure_collides_with_callback(
          * otherwise, we haven't collided yet so mark the cell with a pointer to
          * the current line
          */
-        // XXX: Whoops! sxbp_walk_figure() doesn't tell us which line we're on!
-        // TODO: change sxbp_walk_figure() to give us the line pointer too
+        callback_data->map->cells[location.x][location.y] = line;
+        return true;
     }
-    return true;
 }
 
 // XXX: Stub functions don't need warnings about unused parameters!

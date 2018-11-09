@@ -32,8 +32,18 @@ typedef struct figure_collides_context {
     bool* collided;
 } figure_collides_context;
 
+/*
+ * disable GCC warning about the unused parameter, as this is a callback it must
+ * include all arguments specified by the caller, even if not used
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 // private, callback function for sxbp_figure_collides()
-static bool sxbp_figure_collides_callback(sxbp_co_ord_t location, void* data) {
+static bool sxbp_figure_collides_callback(
+    sxbp_line_t* line,
+    sxbp_co_ord_t location,
+    void* data
+) {
     // cast void pointer to a pointer to our context structure
     figure_collides_context* callback_data = (figure_collides_context*)data;
     // check if there's already a pixel here
@@ -49,6 +59,8 @@ static bool sxbp_figure_collides_callback(sxbp_co_ord_t location, void* data) {
         return false;
     }
 }
+// reënable all warnings
+#pragma GCC diagnostic pop
 
 // private, sets collided to true if the figure's line collides with itself
 static sxbp_result_t sxbp_figure_collides(
