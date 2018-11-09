@@ -26,6 +26,87 @@ extern "C" {
 #endif
 
 /*
+ * private datatype for building 'line maps', which are 2D arrays of pointers to
+ * sxbp_line_t items
+ */
+typedef struct line_map {
+    // the width of the line_map (same data type as bitmap width)
+    uint32_t width;
+    // the height of the line_map (same data type as bitmap height)
+    uint32_t height;
+    // dynamically allocated 2D array of pointers to lines
+    sxbp_line_t*** cells;
+} line_map;
+
+// private datatype for passing context data into sxbp_walk_figure() callback
+typedef struct figure_collides_with_context {
+    line_map* map;
+    sxbp_line_t** collider;
+} figure_collides_with_context;
+
+/*
+ * private, frees dynamically allocated memory of a line_map instance
+ * returns true if it needed to free it, or false if it didn't
+ */
+static bool sxbp_free_line_map(line_map* map) {
+    // if map->cells is not null, then it needs to be deallocated
+    if (map->cells != NULL) {
+        for (uint32_t col = 0; col < map->width; col++) {
+            // but first check each column of the col inside cells too
+            if (map->cells[col] != NULL) {
+                free(map->cells[col]);
+            }
+        }
+        // finally, deallocate the row
+        free(map->cells);
+        return true;
+    } else {
+        // nothing to deallocate!
+        return false;
+    }
+}
+
+/*
+ * private, initialises and allocates a line_map sized for the specified bounds
+ * WARN: Don't even think about calling this function with an already allocated
+ * line_map instance!
+ */
+static sxbp_result_t sxbp_init_line_map_from_bounds(
+    line_map* map,
+    sxbp_bounds_t bounds
+) {
+    /*
+     * the width and height are the difference of the max and min dimensions
+     * + 1.
+     * this makes sense because for example from 1 to 10 there are 10 values
+     * and the difference of these is 9 so the number of values is 9+1 = 10
+     */
+    map->width = (bounds.x_max - bounds.x_min) + 1;
+    map->height = (bounds.y_max - bounds.y_min) + 1;
+    // allocate dynamic memory for the row
+    map->cells = calloc(map->width, sizeof(sxbp_line_t**));
+    // catch allocation error and exit early
+    if (map->cells == NULL) {
+        return SXBP_RESULT_FAIL_MEMORY;
+    } else {
+        // now allocate memory for the columns of the row
+        for (uint32_t col = 0; col < map->width; col++) {
+            map->cells[col] = calloc(map->height, sizeof(sxbp_line_t*));
+            // catch allocation error, free and exit early
+            if (map->cells[col] == NULL) {
+                sxbp_free_line_map(map);
+                return SXBP_RESULT_FAIL_MEMORY;
+            }
+            // pedantic, set all cells within the column explicitly to NULL
+            for (uint32_t row = 0; row < map->height; row++) {
+                map->cells[col][row] = NULL;
+            }
+        }
+    }
+    return SXBP_RESULT_OK;
+}
+
+/*
  * Algorithm:
  *
  * - FOR all lines, counting forwards:
@@ -46,6 +127,35 @@ extern "C" {
  *     - RETURN new distance for PreviousLine
  */
 
+// private, callback function for sxbp_figure_collides_with()
+static bool sxbp_figure_collides_with_callback(
+    sxbp_co_ord_t location,
+    void* data
+) {
+    // cast void pointer to a pointer to our context structure
+    figure_collides_with_context* callback_data =
+        (figure_collides_with_context*)data;
+    /*
+     * if a pixel would be plotted at a location that isn't NULL, then stop and
+     * set collider to point to the location that would have been plotted to
+     * --this is the line that would be collided with
+     */
+    if (callback_data->map->cells[location.x][location.y] != NULL) {
+        // the thing we collided with is the pointer at this location, store it!
+        callback_data->collider = &callback_data->map->cells[location.x][location.y];
+        // halt walking early by returning false
+        return false;
+    } else {
+        /*
+         * otherwise, we haven't collided yet so mark the cell with a pointer to
+         * the current line
+         */
+        // XXX: Whoops! sxbp_walk_figure() doesn't tell us which line we're on!
+        // TODO: change sxbp_walk_figure() to give us the line pointer too
+    }
+    return true;
+}
+
 // XXX: Stub functions don't need warnings about unused parameters!
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -60,8 +170,35 @@ static sxbp_result_t sxbp_figure_collides_with(
     sxbp_figure_size_t line_index,
     sxbp_line_t** collider
 ) {
-    // signal to caller that the call succeeded
-    return SXBP_RESULT_OK;
+    // variable to store any errors in
+    sxbp_result_t status = SXBP_RESULT_UNKNOWN;
+    // build a 'line map' (2D array of pointers to lines) from figure's bounds
+    line_map map;
+    if (
+        !sxbp_check(
+            sxbp_init_line_map_from_bounds(&map, sxbp_get_bounds(figure, 1)),
+            &status
+        )
+    ) {
+        // if an error occurred building the line map, return it
+        return status;
+    } else {
+        /*
+         * use our callback function with walk() to plot the line pointers into
+         * the line_map
+         */
+        figure_collides_with_context data = {
+            .map = &map,
+            .collider = collider,
+        };
+        sxbp_walk_figure(
+            figure, 1, sxbp_figure_collides_with_callback, (void*)&data
+        );
+        // free the line map
+        sxbp_free_line_map(&map);
+        // signal to caller that the call succeeded
+        return SXBP_RESULT_OK;
+    }
 }
 // reënable all warnings
 #pragma GCC diagnostic pop
