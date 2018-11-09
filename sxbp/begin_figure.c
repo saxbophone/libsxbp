@@ -39,6 +39,7 @@ static sxbp_line_t sxbp_make_line(
     sxbp_direction_t direction,
     sxbp_length_t length
 ) {
+    // TODO: add line index!
     return (sxbp_line_t){ .direction = direction, .length = length, };
 }
 
@@ -101,6 +102,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
     // the first line is always an up line - this is for orientation purposes
     sxbp_direction_t facing = SXBP_UP;
     // add first line to the figure
+    // TODO: add line index!
     figure->lines[0] = sxbp_make_line(facing, 1);
     // update the location
     sxbp_move_location_along_line(&location, figure->lines[0]);
@@ -130,6 +132,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             // calculate what length this line should be
             sxbp_length_t length = sxbp_next_length(location, facing, bounds);
             // make line
+            // TODO: add line index!
             sxbp_line_t line = sxbp_make_line(facing, length);
             // add line to figure
             figure->lines[index] = line;

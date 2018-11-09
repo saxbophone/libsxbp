@@ -46,6 +46,26 @@ extern "C" {
  *     - RETURN new distance for PreviousLine
  */
 
+// XXX: Stub functions don't need warnings about unused parameters!
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+/*
+ * private, given an sxbp figure, the most recently plotted line index and a
+ * pointer to a pointer to a line, checks if the full line of the given figure
+ * as plotted up to the line index collides with itself. If it does, collider
+ * will be set to point to the line which it collides with.
+ */
+static sxbp_result_t sxbp_figure_collides_with(
+    const sxbp_figure_t* figure,
+    sxbp_figure_size_t line_index,
+    sxbp_line_t** collider
+) {
+    // signal to caller that the call succeeded
+    return SXBP_RESULT_OK;
+}
+// reënable all warnings
+#pragma GCC diagnostic pop
+
 /*
  * private, attempts to change the length of the line at the given line_index to
  * the requested line length.
@@ -55,8 +75,20 @@ static sxbp_result_t sxbp_set_line_length(
     sxbp_figure_size_t line_index,
     sxbp_length_t line_length
 ) {
-    // TODO: Check if this causes collision and call self recursively if it does
+    // try and set the line's length to that requested
     figure->lines[line_index].length = line_length;
+    // check if the figure now collides, and if so, with which other line?
+    sxbp_line_t* collider = NULL;
+    // TODO: Handle error!
+    sxbp_figure_collides_with(figure, line_index, &collider);
+    // IF COLLIDES:
+    //   TODO: work out what length to extend the previous line to
+    //   ...
+    //   TODO: call self recursively, to resize the previous line to new length
+    //   ...
+    //   TODO: set the original line at line index's length back to 1
+    //   NOTE: or do we set it to the originally requested length?
+    //   ...
     // signal to caller that the call succeeded
     return SXBP_RESULT_OK;
 }
