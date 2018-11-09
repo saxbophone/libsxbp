@@ -66,8 +66,12 @@ static sxbp_result_t sxbp_write_pbm_header(
     // these are used to keep track of how many digits each is
     int width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, store lengths
-    width_string_length = sprintf(width_string, "%" PRIu32, bitmap->width);
-    height_string_length = sprintf(height_string, "%" PRIu32, bitmap->height);
+    width_string_length = snprintf(
+        width_string, 11, "%" PRIu32, bitmap->width
+    );
+    height_string_length = snprintf(
+        height_string, 11, "%" PRIu32, bitmap->height
+    );
     /*
      * now that we know the length of the image dimension strings, we can now
      * calculate how much memory we'll have to allocate for the image buffer
