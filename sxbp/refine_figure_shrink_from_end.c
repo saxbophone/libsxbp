@@ -4,7 +4,7 @@
  *
  * This compilation unit provides the definition of
  * `sxbp_refine_figure_shrink_from_end`, a public function providing a specific
- * algorithm for refining a figure by attemptin to shrink all the lines from
+ * algorithm for refining a figure by attempting to shrink all the lines from
  * their safe 'default' lengths (as plotted by `sxbp_begin_figure`) to the
  * shortest length possible, starting from the end and working backwards.
  *
