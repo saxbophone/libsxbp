@@ -45,6 +45,22 @@ extern "C" {
  *       for CurrentLine to not collide with CollidedLine
  *     - RETURN new distance for PreviousLine
  */
+
+/*
+ * private, attempts to change the length of the line at the given line_index to
+ * the requested line length.
+ */
+static sxbp_result_t sxbp_set_line_length(
+    sxbp_figure_t* figure,
+    sxbp_figure_size_t line_index,
+    sxbp_length_t line_length
+) {
+    // TODO: Check if this causes collision and call self recursively if it does
+    figure->lines[line_index].length = line_length;
+    // signal to caller that the call succeeded
+    return SXBP_RESULT_OK;
+}
+
 sxbp_result_t sxbp_refine_figure_grow_from_start(
     sxbp_figure_t* figure,
     const sxbp_refine_figure_options_t* options
@@ -53,8 +69,8 @@ sxbp_result_t sxbp_refine_figure_grow_from_start(
     // sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     // try and set the length of each line in the figure (ascending) to 1
     for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
-        // TODO: this line will be moved out into a separate function
-        figure->lines[i].length = 1;
+        // try and set the line length to 1 using a helper function
+        sxbp_set_line_length(figure, i, 1); // TODO: Handle error!
         // set which how many lines we have left to solve
         figure->lines_remaining = figure->size - 1 - i;
         // TODO: refactor the following code into sxbp_internal:
