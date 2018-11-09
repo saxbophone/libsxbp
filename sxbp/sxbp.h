@@ -89,12 +89,17 @@ typedef uint32_t sxbp_figure_size_t;
 
 /**
  * @brief Represents one line segment in the spiral structure.
- * @details This includes the direction of the line and it's length
+ * @details This includes the ID, direction of the line and it's length
  * (initially set to 0).
- * @note The whole struct uses bitfields to occupy 32 bits of memory.
+ * @note The members `direction` and `length` use bitfields to occupy 32 bits of
+ * memory between them.
  * @since v0.27.0
  */
 typedef struct sxbp_line_t {
+    /**
+     * @brief the zero-indexed ID of this line, measured from the spiral origin
+     */
+    sxbp_figure_size_t id;
     /** @brief uses 2 bits as there's only 4 directions */
     sxbp_direction_t direction : 2;
     /** @brief uses 30 bits for the length, this is wide enough */

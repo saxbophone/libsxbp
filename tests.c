@@ -87,6 +87,7 @@ int main(void) {
         sxbp_render_figure_to_bitmap(&figure, &bitmap);
         sxbp_refine_figure_options_t options = {
             .progress_callback = print_progress,
+            .refine_method = SXBP_REFINE_METHOD_GROW_FROM_START,
         };
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
         assert(outcome == SXBP_RESULT_OK);
