@@ -152,8 +152,7 @@ typedef enum sxbp_refine_method_t {
     SXBP_REFINE_METHOD_ANY = 0u, /**< use any method, the default */
     SXBP_REFINE_METHOD_GROW_FROM_START, /**< the original refinement method */
     SXBP_REFINE_METHOD_SHRINK_FROM_END, /**< the current refinement method */
-    SXBP_REFINE_METHOD_GROW_FROM_MIDDLE = 10u, /**< reserved for future use */
-    SXBP_REFINE_METHOD_RESERVED_START, /**< reserved for future use */
+    SXBP_REFINE_METHOD_RESERVED_START = 10u, /**< reserved for future use */
     SXBP_REFINE_METHOD_RESERVED_END = 255u, /**< reserved for future use */
 } sxbp_refine_method_t;
 
@@ -230,7 +229,7 @@ typedef enum sxbp_result_t {
     SXBP_RESULT_FAIL_MEMORY, /**< failure to allocate or reallocate memory */
     SXBP_RESULT_FAIL_PRECONDITION, /**< a preconditional check failed */
     SXBP_RESULT_FAIL_FILE, /**< a file read/write operation failed */
-    SXBP_RESULT_FAIL_UNIMPLEMENTED, /** requested action is not implemented */
+    SXBP_RESULT_FAIL_UNIMPLEMENTED, /**< requested action is not implemented */
     SXBP_RESULT_RESERVED_START, /**< reserved for future use */
     SXBP_RESULT_RESERVED_END = 255u, /**< reserved for future use */
 } sxbp_result_t;
