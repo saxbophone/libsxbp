@@ -25,9 +25,6 @@
 extern "C" {
 #endif
 
-// disable GCC warning about the unused parameter, as this is currently a stub
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 /*
  * Algorithm:
  *
@@ -69,8 +66,6 @@ sxbp_result_t sxbp_refine_figure_grow_from_start(
     // signal to caller that the call succeeded
     return SXBP_RESULT_OK;
 }
-// reënable all warnings
-#pragma GCC diagnostic pop
 
 #ifdef __cplusplus
 } // extern "C"
