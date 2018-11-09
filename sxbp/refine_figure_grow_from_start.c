@@ -42,6 +42,7 @@ typedef struct line_map {
 typedef struct figure_collides_with_context {
     line_map* map;
     sxbp_line_t** collider;
+    sxbp_figure_size_t max_line;
 } figure_collides_with_context;
 
 /*
@@ -136,6 +137,8 @@ static bool sxbp_figure_collides_with_callback(
     // cast void pointer to a pointer to our context structure
     figure_collides_with_context* callback_data =
         (figure_collides_with_context*)data;
+    // is this the last line? if so we need to tell walk() to finish early
+    bool last_line = (line->id == callback_data->max_line);
     /*
      * if a pixel would be plotted at a location that isn't NULL, then stop and
      * set collider to point to the location that would have been plotted to
@@ -143,7 +146,7 @@ static bool sxbp_figure_collides_with_callback(
      */
     if (callback_data->map->cells[location.x][location.y] != NULL) {
         // the thing we collided with is the pointer at this location, store it!
-        callback_data->collider = &callback_data->map->cells[location.x][location.y];
+        *callback_data->collider = callback_data->map->cells[location.x][location.y];
         // halt walking early by returning false
         return false;
     } else {
@@ -152,7 +155,8 @@ static bool sxbp_figure_collides_with_callback(
          * the current line
          */
         callback_data->map->cells[location.x][location.y] = line;
-        return true;
+        // only continue if it's not the last line
+        return !last_line;
     }
 }
 
@@ -190,6 +194,7 @@ static sxbp_result_t sxbp_figure_collides_with(
         figure_collides_with_context data = {
             .map = &map,
             .collider = collider,
+            .max_line = line_index,
         };
         sxbp_walk_figure(
             figure, 1, sxbp_figure_collides_with_callback, (void*)&data
@@ -212,22 +217,36 @@ static sxbp_result_t sxbp_set_line_length(
     sxbp_figure_size_t line_index,
     sxbp_length_t line_length
 ) {
+    // variable to store any errors in
+    sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     // try and set the line's length to that requested
     figure->lines[line_index].length = line_length;
     // check if the figure now collides, and if so, with which other line?
     sxbp_line_t* collider = NULL;
-    // TODO: Handle error!
-    sxbp_figure_collides_with(figure, line_index, &collider);
-    // IF COLLIDES:
-    //   TODO: work out what length to extend the previous line to
-    //   ...
-    //   TODO: call self recursively, to resize the previous line to new length
-    //   ...
-    //   TODO: set the original line at line index's length back to 1
-    //   NOTE: or do we set it to the originally requested length?
-    //   ...
-    // signal to caller that the call succeeded
-    return SXBP_RESULT_OK;
+    if (
+        !sxbp_check(
+            sxbp_figure_collides_with(figure, line_index, &collider), &status
+        )
+    ) {
+        // if an error occurred checking the collision, return it
+        return status;
+    } else {
+        // if collider is not NULL, then there's been a collision
+        if (collider != NULL) {
+            printf("!\n");
+            // collision!
+            //   TODO: work out what length to extend the previous line to
+            //   ...
+            //   TODO: call self recursively, to resize the previous line to new
+            // length
+            //   ...
+            //   TODO: set the original line at line index's length back to 1
+            //   NOTE: or do we set it to the originally requested length?
+            //   ...
+        }
+        // signal to caller that the call succeeded
+        return SXBP_RESULT_OK;
+    }
 }
 
 sxbp_result_t sxbp_refine_figure_grow_from_start(
