@@ -56,10 +56,12 @@ static bool sxbp_free_line_map(line_map* map) {
             // but first check each column of the col inside cells too
             if (map->cells[col] != NULL) {
                 free(map->cells[col]);
+                map->cells[col] = NULL;
             }
         }
         // finally, deallocate the row
         free(map->cells);
+        map->cells = NULL;
         return true;
     } else {
         // nothing to deallocate!
@@ -160,9 +162,6 @@ static bool sxbp_figure_collides_with_callback(
     }
 }
 
-// XXX: Stub functions don't need warnings about unused parameters!
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 /*
  * private, given an sxbp figure, the most recently plotted line index and a
  * pointer to a pointer to a line, checks if the full line of the given figure
@@ -205,8 +204,6 @@ static sxbp_result_t sxbp_figure_collides_with(
         return SXBP_RESULT_OK;
     }
 }
-// reënable all warnings
-#pragma GCC diagnostic pop
 
 /*
  * private, attempts to change the length of the line at the given line_index to
