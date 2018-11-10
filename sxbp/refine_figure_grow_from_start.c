@@ -139,8 +139,6 @@ static bool sxbp_figure_collides_with_callback(
     // cast void pointer to a pointer to our context structure
     figure_collides_with_context* callback_data =
         (figure_collides_with_context*)data;
-    // is this the last line? if so we need to tell walk() to finish early
-    bool last_line = (line->id == callback_data->max_line);
     /*
      * if a pixel would be plotted at a location that isn't NULL, then stop and
      * set collider to point to the location that would have been plotted to
@@ -158,7 +156,7 @@ static bool sxbp_figure_collides_with_callback(
          */
         callback_data->map->cells[location.x][location.y] = line;
         // only continue if it's not the last line
-        return !last_line;
+        return !(line->id == callback_data->max_line);
     }
 }
 
@@ -230,7 +228,6 @@ static sxbp_result_t sxbp_set_line_length(
     } else {
         // if collider is not NULL, then there's been a collision
         if (collider != NULL) {
-            printf("!\n");
             // collision!
             //   TODO: work out what length to extend the previous line to
             //   ...
