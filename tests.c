@@ -30,8 +30,8 @@ extern "C"{
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 static void print_progress(const sxbp_figure_t* figure, void* context) {
-    printf("%" PRIu32 "|", figure->lines_remaining);
-    fflush(stdout);
+    printf("(%" PRIu32 " lines remaining)\n", figure->lines_remaining);
+    // fflush(stdout);
 }
 // reënable all warnings
 #pragma GCC diagnostic pop

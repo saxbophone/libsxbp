@@ -13,6 +13,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -38,12 +39,28 @@ typedef struct line_map {
     sxbp_line_t*** cells;
 } line_map;
 
-// private datatype for passing context data into sxbp_walk_figure() callback
+/*
+ * private datatype for passing context data into sxbp_walk_figure() callback
+ * within sxbp_figure_collides_with()
+ */
 typedef struct figure_collides_with_context {
     line_map* map;
     sxbp_line_t** collider;
     sxbp_figure_size_t max_line;
 } figure_collides_with_context;
+
+/*
+ * private datatype for passing context data into sxbp_walk_figure() callback
+ * within sxbp_suggest_previous_length()
+ */
+typedef struct suggest_previous_length_context {
+    sxbp_figure_size_t previous_index;
+    sxbp_figure_size_t collider_index;
+    sxbp_co_ord_t current_location;
+    sxbp_co_ord_t previous_origin;
+    sxbp_co_ord_t collider_origin;
+    bool collider_found;
+} suggest_previous_length_context;
 
 /*
  * private, frees dynamically allocated memory of a line_map instance
@@ -109,27 +126,6 @@ static sxbp_result_t sxbp_init_line_map_from_bounds(
     return SXBP_RESULT_OK;
 }
 
-/*
- * Algorithm:
- *
- * - FOR all lines, counting forwards:
- *     - SetLineLength(CurrentLine, 1)
- *
- * - SetLineLength(line, length)
- *     - Try and SET 'line' length to 'length'
- *     - IF this causes a collision:
- *         - NOTE the line that it collided with (CollidedLine)
- *         - SetLineLength(
- *               PreviousLine, EvadeDistance(CurrentLine, CollidedLine)
- *           )
- *
- * - EvadeDistance(PreviousLine, CurrentLine, CollidedLine)
- *     - COMPARE PreviousLine, CurrentLine and CollidedLine lengths, directions
- *       and positions to work out what length PreviousLine should be in order
- *       for CurrentLine to not collide with CollidedLine
- *     - RETURN new distance for PreviousLine
- */
-
 // private, callback function for sxbp_figure_collides_with()
 static bool sxbp_figure_collides_with_callback(
     sxbp_line_t* line,
@@ -147,6 +143,7 @@ static bool sxbp_figure_collides_with_callback(
     if (callback_data->map->cells[location.x][location.y] != NULL) {
         // the thing we collided with is the pointer at this location, store it!
         *callback_data->collider = callback_data->map->cells[location.x][location.y];
+        printf("Collider is #%u\n", callback_data->map->cells[location.x][location.y]->id);
         // halt walking early by returning false
         return false;
     } else {
@@ -185,8 +182,8 @@ static sxbp_result_t sxbp_figure_collides_with(
         return status;
     } else {
         /*
-         * use our callback function with walk() to plot the line pointers into
-         * the line_map
+         * use our callback function with sxbp_walk_figure() to plot the line
+         * pointers into the line_map
          */
         figure_collides_with_context data = {
             .map = &map,
@@ -203,6 +200,146 @@ static sxbp_result_t sxbp_figure_collides_with(
     }
 }
 
+// private, callback function for sxbp_suggest_previous_length()
+static bool sxbp_suggest_previous_length_callback(
+    sxbp_line_t* line,
+    sxbp_co_ord_t location,
+    void* data
+) {
+    // cast void pointer to a pointer to our context structure
+    suggest_previous_length_context* callback_data =
+        (suggest_previous_length_context*)data;
+    // lastly, update the current_location attribute to the one we've just seen
+    callback_data->current_location = location;
+    if (
+        line->id == callback_data->collider_index &&
+        !callback_data->collider_found
+    ) {
+        /*
+         * if the current line's index is the collider's then set the collider
+         * origin to the previous invocation's location
+         */
+        callback_data->collider_origin = callback_data->current_location;
+        callback_data->collider_found = true;
+    } else if (line->id == callback_data->previous_index) {
+        /*
+         * otherwise, if the index is that of the previous line's then set the
+         * previous origin to the previous invocation's location and then exit
+         */
+        callback_data->previous_origin = callback_data->current_location;
+        return false; // exit now please!
+    }
+    return true; // continue running please!
+}
+
+/*
+ * private, given the previous line, the colliding line and their origin points,
+ * applies a special set of rules to work out what length the previous line
+ * should be set to to prevent the collision from happening
+ */
+static sxbp_length_t sxbp_resolve_collision(
+    sxbp_line_t previous,
+    sxbp_line_t collider,
+    sxbp_co_ord_t previous_origin,
+    sxbp_co_ord_t collider_origin
+) {
+    // calculate collider end coördinates
+    sxbp_co_ord_t collider_end = collider_origin;
+    sxbp_move_location_along_line(&collider_end, collider);
+    if((previous.direction == SXBP_UP) && (collider.direction == SXBP_UP)) {
+        return (collider_origin.y - previous_origin.y) + collider.length + 1;
+    } else if((previous.direction == SXBP_UP) && (collider.direction == SXBP_DOWN)) {
+        return (collider_end.y - previous_origin.y) + collider.length + 1;
+    } else if((previous.direction == SXBP_RIGHT) && (collider.direction == SXBP_RIGHT)) {
+        return (collider_origin.x - previous_origin.x) + collider.length + 1;
+    } else if((previous.direction == SXBP_RIGHT) && (collider.direction == SXBP_LEFT)) {
+        return (collider_end.x - previous_origin.x) + collider.length + 1;
+    } else if((previous.direction == SXBP_DOWN) && (collider.direction == SXBP_UP)) {
+        return (previous_origin.y - collider_end.y) + collider.length + 1;
+    } else if((previous.direction == SXBP_DOWN) && (collider.direction == SXBP_DOWN)) {
+        return (previous_origin.y - collider_origin.y) + collider.length + 1;
+    } else if((previous.direction == SXBP_LEFT) && (collider.direction == SXBP_RIGHT)) {
+        return (previous_origin.x - collider_end.x) + collider.length + 1;
+    } else if((previous.direction == SXBP_LEFT) && (collider.direction == SXBP_LEFT)) {
+        return (previous_origin.x - collider_origin.x) + collider.length + 1;
+    } else {
+        // this is the catch-all case, where no way to optimise was found
+        return previous.length + 1;
+    }
+}
+
+/*
+ * private, calculates and returns a suggested length to extend the previous
+ * line to the current line such that the current one no longer collides with
+ * collider
+ */
+static sxbp_length_t sxbp_suggest_previous_length(
+    const sxbp_figure_t* figure,
+    sxbp_figure_size_t current_index,
+    sxbp_figure_size_t collider_index
+) {
+    /*
+     * Algorithm:
+     *
+     * - IF the previous line and the collider are not parallel, then we can
+     * return early with a suggested size of the previous' length + 1
+     * OTHERWISE:
+     * - Use sxbp_walk_figure() to advance through the figure's lines, making a
+     * note of the first times we encounter the line with the ID of the:
+     *   - collider
+     *   - line previous to the current one
+     * - When we encounter both of these, store the coördinates of their origins
+     * Knowing their origins, directions and length, we are able to work out
+     * the coördinates of the end of each line also.
+     * - Ensure we have stored the start coördinates of the previous line and
+     * the start AND end coördinates of the collider line
+     * - Apply a set of pre-defined rules (probably via a lookup table) to
+     * decide which length to set the previous line's length to to try and
+     * resolve the collision, and return this length
+     */
+    // retrieve the previous and collider lines for convenience
+    sxbp_line_t previous = figure->lines[current_index - 1];
+    sxbp_line_t collider = figure->lines[collider_index];
+    // printf(
+    //     "Current: %u Previous: %u Collider: %u\n",
+    //     current_index, previous.id, collider_index
+    // );
+    // // if the two lines are not parallel, just extend by 1 and return early
+    if((previous.direction % 2u) != (collider.direction % 2u)) {
+        return previous.length + 1;
+    } else {
+        /*
+         * otherwise, use our callback function with sxbp_walk_figure() to get
+         * the origin of both lines
+         */
+        suggest_previous_length_context data = {
+            .previous_index = previous.id,
+            .collider_index = collider_index,
+            .current_location = {0},
+            .previous_origin = {0},
+            .collider_origin = {0},
+            .collider_found = false,
+        };
+        sxbp_walk_figure(
+            figure, 1, sxbp_suggest_previous_length_callback, (void*)&data
+        );
+        // XXX: Debugging code
+        // printf(
+        //     "(%u, %u) and (%u, %u)\n",
+        //     data.previous_origin.x, data.previous_origin.y,
+        //     data.collider_origin.x, data.collider_origin.y
+        // );
+        // use collision resolution rules to calculate the length to resize to
+        sxbp_resolve_collision(
+            previous, collider, data.previous_origin, data.collider_origin
+        );
+        // TODO: replace with result of sxbp_resolve_collision() above
+        return previous.length + 1;
+    }
+}
+
+static size_t RECURSION_COUNT = 0;
+
 /*
  * private, attempts to change the length of the line at the given line_index to
  * the requested line length.
@@ -212,6 +349,16 @@ static sxbp_result_t sxbp_set_line_length(
     sxbp_figure_size_t line_index,
     sxbp_length_t line_length
 ) {
+    RECURSION_COUNT++;
+    // printf("RECURSION DEPTH: %zu\n", RECURSION_COUNT);
+    // printf("line_index:%u, line_length:%u\n", line_index, line_length);
+    // XXX: debugging
+    sxbp_bitmap_t bitmap = {0};
+    printf("Try line #%u\n", line_index);
+    // render incomplete figure to bitmap
+    sxbp_render_figure_to_bitmap(figure, &bitmap);
+    printf("\n");
+    sxbp_print_bitmap(&bitmap, stdout);
     // variable to store any errors in
     sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     // try and set the line's length to that requested
@@ -226,27 +373,84 @@ static sxbp_result_t sxbp_set_line_length(
         // if an error occurred checking the collision, return it
         return status;
     } else {
-        // if collider is not NULL, then there's been a collision
-        if (collider != NULL) {
-            // collision!
-            //   TODO: work out what length to extend the previous line to
-            //   ...
-            //   TODO: call self recursively, to resize the previous line to new
-            // length
-            //   ...
-            //   TODO: set the original line at line index's length back to 1
-            //   NOTE: or do we set it to the originally requested length?
-            //   ...
+        // while there is a collision (collider is not NULL)
+        while (collider != NULL) {
+            sxbp_render_figure_to_bitmap(figure, &bitmap);
+            printf("\n");
+            sxbp_print_bitmap(&bitmap, stdout);
+            // // set the original line at line index's length back to 0
+            figure->lines[line_index].length = 0;
+            // work out what length to extend the previous line to
+            sxbp_length_t suggested_length = sxbp_suggest_previous_length(
+                figure, line_index, collider->id
+            );
+            // call self recursively, to resize the previous line to new length
+            // TODO: handle errors!
+            printf("RETRY PREVIOUS LINE!\n");
+            assert(
+                sxbp_success(
+                    sxbp_set_line_length(
+                        figure, line_index - 1, suggested_length
+                    )
+                )
+            );
+            // set the original line at line index's length back to 1
+            figure->lines[line_index].length = 1;
+            // reset collider first otherwise we'll never know if we fixed it
+            collider = NULL;
+            // check if there is still a collision, or if we fixed it
+            // TODO: this is almost exact code from earlier, optimise out!
+            if (
+                !sxbp_check(
+                    sxbp_figure_collides_with(
+                        figure, line_index, &collider
+                    ),
+                    &status
+                )
+            ) {
+                // if an error occurred checking the collision, return it
+                return status;
+            }
         }
+        RECURSION_COUNT--;
+        // render complete figure to bitmap
+        sxbp_render_figure_to_bitmap(figure, &bitmap);
+        printf("\n");
+        sxbp_print_bitmap(&bitmap, stdout);
+        printf("Finished line #%u\n", line_index);
         // signal to caller that the call succeeded
         return SXBP_RESULT_OK;
     }
 }
 
+/*
+ * Algorithm:
+ *
+ * - FOR all lines, counting forwards:
+ *     - SetLineLength(CurrentLine, 1)
+ *
+ * - SetLineLength(line, length)
+ *     - Try and SET 'line' length to 'length'
+ *     - IF this causes a collision:
+ *         - NOTE the line that it collided with (CollidedLine)
+ *         - SetLineLength(
+ *               PreviousLine, EvadeDistance(CurrentLine, CollidedLine)
+ *           )
+ *
+ * - EvadeDistance(PreviousLine, CurrentLine, CollidedLine)
+ *     - COMPARE PreviousLine, CurrentLine and CollidedLine lengths, directions
+ *       and positions to work out what length PreviousLine should be in order
+ *       for CurrentLine to not collide with CollidedLine
+ *     - RETURN new distance for PreviousLine
+ */
 sxbp_result_t sxbp_refine_figure_grow_from_start(
     sxbp_figure_t* figure,
     const sxbp_refine_figure_options_t* options
 ) {
+    // XXX: debugging
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+        figure->lines[i].length = 0;
+    }
     // variable to store any errors in
     // sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     // try and set the length of each line in the figure (ascending) to 1
