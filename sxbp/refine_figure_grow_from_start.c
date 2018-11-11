@@ -214,6 +214,11 @@ static bool sxbp_suggest_previous_length_callback(
     // cast void pointer to a pointer to our context structure
     suggest_previous_length_context* callback_data =
         (suggest_previous_length_context*)data;
+    // FIXME: This function is currently wrong:
+    // Because of the way lines are plotted, all lines apart from line 0 have
+    // their first coördinate marked as belonging to the previous line
+    // This means that their origin coördinates actually are the ones before!
+
     // lastly, update the current_location attribute to the one we've just seen
     callback_data->current_location = location;
     if (
@@ -333,6 +338,8 @@ static sxbp_length_t sxbp_suggest_previous_length(
             previous, collider, data.previous_origin, data.collider_origin
         );
         // TODO: replace with result of sxbp_resolve_collision() above
+        // FIXME: This can't be done until sxbp_suggest_previous_length_callback
+        // is fixed properly
         return previous.length + 1;
     }
 }
