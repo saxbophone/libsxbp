@@ -85,10 +85,12 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wstrict-prototypes")
     # enable warnings on missing prototypes of global functions
     enable_c_compiler_flag_if_supported("-Wmissing-prototypes")
-    # turn off spurious warnings from clang about missing field initialisers
-    enable_c_compiler_flag_if_supported("-Wno-missing-field-initializers")
+    # enable sign and type conversion warnings
+    enable_c_compiler_flag_if_supported("-Wconversion")
     # enable warnings about mistakes in Doxygen documentation
     enable_c_compiler_flag_if_supported("-Wdocumentation")
+    # turn off spurious warnings from clang about missing field initialisers
+    enable_c_compiler_flag_if_supported("-Wno-missing-field-initializers")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
