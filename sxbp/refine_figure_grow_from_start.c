@@ -135,24 +135,30 @@ static bool sxbp_figure_collides_with_callback(
     // cast void pointer to a pointer to our context structure
     figure_collides_with_context* callback_data =
         (figure_collides_with_context*)data;
-    /*
-     * if a pixel would be plotted at a location that isn't NULL, then stop and
-     * set collider to point to the location that would have been plotted to
-     * --this is the line that would be collided with
-     */
-    if (callback_data->map->cells[location.x][location.y] != NULL) {
-        // the thing we collided with is the pointer at this location, store it!
-        *callback_data->collider = callback_data->map->cells[location.x][location.y];
-        // halt walking early by returning false
+    // if the line's ID is greater than the max line we want, we can quit NOW
+    if (line->id > callback_data->max_line) {
         return false;
     } else {
         /*
-         * otherwise, we haven't collided yet so mark the cell with a pointer to
-         * the current line
+         * if a pixel would be plotted at a location that isn't NULL, then stop
+         * and set collider to point to the location that would have been
+         * plotted to --this is the line that would be collided with
          */
-        callback_data->map->cells[location.x][location.y] = line;
-        // only continue if it's not the last line
-        return !(line->id > callback_data->max_line);
+        if (callback_data->map->cells[location.x][location.y] != NULL) {
+            // the line we collided with is the pointer in this cell, store it!
+            *callback_data->collider =
+                callback_data->map->cells[location.x][location.y];
+            // halt walking early by returning false
+            return false;
+        } else {
+            /*
+             * otherwise, we haven't collided yet so mark the cell with a
+             * pointer to the current line
+             */
+            callback_data->map->cells[location.x][location.y] = line;
+            // tell sxbp_walk_figure() that we want to continue!
+            return true;
+        }
     }
 }
 
