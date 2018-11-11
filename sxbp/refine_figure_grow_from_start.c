@@ -152,7 +152,7 @@ static bool sxbp_figure_collides_with_callback(
          */
         callback_data->map->cells[location.x][location.y] = line;
         // only continue if it's not the last line
-        return !(line->id == callback_data->max_line);
+        return !(line->id > callback_data->max_line);
     }
 }
 
@@ -192,6 +192,18 @@ static sxbp_result_t sxbp_figure_collides_with(
         sxbp_walk_figure(
             figure, 1, sxbp_figure_collides_with_callback, (void*)&data
         );
+        // XXX: debugging, print the line map
+        for (uint32_t row = 0; row < map.height; row++) {
+            for (uint32_t col = 0; col < map.width; col++) {
+                if (map.cells[col][map.height - 1 - row] != NULL) {
+                    printf("%x", map.cells[col][map.height - 1 - row]->id);
+                } else {
+                    printf("░");
+                }
+            }
+            printf("\n");
+        }
+        printf("\n");
         // free the line map
         sxbp_free_line_map(&map);
         // signal to caller that the call succeeded
@@ -348,55 +360,66 @@ static sxbp_result_t sxbp_set_line_length(
 ) {
     // variable to store any errors in
     sxbp_result_t status = SXBP_RESULT_UNKNOWN;
-    // try and set the line's length to that requested
-    figure->lines[line_index].length = line_length;
-    // check if the figure now collides, and if so, with which other line?
-    sxbp_line_t* collider = NULL;
-    if (
-        !sxbp_check(
-            sxbp_figure_collides_with(figure, line_index, &collider), &status
-        )
-    ) {
-        // if an error occurred checking the collision, return it
-        return status;
-    } else {
-        // while there is a collision (collider is not NULL)
-        while (collider != NULL) {
-            // // set the original line at line index's length back to 0
-            figure->lines[line_index].length = 0;
-            // work out what length to extend the previous line to
-            sxbp_length_t suggested_length = sxbp_suggest_previous_length(
-                figure, line_index, collider->id
-            );
-            // call self recursively, to resize the previous line to new length
-            // TODO: handle errors!
-            assert(
-                sxbp_success(
-                    sxbp_set_line_length(
-                        figure, line_index - 1, suggested_length
-                    )
-                )
-            );
-            // set the original line at line index's length back to 1
-            figure->lines[line_index].length = 1;
-            // reset collider first otherwise we'll never know if we fixed it
-            collider = NULL;
-            // check if there is still a collision, or if we fixed it
-            // TODO: this is almost exact code from earlier, optimise out!
-            if (
-                !sxbp_check(
-                    sxbp_figure_collides_with(
-                        figure, line_index, &collider
-                    ),
-                    &status
-                )
-            ) {
-                // if an error occurred checking the collision, return it
-                return status;
+    /*
+     * setup state variables, these are used in place of recursion for managing
+     * state of which line is being resized, and what size it should be.
+     */
+    // these 'target' variables are updated as we jump up or down the figure
+    sxbp_length_t target_length = line_length;
+    sxbp_figure_size_t target_index = line_index;
+    // this while loop is complicated, so we quit it manually when ready
+    while (true) {
+        // set the target line to the target length
+        figure->lines[target_index].length = target_length;
+        // XXX: debugging, render figure
+        sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+        sxbp_render_figure_to_bitmap(figure, &bitmap);
+        sxbp_print_bitmap(&bitmap, stdout);
+        // check if the figure now collides, and if so, with which other line?
+        sxbp_line_t* collider = NULL;
+        if (
+            !sxbp_check(
+                sxbp_figure_collides_with(
+                    figure, target_index, &collider
+                ), &status
+            )
+        ) {
+            // if an error occurred checking the collision, return it
+            return status;
+        } else {
+            // if no error, then check if there was a collision
+            if (collider != NULL) {
+                /*
+                 * if we've caused a collision, we need to try and work out an
+                 * alternative size to set the *previous* line to to try and
+                 * resolve it
+                 */
+                // XXX: debugging, reset the latest line to zero
+                figure->lines[target_index].length = 0;
+                // change target length so next iteration uses this suggestion
+                target_length = sxbp_suggest_previous_length(
+                    figure, target_index, collider->id
+                );
+                // change target index so next iteration tries previous line
+                target_index--;
+            } else if (target_index != line_index) {
+                /*
+                 * if we didn't cause a collision but we're not on the top-most
+                 * line, then we've just resolved a collision situation.
+                 * we now need to work on the next line and start by setting it
+                 * to 1.
+                 */
+                target_index++;
+                target_length = 1;
+            } else {
+                /*
+                 * if we're on the top-most line and there's no collision
+                 * this means we've finished!
+                 * -- return with success code
+                 */
+                return SXBP_RESULT_OK;
             }
         }
-        // signal to caller that the call succeeded
-        return SXBP_RESULT_OK;
     }
 }
 
