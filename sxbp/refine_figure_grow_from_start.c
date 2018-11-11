@@ -198,18 +198,6 @@ static sxbp_result_t sxbp_figure_collides_with(
         sxbp_walk_figure(
             figure, 1, sxbp_figure_collides_with_callback, (void*)&data
         );
-        // XXX: debugging, print the line map
-        for (uint32_t row = 0; row < map.height; row++) {
-            for (uint32_t col = 0; col < map.width; col++) {
-                if (map.cells[col][map.height - 1 - row] != NULL) {
-                    printf("%x", map.cells[col][map.height - 1 - row]->id);
-                } else {
-                    printf("░");
-                }
-            }
-            printf("\n");
-        }
-        printf("\n");
         // free the line map
         sxbp_free_line_map(&map);
         // signal to caller that the call succeeded
@@ -340,12 +328,6 @@ static sxbp_length_t sxbp_suggest_previous_length(
         sxbp_walk_figure(
             figure, 1, sxbp_suggest_previous_length_callback, (void*)&data
         );
-        // XXX: Debugging code
-        // printf(
-        //     "(%u, %u) and (%u, %u)\n",
-        //     data.previous_origin.x, data.previous_origin.y,
-        //     data.collider_origin.x, data.collider_origin.y
-        // );
         // use collision resolution rules to calculate the length to resize to
         sxbp_resolve_collision(
             previous, collider, data.previous_origin, data.collider_origin
@@ -377,10 +359,6 @@ static sxbp_result_t sxbp_set_line_length(
     while (true) {
         // set the target line to the target length
         figure->lines[target_index].length = target_length;
-        // XXX: debugging, render figure
-        sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-        sxbp_render_figure_to_bitmap(figure, &bitmap);
-        sxbp_print_bitmap(&bitmap, stdout);
         // check if the figure now collides, and if so, with which other line?
         sxbp_line_t* collider = NULL;
         if (
@@ -400,8 +378,6 @@ static sxbp_result_t sxbp_set_line_length(
                  * alternative size to set the *previous* line to to try and
                  * resolve it
                  */
-                // XXX: debugging, reset the latest line to zero
-                figure->lines[target_index].length = 0;
                 // change target length so next iteration uses this suggestion
                 target_length = sxbp_suggest_previous_length(
                     figure, target_index, collider->id
@@ -453,10 +429,6 @@ sxbp_result_t sxbp_refine_figure_grow_from_start(
     sxbp_figure_t* figure,
     const sxbp_refine_figure_options_t* options
 ) {
-    // XXX: debugging
-    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
-        figure->lines[i].length = 0;
-    }
     // variable to store any errors in
     // sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     // try and set the length of each line in the figure (ascending) to 1
