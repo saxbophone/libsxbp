@@ -143,7 +143,6 @@ static bool sxbp_figure_collides_with_callback(
     if (callback_data->map->cells[location.x][location.y] != NULL) {
         // the thing we collided with is the pointer at this location, store it!
         *callback_data->collider = callback_data->map->cells[location.x][location.y];
-        printf("Collider is #%u\n", callback_data->map->cells[location.x][location.y]->id);
         // halt walking early by returning false
         return false;
     } else {
@@ -338,8 +337,6 @@ static sxbp_length_t sxbp_suggest_previous_length(
     }
 }
 
-static size_t RECURSION_COUNT = 0;
-
 /*
  * private, attempts to change the length of the line at the given line_index to
  * the requested line length.
@@ -349,16 +346,6 @@ static sxbp_result_t sxbp_set_line_length(
     sxbp_figure_size_t line_index,
     sxbp_length_t line_length
 ) {
-    RECURSION_COUNT++;
-    // printf("RECURSION DEPTH: %zu\n", RECURSION_COUNT);
-    // printf("line_index:%u, line_length:%u\n", line_index, line_length);
-    // XXX: debugging
-    sxbp_bitmap_t bitmap = {0};
-    printf("Try line #%u\n", line_index);
-    // render incomplete figure to bitmap
-    sxbp_render_figure_to_bitmap(figure, &bitmap);
-    printf("\n");
-    sxbp_print_bitmap(&bitmap, stdout);
     // variable to store any errors in
     sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     // try and set the line's length to that requested
@@ -375,9 +362,6 @@ static sxbp_result_t sxbp_set_line_length(
     } else {
         // while there is a collision (collider is not NULL)
         while (collider != NULL) {
-            sxbp_render_figure_to_bitmap(figure, &bitmap);
-            printf("\n");
-            sxbp_print_bitmap(&bitmap, stdout);
             // // set the original line at line index's length back to 0
             figure->lines[line_index].length = 0;
             // work out what length to extend the previous line to
@@ -386,7 +370,6 @@ static sxbp_result_t sxbp_set_line_length(
             );
             // call self recursively, to resize the previous line to new length
             // TODO: handle errors!
-            printf("RETRY PREVIOUS LINE!\n");
             assert(
                 sxbp_success(
                     sxbp_set_line_length(
@@ -412,12 +395,6 @@ static sxbp_result_t sxbp_set_line_length(
                 return status;
             }
         }
-        RECURSION_COUNT--;
-        // render complete figure to bitmap
-        sxbp_render_figure_to_bitmap(figure, &bitmap);
-        printf("\n");
-        sxbp_print_bitmap(&bitmap, stdout);
-        printf("Finished line #%u\n", line_index);
         // signal to caller that the call succeeded
         return SXBP_RESULT_OK;
     }
