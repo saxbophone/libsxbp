@@ -256,6 +256,15 @@ static sxbp_length_t sxbp_resolve_collision(
     // calculate collider end coördinates
     sxbp_co_ord_t collider_end = collider_origin;
     sxbp_move_location_along_line(&collider_end, collider);
+    // XXX: This soup of if and else-if blocks is copied direct from the
+    // original implementation. It cannot be verified to work correctly until
+    // sxbp_suggest_previous_length_callback is fixed.
+    // TODO: Once verified that this logic is correct, replace with a lookup
+    // table approach, using the SXBP direction constants as indices
+    // (lookup table will be a 2D array of the expressions that change)
+    // WARN: if this approach is used, a check should first be made to check and
+    // rule out the combinations of directions not featured in the table (any
+    // non-parallel combos, which cannot be optimised in this manner)
     if((previous.direction == SXBP_UP) && (collider.direction == SXBP_UP)) {
         return (collider_origin.y - previous_origin.y) + collider.length + 1;
     } else if((previous.direction == SXBP_UP) && (collider.direction == SXBP_DOWN)) {
