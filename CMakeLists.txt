@@ -60,11 +60,12 @@ add_definitions(-DSXBP_VERSION_STRING=${SXBP_ESCAPED_VERSION_STRING})
 include(CheckCCompilerFlag)
 
 function(enable_c_compiler_flag_if_supported flag)
+    message(STATUS "[sxbp] Checking if compiler supports warning flag '${flag}'")
     string(FIND "${CMAKE_C_FLAGS}" "${flag}" flag_already_set)
     if(flag_already_set EQUAL -1)
         check_c_compiler_flag("${flag}" flag_supported)
         if(flag_supported)
-            message(STATUS "[sxbp] Enabling warning flag ${flag}")
+            message(STATUS "[sxbp] Enabling warning flag '${flag}'")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${flag}" PARENT_SCOPE)
         endif()
     endif()
@@ -87,6 +88,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wmissing-prototypes")
     # enable sign and type conversion warnings
     enable_c_compiler_flag_if_supported("-Wconversion")
+    # enable warnings about C11 features not supported in C99
+    enable_c_compiler_flag_if_supported("-Wc99-c11-compat")
     # enable warnings about mistakes in Doxygen documentation
     enable_c_compiler_flag_if_supported("-Wdocumentation")
     # turn off spurious warnings from clang about missing field initialisers
