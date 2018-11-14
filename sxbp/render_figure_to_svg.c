@@ -37,7 +37,28 @@ sxbp_result_t sxbp_render_figure_to_svg(
     SXBP_RETURN_FAIL_IF_NULL(figure);
     SXBP_RETURN_FAIL_IF_NULL(figure->lines);
     SXBP_RETURN_FAIL_IF_NULL(buffer);
-    // TODO: Render the SVG here!
+    /*
+     * because SVG is a vector-based format, this backend differs from the
+     * others as we don't need to plot a bunch of pixels, instead we need to use
+     * sxbp_walk_figure() to draw an SVG <polyline> element.
+     * the setup process for this is similar to that in
+     * `sxbp_render_figure_to_bitmap()` however, as the image we produce still
+     * needs to have the same dimensions and scale (including the 1px border).
+     */
+    // get figure bounds, at scale 2
+    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
+    /*
+     * calculate width and height of the image from the bounds
+     * (see ... for details)
+     */
+    uint32_t width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
+    uint32_t height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
+    // TODO: write image header, including everything up to the line's points
+    // ...
+    // TODO: use sxbp_walk_figure() to write all the line's points
+    // ...
+    // TODO: write the image tail (close polyline quote, tag, closing svg tag)
+    // ...
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;
 }
 // reënable all warnings

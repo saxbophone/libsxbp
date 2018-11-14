@@ -140,6 +140,8 @@ sxbp_result_t sxbp_make_bitmap_for_bounds(
      * + 1.
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
+     * TODO: refactor this out to a reusable function, other things need to know
+     * the width and height of an image without creating a bitmap too!
      */
     bitmap->width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
     bitmap->height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
