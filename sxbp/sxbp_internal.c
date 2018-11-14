@@ -78,7 +78,7 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure, size_t scale) {
         sxbp_move_location(
             &location,
             figure->lines[i].direction,
-            (sxbp_length_t)(figure->lines[i].length * scale)
+            figure->lines[i].length * scale
         );
         // update the bounds
         sxbp_update_bounds(location, &bounds);
