@@ -87,7 +87,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     # enable warnings on missing prototypes of global functions
     enable_c_compiler_flag_if_supported("-Wmissing-prototypes")
     # enable sign and type conversion warnings
-    enable_c_compiler_flag_if_supported("-Wconversion")
+    enable_c_compiler_flag_if_supported("-Wsign-conversion")
     # enable warnings about C11 features not supported in C99
     enable_c_compiler_flag_if_supported("-Wc99-c11-compat")
     # enable warnings about mistakes in Doxygen documentation
