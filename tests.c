@@ -105,12 +105,12 @@ int main(void) {
         outcome = sxbp_render_figure(
             &figure,
             &buffer,
-            sxbp_render_figure_to_pbm,
+            sxbp_render_figure_to_svg,
             NULL,
             NULL
         );
         assert(outcome == SXBP_RESULT_OK);
-        FILE* output_file = fopen("sxbp-test.pbm", "wb");
+        FILE* output_file = fopen("sxbp-test.svg", "wb");
         assert(output_file != NULL);
         outcome = sxbp_buffer_to_file(&buffer, output_file);
         assert(outcome == SXBP_RESULT_OK);
