@@ -11,11 +11,6 @@ os:
 compiler:
   - clang
   - gcc
-# different C Standard versions - test on C99 and C11
-env:
-  matrix:
-    - SXBP_C_STANDARD=99
-    - SXBP_C_STANDARD=11
 cache:
   - ccache
 addons:

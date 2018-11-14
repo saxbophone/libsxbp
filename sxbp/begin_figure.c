@@ -55,7 +55,7 @@ static sxbp_direction_t sxbp_change_line_direction(
     sxbp_direction_t current,
     sxbp_rotation_t turn
 ) {
-    return (current + turn) % 4;
+    return (current + (sxbp_direction_t)turn) % 4;
 }
 
 /*
@@ -72,13 +72,13 @@ static sxbp_length_t sxbp_next_length(
     assert(direction <= SXBP_LEFT);
     switch (direction % 4u) {
         case SXBP_UP:
-            return abs(bounds.y_max - location.y) + 1;
+            return labs(bounds.y_max - location.y) + 1;
         case SXBP_RIGHT:
-            return abs(bounds.x_max - location.x) + 1;
+            return labs(bounds.x_max - location.x) + 1;
         case SXBP_DOWN:
-            return abs(bounds.y_min - location.y) + 1;
+            return labs(bounds.y_min - location.y) + 1;
         case SXBP_LEFT:
-            return abs(bounds.x_min - location.x) + 1;
+            return labs(bounds.x_min - location.x) + 1;
         default:
             /*
              * NOTE: this case should never happen

@@ -63,52 +63,60 @@ static sxbp_result_t sxbp_write_pbm_header(
      * char arrays of 11 chars each (1 extra char for null-terminator)
      */
     char width_string[11], height_string[11];
-    // these are used to keep track of how many digits each is
-    int width_string_length, height_string_length = 0;
-    // convert width and height to a decimal string, store lengths
-    width_string_length = snprintf(
+    // we'll store the return values of two snprintf() calls in these variables
+    int width_string_result, height_string_result = 0;
+    // convert width and height to a decimal string, check for errors
+    width_string_result = snprintf(
         width_string, 11, "%" PRIu32, bitmap->width
     );
-    height_string_length = snprintf(
+    height_string_result = snprintf(
         height_string, 11, "%" PRIu32, bitmap->height
     );
-    /*
-     * now that we know the length of the image dimension strings, we can now
-     * calculate how much memory we'll have to allocate for the image buffer
-     */
-    buffer->size = sxbp_get_pbm_image_size(
-        bitmap->width,
-        bitmap->height,
-        width_string_length,
-        height_string_length,
-        bytes_per_row_ptr
-    );
-    // try and allocate the buffer
-    if (!sxbp_check(sxbp_init_buffer(buffer), &error)) {
-        // catch and return error if there was one
-        return error;
+    if (width_string_result < 0 || height_string_result < 0) {
+        // snprintf() returns negative values when it fails, so return an error
+        return SXBP_RESULT_FAIL_IO;
     } else {
-        // now with the buffer allocated, write the header
-        size_t index = *index_ptr; // this index is used to index the buffer
-        // construct magic number + whitespace
-        memcpy(buffer->bytes + index, "P4\n", 3);
-        index += 3;
-        // image width
-        memcpy(buffer->bytes + index, width_string, width_string_length);
-        index += width_string_length;
-        // whitespace
-        memcpy(buffer->bytes + index, "\n", 1);
-        index += 1;
-        // image height
-        memcpy(buffer->bytes + index, height_string, height_string_length);
-        index += height_string_length;
-        // whitespace
-        memcpy(buffer->bytes + index, "\n", 1);
-        index += 1;
-        // update the index pointer
-        *index_ptr = index;
+        // get lengths from snprintf() return values
+        size_t width_string_length = (size_t)width_string_result;
+        size_t height_string_length = (size_t)height_string_result;
+        /*
+         * now that we know the length of the image dimension strings, we can now
+         * calculate how much memory we'll have to allocate for the image buffer
+         */
+        buffer->size = sxbp_get_pbm_image_size(
+            bitmap->width,
+            bitmap->height,
+            width_string_length,
+            height_string_length,
+            bytes_per_row_ptr
+        );
+        // try and allocate the buffer
+        if (!sxbp_check(sxbp_init_buffer(buffer), &error)) {
+            // catch and return error if there was one
+            return error;
+        } else {
+            // now with the buffer allocated, write the header
+            size_t index = *index_ptr; // this index is used to index the buffer
+            // construct magic number + whitespace
+            memcpy(buffer->bytes + index, "P4\n", 3);
+            index += 3;
+            // image width
+            memcpy(buffer->bytes + index, width_string, width_string_length);
+            index += width_string_length;
+            // whitespace
+            memcpy(buffer->bytes + index, "\n", 1);
+            index += 1;
+            // image height
+            memcpy(buffer->bytes + index, height_string, height_string_length);
+            index += height_string_length;
+            // whitespace
+            memcpy(buffer->bytes + index, "\n", 1);
+            index += 1;
+            // update the index pointer
+            *index_ptr = index;
+        }
+        return SXBP_RESULT_OK;
     }
-    return SXBP_RESULT_OK;
 }
 
 // private, writes the image data out to the buffer

@@ -57,8 +57,8 @@ void sxbp_move_location(
     sxbp_length_t length
 ) {
     sxbp_vector_t vector = SXBP_VECTOR_DIRECTIONS[direction];
-    location->x += vector.x * length;
-    location->y += vector.y * length;
+    location->x += vector.x * (sxbp_tuple_item_t)length;
+    location->y += vector.y * (sxbp_tuple_item_t)length;
 }
 
 void sxbp_move_location_along_line(
@@ -141,8 +141,8 @@ sxbp_result_t sxbp_make_bitmap_for_bounds(
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
      */
-    bitmap->width = (bounds.x_max - bounds.x_min) + 1;
-    bitmap->height = (bounds.y_max - bounds.y_min) + 1;
+    bitmap->width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
+    bitmap->height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
     bitmap->pixels = NULL;
     // allocate memory for the bitmap and return the status of this operation
     return sxbp_init_bitmap(bitmap);
