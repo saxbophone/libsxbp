@@ -643,6 +643,7 @@ sxbp_result_t sxbp_render_figure(
  * @warn This function is currently unusable because it always returns the
  * "not implemented" failure error code
  * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED`
+ * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure_to_null(
     const sxbp_figure_t* const figure,
@@ -658,8 +659,25 @@ sxbp_result_t sxbp_render_figure_to_null(
  * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `buffer` are `NULL`
  * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred
+ * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure_to_pbm(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+);
+
+/**
+ * @brief Renders figures to SVG images
+ * @details If successful, the buffer will be filled with data which represents
+ * an SVG image.
+ * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `buffer` are `NULL`
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred
+ * @since v0.54.0
+ */
+sxbp_result_t sxbp_render_figure_to_svg(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer,
     const sxbp_render_options_t* const render_options,
