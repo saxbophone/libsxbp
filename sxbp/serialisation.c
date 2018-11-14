@@ -256,7 +256,7 @@ static void sxbp_read_sxbp_data_line(
      * handle first byte on it's own as we only need least 6 bits of it
      * bit mask and shift 3 bytes to left
      */
-    line->length = (buffer->bytes[index] & 0x3f) << 24; // 0x3f = 0b00111111
+    line->length = (buffer->bytes[index] & 0x3fU) << 24; // 0x3f = 0b00111111
     // next byte
     index++;
     // handle remaining 3 bytes in loop
