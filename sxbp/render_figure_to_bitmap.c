@@ -40,7 +40,8 @@ static bool sxbp_render_figure_to_bitmap_callback(
     void* callback_data
 ) {
     // cast void pointer to a pointer to our context structure
-    render_figure_to_bitmap_context* data = (render_figure_to_bitmap_context*)callback_data;
+    render_figure_to_bitmap_context* data =
+        (render_figure_to_bitmap_context*)callback_data;
     // skip the plotting of the second pixel
     if (data->first_pixel_complete && !data->second_pixel_complete) {
         // mark second pixel as complete
@@ -49,7 +50,9 @@ static bool sxbp_render_figure_to_bitmap_callback(
         // mark first pixel as complete if it isn't already
         data->first_pixel_complete = true;
         // plot the pixel, but flip the y coördinate
-        data->image->pixels[location.x][data->image->height - 1 - (uint32_t)location.y] = true;
+        data->image
+            ->pixels[location.x]
+            [data->image->height - 1 - (uint32_t)location.y] = true;
     }
     // return true --we always want to continue
     return true;

@@ -171,7 +171,8 @@ static uint16_t sxbp_load_uint16_t(
     size_t index = *start_index;
     // extract the value
     uint16_t value = (
-        (uint16_t)((uint16_t)buffer->bytes[index] << 8) + buffer->bytes[index + 1]
+        (uint16_t)((uint16_t)buffer->bytes[index] << 8) +
+        buffer->bytes[index + 1]
     );
     // increment index to point to next location
     *start_index += 2;
