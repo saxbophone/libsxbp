@@ -14,6 +14,7 @@
 #include <stdbool.h>
 
 #include "sxbp.h"
+#include "sxbp_internal.h"
 
 
 #ifdef __cplusplus
@@ -32,6 +33,11 @@ sxbp_result_t sxbp_render_figure_to_svg(
     const sxbp_render_options_t* const render_options,
     const void* render_callback_options
 ) {
+    // figure, figure lines and buffer must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(figure);
+    SXBP_RETURN_FAIL_IF_NULL(figure->lines);
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
+    // TODO: Render the SVG here!
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;
 }
 // reënable all warnings
