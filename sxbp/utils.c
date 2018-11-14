@@ -102,7 +102,7 @@ static size_t sxbp_get_file_size(FILE* file_handle) {
     // NOTE: This isn't portable due to lack of meaningful support of `SEEK_END`
     fseek(file_handle, 0, SEEK_END);
     // get size
-    size_t file_size = ftell(file_handle);
+    size_t file_size = (size_t)ftell(file_handle);
     // seek to start again
     fseek(file_handle, 0, SEEK_SET);
     return file_size;
@@ -139,7 +139,7 @@ sxbp_result_t sxbp_buffer_from_file(
             // we didn't read the same number of bytes as the file's size
             sxbp_free_buffer(buffer);
             // return a file error
-            return SXBP_RESULT_FAIL_FILE;
+            return SXBP_RESULT_FAIL_IO;
         } else {
             // we read the buffer successfully, so return success
             return SXBP_RESULT_OK;
@@ -162,7 +162,7 @@ sxbp_result_t sxbp_buffer_to_file(
         file_handle
     );
     // return success/failure if the correct number of bytes were written
-    return bytes_written == buffer->size ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_FILE;
+    return bytes_written == buffer->size ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_IO;
 }
 
 sxbp_figure_t sxbp_blank_figure(void) {

@@ -130,7 +130,7 @@ static void sxbp_write_sxbp_data_line(
 ) {
     size_t index = *start_index;
     // the leading 2 bits of the first byte are used for the direction
-    buffer->bytes[index] = (line.direction << 6);
+    buffer->bytes[index] = (uint8_t)(line.direction << 6u);
     // the next 6 bits of the first byte are used for the first 6 bits of length
     buffer->bytes[index] |= (line.length >> 24);
     // move on to the next byte
@@ -171,7 +171,7 @@ static uint16_t sxbp_load_uint16_t(
     size_t index = *start_index;
     // extract the value
     uint16_t value = (
-        ((uint16_t)buffer->bytes[index] << 8) + buffer->bytes[index + 1]
+        (uint16_t)((uint16_t)buffer->bytes[index] << 8) + buffer->bytes[index + 1]
     );
     // increment index to point to next location
     *start_index += 2;
@@ -195,7 +195,7 @@ static uint32_t sxbp_load_uint32_t(
     // extract the value
     uint32_t value = 0;
     for(uint8_t i = 0; i < 4; i++) {
-        value |= (buffer->bytes[index + i]) << (8 * (3 - i));
+        value |= (uint8_t)((buffer->bytes[index + i]) << (8 * (3 - i)));
     }
     // increment index to point to next location
     *start_index += 4;
@@ -255,7 +255,7 @@ static void sxbp_read_sxbp_data_line(
      * handle first byte on it's own as we only need least 6 bits of it
      * bit mask and shift 3 bytes to left
      */
-    line->length = (buffer->bytes[index] & 0x3f) << 24; // 0x3f = 0b00111111
+    line->length = (sxbp_length_t)((buffer->bytes[index] & 0x3f) << 24); // 0x3f = 0b00111111
     // next byte
     index++;
     // handle remaining 3 bytes in loop

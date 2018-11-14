@@ -228,7 +228,7 @@ typedef enum sxbp_result_t {
     SXBP_RESULT_OK, /**< success */
     SXBP_RESULT_FAIL_MEMORY, /**< failure to allocate or reallocate memory */
     SXBP_RESULT_FAIL_PRECONDITION, /**< a preconditional check failed */
-    SXBP_RESULT_FAIL_FILE, /**< a file read/write operation failed */
+    SXBP_RESULT_FAIL_IO, /**< an input/output operation failed */
     SXBP_RESULT_FAIL_UNIMPLEMENTED, /**< requested action is not implemented */
     SXBP_RESULT_RESERVED_START, /**< reserved for future use */
     SXBP_RESULT_RESERVED_END = 255u, /**< reserved for future use */
@@ -356,7 +356,7 @@ sxbp_result_t sxbp_copy_buffer(
  * @param file_handle The file to read data from
  * @param[out] buffer The buffer to write data to
  * @returns `SXBP_RESULT_OK` on successfully copying the file contents
- * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_FILE` on failure to copy the file contents
+ * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_IO` on failure to copy the file contents
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `file_handle` or `buffer` is
  * `NULL`
  * @since v0.54.0
@@ -373,7 +373,7 @@ sxbp_result_t sxbp_buffer_from_file(
  * @param buffer The buffer to read data from
  * @param[out] file_handle The file to write data to
  * @returns `SXBP_RESULT_OK` on successfully writing the file
- * @returns `SXBP_RESULT_FAIL_FILE` on failure to write the file
+ * @returns `SXBP_RESULT_FAIL_IO` on failure to write the file
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` or `file_handle` is
  * `NULL`
  * @since v0.54.0

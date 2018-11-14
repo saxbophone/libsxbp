@@ -13,6 +13,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "sxbp.h"
 #include "sxbp_internal.h"
@@ -48,7 +49,7 @@ static bool sxbp_render_figure_to_bitmap_callback(
         // mark first pixel as complete if it isn't already
         data->first_pixel_complete = true;
         // plot the pixel, but flip the y coördinate
-        data->image->pixels[location.x][data->image->height - 1 - location.y] = true;
+        data->image->pixels[location.x][data->image->height - 1 - (uint32_t)location.y] = true;
     }
     // return true --we always want to continue
     return true;
