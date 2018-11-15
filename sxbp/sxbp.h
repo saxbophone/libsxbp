@@ -318,6 +318,22 @@ sxbp_buffer_t sxbp_blank_buffer(void);
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
 
 /**
+ * @brief Attempts to resize the given buffer
+ * @details The buffer will be grown or shrunk depending on if `size` is bigger
+ * than or less than it's existing size. If grown, the bytes beyond the extent
+ * of its previous size will be of indeterminate value. If shrunk, the bytes
+ * that lie beyond the new extent after shrinking will be lost.
+ * @warning It is unsafe to call this function on a buffer that has not been
+ * allocated with `sxbp_init_buffer` before.
+ * @returns `SXBP_RESULT_OK` if memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not reallocated successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` or `buffer->bytes` are
+ * `NULL`
+ * @since v0.54.0
+ */
+sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size);
+
+/**
  * @brief Deallocates any allocated memory for the bytes of the given buffer
  * @note It is safe to call this function multiple times on the same buffer
  * @warning It is unsafe to call this function on a buffer that has been

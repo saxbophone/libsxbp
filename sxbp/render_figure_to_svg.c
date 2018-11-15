@@ -49,7 +49,9 @@ sxbp_result_t sxbp_render_figure_to_svg(
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
     /*
      * calculate width and height of the image from the bounds
-     * (see ... for details)
+     * (see `sxbp_make_bitmap_for_bounds()` for details)
+     * TODO: refactor this out to a reusable function, other things need to know
+     * the width and height of an image without creating a bitmap too!
      */
     uint32_t width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
     uint32_t height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
