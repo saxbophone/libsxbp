@@ -32,7 +32,7 @@ static sxbp_result_t sxbp_write_svg_header(
      * sxbp_walk_figure() to draw an SVG <polyline> element.
      * the setup process for this is similar to that in
      * `sxbp_render_figure_to_bitmap()` however, as the image we produce still
-     * needs to have the same dimensions and scale (including the 1px border).
+     * needs to have the same dimensions and scale.
      */
     // get figure bounds, at scale 2
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
