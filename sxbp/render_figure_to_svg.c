@@ -12,6 +12,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <stdbool.h>
+#include <string.h>
 
 #include "sxbp.h"
 #include "sxbp_internal.h"
@@ -51,6 +52,34 @@ static sxbp_result_t sxbp_write_svg_header(
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;
 }
 
+// private, given a buffer, writes out the end of the SVG file to the buffer
+static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
+    /*
+     * the 'tail' of the SVG images produced by libsxbp never change, the only
+     * way this function can fail is if reallocating memory was refused
+     */
+    // the 'tail' (close polyline quote and tag, closing svg tag)
+    const char* tail = "\"\n/>\n</svg>\n";
+    size_t tail_length = strlen(tail);
+    // any errors encountered will be stored here
+    sxbp_result_t error;
+    // try and reallocate memory to include the tail
+    if (
+        !sxbp_check(
+            sxbp_resize_buffer(buffer, buffer->size + tail_length),
+            &error
+        )
+    ) {
+        // catch and return error
+        return error;
+    } else {
+        // write the tail to the end of the buffer
+        memcpy(buffer->bytes + (buffer->size - tail_length), tail, tail_length);
+        // return success
+        return SXBP_RESULT_OK;
+    }
+}
+
 /*
  * disable GCC warning about unused parameters, as this dummy function doesn't
  * do anything with its arguments
@@ -76,8 +105,14 @@ sxbp_result_t sxbp_render_figure_to_svg(
     } else {
         // TODO: use sxbp_walk_figure() to write all the line's points
         // ...
-        // TODO: write the image tail (close polyline quote, tag, closing svg tag)
-        // ...
+        // write the image tail
+        if (!sxbp_check(sxbp_write_svg_tail(buffer), &error)) {
+            // catch and return error
+            return error;
+        } else {
+            // success!
+            return SXBP_RESULT_OK;
+        }
     }
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;
 }
