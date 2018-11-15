@@ -21,22 +21,11 @@
 extern "C" {
 #endif
 
-/*
- * disable GCC warning about unused parameters, as this dummy function doesn't
- * do anything with its arguments
- */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-sxbp_result_t sxbp_render_figure_to_svg(
+// private, given a figure and a buffer, writes out the SVG header to the buffer
+static sxbp_result_t sxbp_write_svg_header(
     const sxbp_figure_t* const figure,
-    sxbp_buffer_t* const buffer,
-    const sxbp_render_options_t* const render_options,
-    const void* render_callback_options
+    sxbp_buffer_t* const buffer
 ) {
-    // figure, figure lines and buffer must not be NULL
-    SXBP_RETURN_FAIL_IF_NULL(figure);
-    SXBP_RETURN_FAIL_IF_NULL(figure->lines);
-    SXBP_RETURN_FAIL_IF_NULL(buffer);
     /*
      * because SVG is a vector-based format, this backend differs from the
      * others as we don't need to plot a bunch of pixels, instead we need to use
@@ -55,12 +44,41 @@ sxbp_result_t sxbp_render_figure_to_svg(
      */
     uint32_t width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
     uint32_t height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
-    // TODO: write image header, including everything up to the line's points
+    // TODO: work out how long the header needs to be then initialise the buffer
     // ...
-    // TODO: use sxbp_walk_figure() to write all the line's points
+    // TODO: write the header to the buffer
     // ...
-    // TODO: write the image tail (close polyline quote, tag, closing svg tag)
-    // ...
+    return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+}
+
+/*
+ * disable GCC warning about unused parameters, as this dummy function doesn't
+ * do anything with its arguments
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+sxbp_result_t sxbp_render_figure_to_svg(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+) {
+    // figure, figure lines and buffer must not be NULL
+    SXBP_RETURN_FAIL_IF_NULL(figure);
+    SXBP_RETURN_FAIL_IF_NULL(figure->lines);
+    SXBP_RETURN_FAIL_IF_NULL(buffer);
+    // any errors encountered will be stored here
+    sxbp_result_t error;
+    // write image header, including everything up to the line's points
+    if (!sxbp_check(sxbp_write_svg_header(figure, buffer), &error)) {
+        // catch and return error
+        return error;
+    } else {
+        // TODO: use sxbp_walk_figure() to write all the line's points
+        // ...
+        // TODO: write the image tail (close polyline quote, tag, closing svg tag)
+        // ...
+    }
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;
 }
 // reënable all warnings
