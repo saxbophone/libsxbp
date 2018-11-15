@@ -27,6 +27,11 @@ static sxbp_result_t sxbp_write_svg_header(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer
 ) {
+    // the fixed data that is always at the start of the file
+    const char* head = (
+        "<svg\n"
+        "    xmlns=\"http://www.w3.org/2000/svg\"\n"
+    );
     /*
      * because SVG is a vector-based format, this backend differs from the
      * others as we don't need to plot a bunch of pixels, instead we need to use
@@ -59,7 +64,11 @@ static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
      * way this function can fail is if reallocating memory was refused
      */
     // the 'tail' (close polyline quote and tag, closing svg tag)
-    const char* tail = "\"\n/>\n</svg>\n";
+    const char* tail = (
+        "\"\n"
+        "    />\n"
+        "</svg>\n"
+    );
     size_t tail_length = strlen(tail);
     // any errors encountered will be stored here
     sxbp_result_t error;
