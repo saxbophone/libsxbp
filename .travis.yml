@@ -2,8 +2,8 @@ language: c
 # Run on Ubuntu 14.04 Trusty in Travis Container
 sudo: false
 dist: trusty
-# helps to use actual GCC on OSX (not Clang!)
-osx_image: xcode8
+# helps to use actual GCC on OSX (not Clang!) and Clang version 6
+osx_image: xcode10
 # build matrix with both OSes and Compilers
 os:
   - linux

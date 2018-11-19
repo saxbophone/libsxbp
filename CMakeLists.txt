@@ -92,8 +92,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wc99-c11-compat")
     # enable warnings about mistakes in Doxygen documentation
     enable_c_compiler_flag_if_supported("-Wdocumentation")
-    # turn off spurious warnings from clang about missing field initialisers
-    enable_c_compiler_flag_if_supported("-Wno-missing-field-initializers")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
