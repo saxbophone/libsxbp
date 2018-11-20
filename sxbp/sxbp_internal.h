@@ -101,6 +101,31 @@ void sxbp_walk_figure(
     void* callback_data
 );
 
+/*
+ * private, given a bounds struct, calculate the width and height of the bounds
+ * and write these values out to the width and height pointed to by `width` and
+ * `height`
+ */
+void sxbp_get_size_from_bounds(
+    const sxbp_bounds_t bounds,
+    uint32_t* restrict width,
+    uint32_t* restrict height
+);
+
+/*
+ * private, given a width and height of a rendered figure, turns these into
+ * decimal strings and writes these out to the given char arrays
+ * returns SXBP_RESULT_FAIL_IO if an error occurred
+ */
+sxbp_result_t sxbp_stringify_dimensions(
+    uint32_t width,
+    uint32_t height,
+    char(* width_string)[11],
+    char(* height_string)[11],
+    size_t* width_string_length,
+    size_t* height_string_length
+);
+
 // private, builds a bitmap large enough to fit coördinates in the given bounds
 sxbp_result_t sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,

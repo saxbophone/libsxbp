@@ -27,10 +27,21 @@ static sxbp_result_t sxbp_write_svg_header(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer
 ) {
+    sxbp_result_t error;
     // the fixed data that is always at the start of the file
     const char* head = (
         "<svg\n"
         "    xmlns=\"http://www.w3.org/2000/svg\"\n"
+        "    viewBox=\"0 0 %s %s\"\n"
+        "    style=\"background-color: white\"\n"
+        ">\n"
+        "    <rect\n"
+        "        x=\"0\"\n"
+        "        y=\"0\"\n"
+        "        width=\"100%%\"\n"
+        "        height=\"100%%\"\n"
+        "        fill=\"white\"\n"
+        "    />\n"
     );
     /*
      * because SVG is a vector-based format, this backend differs from the
@@ -42,19 +53,61 @@ static sxbp_result_t sxbp_write_svg_header(
      */
     // get figure bounds, at scale 2
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
-    /*
-     * calculate width and height of the image from the bounds
-     * (see `sxbp_make_bitmap_for_bounds()` for details)
-     * TODO: refactor this out to a reusable function, other things need to know
-     * the width and height of an image without creating a bitmap too!
-     */
-    uint32_t width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
-    uint32_t height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
-    // TODO: work out how long the header needs to be then initialise the buffer
-    // ...
-    // TODO: write the header to the buffer
-    // ...
-    return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    // calculate width and height of the image from the bounds
+    uint32_t width = 0;
+    uint32_t height = 0;
+    sxbp_get_size_from_bounds(bounds, &width, &height);
+    char width_string[11], height_string[11];
+    // we'll store the length of each string here
+    size_t width_string_length, height_string_length = 0;
+    // convert width and height to a decimal string, check for errors
+    if (
+        !sxbp_check(
+            sxbp_stringify_dimensions(
+                width,
+                height,
+                &width_string,
+                &height_string,
+                &width_string_length,
+                &height_string_length
+            ),
+            &error
+        )
+    ) {
+        // return error
+        return error;
+    } else {
+        // work out how long the header needs to be
+        buffer->size = (
+            strlen(head) // the head template string
+            - 6 // remove formatting codes
+            // add the lengths of the width and height strings
+            + width_string_length
+            + height_string_length
+        );
+        // initialise the buffer
+        if (!sxbp_check(sxbp_init_buffer(buffer), &error)) {
+            return error;
+        }
+        // write the header to the buffer
+        if (
+            snprintf(
+                (char*)buffer->bytes,
+                buffer->size,
+                head,
+                width_string,
+                height_string
+            ) < 0
+        ) {
+            // snprintf() failed, so it's an I/O error
+            return SXBP_RESULT_FAIL_IO;
+        }
+        // chop off the null-terminator at the end
+        if (!sxbp_check(sxbp_resize_buffer(buffer, buffer->size - 1), &error)) {
+            return error;
+        }
+        return SXBP_RESULT_OK;
+    }
 }
 
 // private, given a buffer, writes out the end of the SVG file to the buffer

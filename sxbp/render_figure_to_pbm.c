@@ -63,22 +63,25 @@ static sxbp_result_t sxbp_write_pbm_header(
      * char arrays of 11 chars each (1 extra char for null-terminator)
      */
     char width_string[11], height_string[11];
-    // we'll store the return values of two snprintf() calls in these variables
-    int width_string_result, height_string_result = 0;
+    // we'll store the length of each string here
+    size_t width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, check for errors
-    width_string_result = snprintf(
-        width_string, 11, "%" PRIu32, bitmap->width
-    );
-    height_string_result = snprintf(
-        height_string, 11, "%" PRIu32, bitmap->height
-    );
-    if (width_string_result < 0 || height_string_result < 0) {
-        // snprintf() returns negative values when it fails, so return an error
-        return SXBP_RESULT_FAIL_IO;
+    if (
+        !sxbp_check(
+            sxbp_stringify_dimensions(
+                bitmap->width,
+                bitmap->height,
+                &width_string,
+                &height_string,
+                &width_string_length,
+                &height_string_length
+            ),
+            &error
+        )
+    ) {
+        // return error
+        return error;
     } else {
-        // get lengths from snprintf() return values
-        size_t width_string_length = (size_t)width_string_result;
-        size_t height_string_length = (size_t)height_string_result;
         /*
          * now that we know the length of the image dimension strings, we can now
          * calculate how much memory we'll have to allocate for the image buffer

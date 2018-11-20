@@ -21,6 +21,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <assert.h>
+#include <inttypes.h>
 #include <stdint.h>
 
 #include "sxbp.h"
@@ -131,20 +132,59 @@ void sxbp_walk_figure(
     }
 }
 
-sxbp_result_t sxbp_make_bitmap_for_bounds(
+void sxbp_get_size_from_bounds(
     const sxbp_bounds_t bounds,
-    sxbp_bitmap_t* bitmap
+    uint32_t* restrict width,
+    uint32_t* restrict height
 ) {
+    // pointer arguments must not be NULL!
+    assert(width != NULL);
+    assert(height != NULL);
     /*
      * the width and height are the difference of the max and min dimensions
      * + 1.
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
-     * TODO: refactor this out to a reusable function, other things need to know
-     * the width and height of an image without creating a bitmap too!
      */
-    bitmap->width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
-    bitmap->height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
+    *width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
+    *height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
+}
+
+sxbp_result_t sxbp_stringify_dimensions(
+    uint32_t width,
+    uint32_t height,
+    char(* width_string)[11],
+    char(* height_string)[11],
+    size_t* width_string_length,
+    size_t* height_string_length
+) {
+    // we'll store the return values of two snprintf() calls in these variables
+    int width_string_result, height_string_result = 0;
+    // convert width and height to a decimal string, check for errors
+    width_string_result = snprintf(
+        *width_string, 11, "%" PRIu32, width
+    );
+    height_string_result = snprintf(
+        *height_string, 11, "%" PRIu32, height
+    );
+    if (width_string_result < 0 || height_string_result < 0) {
+        // snprintf() returns negative values when it fails, so return an error
+        return SXBP_RESULT_FAIL_IO;
+    } else {
+        // store lengths from snprintf() return values
+        *width_string_length = (size_t)width_string_result;
+        *height_string_length = (size_t)height_string_result;
+        // return success
+        return SXBP_RESULT_OK;
+    }
+}
+
+sxbp_result_t sxbp_make_bitmap_for_bounds(
+    const sxbp_bounds_t bounds,
+    sxbp_bitmap_t* bitmap
+) {
+    // calculate the width and height
+    sxbp_get_size_from_bounds(bounds, &bitmap->width, &bitmap->height);
     bitmap->pixels = NULL;
     // allocate memory for the bitmap and return the status of this operation
     return sxbp_init_bitmap(bitmap);
