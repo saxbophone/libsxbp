@@ -194,6 +194,14 @@ typedef struct sxbp_render_options_t {
 } sxbp_render_options_t;
 
 /**
+ * @brief Type for representing the width or height of a rendered SXBP figure
+ * @details This type is that used for representing the width and height of
+ * rendered images of sxbp figures.
+ * @since v0.54.0
+ */
+typedef uint32_t sxbp_figure_dimension_t;
+
+/**
  * @brief Used to represent a basic 1-bit, pure black/white bitmap image.
  * @details The image has integer height and width, and a 2-dimensional array of
  * 1-bit pixels which are either black or white.
@@ -201,9 +209,9 @@ typedef struct sxbp_render_options_t {
  */
 typedef struct sxbp_bitmap_t {
     /** @brief The width of the bitmap in pixels */
-    uint32_t width;
+    sxbp_figure_dimension_t width;
     /** @brief The height of the bitmap in pixels */
-    uint32_t height;
+    sxbp_figure_dimension_t height;
     /**
      * @brief A 2-dimensional array of pixels.
      * @details false is the background colour, true is the foreground colour

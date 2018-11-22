@@ -242,7 +242,7 @@ sxbp_bitmap_t sxbp_blank_bitmap(void) {
 }
 
 // allocates memory for one column of a bitmap, returning whether it succeeded
-static bool sxbp_init_bitmap_col(bool** col, uint32_t size) {
+static bool sxbp_init_bitmap_col(bool** col, sxbp_figure_dimension_t size) {
     // allocate col with calloc
     *col = calloc(size, sizeof(bool));
     // if col is not NULL, then the operation was successful
@@ -259,7 +259,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation of col pointers succeeded, now try and allocate each col
-        for (uint32_t col = 0; col < bitmap->width; col++) {
+        for (sxbp_figure_dimension_t col = 0; col < bitmap->width; col++) {
             if (
                 !sxbp_success(
                     sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)
@@ -279,7 +279,7 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
     // if bitmap and pixels aren't NULL, assume there are cols to be deallocated
     if (bitmap != NULL && bitmap->pixels != NULL) {
         // deallocate each col that needs deallocating first
-        for (uint32_t col = 0; col < bitmap->width; col++) {
+        for (sxbp_figure_dimension_t col = 0; col < bitmap->width; col++) {
             if (bitmap->pixels[col] != NULL) {
                 free(bitmap->pixels[col]);
             }
@@ -310,7 +310,7 @@ sxbp_result_t sxbp_copy_bitmap(
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the pixels
-        for (uint32_t col = 0; col < to->width; col++) {
+        for (sxbp_figure_dimension_t col = 0; col < to->width; col++) {
             memcpy(to->pixels[col], from->pixels[col], to->height);
         }
         return SXBP_RESULT_OK;

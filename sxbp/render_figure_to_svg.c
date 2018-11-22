@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 // private, given a figure and a buffer, writes out the SVG header to the buffer
-static sxbp_result_t sxbp_write_svg_header(
+static sxbp_result_t sxbp_write_svg_head(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer
 ) {
@@ -54,8 +54,8 @@ static sxbp_result_t sxbp_write_svg_header(
     // get figure bounds, at scale 2
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
     // calculate width and height of the image from the bounds
-    uint32_t width = 0;
-    uint32_t height = 0;
+    sxbp_figure_dimension_t width = 0;
+    sxbp_figure_dimension_t height = 0;
     sxbp_get_size_from_bounds(bounds, &width, &height);
     char width_string[11], height_string[11];
     // we'll store the length of each string here
@@ -110,6 +110,17 @@ static sxbp_result_t sxbp_write_svg_header(
     }
 }
 
+/*
+ * private, given a figure and a buffer, writes out the bulk of the SVG markup
+ * to the buffer
+ */
+static sxbp_result_t sxbp_write_svg_body(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer
+) {
+    return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+}
+
 // private, given a buffer, writes out the end of the SVG file to the buffer
 static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
     /*
@@ -160,8 +171,8 @@ sxbp_result_t sxbp_render_figure_to_svg(
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     // any errors encountered will be stored here
     sxbp_result_t error;
-    // write image header, including everything up to the line's points
-    if (!sxbp_check(sxbp_write_svg_header(figure, buffer), &error)) {
+    // write image head, including everything up to the line's points
+    if (!sxbp_check(sxbp_write_svg_head(figure, buffer), &error)) {
         // catch and return error
         return error;
     } else {

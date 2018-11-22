@@ -24,6 +24,7 @@
 #ifndef SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 #define SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "sxbp.h"
@@ -108,8 +109,20 @@ void sxbp_walk_figure(
  */
 void sxbp_get_size_from_bounds(
     const sxbp_bounds_t bounds,
-    uint32_t* restrict width,
-    uint32_t* restrict height
+    sxbp_figure_dimension_t* restrict width,
+    sxbp_figure_dimension_t* restrict height
+);
+
+/*
+ * private, given a dimension value, try and generate a string representing it
+ * in decimal notation, outputting this string to `output_string` and storing
+ * its length in `string_length` if successful.
+ * returns true/false for whether the operation succeeded or not
+ */
+bool sxbp_stringify_dimension(
+    sxbp_figure_dimension_t dimension,
+    char(* output_string)[11],
+    size_t* string_length
 );
 
 /*
@@ -118,8 +131,8 @@ void sxbp_get_size_from_bounds(
  * returns SXBP_RESULT_FAIL_IO if an error occurred
  */
 sxbp_result_t sxbp_stringify_dimensions(
-    uint32_t width,
-    uint32_t height,
+    sxbp_figure_dimension_t width,
+    sxbp_figure_dimension_t height,
     char(* width_string)[11],
     char(* height_string)[11],
     size_t* width_string_length,

@@ -52,7 +52,7 @@ static bool sxbp_render_figure_to_bitmap_callback(
         // plot the pixel, but flip the y coördinate
         data->image
             ->pixels[location.x]
-            [data->image->height - 1 - (uint32_t)location.y] = true;
+            [data->image->height - 1 - (sxbp_figure_dimension_t)location.y] = true;
     }
     // return true --we always want to continue
     return true;

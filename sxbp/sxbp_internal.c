@@ -134,8 +134,8 @@ void sxbp_walk_figure(
 
 void sxbp_get_size_from_bounds(
     const sxbp_bounds_t bounds,
-    uint32_t* restrict width,
-    uint32_t* restrict height
+    sxbp_figure_dimension_t* restrict width,
+    sxbp_figure_dimension_t* restrict height
 ) {
     // pointer arguments must not be NULL!
     assert(width != NULL);
@@ -146,13 +146,13 @@ void sxbp_get_size_from_bounds(
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
      */
-    *width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
-    *height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
+    *width = (sxbp_figure_dimension_t)((bounds.x_max - bounds.x_min) + 1);
+    *height = (sxbp_figure_dimension_t)((bounds.y_max - bounds.y_min) + 1);
 }
 
 sxbp_result_t sxbp_stringify_dimensions(
-    uint32_t width,
-    uint32_t height,
+    sxbp_figure_dimension_t width,
+    sxbp_figure_dimension_t height,
     char(* width_string)[11],
     char(* height_string)[11],
     size_t* width_string_length,
