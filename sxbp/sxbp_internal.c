@@ -150,6 +150,25 @@ void sxbp_get_size_from_bounds(
     *height = (sxbp_figure_dimension_t)((bounds.y_max - bounds.y_min) + 1);
 }
 
+bool sxbp_stringify_dimension(
+    sxbp_figure_dimension_t dimension,
+    char(* output_string)[11],
+    size_t* string_length
+) {
+    // call snprintf() to convert to string and store the return code
+    int result = snprintf(*output_string, 11, "%" PRIu32, dimension);
+    // snprintf() returns negative values when it fails, so check this
+    if (result < 0) {
+        // indicate failure
+        return false;
+    } else {
+        // otherwise, store the length of the resulting string to string_length
+        *string_length = (size_t)result;
+        // indicate success
+        return true;
+    }
+}
+
 sxbp_result_t sxbp_stringify_dimensions(
     sxbp_figure_dimension_t width,
     sxbp_figure_dimension_t height,
@@ -158,24 +177,15 @@ sxbp_result_t sxbp_stringify_dimensions(
     size_t* width_string_length,
     size_t* height_string_length
 ) {
-    // we'll store the return values of two snprintf() calls in these variables
-    int width_string_result, height_string_result = 0;
-    // convert width and height to a decimal string, check for errors
-    width_string_result = snprintf(
-        *width_string, 11, "%" PRIu32, width
-    );
-    height_string_result = snprintf(
-        *height_string, 11, "%" PRIu32, height
-    );
-    if (width_string_result < 0 || height_string_result < 0) {
-        // snprintf() returns negative values when it fails, so return an error
-        return SXBP_RESULT_FAIL_IO;
-    } else {
-        // store lengths from snprintf() return values
-        *width_string_length = (size_t)width_string_result;
-        *height_string_length = (size_t)height_string_result;
-        // return success
+    if (
+        sxbp_stringify_dimension(width, width_string, width_string_length) &&
+        sxbp_stringify_dimension(height, height_string, height_string_length)
+    ) {
+        // indicate success
         return SXBP_RESULT_OK;
+    } else {
+        // indicate failure
+        return SXBP_RESULT_FAIL_IO;
     }
 }
 
