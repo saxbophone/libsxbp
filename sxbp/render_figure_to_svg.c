@@ -2,8 +2,8 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides the definition of `sxbp_render_figure_to_svg`
- * , a public function used to render an SXBP figure to an SVG file buffer.
+ * This compilation unit provides the definition of `sxbp_render_figure_to_svg`,
+ * a public function used to render an SXBP figure to an SVG file buffer.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2018
  *
