@@ -75,6 +75,7 @@ static sxbp_result_t sxbp_write_svg_head(
         // add the lengths of the width and height strings
         + width_string_length
         + height_string_length
+        + 1 // NUL-terminator
     );
     // initialise the buffer
     if (!sxbp_check(sxbp_init_buffer(buffer), &error)) {
@@ -110,13 +111,13 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
 ) {
     // generate the code for the origin dot
     const char* origin_dot = (
-        "<rect\n"
-        "    x=\"%s\"\n"
-        "    y=\"%s\"\n"
-        "    width=\"1\"\n"
-        "    height=\"1\"\n"
-        "    fill=\"black\"\n"
-        "/>\n"
+        "    <rect\n"
+        "        x=\"%s\"\n"
+        "        y=\"%s\"\n"
+        "        width=\"1\"\n"
+        "        height=\"1\"\n"
+        "        fill=\"black\"\n"
+        "    />\n"
     );
     // get the coördinates of the origin dot
     sxbp_co_ord_t origin = sxbp_get_origin_from_bounds(
@@ -136,12 +137,12 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     }
     // now work out how much to extend buffer by
     size_t extend_amount = (
-        buffer->size // original size
-        + strlen(origin_dot) // add size of string template
+        strlen(origin_dot) // size of string template
         - 4 // subtract formatting codes
         // add lengths of origin strings
         + origin_x_length
         + origin_y_length
+        + 1 // NUL-terminator
     );
     // try and resize the buffer
     if (
@@ -163,6 +164,10 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
         // return I/O failure
         return SXBP_RESULT_FAIL_IO;
     }
+    // chop off the null-terminator at the end
+    if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
     // if we got here, we succeeded, so return success
     return SXBP_RESULT_OK;
 }
@@ -175,7 +180,37 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer
 ) {
-    return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    const char* polyline_boilerplate = (
+        "    <polyline\n"
+        "        fill=\"none\"\n"
+        "        stroke=\"black\"\n"
+        "        stroke-width=\"1\"\n"
+        "        stroke-linecap=\"square\"\n"
+        "        stroke-linejoin=\"miter\"\n"
+        "        points=\""
+    );
+    size_t polyline_boilerplate_length = strlen(polyline_boilerplate);
+    // try and extend buffer
+    if (
+        !sxbp_success(
+            sxbp_resize_buffer(
+                buffer,
+                buffer->size + polyline_boilerplate_length
+            )
+        )
+    ) {
+        // catch and return memory error
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
+    // write out polyline boilerplate
+    memcpy(
+        buffer->bytes + (buffer->size - polyline_boilerplate_length),
+        polyline_boilerplate,
+        polyline_boilerplate_length
+    );
+    // TODO: write out polyline points
+    sxbp_walk_figure(figure, 2, NULL, NULL);
+    return SXBP_RESULT_OK;
 }
 
 /*
@@ -251,21 +286,25 @@ sxbp_result_t sxbp_render_figure_to_svg(
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     // any errors encountered will be stored here
     sxbp_result_t error;
+    printf("buffer->size == %zu\n", buffer->size);
     // write image head, including everything up to the line's points
     if (!sxbp_check(sxbp_write_svg_head(figure, buffer), &error)) {
         // catch and return error
         return error;
     }
+    printf("buffer->size == %zu\n", buffer->size);
     // write the image body
     if (!sxbp_check(sxbp_write_svg_body(figure, buffer), &error)) {
         // catch and return error
         return error;
     }
+    printf("buffer->size == %zu\n", buffer->size);
     // write the image tail
     if (!sxbp_check(sxbp_write_svg_tail(buffer), &error)) {
         // catch and return error
         return error;
     }
+    printf("buffer->size == %zu\n", buffer->size);
     // if we got here, the operation was successful
     return SXBP_RESULT_OK;
 }
