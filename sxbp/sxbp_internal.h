@@ -129,6 +129,7 @@ bool sxbp_stringify_dimension(
  * private, given a width and height of a rendered figure, turns these into
  * decimal strings and writes these out to the given char arrays
  * returns SXBP_RESULT_FAIL_IO if an error occurred
+ * TODO: REMOVE
  */
 sxbp_result_t sxbp_stringify_dimensions(
     sxbp_figure_dimension_t width,
