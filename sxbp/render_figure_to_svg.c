@@ -22,6 +22,13 @@
 extern "C" {
 #endif
 
+// private datatype for passing context data into sxbp_walk_figure() callback
+typedef struct write_polyline_context {
+    sxbp_buffer_t* buffer; // the buffer to write out SVG code fragments to
+    size_t current_point; // the index of the point currently being rendered
+    sxbp_result_t error; // any error conditions that occur will be stored here
+} write_polyline_context;
+
 // private, given a figure and a buffer, writes out the SVG header to the buffer
 static sxbp_result_t sxbp_write_svg_head(
     const sxbp_figure_t* const figure,
@@ -126,7 +133,7 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     sxbp_figure_dimension_t origin_x = (sxbp_figure_dimension_t)origin.x;
     sxbp_figure_dimension_t origin_y = (sxbp_figure_dimension_t)origin.y;
     char origin_x_str[11], origin_y_str[11];
-    size_t origin_x_length, origin_y_length;
+    size_t origin_x_length, origin_y_length = 0;
     // stringify the origin dot x/y values
     if (
         !sxbp_stringify_dimension(origin_x, &origin_x_str, &origin_x_length) ||
@@ -172,6 +179,79 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     return SXBP_RESULT_OK;
 }
 
+
+// private, callback function for sxbp_write_svg_body_figure_line()
+static bool sxbp_render_figure_to_bitmap_callback(
+    sxbp_co_ord_t location,
+    void* callback_data
+) {
+    // cast void pointer to a pointer to our context structure
+    write_polyline_context* data =
+        (write_polyline_context*)callback_data;
+    // skip plotting the first and second line segments
+    if (data->current_point >= 2) {
+        printf("(%i, %i)\n", location.x, location.y);
+        // TODO: add error handling!
+        // TODO: stringify this point's coördinates
+        sxbp_figure_dimension_t x = (sxbp_figure_dimension_t)location.x;
+        sxbp_figure_dimension_t y = (sxbp_figure_dimension_t)location.y;
+        char x_str[11], y_str[11];
+        size_t x_str_length, y_str_length = 0;
+        if (
+            !sxbp_stringify_dimension(x, &x_str, &x_str_length) ||
+            !sxbp_stringify_dimension(y, &y_str, &y_str_length)
+        ) {
+            // if this fails, set error to I/O error and stop walk()-ing early
+            data->error = SXBP_RESULT_FAIL_IO;
+            return false;
+        }
+        const char* co_ord_template = "%s.5,%s.5 ";
+        size_t extend_amount = (
+            strlen(co_ord_template) // length of template string
+            - 4 // subtract formatting codes
+            // add lengths of coördinate strings
+            + x_str_length
+            + y_str_length
+            + 1 // NUL-terminator
+        );
+        // de-reference buffer pointer for ease
+        sxbp_buffer_t* buffer = data->buffer;
+        // try and allocate more memory
+        if (
+            !sxbp_success(
+                sxbp_resize_buffer(buffer, buffer->size + extend_amount)
+            )
+        ) {
+            // set error to memory error and stop walk()-in early
+            data->error = SXBP_RESULT_FAIL_MEMORY;
+            return false;
+        }
+        // output string coördinates to buffer
+        if (
+            snprintf(
+                (char*)buffer->bytes + (buffer->size - extend_amount),
+                extend_amount,
+                co_ord_template,
+                x_str,
+                y_str
+            ) < 0
+        ) {
+            // if this fails, set error to I/O error and stop walk()-ing early
+            data->error = SXBP_RESULT_FAIL_IO;
+            return false;
+        }
+        // chop off null-terminator at the end
+        if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
+            // set error to memory error and stop walk()-in early
+            data->error = SXBP_RESULT_FAIL_MEMORY;
+            return false;
+        }
+    }
+    // increment point index
+    data->current_point++;
+    return true;
+}
+
 /*
  * private, given a figure and a buffer, writes out the SVG code for the
  * figure's line to the buffer
@@ -208,9 +288,25 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
         polyline_boilerplate,
         polyline_boilerplate_length
     );
-    // TODO: write out polyline points
-    sxbp_walk_figure(figure, 2, NULL, NULL);
-    return SXBP_RESULT_OK;
+    // construct callback context data
+    write_polyline_context data = {
+        .buffer = buffer,
+        .current_point = 0,
+        .error = SXBP_RESULT_OK, // assume no errors to start with
+    };
+    // write out polyline points
+    sxbp_walk_figure(
+        figure,
+        2,
+        sxbp_render_figure_to_bitmap_callback,
+        (void*)&data
+    );
+    // chop off the extra space at the end
+    if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
+    // return the error condition stored in the callback context data
+    return data.error;
 }
 
 /*
