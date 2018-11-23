@@ -67,20 +67,15 @@ static sxbp_result_t sxbp_write_pbm_header(
     size_t width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, check for errors
     if (
-        !sxbp_check(
-            sxbp_stringify_dimensions(
-                bitmap->width,
-                bitmap->height,
-                &width_string,
-                &height_string,
-                &width_string_length,
-                &height_string_length
-            ),
-            &error
+        !sxbp_stringify_dimension(
+            bitmap->width, &width_string, &width_string_length
+        ) ||
+        !sxbp_stringify_dimension(
+            bitmap->height, &height_string, &height_string_length
         )
     ) {
-        // return error
-        return error;
+        // return I/O error code
+        return SXBP_RESULT_FAIL_IO;
     } else {
         /*
          * now that we know the length of the image dimension strings, we can now
