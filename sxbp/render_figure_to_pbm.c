@@ -67,10 +67,10 @@ static sxbp_result_t sxbp_write_pbm_header(
     size_t width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, check for errors
     if (
-        !sxbp_stringify_dimension(
+        !sxbp_dimension_to_string(
             bitmap->width, &width_string, &width_string_length
         ) ||
-        !sxbp_stringify_dimension(
+        !sxbp_dimension_to_string(
             bitmap->height, &height_string, &height_string_length
         )
     ) {

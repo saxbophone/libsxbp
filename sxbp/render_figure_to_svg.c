@@ -57,8 +57,8 @@ static sxbp_result_t sxbp_write_svg_head(
     size_t width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, check for errors
     if (
-        !sxbp_stringify_dimension(width, &width_string, &width_string_length) ||
-        !sxbp_stringify_dimension(height, &height_string, &height_string_length)
+        !sxbp_dimension_to_string(width, &width_string, &width_string_length) ||
+        !sxbp_dimension_to_string(height, &height_string, &height_string_length)
     ) {
         // return I/O error code
         return SXBP_RESULT_FAIL_IO;
@@ -127,8 +127,8 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     size_t origin_x_length, origin_y_length = 0;
     // stringify the origin dot x/y values
     if (
-        !sxbp_stringify_dimension(origin_x, &origin_x_str, &origin_x_length) ||
-        !sxbp_stringify_dimension(origin_y, &origin_y_str, &origin_y_length)
+        !sxbp_dimension_to_string(origin_x, &origin_x_str, &origin_x_length) ||
+        !sxbp_dimension_to_string(origin_y, &origin_y_str, &origin_y_length)
     ) {
         // return I/O error if failure
         return SXBP_RESULT_FAIL_IO;
@@ -188,8 +188,8 @@ static bool sxbp_render_figure_to_bitmap_callback(
         char x_str[11], y_str[11];
         size_t x_str_length, y_str_length = 0;
         if (
-            !sxbp_stringify_dimension(x, &x_str, &x_str_length) ||
-            !sxbp_stringify_dimension(y, &y_str, &y_str_length)
+            !sxbp_dimension_to_string(x, &x_str, &x_str_length) ||
+            !sxbp_dimension_to_string(y, &y_str, &y_str_length)
         ) {
             // if this fails, set error to I/O error and stop walk()-ing early
             data->error = SXBP_RESULT_FAIL_IO;

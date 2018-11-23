@@ -119,7 +119,7 @@ void sxbp_get_size_from_bounds(
  * its length in `string_length` if successful.
  * returns true/false for whether the operation succeeded or not
  */
-bool sxbp_stringify_dimension(
+bool sxbp_dimension_to_string(
     sxbp_figure_dimension_t dimension,
     char(* output_string)[11],
     size_t* string_length

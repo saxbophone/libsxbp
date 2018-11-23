@@ -159,7 +159,7 @@ void sxbp_get_size_from_bounds(
     *height = (sxbp_figure_dimension_t)((bounds.y_max - bounds.y_min) + 1);
 }
 
-bool sxbp_stringify_dimension(
+bool sxbp_dimension_to_string(
     sxbp_figure_dimension_t dimension,
     char(* output_string)[11],
     size_t* string_length
