@@ -379,7 +379,6 @@ sxbp_result_t sxbp_render_figure_to_svg(
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     // any errors encountered will be stored here
     sxbp_result_t error;
-    printf("buffer->size == %zu\n", buffer->size);
     /*
      * because SVG is a vector-based format, this backend differs from the
      * others as we don't need to plot a bunch of pixels, instead we need to use
@@ -401,19 +400,16 @@ sxbp_result_t sxbp_render_figure_to_svg(
         // catch and return error
         return error;
     }
-    printf("buffer->size == %zu\n", buffer->size);
     // write the image body
     if (!sxbp_check(sxbp_write_svg_body(figure, height, buffer), &error)) {
         // catch and return error
         return error;
     }
-    printf("buffer->size == %zu\n", buffer->size);
     // write the image tail
     if (!sxbp_check(sxbp_write_svg_tail(buffer), &error)) {
         // catch and return error
         return error;
     }
-    printf("buffer->size == %zu\n", buffer->size);
     // if we got here, the operation was successful
     return SXBP_RESULT_OK;
 }
