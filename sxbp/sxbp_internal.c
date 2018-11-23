@@ -181,26 +181,6 @@ bool sxbp_stringify_dimension(
     }
 }
 
-sxbp_result_t sxbp_stringify_dimensions(
-    sxbp_figure_dimension_t width,
-    sxbp_figure_dimension_t height,
-    char(* width_string)[11],
-    char(* height_string)[11],
-    size_t* width_string_length,
-    size_t* height_string_length
-) {
-    if (
-        sxbp_stringify_dimension(width, width_string, width_string_length) &&
-        sxbp_stringify_dimension(height, height_string, height_string_length)
-    ) {
-        // indicate success
-        return SXBP_RESULT_OK;
-    } else {
-        // indicate failure
-        return SXBP_RESULT_FAIL_IO;
-    }
-}
-
 sxbp_result_t sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
     sxbp_bitmap_t* bitmap

@@ -125,21 +125,6 @@ bool sxbp_stringify_dimension(
     size_t* string_length
 );
 
-/*
- * private, given a width and height of a rendered figure, turns these into
- * decimal strings and writes these out to the given char arrays
- * returns SXBP_RESULT_FAIL_IO if an error occurred
- * TODO: REMOVE
- */
-sxbp_result_t sxbp_stringify_dimensions(
-    sxbp_figure_dimension_t width,
-    sxbp_figure_dimension_t height,
-    char(* width_string)[11],
-    char(* height_string)[11],
-    size_t* width_string_length,
-    size_t* height_string_length
-);
-
 // private, builds a bitmap large enough to fit coördinates in the given bounds
 sxbp_result_t sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
