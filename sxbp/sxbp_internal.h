@@ -24,6 +24,7 @@
 #ifndef SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 #define SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "sxbp.h"
@@ -99,6 +100,29 @@ void sxbp_walk_figure(
     size_t scale,
     bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
     void* callback_data
+);
+
+/*
+ * private, given a bounds struct, calculate the width and height of the bounds
+ * and write these values out to the width and height pointed to by `width` and
+ * `height`
+ */
+void sxbp_get_size_from_bounds(
+    const sxbp_bounds_t bounds,
+    sxbp_figure_dimension_t* restrict width,
+    sxbp_figure_dimension_t* restrict height
+);
+
+/*
+ * private, given a dimension value, try and generate a string representing it
+ * in decimal notation, outputting this string to `output_string` and storing
+ * its length in `string_length` if successful.
+ * returns true/false for whether the operation succeeded or not
+ */
+bool sxbp_dimension_to_string(
+    sxbp_figure_dimension_t dimension,
+    char(* output_string)[11],
+    size_t* string_length
 );
 
 // private, builds a bitmap large enough to fit coördinates in the given bounds

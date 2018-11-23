@@ -21,6 +21,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <assert.h>
+#include <inttypes.h>
 #include <stdint.h>
 
 #include "sxbp.h"
@@ -39,6 +40,8 @@ const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
 };
 
 void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds) {
+    // preconditional assertions
+    assert(bounds != NULL);
     if (location.x > bounds->x_max) {
         bounds->x_max = location.x;
     } else if (location.x < bounds->x_min) {
@@ -56,6 +59,8 @@ void sxbp_move_location(
     sxbp_direction_t direction,
     sxbp_length_t length
 ) {
+    // preconditional assertions
+    assert(location != NULL);
     sxbp_vector_t vector = SXBP_VECTOR_DIRECTIONS[direction];
     location->x += vector.x * (sxbp_tuple_item_t)length;
     location->y += vector.y * (sxbp_tuple_item_t)length;
@@ -65,10 +70,14 @@ void sxbp_move_location_along_line(
     sxbp_co_ord_t* location,
     sxbp_line_t line
 ) {
+    // preconditional assertions
+    assert(location != NULL);
     sxbp_move_location(location, line.direction, line.length);
 }
 
 sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure, size_t scale) {
+    // preconditional assertions
+    assert(figure != NULL);
     // loop state variables
     sxbp_co_ord_t location = { 0 }; // where the end of the last line is
     sxbp_bounds_t bounds = { 0 }; // the bounds of the line walked so far
@@ -107,6 +116,7 @@ void sxbp_walk_figure(
     void* callback_data
 ) {
     // preconditional assertions
+    assert(figure != NULL);
     assert(plot_point_callback != NULL);
     // get figure's bounds
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, scale);
@@ -131,18 +141,54 @@ void sxbp_walk_figure(
     }
 }
 
-sxbp_result_t sxbp_make_bitmap_for_bounds(
+void sxbp_get_size_from_bounds(
     const sxbp_bounds_t bounds,
-    sxbp_bitmap_t* bitmap
+    sxbp_figure_dimension_t* restrict width,
+    sxbp_figure_dimension_t* restrict height
 ) {
+    // pointer arguments must not be NULL!
+    assert(width != NULL);
+    assert(height != NULL);
     /*
      * the width and height are the difference of the max and min dimensions
      * + 1.
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
      */
-    bitmap->width = (uint32_t)((bounds.x_max - bounds.x_min) + 1);
-    bitmap->height = (uint32_t)((bounds.y_max - bounds.y_min) + 1);
+    *width = (sxbp_figure_dimension_t)((bounds.x_max - bounds.x_min) + 1);
+    *height = (sxbp_figure_dimension_t)((bounds.y_max - bounds.y_min) + 1);
+}
+
+bool sxbp_dimension_to_string(
+    sxbp_figure_dimension_t dimension,
+    char(* output_string)[11],
+    size_t* string_length
+) {
+    // preconditional assertions
+    assert(output_string != NULL);
+    assert(string_length != NULL);
+    // call snprintf() to convert to string and store the return code
+    int result = snprintf(*output_string, 11, "%" PRIu32, dimension);
+    // snprintf() returns negative values when it fails, so check this
+    if (result < 0) {
+        // indicate failure
+        return false;
+    } else {
+        // otherwise, store the length of the resulting string to string_length
+        *string_length = (size_t)result;
+        // indicate success
+        return true;
+    }
+}
+
+sxbp_result_t sxbp_make_bitmap_for_bounds(
+    const sxbp_bounds_t bounds,
+    sxbp_bitmap_t* bitmap
+) {
+    // preconditional assertions
+    assert(bitmap != NULL);
+    // calculate the width and height
+    sxbp_get_size_from_bounds(bounds, &bitmap->width, &bitmap->height);
     bitmap->pixels = NULL;
     // allocate memory for the bitmap and return the status of this operation
     return sxbp_init_bitmap(bitmap);

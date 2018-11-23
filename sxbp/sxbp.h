@@ -194,6 +194,14 @@ typedef struct sxbp_render_options_t {
 } sxbp_render_options_t;
 
 /**
+ * @brief Type for representing the width or height of a rendered SXBP figure
+ * @details This type is that used for representing the width and height of
+ * rendered images of sxbp figures.
+ * @since v0.54.0
+ */
+typedef uint32_t sxbp_figure_dimension_t;
+
+/**
  * @brief Used to represent a basic 1-bit, pure black/white bitmap image.
  * @details The image has integer height and width, and a 2-dimensional array of
  * 1-bit pixels which are either black or white.
@@ -201,9 +209,9 @@ typedef struct sxbp_render_options_t {
  */
 typedef struct sxbp_bitmap_t {
     /** @brief The width of the bitmap in pixels */
-    uint32_t width;
+    sxbp_figure_dimension_t width;
     /** @brief The height of the bitmap in pixels */
-    uint32_t height;
+    sxbp_figure_dimension_t height;
     /**
      * @brief A 2-dimensional array of pixels.
      * @details false is the background colour, true is the foreground colour
@@ -316,6 +324,22 @@ sxbp_buffer_t sxbp_blank_buffer(void);
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
+
+/**
+ * @brief Attempts to resize the given buffer
+ * @details The buffer will be grown or shrunk depending on if `size` is bigger
+ * than or less than it's existing size. If grown, the bytes beyond the extent
+ * of its previous size will be of indeterminate value. If shrunk, the bytes
+ * that lie beyond the new extent after shrinking will be lost.
+ * @warning It is unsafe to call this function on a buffer that has not been
+ * allocated with `sxbp_init_buffer` before.
+ * @returns `SXBP_RESULT_OK` if memory was allocated successfully
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not reallocated successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` or `buffer->bytes` are
+ * `NULL`
+ * @since v0.54.0
+ */
+sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size);
 
 /**
  * @brief Deallocates any allocated memory for the bytes of the given buffer
@@ -643,6 +667,7 @@ sxbp_result_t sxbp_render_figure(
  * @warn This function is currently unusable because it always returns the
  * "not implemented" failure error code
  * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED`
+ * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure_to_null(
     const sxbp_figure_t* const figure,
@@ -658,8 +683,25 @@ sxbp_result_t sxbp_render_figure_to_null(
  * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `buffer` are `NULL`
  * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred
+ * @since v0.54.0
  */
 sxbp_result_t sxbp_render_figure_to_pbm(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+);
+
+/**
+ * @brief Renders figures to SVG images
+ * @details If successful, the buffer will be filled with data which represents
+ * an SVG image.
+ * @returns `SXBP_RESULT_OK` if the figure could be rendered successfully
+ * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` or `buffer` are `NULL`
+ * @returns `SXBP_RESULT_FAIL_MEMORY` if a memory allocation error occurred
+ * @since v0.54.0
+ */
+sxbp_result_t sxbp_render_figure_to_svg(
     const sxbp_figure_t* const figure,
     sxbp_buffer_t* const buffer,
     const sxbp_render_options_t* const render_options,
