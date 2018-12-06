@@ -12,6 +12,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <assert.h>
+#include <iso646.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -168,11 +169,11 @@ sxbp_result_t sxbp_begin_figure(
          * then this means we need to make the figure size the size specified by
          * `max_lines`
          */
-        if (options->max_lines != 0 && options->max_lines < figure->size) {
+        if (options->max_lines != 0 and options->max_lines < figure->size) {
             figure->size = options->max_lines;
         }
         // allocate memory for the figure
-        if (!sxbp_success(sxbp_init_figure(figure))) {
+        if (not sxbp_success(sxbp_init_figure(figure))) {
             // exit early and signal error status - can only be a memory error
             return SXBP_RESULT_FAIL_MEMORY;
         } else {

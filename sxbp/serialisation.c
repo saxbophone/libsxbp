@@ -12,6 +12,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <assert.h>
+#include <iso646.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -217,7 +218,7 @@ static bool sxbp_check_sxbp_data_version(const sxbp_buffer_t* buffer) {
     sxbp_version_t min_version = { .major = 0, .minor = 54, .patch = 0, };
     // compare the extracted version with the minimum one
     return (
-        buffer_version.major == min_version.major &&
+        buffer_version.major == min_version.major and
         buffer_version.minor >= min_version.minor
     );
 }
@@ -230,9 +231,9 @@ static bool sxbp_check_sxbp_data_is_valid(const sxbp_buffer_t* buffer) {
      * finally, if both of those are valid, theh check the data version
      */
     if (
-        buffer->size < SXBP_FILE_HEADER_SIZE ||
-        strncmp((char*)buffer->bytes, "sxbp", 4) != 0 ||
-        !sxbp_check_sxbp_data_version(buffer)
+        buffer->size < SXBP_FILE_HEADER_SIZE or
+        strncmp((char*)buffer->bytes, "sxbp", 4) != 0 or
+        not sxbp_check_sxbp_data_version(buffer)
     ) {
         return false;
     } else {
@@ -291,7 +292,7 @@ sxbp_result_t sxbp_dump_figure(
     // set buffer size to that needed for figure
     buffer->size = sxbp_get_figure_serialised_size(figure);
     // try and allocate memory for the buffer
-    if (!sxbp_success(sxbp_init_buffer(buffer))) {
+    if (not sxbp_success(sxbp_init_buffer(buffer))) {
         // handle error - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
@@ -316,7 +317,7 @@ sxbp_result_t sxbp_load_figure(
     // erase the figure first of all just in case
     sxbp_free_figure(figure);
     // check that the buffer contains valid sxbp data
-    if (!sxbp_check_sxbp_data_is_valid(buffer)) {
+    if (not sxbp_check_sxbp_data_is_valid(buffer)) {
         // exit early as it's not valid
         return SXBP_RESULT_FAIL_PRECONDITION;
     } else {
@@ -336,7 +337,7 @@ sxbp_result_t sxbp_load_figure(
             // extract the lines_remaining field
             figure->lines_remaining = sxbp_load_uint32_t(buffer, &index);
             // allocate memory for the lines
-            if (!sxbp_success(sxbp_init_figure(figure))) {
+            if (not sxbp_success(sxbp_init_figure(figure))) {
                 // handle error - this can only be a memory error
                 return SXBP_RESULT_FAIL_MEMORY;
             } else {

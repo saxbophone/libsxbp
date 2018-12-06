@@ -11,6 +11,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <iso646.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -57,8 +58,9 @@ static sxbp_result_t sxbp_write_svg_head(
     size_t width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, check for errors
     if (
-        !sxbp_dimension_to_string(width, &width_string, &width_string_length) ||
-        !sxbp_dimension_to_string(height, &height_string, &height_string_length)
+        not sxbp_dimension_to_string(width, &width_string, &width_string_length)
+        or
+        not sxbp_dimension_to_string(height, &height_string, &height_string_length)
     ) {
         // return I/O error code
         return SXBP_RESULT_FAIL_IO;
@@ -73,7 +75,7 @@ static sxbp_result_t sxbp_write_svg_head(
         + 1 // NUL-terminator
     );
     // initialise the buffer
-    if (!sxbp_check(sxbp_init_buffer(buffer), &error)) {
+    if (not sxbp_check(sxbp_init_buffer(buffer), &error)) {
         return error;
     }
     // write the header to the buffer
@@ -90,7 +92,7 @@ static sxbp_result_t sxbp_write_svg_head(
         return SXBP_RESULT_FAIL_IO;
     }
     // chop off the null-terminator at the end
-    if (!sxbp_check(sxbp_resize_buffer(buffer, buffer->size - 1), &error)) {
+    if (not sxbp_check(sxbp_resize_buffer(buffer, buffer->size - 1), &error)) {
         return error;
     }
     return SXBP_RESULT_OK;
@@ -127,8 +129,9 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     size_t origin_x_length, origin_y_length = 0;
     // stringify the origin dot x/y values
     if (
-        !sxbp_dimension_to_string(origin_x, &origin_x_str, &origin_x_length) ||
-        !sxbp_dimension_to_string(origin_y, &origin_y_str, &origin_y_length)
+        not sxbp_dimension_to_string(origin_x, &origin_x_str, &origin_x_length)
+        or
+        not sxbp_dimension_to_string(origin_y, &origin_y_str, &origin_y_length)
     ) {
         // return I/O error if failure
         return SXBP_RESULT_FAIL_IO;
@@ -144,7 +147,7 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     );
     // try and resize the buffer
     if (
-        !sxbp_success(sxbp_resize_buffer(buffer, buffer->size + extend_amount))
+        not sxbp_success(sxbp_resize_buffer(buffer, buffer->size + extend_amount))
     ) {
         // catch and return memory error
         return SXBP_RESULT_FAIL_MEMORY;
@@ -163,7 +166,7 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
         return SXBP_RESULT_FAIL_IO;
     }
     // chop off the null-terminator at the end
-    if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
+    if (not sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
         return SXBP_RESULT_FAIL_MEMORY;
     }
     // if we got here, we succeeded, so return success
@@ -188,8 +191,8 @@ static bool sxbp_render_figure_to_bitmap_callback(
         char x_str[11], y_str[11];
         size_t x_str_length, y_str_length = 0;
         if (
-            !sxbp_dimension_to_string(x, &x_str, &x_str_length) ||
-            !sxbp_dimension_to_string(y, &y_str, &y_str_length)
+            not sxbp_dimension_to_string(x, &x_str, &x_str_length) or
+            not sxbp_dimension_to_string(y, &y_str, &y_str_length)
         ) {
             // if this fails, set error to I/O error and stop walk()-ing early
             data->error = SXBP_RESULT_FAIL_IO;
@@ -208,7 +211,7 @@ static bool sxbp_render_figure_to_bitmap_callback(
         sxbp_buffer_t* buffer = data->buffer;
         // try and allocate more memory
         if (
-            !sxbp_success(
+            not sxbp_success(
                 sxbp_resize_buffer(buffer, buffer->size + extend_amount)
             )
         ) {
@@ -231,7 +234,7 @@ static bool sxbp_render_figure_to_bitmap_callback(
             return false;
         }
         // chop off null-terminator at the end
-        if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
+        if (not sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
             // set error to memory error and stop walk()-in early
             data->error = SXBP_RESULT_FAIL_MEMORY;
             return false;
@@ -263,7 +266,7 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
     size_t polyline_boilerplate_length = strlen(polyline_boilerplate);
     // try and extend buffer
     if (
-        !sxbp_success(
+        not sxbp_success(
             sxbp_resize_buffer(
                 buffer,
                 buffer->size + polyline_boilerplate_length
@@ -294,7 +297,7 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
         (void*)&data
     );
     // chop off the extra space at the end
-    if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
+    if (not sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
         return SXBP_RESULT_FAIL_MEMORY;
     }
     // return the error condition stored in the callback context data
@@ -313,15 +316,19 @@ static sxbp_result_t sxbp_write_svg_body(
     // any errors encountered will be stored here
     sxbp_result_t error;
     // write the origin dot
-    if (!sxbp_check(
-        sxbp_write_svg_body_origin_dot(figure, height, buffer), &error)
+    if (
+        not sxbp_check(
+            sxbp_write_svg_body_origin_dot(figure, height, buffer), &error
+        )
     ) {
         // catch and return error
         return error;
     }
     // write the line
-    if (!sxbp_check(
-        sxbp_write_svg_body_figure_line(figure, height, buffer), &error)
+    if (
+        not sxbp_check(
+            sxbp_write_svg_body_figure_line(figure, height, buffer), &error
+        )
     ) {
         // catch and return error
         return error;
@@ -347,7 +354,7 @@ static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
     sxbp_result_t error;
     // try and reallocate memory to include the tail
     if (
-        !sxbp_check(
+        not sxbp_check(
             sxbp_resize_buffer(buffer, buffer->size + tail_length),
             &error
         )
@@ -394,19 +401,21 @@ sxbp_result_t sxbp_render_figure_to_svg(
     sxbp_figure_dimension_t height = 0;
     sxbp_get_size_from_bounds(bounds, &width, &height);
     // write image head, including everything up to the line's points
-    if (!sxbp_check(
-        sxbp_write_svg_head(width, height, buffer), &error)
+    if (
+        not sxbp_check(
+            sxbp_write_svg_head(width, height, buffer), &error
+        )
     ) {
         // catch and return error
         return error;
     }
     // write the image body
-    if (!sxbp_check(sxbp_write_svg_body(figure, height, buffer), &error)) {
+    if (not sxbp_check(sxbp_write_svg_body(figure, height, buffer), &error)) {
         // catch and return error
         return error;
     }
     // write the image tail
-    if (!sxbp_check(sxbp_write_svg_tail(buffer), &error)) {
+    if (not sxbp_check(sxbp_write_svg_tail(buffer), &error)) {
         // catch and return error
         return error;
     }

@@ -14,6 +14,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <iso646.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -59,7 +60,7 @@ static sxbp_result_t sxbp_figure_collides(
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-    if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, &bitmap))) {
+    if (not sxbp_success(sxbp_make_bitmap_for_bounds(bounds, &bitmap))) {
         // a memory allocation error occurred
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
@@ -98,7 +99,7 @@ static sxbp_result_t sxbp_attempt_line_shorten(
         bool collided = false;
         // we'll store any errors encountered by this function here
         sxbp_result_t status = SXBP_RESULT_UNKNOWN;
-        if (!sxbp_check(sxbp_figure_collides(figure, &collided), &status)) {
+        if (not sxbp_check(sxbp_figure_collides(figure, &collided), &status)) {
             // handle error
             return status;
         } else {
@@ -107,11 +108,11 @@ static sxbp_result_t sxbp_attempt_line_shorten(
              * collides (or we reach the original length)
              * --we can quit in that case as we already know it doesn't collide
              */
-            while (line->length < original_length && collided) {
+            while (line->length < original_length and collided) {
                 line->length++;
                 // check again if it colldes and handle any errors
                 if (
-                    !sxbp_check(
+                    not sxbp_check(
                         sxbp_figure_collides(figure, &collided), &status
                     )
                 ) {
@@ -129,7 +130,7 @@ static sxbp_result_t sxbp_attempt_line_shorten(
                 for (sxbp_figure_size_t i = max; i >= l; i--) {
                     // handle any errors returned by the call
                     if (
-                        !sxbp_check(
+                        not sxbp_check(
                             sxbp_attempt_line_shorten(figure, i, max), &status
                         )
                     ) {
@@ -152,7 +153,7 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
     for (sxbp_figure_size_t i = figure->size - 1; i > 0; i--) {
         // try and shorten it, or return error if not
         if (
-            !sxbp_check(
+            not sxbp_check(
                 sxbp_attempt_line_shorten(figure, i, figure->size - 1),
                 &status
             )
@@ -165,7 +166,7 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
              */
             figure->lines_remaining = i - 1;
             // call the progress callback if it's been given
-            if (options != NULL && options->progress_callback != NULL) {
+            if (options != NULL and options->progress_callback != NULL) {
                 options->progress_callback(figure, options->callback_context);
             }
         }

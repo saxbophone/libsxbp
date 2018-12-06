@@ -22,6 +22,7 @@
  */
 #include <assert.h>
 #include <inttypes.h>
+#include <iso646.h>
 #include <stdint.h>
 
 #include "sxbp.h"
@@ -123,7 +124,7 @@ void sxbp_walk_figure(
     // start the line at the origin
     sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
     // plot the first point of the line, if callback returned false then exit
-    if (!plot_point_callback(location, callback_data)) {
+    if (not plot_point_callback(location, callback_data)) {
         return;
     }
     // for each line, plot separate points along their length
@@ -134,7 +135,7 @@ void sxbp_walk_figure(
             // move the location
             sxbp_move_location(&location, line.direction, 1);
             // plot a point, if callback returned false then exit
-            if (!plot_point_callback(location, callback_data)) {
+            if (not plot_point_callback(location, callback_data)) {
                 return;
             }
         }

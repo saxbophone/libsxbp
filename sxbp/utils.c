@@ -12,6 +12,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <iso646.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -83,7 +84,7 @@ sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size) {
 
 bool sxbp_free_buffer(sxbp_buffer_t* const buffer) {
     // if buffer and bytes are not NULL, assume there's memory to be deallocated
-    if (buffer != NULL && buffer->bytes != NULL) {
+    if (buffer != NULL and buffer->bytes != NULL) {
         free(buffer->bytes);
         // set bytes to NULL (be a good person)
         buffer->bytes = NULL;
@@ -106,7 +107,7 @@ sxbp_result_t sxbp_copy_buffer(
     // copy across the size
     to->size = from->size;
     // allocate the 'to' buffer
-    if (!sxbp_success(sxbp_init_buffer(to))) {
+    if (not sxbp_success(sxbp_init_buffer(to))) {
         // exit early if allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
@@ -143,7 +144,7 @@ sxbp_result_t sxbp_buffer_from_file(
     // get the file's size
     buffer->size = sxbp_get_file_size(file_handle);
     // allocate the buffer to this size and handle error if this failed
-    if (!sxbp_success(sxbp_init_buffer(buffer))) {
+    if (not sxbp_success(sxbp_init_buffer(buffer))) {
         // allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
@@ -203,7 +204,7 @@ sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
 
 bool sxbp_free_figure(sxbp_figure_t* const figure) {
     // if figure and lines are not NULL, assume there's memory to be deallocated
-    if (figure != NULL && figure->lines != NULL) {
+    if (figure != NULL and figure->lines != NULL) {
         free(figure->lines);
         // set lines to NULL (be a good person)
         figure->lines = NULL;
@@ -227,7 +228,7 @@ sxbp_result_t sxbp_copy_figure(
     to->size = from->size;
     to->lines_remaining = from->lines_remaining;
     // allocate the 'to' figure
-    if (!sxbp_init_figure(to)) {
+    if (not sxbp_init_figure(to)) {
         // exit early if allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
@@ -261,7 +262,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
         // allocation of col pointers succeeded, now try and allocate each col
         for (sxbp_figure_dimension_t col = 0; col < bitmap->width; col++) {
             if (
-                !sxbp_success(
+                not sxbp_success(
                     sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)
                 )
             ) {
@@ -277,7 +278,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
 
 bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
     // if bitmap and pixels aren't NULL, assume there are cols to be deallocated
-    if (bitmap != NULL && bitmap->pixels != NULL) {
+    if (bitmap != NULL and bitmap->pixels != NULL) {
         // deallocate each col that needs deallocating first
         for (sxbp_figure_dimension_t col = 0; col < bitmap->width; col++) {
             if (bitmap->pixels[col] != NULL) {
@@ -305,7 +306,7 @@ sxbp_result_t sxbp_copy_bitmap(
     to->width = from->width;
     to->height = from->height;
     // allocate the 'to' bitmap
-    if (!sxbp_success(sxbp_init_bitmap(to))) {
+    if (not sxbp_success(sxbp_init_bitmap(to))) {
         // exit early if allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
     } else {

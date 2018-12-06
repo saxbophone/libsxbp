@@ -12,6 +12,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <iso646.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -43,7 +44,7 @@ static bool sxbp_render_figure_to_bitmap_callback(
     render_figure_to_bitmap_context* data =
         (render_figure_to_bitmap_context*)callback_data;
     // skip the plotting of the second pixel
-    if (data->first_pixel_complete && !data->second_pixel_complete) {
+    if (data->first_pixel_complete and not data->second_pixel_complete) {
         // mark second pixel as complete
         data->second_pixel_complete = true;
     } else {
@@ -70,7 +71,7 @@ sxbp_result_t sxbp_render_figure_to_bitmap(
     // get figure bounds, at scale 2
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
     // build bitmap for bounds
-    if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, bitmap))) {
+    if (not sxbp_success(sxbp_make_bitmap_for_bounds(bounds, bitmap))) {
         // couldn't allocate memory, return error early
         return SXBP_RESULT_FAIL_MEMORY;
     } else {

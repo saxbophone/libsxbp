@@ -13,6 +13,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <iso646.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -34,7 +35,7 @@ sxbp_result_t sxbp_refine_figure(
     SXBP_RETURN_FAIL_IF_NULL(figure->lines);
     // work out which refinement method to use
     sxbp_refine_method_t method = SXBP_REFINE_METHOD_DEFAULT;
-    if (options != NULL && options->refine_method != SXBP_REFINE_METHOD_ANY) {
+    if (options != NULL and options->refine_method != SXBP_REFINE_METHOD_ANY) {
         method = options->refine_method;
     }
     // now run the appropriate refinement function for all implemented methods

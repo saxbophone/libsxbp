@@ -12,6 +12,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <inttypes.h>
+#include <iso646.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -67,10 +68,10 @@ static sxbp_result_t sxbp_write_pbm_header(
     size_t width_string_length, height_string_length = 0;
     // convert width and height to a decimal string, check for errors
     if (
-        !sxbp_dimension_to_string(
+        not sxbp_dimension_to_string(
             bitmap->width, &width_string, &width_string_length
-        ) ||
-        !sxbp_dimension_to_string(
+        ) or
+        not sxbp_dimension_to_string(
             bitmap->height, &height_string, &height_string_length
         )
     ) {
@@ -89,7 +90,7 @@ static sxbp_result_t sxbp_write_pbm_header(
             bytes_per_row_ptr
         );
         // try and allocate the buffer
-        if (!sxbp_check(sxbp_init_buffer(buffer), &error)) {
+        if (not sxbp_check(sxbp_init_buffer(buffer), &error)) {
             // catch and return error if there was one
             return error;
         } else {
@@ -157,7 +158,7 @@ static sxbp_result_t sxbp_bitmap_to_pbm(
      * to store the whole image data too
      */
     if (
-        !sxbp_check(
+        not sxbp_check(
             sxbp_write_pbm_header(
                 bitmap,
                 buffer,
@@ -195,7 +196,7 @@ sxbp_result_t sxbp_render_figure_to_pbm(
     sxbp_result_t error;
     // rasterise the figure to bitmap first of all
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
-    if (!sxbp_check(sxbp_render_figure_to_bitmap(figure, &bitmap), &error)) {
+    if (not sxbp_check(sxbp_render_figure_to_bitmap(figure, &bitmap), &error)) {
         // catch and return raised error
         return error;
     } else {
