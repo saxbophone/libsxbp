@@ -305,6 +305,7 @@ bool sxbp_success(sxbp_result_t state);
 bool sxbp_check(sxbp_result_t state, sxbp_result_t* const report_to);
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Creates a blank empty buffer
  * @details Ensures that all pointer fields are properly initialised to NULL
  * @returns An `sxbp_buffer_t` object with all fields set to default/blank value
@@ -313,6 +314,7 @@ bool sxbp_check(sxbp_result_t state, sxbp_result_t* const report_to);
 sxbp_buffer_t sxbp_blank_buffer(void);
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Attempts to allocate memory for the bytes of the given buffer
  * @details Attempts to allocate the amount of memory specified by the `size`
  * member of the buffer
@@ -326,6 +328,7 @@ sxbp_buffer_t sxbp_blank_buffer(void);
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Attempts to resize the given buffer
  * @details The buffer will be grown or shrunk depending on if `size` is bigger
  * than or less than it's existing size. If grown, the bytes beyond the extent
@@ -342,6 +345,7 @@ sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
 sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size);
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Deallocates any allocated memory for the bytes of the given buffer
  * @note It is safe to call this function multiple times on the same buffer
  * @warning It is unsafe to call this function on a buffer that has been
@@ -354,6 +358,7 @@ sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size);
 bool sxbp_free_buffer(sxbp_buffer_t* const buffer);
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Attempts to copy one buffer to another
  * @details All the data is copied from the buffer such that both are entirely
  * separate at the completion of the operation. Any data in the `to` buffer
@@ -374,6 +379,7 @@ sxbp_result_t sxbp_copy_buffer(
 );
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Attempts to read the contents of the given file into the given buffer
  * @details Allocates the buffer and copies all the bytes of the file into it
  * @warning The file should have been opened in `rb` mode
@@ -391,6 +397,7 @@ sxbp_result_t sxbp_buffer_from_file(
 );
 
 /**
+ * @relatesalso sxbp_buffer_t
  * @brief Attempts to write the contents of the given buffer to the given file
  * @details Writes all the bytes in the buffer out to the open file
  * @warning The file should have been opened in `wb` mode
@@ -408,6 +415,7 @@ sxbp_result_t sxbp_buffer_to_file(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Creates a blank empty figure
  * @details Ensures that all pointer fields are properly initialised to NULL
  * @returns An `sxbp_figure_t` object with all fields set to default/blank value
@@ -416,6 +424,7 @@ sxbp_result_t sxbp_buffer_to_file(
 sxbp_figure_t sxbp_blank_figure(void);
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Attempts to allocate memory for dynamic members of the given figure
  * @details Attempts to allocate the number of lines specified by the `size`
  * member of the figure, and memory for other private fields of the structure
@@ -431,6 +440,7 @@ sxbp_figure_t sxbp_blank_figure(void);
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure);
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Deallocates any allocated memory for the given figure
  * @note It is safe to call this function multiple times on the same figure
  * @warning It is unsafe to call this function on a figure that has had any
@@ -444,6 +454,7 @@ sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure);
 bool sxbp_free_figure(sxbp_figure_t* const figure);
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Attempts to copy one figure to another
  * @details All the data is copied from the figure such that both are entirely
  * separate at the completion of the operation. Any data in the `to` figure
@@ -464,6 +475,7 @@ sxbp_result_t sxbp_copy_figure(
 );
 
 /**
+ * @relatesalso sxbp_bitmap_t
  * @brief Creates a blank empty bitmap
  * @details Ensures that all pointer fields are properly initialised to NULL
  * @returns An `sxbp_bitmap_t` object with all fields set to default/blank value
@@ -472,6 +484,7 @@ sxbp_result_t sxbp_copy_figure(
 sxbp_bitmap_t sxbp_blank_bitmap(void);
 
 /**
+ * @relatesalso sxbp_bitmap_t
  * @brief Attempts to allocate memory for the pixels of the given bitmap
  * @details Attempts to allocate the memory for the amount of pixels specified
  * by the `width` and `height` members of the bitmap
@@ -485,6 +498,7 @@ sxbp_bitmap_t sxbp_blank_bitmap(void);
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap);
 
 /**
+ * @relatesalso sxbp_bitmap_t
  * @brief Deallocates any allocated memory for the pixels of the given bitmap
  * @note It is safe to call this function multiple times on the same bitmap
  * @warning It is unsafe to call this function on a bitmap that has been
@@ -497,6 +511,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap);
 bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap);
 
 /**
+ * @relatesalso sxbp_bitmap_t
  * @brief Attempts to copy one bitmap to another
  * @details All the data is copied from the bitmap such that both are entirely
  * separate at the completion of the operation. Any data in the `to` bitmap
@@ -517,6 +532,7 @@ sxbp_result_t sxbp_copy_bitmap(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Converts the given binary data into an early-draft SXBP figure
  * @details The data in the given buffer is converted into a sequence of spiral
  * directions and from these an unrefined rudimentary line is plotted in the
@@ -546,6 +562,7 @@ sxbp_result_t sxbp_begin_figure(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Refines the line lengths of the given SXBP figure
  * @details The line lengths are adjusted to take up less space than that
  * which are generated by `sxbp_begin_figure`
@@ -571,6 +588,7 @@ sxbp_result_t sxbp_refine_figure(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Serialises the given figure to data, stored in the given buffer
  * @details The buffer is populated with bytes which represent the figure and
  * from whch compatible versions of SXBP can load figures from again
@@ -589,6 +607,7 @@ sxbp_result_t sxbp_dump_figure(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Attempts to deserialise an SXBP figure from the given buffer
  * @details A serialised SXBP figure is extracted from the buffer's data to the
  * given figure, if the buffer data is valid, containing an SXBP figure in the
@@ -611,6 +630,7 @@ sxbp_result_t sxbp_load_figure(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Rasterises an image of the given figure to a basic bitmap object
  * @details A 1-bit black/white bitmap image of the line formed by the SXBP
  * figure is rendered to the given bitmap object
@@ -629,6 +649,7 @@ sxbp_result_t sxbp_render_figure_to_bitmap(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Renders an image of the given figure, using the given render callback
  * @details The render callback should write out the bytes of the rendered image
  * to the given buffer.
@@ -662,6 +683,7 @@ sxbp_result_t sxbp_render_figure(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief A dummy renderer function that does nothing
  * @details This exists for testing purposes only
  * @warn This function is currently unusable because it always returns the
@@ -677,6 +699,7 @@ sxbp_result_t sxbp_render_figure_to_null(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Renders figures to PBM images
  * @details If successful, the buffer will be filled with data which represents
  * a binary format PBM image (P4 format).
@@ -693,6 +716,7 @@ sxbp_result_t sxbp_render_figure_to_pbm(
 );
 
 /**
+ * @relatesalso sxbp_figure_t
  * @brief Renders figures to SVG images
  * @details If successful, the buffer will be filled with data which represents
  * an SVG image.
