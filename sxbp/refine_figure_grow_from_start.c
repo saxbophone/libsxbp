@@ -32,9 +32,9 @@ extern "C" {
  */
 typedef struct line_map {
     // the width of the line_map (same data type as bitmap width)
-    uint32_t width;
+    sxbp_figure_dimension_t width;
     // the height of the line_map (same data type as bitmap height)
-    uint32_t height;
+    sxbp_figure_dimension_t height;
     // dynamically allocated 2D array of pointers to lines
     sxbp_line_t*** cells;
 } line_map;
@@ -69,7 +69,7 @@ typedef struct suggest_previous_length_context {
 static bool sxbp_free_line_map(line_map* map) {
     // if map->cells is not null, then it needs to be deallocated
     if (map->cells != NULL) {
-        for (uint32_t col = 0; col < map->width; col++) {
+        for (sxbp_figure_dimension_t col = 0; col < map->width; col++) {
             // but first check each column of the col inside cells too
             if (map->cells[col] != NULL) {
                 free(map->cells[col]);
@@ -101,8 +101,8 @@ static sxbp_result_t sxbp_init_line_map_from_bounds(
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
      */
-    map->width = (bounds.x_max - bounds.x_min) + 1;
-    map->height = (bounds.y_max - bounds.y_min) + 1;
+    map->width = (sxbp_figure_dimension_t)(bounds.x_max - bounds.x_min) + 1;
+    map->height = (sxbp_figure_dimension_t)(bounds.y_max - bounds.y_min) + 1;
     // allocate dynamic memory for the row
     map->cells = calloc(map->width, sizeof(sxbp_line_t**));
     // catch allocation error and exit early
@@ -110,7 +110,7 @@ static sxbp_result_t sxbp_init_line_map_from_bounds(
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // now allocate memory for the columns of the row
-        for (uint32_t col = 0; col < map->width; col++) {
+        for (sxbp_figure_dimension_t col = 0; col < map->width; col++) {
             map->cells[col] = calloc(map->height, sizeof(sxbp_line_t*));
             // catch allocation error, free and exit early
             if (map->cells[col] == NULL) {
@@ -118,7 +118,7 @@ static sxbp_result_t sxbp_init_line_map_from_bounds(
                 return SXBP_RESULT_FAIL_MEMORY;
             }
             // pedantic, set all cells within the column explicitly to NULL
-            for (uint32_t row = 0; row < map->height; row++) {
+            for (sxbp_figure_dimension_t row = 0; row < map->height; row++) {
                 map->cells[col][row] = NULL;
             }
         }
@@ -266,21 +266,21 @@ static sxbp_length_t sxbp_resolve_collision(
     // rule out the combinations of directions not featured in the table (any
     // non-parallel combos, which cannot be optimised in this manner)
     if((previous.direction == SXBP_UP) && (collider.direction == SXBP_UP)) {
-        return (collider_origin.y - previous_origin.y) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((collider_origin.y - previous_origin.y) + collider.length + 1);
     } else if((previous.direction == SXBP_UP) && (collider.direction == SXBP_DOWN)) {
-        return (collider_end.y - previous_origin.y) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((collider_end.y - previous_origin.y) + collider.length + 1);
     } else if((previous.direction == SXBP_RIGHT) && (collider.direction == SXBP_RIGHT)) {
-        return (collider_origin.x - previous_origin.x) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((collider_origin.x - previous_origin.x) + collider.length + 1);
     } else if((previous.direction == SXBP_RIGHT) && (collider.direction == SXBP_LEFT)) {
-        return (collider_end.x - previous_origin.x) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((collider_end.x - previous_origin.x) + collider.length + 1);
     } else if((previous.direction == SXBP_DOWN) && (collider.direction == SXBP_UP)) {
-        return (previous_origin.y - collider_end.y) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((previous_origin.y - collider_end.y) + collider.length + 1);
     } else if((previous.direction == SXBP_DOWN) && (collider.direction == SXBP_DOWN)) {
-        return (previous_origin.y - collider_origin.y) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((previous_origin.y - collider_origin.y) + collider.length + 1);
     } else if((previous.direction == SXBP_LEFT) && (collider.direction == SXBP_RIGHT)) {
-        return (previous_origin.x - collider_end.x) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((previous_origin.x - collider_end.x) + collider.length + 1);
     } else if((previous.direction == SXBP_LEFT) && (collider.direction == SXBP_LEFT)) {
-        return (previous_origin.x - collider_origin.x) + collider.length + 1;
+        return (sxbp_figure_dimension_t)((previous_origin.x - collider_origin.x) + collider.length + 1);
     } else {
         // this is the catch-all case, where no way to optimise was found
         return previous.length + 1;
