@@ -266,24 +266,24 @@ static sxbp_length_t sxbp_resolve_collision(
     // rule out the combinations of directions not featured in the table (any
     // non-parallel combos, which cannot be optimised in this manner)
     if((previous.direction == SXBP_UP) && (collider.direction == SXBP_UP)) {
-        return (sxbp_figure_dimension_t)((collider_origin.y - previous_origin.y) + collider.length + 1);
+        return (sxbp_length_t)((collider_origin.y - previous_origin.y) + collider.length + 1);
     } else if((previous.direction == SXBP_UP) && (collider.direction == SXBP_DOWN)) {
-        return (sxbp_figure_dimension_t)((collider_end.y - previous_origin.y) + collider.length + 1);
+        return (sxbp_length_t)((collider_end.y - previous_origin.y) + collider.length + 1);
     } else if((previous.direction == SXBP_RIGHT) && (collider.direction == SXBP_RIGHT)) {
-        return (sxbp_figure_dimension_t)((collider_origin.x - previous_origin.x) + collider.length + 1);
+        return (sxbp_length_t)((collider_origin.x - previous_origin.x) + collider.length + 1);
     } else if((previous.direction == SXBP_RIGHT) && (collider.direction == SXBP_LEFT)) {
-        return (sxbp_figure_dimension_t)((collider_end.x - previous_origin.x) + collider.length + 1);
+        return (sxbp_length_t)((collider_end.x - previous_origin.x) + collider.length + 1);
     } else if((previous.direction == SXBP_DOWN) && (collider.direction == SXBP_UP)) {
-        return (sxbp_figure_dimension_t)((previous_origin.y - collider_end.y) + collider.length + 1);
+        return (sxbp_length_t)((previous_origin.y - collider_end.y) + collider.length + 1);
     } else if((previous.direction == SXBP_DOWN) && (collider.direction == SXBP_DOWN)) {
-        return (sxbp_figure_dimension_t)((previous_origin.y - collider_origin.y) + collider.length + 1);
+        return (sxbp_length_t)((previous_origin.y - collider_origin.y) + collider.length + 1);
     } else if((previous.direction == SXBP_LEFT) && (collider.direction == SXBP_RIGHT)) {
-        return (sxbp_figure_dimension_t)((previous_origin.x - collider_end.x) + collider.length + 1);
+        return (sxbp_length_t)((previous_origin.x - collider_end.x) + collider.length + 1);
     } else if((previous.direction == SXBP_LEFT) && (collider.direction == SXBP_LEFT)) {
-        return (sxbp_figure_dimension_t)((previous_origin.x - collider_origin.x) + collider.length + 1);
+        return (sxbp_length_t)((previous_origin.x - collider_origin.x) + collider.length + 1);
     } else {
         // this is the catch-all case, where no way to optimise was found
-        return previous.length + 1;
+        return previous.length + 1U;
     }
 }
 
@@ -325,7 +325,7 @@ static sxbp_length_t sxbp_suggest_previous_length(
     // );
     // // if the two lines are not parallel, just extend by 1 and return early
     if((previous.direction % 2u) != (collider.direction % 2u)) {
-        return previous.length + 1;
+        return previous.length + 1U;
     } else {
         /*
          * otherwise, use our callback function with sxbp_walk_figure() to get
@@ -349,7 +349,7 @@ static sxbp_length_t sxbp_suggest_previous_length(
         // TODO: replace with result of sxbp_resolve_collision() above
         // FIXME: This can't be done until sxbp_suggest_previous_length_callback
         // is fixed properly
-        return previous.length + 1;
+        return previous.length + 1U;
     }
 }
 
