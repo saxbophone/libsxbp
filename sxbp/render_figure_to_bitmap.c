@@ -20,7 +20,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 // private datatype for passing context data into sxbp_walk_figure() callback
@@ -90,7 +90,3 @@ sxbp_result_t sxbp_render_figure_to_bitmap(
     }
     return SXBP_RESULT_OK;
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

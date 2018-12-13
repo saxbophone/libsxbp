@@ -16,7 +16,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 // Version numbers are passed as preprocessor definitions by CMake
@@ -35,7 +35,3 @@ const sxbp_begin_figure_options_t SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT = {
 
 const sxbp_refine_method_t SXBP_REFINE_METHOD_DEFAULT =
     SXBP_REFINE_METHOD_SHRINK_FROM_END;
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

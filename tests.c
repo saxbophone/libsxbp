@@ -19,9 +19,8 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
-
 
 /*
  * disable GCC warning about the unused parameter, as this is a callback it must
@@ -121,7 +120,3 @@ int main(void) {
         return 0;
     }
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

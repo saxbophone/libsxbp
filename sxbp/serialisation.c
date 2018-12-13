@@ -21,7 +21,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 // NOTE: All unsigned integer serialisation uses big-endian ordering
@@ -347,7 +347,3 @@ sxbp_result_t sxbp_load_figure(
         }
     }
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

@@ -23,7 +23,7 @@
 
 
 #ifdef __cplusplus
-extern "C"{
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 bool sxbp_success(sxbp_result_t state) {
@@ -316,7 +316,3 @@ sxbp_result_t sxbp_copy_bitmap(
         return SXBP_RESULT_OK;
     }
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

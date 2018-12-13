@@ -25,7 +25,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 // private, works out how many bytes are needed to store the given bitmap as PBM
@@ -208,7 +208,3 @@ sxbp_result_t sxbp_render_figure_to_pbm(
 }
 // reënable all warnings
 #pragma GCC diagnostic pop
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
