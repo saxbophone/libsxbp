@@ -1,9 +1,10 @@
 language: c
-# Run on Ubuntu 14.04 Trusty in Travis Container
+# On Ubuntu, run in Travis Container
 sudo: false
-dist: trusty
-# helps to use actual GCC on OSX (not Clang!)
-osx_image: xcode8
+# Use Ubuntu 16.04 Xenial (for Clang 7)
+dist: xenial
+# helps to use actual GCC on OSX (not Clang!) and Clang version 6
+osx_image: xcode10
 # build matrix with both OSes and Compilers
 os:
   - linux
@@ -13,14 +14,6 @@ compiler:
   - gcc
 cache:
   - ccache
-addons:
-  apt:
-    sources:
-      # add PPAs with more up-to-date toolchains
-      - ubuntu-toolchain-r-test
-    packages:
-      # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5
 # branches safelist
 branches:
   only:
@@ -35,8 +28,8 @@ install:
   # install gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew install gcc5; fi
 before_script:
-  # override $CC to use gcc-5
-  - if [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
+  # override $CC to use gcc-5 on OSX
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
   - cmake .
 script:
   - make -j -k
