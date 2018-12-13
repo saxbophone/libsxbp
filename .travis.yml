@@ -1,6 +1,7 @@
 language: c
-# Run on Ubuntu 14.04 Trusty in Travis Container
+# On Ubuntu, run in Travis Container
 sudo: false
+# Use Ubuntu 16.04 Xenial (for Clang 7)
 dist: trusty
 # helps to use actual GCC on OSX (not Clang!) and Clang version 6
 osx_image: xcode10
@@ -13,14 +14,6 @@ compiler:
   - gcc
 cache:
   - ccache
-addons:
-  apt:
-    sources:
-      # add PPAs with more up-to-date toolchains
-      - ubuntu-toolchain-r-test
-    packages:
-      # want gcc 5.x as 4.x gives incorrect warnings
-      - gcc-5
 # branches safelist
 branches:
   only:
