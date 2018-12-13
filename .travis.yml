@@ -1,8 +1,8 @@
 language: c
 # On Ubuntu, run in Travis Container
-# sudo: false
+sudo: false
 # Use Ubuntu 16.04 Xenial (for Clang 7)
-dist: trusty
+dist: xenial
 # helps to use actual GCC on OSX (not Clang!) and Clang version 6
 osx_image: xcode10
 # build matrix with both OSes and Compilers
