@@ -116,21 +116,6 @@ sxbp_result_t sxbp_copy_buffer(
     }
 }
 
-/*
- * private, works out and returns the size of the file referred to by the given
- * file handle
- */
-static size_t sxbp_get_file_size(FILE* file_handle) {
-    // seek to end
-    // NOTE: This isn't portable due to lack of meaningful support of `SEEK_END`
-    fseek(file_handle, 0, SEEK_END);
-    // get size
-    size_t file_size = (size_t)ftell(file_handle);
-    // seek to start again
-    fseek(file_handle, 0, SEEK_SET);
-    return file_size;
-}
-
 sxbp_result_t sxbp_buffer_from_file(
     FILE* file_handle,
     sxbp_buffer_t* const buffer
