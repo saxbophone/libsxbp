@@ -62,8 +62,13 @@ typedef struct sxbp_bounds_t {
  */
 extern const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4];
 
-// private, portably returns the size in bytes of the file at the given handle
-size_t sxbp_get_file_size(FILE* file_handle);
+/*
+ * private, portably retrieves the size in bytes of the file at the given handle
+ * and writes this out to file_size
+ * returns SXBP_RESULT_FAIL_IO if an error occurred
+ * returns SXBP_RESULT_OK if successful
+ */
+sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size);
 
 /*
  * private, updates the current figure bounds given the location of the end of

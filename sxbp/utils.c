@@ -125,8 +125,15 @@ sxbp_result_t sxbp_buffer_from_file(
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     // erase buffer
     sxbp_free_buffer(buffer);
-    // get the file's size
-    buffer->size = sxbp_get_file_size(file_handle);
+    /*
+     * get the file's size
+     * we'll store any errors encountered by this operation here
+     */
+    sxbp_result_t status = SXBP_RESULT_UNKNOWN;
+    if (!sxbp_check(sxbp_get_file_size(file_handle, &buffer->size), &status)) {
+        // handle error
+        return status;
+    }
     // allocate the buffer to this size and handle error if this failed
     if (!sxbp_success(sxbp_init_buffer(buffer))) {
         // allocation failed - this can only be a memory error

@@ -25,7 +25,10 @@
  */
 #include <assert.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
 
+#include "sxbp.h"
 #include "sxbp_internal.h"
 
 
@@ -33,70 +36,104 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
-// TODO: Check these macro constants and how to check two macro constants
+// TODO: Check these macro constants for correctness on each OS
 
 // POSIX version
-#ifdef POSIX
+#if defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 // we're gonna need fstat() for this!
 #include <sys/stat.h>
 
 
-size_t sxbp_get_file_size(FILE* file_handle) {
+sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size) {
     // preconditional assertions
     assert(file_handle != NULL);
+    assert(file_size != NULL);
+    // try and get a file descriptor for the file handle
+    int file_descriptor = fileno(file_handle);
+    if (file_descriptor == -1) {
+        // getting a file descriptor failed
+        return SXBP_RESULT_FAIL_IO;
+    }
     // results from the fstat call are stored here
     struct stat file_info = { 0 };
-    if (fstat(file_handle, &file_info) == 0) {
+    if (fstat(file_descriptor, &file_info) == 0) {
         // file size is file_info.st_size
-        return (size_t)file_info.st_size;
+        *file_size = (size_t)file_info.st_size;
+        // return success
+        return SXBP_RESULT_OK;
     } else {
-        /*
-         * TODO: change function signature to make file size an out parameter,
-         * so that success/failure may be returned directly.
-         */
-        return 0;
+        // return error code
+        return SXBP_RESULT_FAIL_IO;
     }
 }
-#endif
 
 // Windows version
-#ifdef WIN32
+#elif defined(_WIN32)
 // We're gonna need GetFileSizeEx() for this!
 #include <Windows.h>
 
 
-size_t sxbp_get_file_size(FILE* file_handle) {
+sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size) {
     // preconditional assertions
     assert(file_handle != NULL);
-    // the file's size will be stored here
-    LARGE_INTEGER file_size;
+    assert(file_size != NULL);
+    // try and convert the file handle to a Windows file descriptor
+    int file_descriptor = _fileno(file_handle);
+    if (file_descriptor < 0) {
+        // Windows API returns a negative code if it couldn't do the operation
+        return SXBP_RESULT_FAIL_IO;
+    }
+    // try and convert the Windows file descriptor to a Windows HANDLE
+    intptr_t windows_file_handle = _get_osfhandle(file_descriptor);
+    if (windows_file_handle == INVALID_HANDLE_VALUE) {
+        // Windows couldn't do it, return an error
+        return SXBP_RESULT_FAIL_IO;
+    }
+    // the file's size from the Windows API call will be stored in this struct
+    LARGE_INTEGER file_size_info;
     // call the Windows API to check the file size
-    GetFileSizeEx(file_handle, &file_size);
-    // LARGE_INTEGER is actually a struct...
-    // TODO: work out which part to return
-    // Oh... Windows API... :P
-    return 0;
+    // TODO: error handling!
+    GetFileSizeEx((HANDLE)windows_file_handle, &file_size_info);
+    /*
+     * LARGE_INTEGER is actually a struct of two DWORDS (32-bits) with an extra
+     * member which is 64 bits on 64-bit systems.
+     * As it happens, we don't care about files that are larger than 1GiB so if
+     * the higher DWORD is set, we can return an error code instead as we don't
+     * need it (can't use it for input to the algorithm)
+     */
+    if (file_size_info.HighPart != 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    } else {
+        *file_size = (size_t)file_size_info.LowPart;
+        return SXBP_RESULT_OK;
+    }
 }
-#endif
 
 // Generic version
 // NOTE: I don't think this is the correct way to check two macro constants
-#ifndef POSIX
-#ifndef WIN32
-size_t sxbp_get_file_size(FILE* file_handle) {
+#else
+sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size) {
     // preconditional assertions
     assert(file_handle != NULL);
+    assert(file_size != NULL);
     /*
      * seek to end
      * NOTE: This isn't portable due to lack of meaningful support of `SEEK_END`
      */
-    fseek(file_handle, 0, SEEK_END);
-    // get size
-    size_t file_size = (size_t)ftell(file_handle);
+    if (fseek(file_handle, 0, SEEK_END) != 0) {
+        // handle fseek() error
+        return SXBP_RESULT_FAIL_IO;
+    }
+    // get size and check it, before storing it or throwing an error
+    int check_file_size = ftell(file_handle);
+    if (check_file_size < 0) {
+        // handle ftell() error
+        return SXBP_RESULT_FAIL_IO;
+    }
+    *file_size = (size_t)check_file_size;
     // seek to start again
     fseek(file_handle, 0, SEEK_SET);
     // return the calculated file size
-    return file_size;
+    return SXBP_RESULT_OK;
 }
-#endif
 #endif

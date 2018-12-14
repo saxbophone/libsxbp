@@ -389,6 +389,9 @@ sxbp_result_t sxbp_copy_buffer(
  * @returns `SXBP_RESULT_FAIL_MEMORY` or `SXBP_RESULT_FAIL_IO` on failure to copy the file contents
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `file_handle` or `buffer` is
  * `NULL`
+ * @returns `SXBP_RESULT_FAIL_IO` if the file's size could not be determined
+ * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED` if the file size appears to be
+ * greater than 2GiB on Microsoft Windows only
  * @since v0.54.0
  */
 sxbp_result_t sxbp_buffer_from_file(
