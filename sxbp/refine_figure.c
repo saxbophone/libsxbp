@@ -39,6 +39,8 @@ sxbp_result_t sxbp_refine_figure(
     }
     // now run the appropriate refinement function for all implemented methods
     switch (method) {
+        case SXBP_REFINE_METHOD_GROW_FROM_START:
+            return sxbp_refine_figure_grow_from_start(figure, options);
         case SXBP_REFINE_METHOD_SHRINK_FROM_END:
             return sxbp_refine_figure_shrink_from_end(figure, options);
         default:

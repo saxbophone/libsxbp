@@ -36,10 +36,15 @@ typedef enum sxbp_rotation_t {
 
 // private, builds a line from a direction and length
 static sxbp_line_t sxbp_make_line(
+    sxbp_figure_size_t index,
     sxbp_direction_t direction,
     sxbp_length_t length
 ) {
-    return (sxbp_line_t){ .direction = direction, .length = length, };
+    return (sxbp_line_t){
+        .id = index,
+        .direction = direction,
+        .length = length,
+    };
 }
 
 // private, converts a binary bit into a rotational direction
@@ -101,7 +106,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
     // the first line is always an up line - this is for orientation purposes
     sxbp_direction_t facing = SXBP_UP;
     // add first line to the figure
-    figure->lines[0] = sxbp_make_line(facing, 1);
+    figure->lines[0] = sxbp_make_line(0u, facing, 1);
     // update the location
     sxbp_move_location_along_line(&location, figure->lines[0]);
     // update the bounds
@@ -130,7 +135,7 @@ static void sxbp_plot_lines(const sxbp_buffer_t* data, sxbp_figure_t* figure) {
             // calculate what length this line should be
             sxbp_length_t length = sxbp_next_length(location, facing, bounds);
             // make line
-            sxbp_line_t line = sxbp_make_line(facing, length);
+            sxbp_line_t line = sxbp_make_line(index, facing, length);
             // add line to figure
             figure->lines[index] = line;
             // update location and bounds

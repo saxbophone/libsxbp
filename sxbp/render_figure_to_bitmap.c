@@ -34,8 +34,15 @@ typedef struct render_figure_to_bitmap_context {
     bool second_pixel_complete; // whether the second pixel has been plotted yet
 } render_figure_to_bitmap_context;
 
+/*
+ * disable GCC warning about the unused parameter, as this is a callback it must
+ * include all arguments specified by the caller, even if not used
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 // private, callback function for sxbp_render_figure_to_bitmap()
 static bool sxbp_render_figure_to_bitmap_callback(
+    sxbp_line_t* line,
     sxbp_co_ord_t location,
     void* callback_data
 ) {
@@ -57,6 +64,8 @@ static bool sxbp_render_figure_to_bitmap_callback(
     // return true --we always want to continue
     return true;
 }
+// reënable all warnings
+#pragma GCC diagnostic pop
 
 sxbp_result_t sxbp_render_figure_to_bitmap(
     const sxbp_figure_t* figure,
