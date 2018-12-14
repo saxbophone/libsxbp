@@ -29,7 +29,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
@@ -203,7 +203,3 @@ void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
     }
     fprintf(stream, "\n");
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

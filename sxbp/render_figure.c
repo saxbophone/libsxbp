@@ -20,7 +20,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+#error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
 sxbp_result_t sxbp_render_figure(
@@ -42,7 +42,3 @@ sxbp_result_t sxbp_render_figure(
         render_callback_options
     );
 }
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
