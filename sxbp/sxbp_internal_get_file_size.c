@@ -92,8 +92,10 @@ sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size) {
     // the file's size from the Windows API call will be stored in this struct
     LARGE_INTEGER file_size_info;
     // call the Windows API to check the file size
-    // TODO: error handling!
-    GetFileSizeEx((HANDLE)windows_file_handle, &file_size_info);
+    if (!GetFileSizeEx((HANDLE)windows_file_handle, &file_size_info)) {
+        // if it failed, return an error code
+        return SXBP_RESULT_FAIL_IO;
+    }
     /*
      * LARGE_INTEGER is actually a struct of two DWORDS (32-bits) with an extra
      * member which is 64 bits on 64-bit systems.
@@ -110,7 +112,6 @@ sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size) {
 }
 
 // Generic version
-// NOTE: I don't think this is the correct way to check two macro constants
 #else
 sxbp_result_t sxbp_get_file_size(FILE* file_handle, size_t* file_size) {
     // preconditional assertions
