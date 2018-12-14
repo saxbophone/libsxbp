@@ -33,37 +33,70 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
+// TODO: Check these macro constants and how to check two macro constants
+
+// POSIX version
+#ifdef POSIX
+// we're gonna need fstat() for this!
+#include <sys/stat.h>
+
+
 size_t sxbp_get_file_size(FILE* file_handle) {
     // preconditional assertions
     assert(file_handle != NULL);
-    size_t file_size = 0;
-    /*
-     * conditional compilation, hurrah!
-     * TODO: Check these macro constants, I literally made these ones up
-     */
-    #ifdef POSIX // POSIX implementation
-    // TODO: POSIX implementation goes here
-    assert(0 != 0);
-    #endif // ifdef POSIX
+    // results from the fstat call are stored here
+    struct stat file_info = { 0 };
+    if (fstat(file_handle, &file_info) == 0) {
+        // file size is file_info.st_size
+        return (size_t)file_info.st_size;
+    } else {
+        /*
+         * TODO: change function signature to make file size an out parameter,
+         * so that success/failure may be returned directly.
+         */
+        return 0;
+    }
+}
+#endif
 
-    #ifndef POSIX
-    #ifdef WIN32 // Windows implementation
-    // TODO: Windows implementation goes here
-    #endif // ifdef WIN32
+// Windows version
+#ifdef WIN32
+// We're gonna need GetFileSizeEx() for this!
+#include <Windows.h>
 
-    #ifndef WIN32 // Generic implementation
+
+size_t sxbp_get_file_size(FILE* file_handle) {
+    // preconditional assertions
+    assert(file_handle != NULL);
+    // the file's size will be stored here
+    LARGE_INTEGER file_size;
+    // call the Windows API to check the file size
+    GetFileSizeEx(file_handle, &file_size);
+    // LARGE_INTEGER is actually a struct...
+    // TODO: work out which part to return
+    // Oh... Windows API... :P
+    return 0;
+}
+#endif
+
+// Generic version
+// NOTE: I don't think this is the correct way to check two macro constants
+#ifndef POSIX
+#ifndef WIN32
+size_t sxbp_get_file_size(FILE* file_handle) {
+    // preconditional assertions
+    assert(file_handle != NULL);
     /*
      * seek to end
      * NOTE: This isn't portable due to lack of meaningful support of `SEEK_END`
      */
     fseek(file_handle, 0, SEEK_END);
     // get size
-    file_size = (size_t)ftell(file_handle);
+    size_t file_size = (size_t)ftell(file_handle);
     // seek to start again
     fseek(file_handle, 0, SEEK_SET);
-    #endif // ifndef WIN32
-    #endif // ifndef POSIX
-
     // return the calculated file size
     return file_size;
 }
+#endif
+#endif
