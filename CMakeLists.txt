@@ -144,7 +144,7 @@ link_directories(${CHECK_LIBRARY_DIRS})
 # C source files
 file(GLOB SXBP_SOURCES "sxbp/*.c")
 # C source files for unit tests
-set(TEST_SOURCES "tests/unit_tests.c")
+file(GLOB TEST_SOURCES "tests/*.c")
 # Header files
 set(SXBP_HEADERS "sxbp/sxbp.h")
 
