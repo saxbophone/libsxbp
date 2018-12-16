@@ -1,6 +1,5 @@
 language: c
-# On Ubuntu, run in Travis Container
-sudo: false
+sudo: true
 # Use Ubuntu 16.04 Xenial (for Clang 7)
 dist: xenial
 # helps to use actual GCC on OSX (not Clang!) and Clang version 6
@@ -30,6 +29,14 @@ branches:
     - develop
     - /^test\/.*$/
     - /^feature\/.*$/
+install:
+  - wget https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar.gz
+  - tar -xzvf check-0.12.0.tar.gz
+  - pushd check-0.12.0.tar.gz
+  - cmake .
+  - make -j
+  - sudo make install
+  - popd
 before_script:
   # override $CC to use gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
