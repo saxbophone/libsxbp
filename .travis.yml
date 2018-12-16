@@ -30,13 +30,7 @@ branches:
     - /^test\/.*$/
     - /^feature\/.*$/
 install:
-  - wget https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar.gz
-  - tar -xzvf check-0.12.0.tar.gz
-  - pushd check-0.12.0.tar.gz
-  - cmake .
-  - make -j
-  - sudo make install
-  - popd
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] ; then ./install_check.sh; fi
 before_script:
   # override $CC to use gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
