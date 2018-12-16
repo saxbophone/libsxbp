@@ -5,3 +5,4 @@
  * test suites
  */
 Suite* make_bitmap_suite(void);
+Suite* make_buffer_suite(void);

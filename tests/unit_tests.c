@@ -8,6 +8,7 @@
 int main(void) {
     int number_failed = -1;
     SRunner* sr = srunner_create(make_bitmap_suite());
+    srunner_add_suite(sr, make_buffer_suite());
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

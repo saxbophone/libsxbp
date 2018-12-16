@@ -102,27 +102,27 @@ START_TEST(test_copy_bitmap) {
 
 Suite* make_bitmap_suite(void) {
     // Test cases for bitmap data type
-    Suite* s = suite_create("Bitmap");
+    Suite* test_suite = suite_create("Bitmap");
 
     TCase* blank_bitmap = tcase_create("Create blank Bitmap");
     tcase_add_test(blank_bitmap, test_blank_bitmap);
-    suite_add_tcase(s, blank_bitmap);
+    suite_add_tcase(test_suite, blank_bitmap);
 
     TCase* init_bitmap = tcase_create("Allocate a Bitmap");
     tcase_add_test(init_bitmap, test_init_bitmap);
-    suite_add_tcase(s, init_bitmap);
+    suite_add_tcase(test_suite, init_bitmap);
 
     TCase* free_bitmap_unallocated = tcase_create("Free an unallocated Bitmap");
     tcase_add_test(free_bitmap_unallocated, test_free_bitmap_unallocated);
-    suite_add_tcase(s, free_bitmap_unallocated);
+    suite_add_tcase(test_suite, free_bitmap_unallocated);
 
     TCase* free_bitmap_allocated = tcase_create("Free an allocated Bitmap");
     tcase_add_test(free_bitmap_allocated, test_free_bitmap_allocated);
-    suite_add_tcase(s, free_bitmap_allocated);
+    suite_add_tcase(test_suite, free_bitmap_allocated);
 
     TCase* copy_bitmap = tcase_create("Copy a Bitmap");
     tcase_add_test(copy_bitmap, test_copy_bitmap);
-    suite_add_tcase(s, copy_bitmap);
+    suite_add_tcase(test_suite, copy_bitmap);
 
-    return s;
+    return test_suite;
 }
