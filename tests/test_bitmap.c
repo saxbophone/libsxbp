@@ -35,7 +35,7 @@ START_TEST(test_init_bitmap) {
     }
 } END_TEST
 
-START_TEST(test_init_bitmap_null_pointer_error) {
+START_TEST(test_init_bitmap_null) {
     sxbp_result_t result = sxbp_init_bitmap(NULL);
 
     // check that the return code was a precondition check error
@@ -136,14 +136,11 @@ Suite* make_bitmap_suite(void) {
     tcase_add_test(init_bitmap, test_init_bitmap);
     suite_add_tcase(test_suite, init_bitmap);
 
-    TCase* init_bitmap_null_pointer_error = tcase_create(
+    TCase* init_bitmap_null = tcase_create(
         "Bitmap allocation returns appropriate error code when given NULL pointer"
     );
-    tcase_add_test(
-        init_bitmap_null_pointer_error,
-        test_init_bitmap_null_pointer_error
-    );
-    suite_add_tcase(test_suite, init_bitmap_null_pointer_error);
+    tcase_add_test(init_bitmap_null, test_init_bitmap_null);
+    suite_add_tcase(test_suite, init_bitmap_null);
 
     TCase* free_bitmap_unallocated = tcase_create("Free an unallocated Bitmap");
     tcase_add_test(free_bitmap_unallocated, test_free_bitmap_unallocated);
