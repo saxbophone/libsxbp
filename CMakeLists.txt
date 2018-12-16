@@ -97,6 +97,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 # begin dependencies
+
 # add custom dependencies directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
@@ -132,10 +133,18 @@ else()
     # issue message
     message(STATUS "[sxbp] PNG output support disabled")
 endif()
+
+# Check (for unit tests)
+find_package(Check REQUIRED)
+include_directories(${CHECK_INCLUDE_DIRS})
+link_directories(${CHECK_LIBRARY_DIRS})
+
 # end dependencies
 
 # C source files
 file(GLOB SXBP_SOURCES "sxbp/*.c")
+# C source files for unit tests
+set(TEST_SOURCES "tests/unit_tests.c")
 # Header files
 set(SXBP_HEADERS "sxbp/sxbp.h")
 
@@ -152,9 +161,9 @@ if(SXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
-add_executable(sxp_test tests.c)
+add_executable(unit_tests ${TEST_SOURCES})
 
-target_link_libraries(sxp_test sxbp)
+target_link_libraries(unit_tests sxbp ${CHECK_LIBRARIES})
 
 install(
     TARGETS sxbp
@@ -186,4 +195,4 @@ install(
 )
 
 enable_testing()
-add_test(unit_tests sxp_test)
+add_test(unit_tests unit_tests)
