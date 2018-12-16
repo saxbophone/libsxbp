@@ -4,6 +4,6 @@ wget https://github.com/libcheck/check/releases/download/0.12.0/check-0.12.0.tar
 tar -xzvf check-0.12.0.tar.gz;
 cd check-0.12.0;
 ./configure;
-make;
-make check;
+make -j;
+make -j check;
 sudo make install;
