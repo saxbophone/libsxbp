@@ -135,9 +135,14 @@ else()
 endif()
 
 # Check (for unit tests)
-find_package(Check REQUIRED)
-include_directories(${CHECK_INCLUDE_DIRS})
-link_directories(${CHECK_LIBRARY_DIRS})
+find_package(Check)
+if(CHECK_FOUND)
+    include_directories(${CHECK_INCLUDE_DIRS})
+    link_directories(${CHECK_LIBRARY_DIRS})
+    set(BUILD_UNIT_TESTS ON)
+else()
+    set(BUILD_UNIT_TESTS OFF)
+endif()
 
 # end dependencies
 
@@ -161,9 +166,13 @@ if(SXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
-add_executable(unit_tests ${TEST_SOURCES})
-
-target_link_libraries(unit_tests sxbp ${CHECK_LIBRARIES})
+# build unit tests if enabled
+if(BUILD_UNIT_TESTS)
+    add_executable(unit_tests ${TEST_SOURCES})
+    target_link_libraries(unit_tests sxbp ${CHECK_LIBRARIES})
+    enable_testing()
+    add_test(unit_tests unit_tests)
+endif()
 
 install(
     TARGETS sxbp
@@ -193,6 +202,3 @@ install(
     FILES ${SXBP_HEADERS}
     DESTINATION "include/${SXBP_PRECISE_HEADER_DESTINATION}"
 )
-
-enable_testing()
-add_test(unit_tests unit_tests)
