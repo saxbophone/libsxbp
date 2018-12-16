@@ -169,6 +169,13 @@ endif()
 # build unit tests if enabled
 if(BUILD_UNIT_TESTS)
     add_executable(unit_tests ${TEST_SOURCES})
+    # Clang complains (and rightly so!) about GNU extensions being used by Check
+    # This is out of our control however, so silence these warnings for the
+    # unit tests ONLY
+    check_c_compiler_flag("-Wno-gnu-zero-variadic-macro-arguments" must_disable_variadic_macro_warning)
+    if(must_disable_variadic_macro_warning)
+        set_source_files_properties(${TEST_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-gnu-zero-variadic-macro-arguments")
+    endif()
     target_link_libraries(unit_tests sxbp ${CHECK_LIBRARIES})
     enable_testing()
     add_test(unit_tests unit_tests)
