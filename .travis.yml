@@ -15,9 +15,10 @@ compiler:
 cache:
   - ccache
 addons:
-  apt:
-    packages:
-      - check
+  # NOTE: only install Check on OSX as the version in APT is too old
+  # apt:
+  #   packages:
+  #     - check
   homebrew:
     packages:
       - gcc5
