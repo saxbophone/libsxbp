@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdlib.h>
 
 #include <check.h>
@@ -53,10 +52,12 @@ START_TEST(test_free_bitmap_unallocated) {
 START_TEST(test_free_bitmap_allocated) {
     sxbp_bitmap_t bitmap = { .width = 32, .height = 64, .pixels = NULL, };
     /*
-     * allocate the bitmap -we use regular assert here to check failure,
-     * because this test case is not testing the init function
+     * allocate the bitmap -if this fails then we'll abort here because this
+     * test case is not testing the init function
      */
-    assert(sxbp_init_bitmap(&bitmap) == SXBP_RESULT_OK);
+    if (sxbp_init_bitmap(&bitmap) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate bitmap");
+    }
 
     // calling the freeing function on this allocated bitmap should free memory
     bool needed_free = sxbp_free_bitmap(&bitmap);
@@ -65,6 +66,38 @@ START_TEST(test_free_bitmap_allocated) {
     ck_assert_ptr_null(bitmap.pixels);
     // the function should return true to tell us it needed to free
     ck_assert(needed_free);
+} END_TEST
+
+START_TEST(test_copy_bitmap) {
+    sxbp_bitmap_t from = { .width = 32, .height = 64, .pixels = NULL, };
+    /*
+     * allocate the bitmap -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_bitmap(&from) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate bitmap");
+    }
+    // populate the bitmap with a chessboard pattern
+    for (sxbp_figure_size_t x = 0; x < from.width; x++) {
+        for (sxbp_figure_size_t y = 0; y < from.height; y++) {
+            from.pixels[x][y] = (x + y) % 2;
+        }
+    }
+    // this is the destination bitmap to copy to
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    // check operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    // memory should have been allocated
+    ck_assert_ptr_nonnull(to.pixels);
+    // check that contents are actually identical
+    for (sxbp_figure_size_t x = 0; x < to.width; x++) {
+        for (sxbp_figure_size_t y = 0; y < to.height; y++) {
+            ck_assert(to.pixels[x][y] == from.pixels[x][y]);
+        }
+    }
 } END_TEST
 
 Suite* make_bitmap_suite(void) {
@@ -86,6 +119,10 @@ Suite* make_bitmap_suite(void) {
     TCase* free_bitmap_allocated = tcase_create("Free an allocated Bitmap");
     tcase_add_test(free_bitmap_allocated, test_free_bitmap_allocated);
     suite_add_tcase(s, free_bitmap_allocated);
+
+    TCase* copy_bitmap = tcase_create("Copy a Bitmap");
+    tcase_add_test(copy_bitmap, test_copy_bitmap);
+    suite_add_tcase(s, copy_bitmap);
 
     return s;
 }
