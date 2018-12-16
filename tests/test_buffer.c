@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include <check.h>
 
 #include "../sxbp/sxbp.h"
