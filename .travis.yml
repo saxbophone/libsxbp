@@ -14,6 +14,10 @@ compiler:
   - gcc
 cache:
   - ccache
+addons:
+  apt:
+    packages:
+      - check
 # branches safelist
 branches:
   only:
@@ -25,8 +29,8 @@ before_install:
   # fix for homebrew failling on Travis-CI
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew update; fi
 install:
-  # install gcc-5 on OSX
-  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew install gcc5; fi
+  # install gcc-5 and check on OSX
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew install gcc5 check; fi
 before_script:
   # override $CC to use gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi
