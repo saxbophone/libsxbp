@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include <check.h>
 
@@ -73,6 +74,53 @@ START_TEST(test_free_buffer_allocated) {
     ck_assert(needed_free);
 } END_TEST
 
+START_TEST(test_copy_buffer) {
+    sxbp_buffer_t from = { .size = 10000, .bytes = NULL, };
+    /*
+     * allocate the buffer -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_buffer(&from) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate buffer");
+    }
+    // populate the buffer with 'random' bytes
+    for (size_t i = 0; i < from.size; i++) {
+        from.bytes[i] = rand() / 128;
+    }
+    // this is the destination buffer to copy to
+    sxbp_buffer_t to = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+
+    // check operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    // memory should have been allocated
+    ck_assert_ptr_nonnull(to.bytes);
+    // check that contents are actually identical
+    ck_assert(to.size == from.size);
+    for (size_t i = 0; i < to.size; i++) {
+        ck_assert(to.bytes[i] == from.bytes[i]);
+    }
+} END_TEST
+
+START_TEST(test_copy_buffer_from_null) {
+    sxbp_buffer_t to = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(NULL, &to);
+
+    // precondition check error should be returned when from is NULL
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+} END_TEST
+
+START_TEST(test_copy_buffer_to_null) {
+    sxbp_buffer_t from = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(&from, NULL);
+
+    // precondition check error should be returned when to is NULL
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+} END_TEST
+
 Suite* make_buffer_suite(void) {
     // Test cases for buffer data type
     Suite* test_suite = suite_create("Buffer");
@@ -98,6 +146,22 @@ Suite* make_buffer_suite(void) {
     TCase* free_buffer_allocated = tcase_create("Free an allocated Buffer");
     tcase_add_test(free_buffer_allocated, test_free_buffer_allocated);
     suite_add_tcase(test_suite, free_buffer_allocated);
+
+    TCase* copy_buffer = tcase_create("Copy a Buffer");
+    tcase_add_test(copy_buffer, test_copy_buffer);
+    suite_add_tcase(test_suite, copy_buffer);
+
+    TCase* copy_buffer_from_null = tcase_create(
+        "Buffer copying returns appropriate error code when from is NULL"
+    );
+    tcase_add_test(copy_buffer_from_null, test_copy_buffer_from_null);
+    suite_add_tcase(test_suite, copy_buffer_from_null);
+
+    TCase* copy_buffer_to_null = tcase_create(
+        "Buffer copying returns appropriate error code when to is NULL"
+    );
+    tcase_add_test(copy_buffer_to_null, test_copy_buffer_to_null);
+    suite_add_tcase(test_suite, copy_buffer_to_null);
 
     return test_suite;
 }

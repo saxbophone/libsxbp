@@ -102,6 +102,8 @@ START_TEST(test_copy_bitmap) {
     // memory should have been allocated
     ck_assert_ptr_nonnull(to.pixels);
     // check that contents are actually identical
+    ck_assert(to.width == from.width);
+    ck_assert(to.height == from.height);
     for (sxbp_figure_size_t x = 0; x < to.width; x++) {
         for (sxbp_figure_size_t y = 0; y < to.height; y++) {
             ck_assert(to.pixels[x][y] == from.pixels[x][y]);
@@ -114,6 +116,7 @@ START_TEST(test_copy_bitmap_from_null) {
 
     sxbp_result_t result = sxbp_copy_bitmap(NULL, &to);
 
+    // precondition check error should be returned when from is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
@@ -122,6 +125,7 @@ START_TEST(test_copy_bitmap_to_null) {
 
     sxbp_result_t result = sxbp_copy_bitmap(&from, NULL);
 
+    // precondition check error should be returned when to is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
