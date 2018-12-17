@@ -8,6 +8,34 @@
 
 #include "test_suites.h"
 
+// global (for this compilation unit) data useful for some tests
+static const char* test_data_filename = "test_buffer_from_file.bin";
+static const uint8_t sample_data[] = {
+    0x33, 0x13, 0x98, 0x44, 0xf1, 0xf7, 0x7f, 0x6a,
+};
+
+// setup function for creating a test file, useful for a couple of test cases
+static void setup(void) {
+    // create a file and populate it with some data
+    FILE* test_data = fopen(test_data_filename, "wb");
+    if (test_data == NULL) {
+        // if we can't open the file, then abort
+        ck_abort_msg("Unable to create test file");
+    }
+    fwrite(
+        sample_data,
+        sizeof(uint8_t),
+        sizeof(sample_data) / sizeof(uint8_t),
+        test_data
+    );
+    // be a good person, close the file!
+    fclose(test_data);
+}
+
+static void tear_down(void) {
+    // delete the test file
+    remove(test_data_filename);
+}
 
 START_TEST(test_blank_buffer) {
     sxbp_buffer_t buffer = sxbp_blank_buffer();
@@ -121,6 +149,52 @@ START_TEST(test_copy_buffer_to_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_buffer_from_file) {
+    // open file in read mode, aborting if failure occurs
+    FILE* temp_file = fopen(test_data_filename, "rb");
+    if (temp_file == NULL) {
+        ck_abort_msg("Unable to open test file in read mode");
+    }
+    // create a buffer to read the file into
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    // try and read the file into the buffer
+    sxbp_result_t result = sxbp_buffer_from_file(temp_file, &buffer);
+
+    // assert that the operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that what was read into the buffer was the actual data we created
+    for (size_t i = 0; i < sizeof(sample_data) / sizeof(uint8_t); i++) {
+        ck_assert(buffer.bytes[i] == sample_data[i]);
+    }
+} END_TEST
+
+START_TEST(test_buffer_from_file_file_null) {
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_buffer_from_file(NULL, &buffer);
+
+    // result should be precondition failure
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // buffer should be empty and unallocated
+    ck_assert(buffer.size == 0);
+    ck_assert_ptr_null(buffer.bytes);
+} END_TEST
+
+START_TEST(test_buffer_from_file_buffer_null) {
+    // open file in read mode, aborting if failure occurs
+    FILE* temp_file = fopen(test_data_filename, "rb");
+    if (temp_file == NULL) {
+        ck_abort_msg("Unable to open test file in read mode");
+    }
+    sxbp_result_t result = sxbp_buffer_from_file(temp_file, NULL);
+
+    // result should be precondition failure
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // cleanup: close the file
+    fclose(temp_file);
+} END_TEST
+
 Suite* make_buffer_suite(void) {
     // Test cases for buffer data type
     Suite* test_suite = suite_create("Buffer");
@@ -162,6 +236,26 @@ Suite* make_buffer_suite(void) {
     );
     tcase_add_test(copy_buffer_to_null, test_copy_buffer_to_null);
     suite_add_tcase(test_suite, copy_buffer_to_null);
+
+    TCase* buffer_from_file = tcase_create(
+        "Buffer can be populated from the contents of an open file"
+    );
+    tcase_add_checked_fixture(buffer_from_file, setup, tear_down);
+    tcase_add_test(buffer_from_file, test_buffer_from_file);
+    suite_add_tcase(test_suite, buffer_from_file);
+
+    TCase* buffer_from_file_file_null = tcase_create(
+        "Buffer from file returns appropriate error code when file is NULL"
+    );
+    tcase_add_test(buffer_from_file_file_null, test_buffer_from_file_file_null);
+    suite_add_tcase(test_suite, buffer_from_file_file_null);
+
+    TCase* buffer_from_file_buffer_null = tcase_create(
+        "Buffer from file returns appropriate error code when buffer is NULL"
+    );
+    tcase_add_checked_fixture(buffer_from_file_buffer_null, setup, tear_down);
+    tcase_add_test(buffer_from_file_buffer_null, test_buffer_from_file_buffer_null);
+    suite_add_tcase(test_suite, buffer_from_file_buffer_null);
 
     return test_suite;
 }
