@@ -254,7 +254,9 @@ Suite* make_buffer_suite(void) {
         "Buffer from file returns appropriate error code when buffer is NULL"
     );
     tcase_add_checked_fixture(buffer_from_file_buffer_null, setup, tear_down);
-    tcase_add_test(buffer_from_file_buffer_null, test_buffer_from_file_buffer_null);
+    tcase_add_test(
+        buffer_from_file_buffer_null, test_buffer_from_file_buffer_null
+    );
     suite_add_tcase(test_suite, buffer_from_file_buffer_null);
 
     return test_suite;
