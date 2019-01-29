@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include <check.h>
+#include "check_wrapper.h"
 
 #include "test_suites.h"
 

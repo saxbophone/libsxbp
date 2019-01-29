@@ -1,4 +1,4 @@
-#include <check.h>
+#include "check_wrapper.h"
 
 /*
  * Forward-declarations of the prototypes of all functions that generate Check

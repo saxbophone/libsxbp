@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <check.h>
+#include "check_wrapper.h"
 
 #include "../sxbp/sxbp.h"
 
