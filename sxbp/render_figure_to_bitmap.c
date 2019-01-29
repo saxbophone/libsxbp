@@ -84,6 +84,8 @@ sxbp_result_t sxbp_render_figure_to_bitmap(
         sxbp_walk_figure(
             figure,
             2,
+            // don't plot vertices only, we need 1-unit sub-lines too for bitmap
+            false,
             sxbp_render_figure_to_bitmap_callback,
             (void*)&data
         );
