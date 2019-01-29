@@ -178,8 +178,8 @@ static bool sxbp_render_figure_to_bitmap_callback(
     // cast void pointer to a pointer to our context structure
     write_polyline_context* data =
         (write_polyline_context*)callback_data;
-    // skip plotting the first and second line segments
-    if (data->current_point >= 2) {
+    // skip plotting the first line segment
+    if (data->current_point >= 1) {
         // stringify this point's coördinates
         sxbp_figure_dimension_t x = (sxbp_figure_dimension_t)location.x;
         // y coördinate is flipped
