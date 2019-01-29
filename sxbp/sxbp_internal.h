@@ -91,13 +91,16 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds);
  * private, walks the line of the figure, calling the callback with the
  * coördinates of each point of space occupied by the line of the figure
  * the scale of the shape produced can be increased with the scale parameter
- * the shift parameter offsets the points produced
+ * parameter plot_vertices_only, if true will cause the callback to only be
+ * called every time a vetice of the figure's line is encountered, i.e. the
+ * interface of each line segment with another
  * the callback should return false if it does not want the function to continue
  * walking the line, otherwise it should return true.
  */
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,
     size_t scale,
+    bool plot_vertices_only,
     bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
     void* callback_data
 );
