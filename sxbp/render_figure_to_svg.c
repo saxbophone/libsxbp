@@ -171,7 +171,7 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
 }
 
 // private, callback function for sxbp_write_svg_body_figure_line()
-static bool sxbp_render_figure_to_bitmap_callback(
+static bool sxbp_write_svg_body_figure_line_callback(
     sxbp_co_ord_t location,
     void* callback_data
 ) {
@@ -294,7 +294,7 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
         /*
         true, // plot vertices only, we don't need 1-unit long sub-lines for SVG
          */
-        sxbp_render_figure_to_bitmap_callback,
+        sxbp_write_svg_body_figure_line_callback,
         (void*)&data
     );
     // chop off the extra space at the end
