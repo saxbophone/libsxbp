@@ -108,21 +108,21 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
     // generate the code for the origin dot
     const char* origin_dot = (
         "    <rect\n"
-        "        x=\"%s\"\n"
+        "        x=\"%s.9\"\n"
         "        y=\"%s\"\n"
-        "        width=\"1\"\n"
+        "        width=\"1.2\"\n"
         "        height=\"1\"\n"
-        "        fill=\"black\"\n"
+        "        fill=\"white\"\n"
         "    />\n"
     );
     // get the coördinates of the origin dot
     sxbp_co_ord_t origin = sxbp_get_origin_from_bounds(
         sxbp_get_bounds(figure, 2)
     );
-    sxbp_figure_dimension_t origin_x = (sxbp_figure_dimension_t)origin.x;
+    sxbp_figure_dimension_t origin_x = (sxbp_figure_dimension_t)origin.x - 1;
     // y coördinate is flipped
     sxbp_figure_dimension_t origin_y =
-        height - 1 - (sxbp_figure_dimension_t)origin.y;
+        height - 1 - (sxbp_figure_dimension_t)origin.y - 1;
     char origin_x_str[11], origin_y_str[11];
     size_t origin_x_length, origin_y_length = 0;
     // stringify the origin dot x/y values
@@ -171,7 +171,7 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
 }
 
 // private, callback function for sxbp_write_svg_body_figure_line()
-static bool sxbp_render_figure_to_bitmap_callback(
+static bool sxbp_render_figure_to_svg_callback(
     sxbp_co_ord_t location,
     void* callback_data
 ) {
@@ -179,7 +179,7 @@ static bool sxbp_render_figure_to_bitmap_callback(
     write_polyline_context* data =
         (write_polyline_context*)callback_data;
     // skip plotting the first line segment
-    if (data->current_point >= 1) {
+    if (true) {
         // stringify this point's coördinates
         sxbp_figure_dimension_t x = (sxbp_figure_dimension_t)location.x;
         // y coördinate is flipped
@@ -291,15 +291,36 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
         figure,
         2,
         true, // plot vertices only, we don't need 1-unit long sub-lines for SVG
-        sxbp_render_figure_to_bitmap_callback,
+        sxbp_render_figure_to_svg_callback,
         (void*)&data
     );
+    // check the error condition stored in the callback context data
+    if (!sxbp_success(data.error)) {
+        return data.error;
+    }
     // chop off the extra space at the end
     if (!sxbp_success(sxbp_resize_buffer(buffer, buffer->size - 1))) {
         return SXBP_RESULT_FAIL_MEMORY;
     }
-    // return the error condition stored in the callback context data
-    return data.error;
+    // close the polyline tag
+    const char* polyline_end = (
+        "\"\n"
+        "    />\n"
+    );
+    size_t polyline_end_length = strlen(polyline_end);
+    // try and reallocate memory to include the polyline end
+    if (
+        !sxbp_success(
+            sxbp_resize_buffer(buffer, buffer->size + polyline_end_length)
+        )
+    ) {
+        // catch and return memory error
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
+    // write the tail to the end of the buffer
+    memcpy(buffer->bytes + (buffer->size - polyline_end_length), polyline_end, polyline_end_length);
+    // return success
+    return SXBP_RESULT_OK;
 }
 
 /*
@@ -313,16 +334,16 @@ static sxbp_result_t sxbp_write_svg_body(
 ) {
     // any errors encountered will be stored here
     sxbp_result_t error;
-    // write the origin dot
+    // write the line
     if (!sxbp_check(
-        sxbp_write_svg_body_origin_dot(figure, height, buffer), &error)
+        sxbp_write_svg_body_figure_line(figure, height, buffer), &error)
     ) {
         // catch and return error
         return error;
     }
-    // write the line
+    // write the origin dot
     if (!sxbp_check(
-        sxbp_write_svg_body_figure_line(figure, height, buffer), &error)
+        sxbp_write_svg_body_origin_dot(figure, height, buffer), &error)
     ) {
         // catch and return error
         return error;
@@ -337,12 +358,9 @@ static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
      * the 'tail' of the SVG images produced by libsxbp never change, the only
      * way this function can fail is if reallocating memory was refused
      */
-    // the 'tail' (close polyline quote and tag, closing svg tag)
-    const char* tail = (
-        "\"\n"
-        "    />\n"
-        "</svg>\n"
-    );
+    // FIXME: the 'tail' (close polyline quote and tag, closing svg tag)
+    // the 'tail', which closes the SVG tag
+    const char* tail = "</svg>\n";
     size_t tail_length = strlen(tail);
     // any errors encountered will be stored here
     sxbp_result_t error;
