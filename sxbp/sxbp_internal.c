@@ -112,6 +112,7 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,
     size_t scale,
+    bool plot_vertices_only,
     bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
     void* callback_data
 ) {
