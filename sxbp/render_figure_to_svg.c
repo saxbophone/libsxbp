@@ -290,6 +290,7 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
     sxbp_walk_figure(
         figure,
         2,
+        true, // plot vertices only, we don't need 1-unit long sub-lines for SVG
         sxbp_render_figure_to_bitmap_callback,
         (void*)&data
     );

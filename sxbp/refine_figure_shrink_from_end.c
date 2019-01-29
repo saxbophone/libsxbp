@@ -70,7 +70,12 @@ static sxbp_result_t sxbp_figure_collides(
         // set collided to false initially
         *data.collided = false;
         // begin walking the figure, use our callback function to handle points
-        sxbp_walk_figure(figure, 1, sxbp_figure_collides_callback, (void*)&data);
+        sxbp_walk_figure(
+            figure,
+            1,
+            false, // don't plot vertices only, we need all 1-unit sub-lines
+            sxbp_figure_collides_callback, (void*)&data
+        );
         // free the memory allocated for the bitmap
         sxbp_free_bitmap(&bitmap);
         return SXBP_RESULT_OK;
