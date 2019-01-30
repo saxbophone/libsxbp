@@ -7,3 +7,6 @@ cd check-0.12.0;
 make -j;
 make -j check;
 sudo make install;
+cd ..;
+rm -rf check-0.12.0;
+rm check-0.12.0.tar.gz;

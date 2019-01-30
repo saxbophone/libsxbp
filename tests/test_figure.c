@@ -22,18 +22,37 @@
 
 
 START_TEST(test_blank_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    // figure returned should have all fields set to zero/blank values
+    ck_assert(figure.size == 0);
+    ck_assert_ptr_null(figure.lines);
+    ck_assert(figure.lines_remaining == 0);
 } END_TEST
 
 START_TEST(test_init_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = {
+        .size = 100,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+
+    sxbp_result_t result = sxbp_init_figure(&figure);
+
+    // check memory was allocated
+    ck_assert(result == SXBP_RESULT_OK);
+    ck_assert_ptr_nonnull(figure.lines);
+    for (size_t i = 0; i < figure.size; i++) {
+        ck_assert(figure.lines[i].length == 0);
+        ck_assert(figure.lines[i].direction == 0);
+    }
 } END_TEST
 
 START_TEST(test_init_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_result_t result = sxbp_init_figure(NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_free_figure_unallocated) {
