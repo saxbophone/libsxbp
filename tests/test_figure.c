@@ -257,13 +257,21 @@ START_TEST(test_dump_figure) {
 } END_TEST
 
 START_TEST(test_dump_figure_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_dump_figure(NULL, &buffer);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_dump_figure_buffer_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_dump_figure(&figure, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_load_figure) {
@@ -272,14 +280,29 @@ START_TEST(test_load_figure) {
 } END_TEST
 
 START_TEST(test_load_figure_buffer_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_load_figure(NULL, &figure);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_load_figure_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_load_figure(&buffer, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
+
+/*
+ * TODO: add further tests for:
+ * - invalid data due to size
+ * - invalid data due to structure
+ * - invalid data due to being compatible with an older version of sxbp only
+ */
 
 START_TEST(test_render_figure) {
     // TODO: replace this body with actual test code
@@ -287,23 +310,57 @@ START_TEST(test_render_figure) {
 } END_TEST
 
 START_TEST(test_render_figure_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_render_figure(
+        NULL,
+        &buffer,
+        sxbp_render_figure_to_null, // just pass it the dummy backend
+        NULL,
+        NULL
+    );
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_buffer_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_render_figure(
+        &figure,
+        &buffer,
+        NULL, // make sure to not pass any render backend
+        NULL,
+        NULL
+    );
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_render_callback_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_render_figure(
+        &figure,
+        NULL,
+        sxbp_render_figure_to_null, // just pass it the dummy backend
+        NULL,
+        NULL
+    );
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    // this function doesn't care if no objects are passed to it
+    sxbp_result_t result = sxbp_render_figure_to_null(NULL, NULL, NULL, NULL);
+
+    // this function should always return the not-implemented error code
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm) {
@@ -312,13 +369,21 @@ START_TEST(test_render_figure_to_pbm) {
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_render_figure_to_pbm(NULL, &buffer, NULL, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm_buffer_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_render_figure_to_pbm(&figure, NULL, NULL, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_svg) {
@@ -327,13 +392,21 @@ START_TEST(test_render_figure_to_svg) {
 } END_TEST
 
 START_TEST(test_render_figure_to_svg_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_render_figure_to_svg(NULL, &buffer, NULL, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_svg_buffer_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_render_figure_to_svg(&figure, NULL, NULL, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 Suite* make_figure_suite(void) {
