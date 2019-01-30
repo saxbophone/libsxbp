@@ -126,7 +126,7 @@ START_TEST(test_copy_buffer) {
     }
     // populate the buffer with 'random' bytes
     for (size_t i = 0; i < from.size; i++) {
-        from.bytes[i] = rand() / 128;
+        from.bytes[i] = rand() & 0xff;
     }
     // this is the destination buffer to copy to
     sxbp_buffer_t to = sxbp_blank_buffer();

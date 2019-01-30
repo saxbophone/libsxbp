@@ -11,6 +11,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <stdlib.h>
+#include <time.h>
 
 #include "check_wrapper.h"
 
@@ -22,6 +23,12 @@ int main(void) {
     SRunner* suite_runner = srunner_create(make_bitmap_suite());
     srunner_add_suite(suite_runner, make_buffer_suite());
     srunner_add_suite(suite_runner, make_figure_suite());
+
+    /*
+     * to add variety to the 'randomness' of tests which use rand(), seed the
+     * mediocre random number generator
+     */
+    srand((unsigned int)time(NULL));
 
     srunner_run_all(suite_runner, CK_NORMAL);
     number_failed = srunner_ntests_failed(suite_runner);

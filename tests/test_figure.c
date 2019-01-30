@@ -94,18 +94,57 @@ START_TEST(test_free_figure_allocated) {
 } END_TEST
 
 START_TEST(test_copy_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t from = {
+        .size = 100,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&from) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with 'random' lines
+    for (size_t i = 0; i < from.size; i++) {
+        from.lines[i].direction = rand() & 0x03; // range 0..3
+        from.lines[i].length = rand() & 0x3fffffff; // range 0..2^30
+    }
+    // this is the destination figure to copy to
+    sxbp_figure_t to = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+
+    // check operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    // memory should have been allocated
+    ck_assert_ptr_nonnull(to.lines);
+    // check that contents are actually identical
+    ck_assert(to.size == from.size);
+    ck_assert(to.lines_remaining == from.lines_remaining);
+    for (size_t i = 0; i < to.size; i++) {
+        ck_assert(to.lines[i].direction == from.lines[i].direction);
+        ck_assert(to.lines[i].length == from.lines[i].length);
+    }
 } END_TEST
 
 START_TEST(test_copy_figure_from_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t to = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(NULL, &to);
+
+    // precondition check error should be returned when from is NULL
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_figure_to_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t from = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(&from, NULL);
+
+    // precondition check error should be returned when to is NULL
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_begin_figure) {

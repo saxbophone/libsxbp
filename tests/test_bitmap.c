@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "check_wrapper.h"
 
@@ -98,10 +99,10 @@ START_TEST(test_copy_bitmap) {
     if (sxbp_init_bitmap(&from) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate bitmap");
     }
-    // populate the bitmap with a chessboard pattern
+    // populate the bitmap with random pixels
     for (sxbp_figure_size_t x = 0; x < from.width; x++) {
         for (sxbp_figure_size_t y = 0; y < from.height; y++) {
-            from.pixels[x][y] = (x + y) % 2;
+            from.pixels[x][y] = rand() % 2;
         }
     }
     // this is the destination bitmap to copy to
