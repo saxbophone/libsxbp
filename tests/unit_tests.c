@@ -9,6 +9,7 @@ int main(void) {
     int number_failed = -1;
     SRunner* suite_runner = srunner_create(make_bitmap_suite());
     srunner_add_suite(suite_runner, make_buffer_suite());
+    srunner_add_suite(suite_runner, make_figure_suite());
 
     srunner_run_all(suite_runner, CK_NORMAL);
     number_failed = srunner_ntests_failed(suite_runner);

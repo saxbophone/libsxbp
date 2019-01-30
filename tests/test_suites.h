@@ -6,3 +6,4 @@
  */
 Suite* make_bitmap_suite(void);
 Suite* make_buffer_suite(void);
+Suite* make_figure_suite(void);
