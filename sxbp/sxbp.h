@@ -62,6 +62,7 @@ typedef struct sxbp_buffer_t {
 /**
  * @brief Type for representing one of the cartesian directions.
  * @since v0.54.0
+ * @todo Prefix these constants with `SXBP_DIRECTION_`
  */
 typedef enum sxbp_direction_t {
     SXBP_UP = 0u, /**< The cartesian direction 'UP' */

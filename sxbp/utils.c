@@ -232,7 +232,7 @@ sxbp_result_t sxbp_copy_figure(
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the lines
-        memcpy(to->lines, from->lines, to->size);
+        memcpy(to->lines, from->lines, to->size * sizeof(sxbp_line_t));
         return SXBP_RESULT_OK;
     }
 }
@@ -284,8 +284,9 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
                 free(bitmap->pixels[col]);
             }
         }
-        // finally, deallocate the rows pointer
+        // finally, deallocate the rows pointer and set it to NULL
         free(bitmap->pixels);
+        bitmap->pixels = NULL;
         return true;
     } else {
         return false;
