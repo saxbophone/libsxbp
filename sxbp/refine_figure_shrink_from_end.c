@@ -8,7 +8,7 @@
  * their safe 'default' lengths (as plotted by `sxbp_begin_figure`) to the
  * shortest length possible, starting from the end and working backwards.
  *
- * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
+ * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018-2019
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this

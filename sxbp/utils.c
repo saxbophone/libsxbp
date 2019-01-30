@@ -6,7 +6,7 @@
  * freeing and copying the public data types of sxbp and those for checking
  * the error codes returned by certain functions in sxbp.
  *
- * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2018
+ * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018-2019
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this

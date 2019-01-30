@@ -6,7 +6,7 @@
  * `sxbp_render_figure_to_bitmap`, a public function used to render an SXBP
  * figure to a basic bitmap structure.
  *
- * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
+ * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018-2019
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
