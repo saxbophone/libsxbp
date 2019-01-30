@@ -2,7 +2,7 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides unit tests for the sxbp_fiigure_t data type.
+ * This compilation unit provides unit tests for the sxbp_figure_t data type.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *
@@ -153,18 +153,49 @@ START_TEST(test_begin_figure) {
 } END_TEST
 
 START_TEST(test_begin_figure_data_too_big) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    // create a buffer that is larger than SXBP_BEGIN_BUFFER_MAX_SIZE
+    sxbp_buffer_t data = sxbp_blank_buffer();
+    data.size = SXBP_BEGIN_BUFFER_MAX_SIZE + 1;
+    /*
+     * allocate the buffer -if this fails then we'll abort here because this
+     * test case is not testing the buffer's init function
+     */
+    if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate buffer");
+    }
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_begin_figure(&data, NULL, &figure);
+
+    // precondition check error should be returned when data is too big
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_begin_figure_data_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_begin_figure(NULL, NULL, &figure);
+
+    // precondition check error should be returned when data is NULL
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_begin_figure_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    // create a buffer that
+    sxbp_buffer_t data = sxbp_blank_buffer();
+    data.size = 100;
+    /*
+     * allocate the buffer -if this fails then we'll abort here because this
+     * test case is not testing the buffer's init function
+     */
+    if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate buffer");
+    }
+
+    sxbp_result_t result = sxbp_begin_figure(&data, NULL, NULL);
+
+    // precondition check error should be returned when figure is NULL
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_refine_figure) {
@@ -177,18 +208,47 @@ START_TEST(test_refine_figure) {
 } END_TEST
 
 START_TEST(test_refine_figure_figure_null) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_result_t result = sxbp_refine_figure(NULL, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_refine_figure_no_lines) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    // create a figure with no lines
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_refine_figure(&figure, NULL);
+
+    // check that the return code was a precondition check error
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_refine_figure_unimplemented_method) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    // make a figure with some lines, but we don't care what they are
+    sxbp_figure_t figure = {
+        .size = 100,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // specify an unimplemented refinement method
+    sxbp_refine_figure_options_t options = {
+        .refine_method = SXBP_REFINE_METHOD_RESERVED_END,
+        .progress_callback = NULL,
+        .callback_context = NULL,
+    };
+
+    sxbp_result_t result = sxbp_refine_figure(&figure, &options);
+
+    // check that the return code was a not-implemented error
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);    
 } END_TEST
 
 START_TEST(test_dump_figure) {
