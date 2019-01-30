@@ -133,43 +133,25 @@ Suite* make_bitmap_suite(void) {
     // Test cases for bitmap data type
     Suite* test_suite = suite_create("Bitmap");
 
-    TCase* blank_bitmap = tcase_create("Create blank Bitmap");
+    TCase* blank_bitmap = tcase_create("sxbp_blank_bitmap()");
     tcase_add_test(blank_bitmap, test_blank_bitmap);
     suite_add_tcase(test_suite, blank_bitmap);
 
-    TCase* init_bitmap = tcase_create("Allocate a Bitmap");
+    TCase* init_bitmap = tcase_create("sxbp_init_bitmap()");
     tcase_add_test(init_bitmap, test_init_bitmap);
+    tcase_add_test(init_bitmap, test_init_bitmap_null);
     suite_add_tcase(test_suite, init_bitmap);
 
-    TCase* init_bitmap_null = tcase_create(
-        "Bitmap allocation returns appropriate error code when given NULL pointer"
-    );
-    tcase_add_test(init_bitmap_null, test_init_bitmap_null);
-    suite_add_tcase(test_suite, init_bitmap_null);
+    TCase* free_bitmap = tcase_create("sxbp_free_bitmap()");
+    tcase_add_test(free_bitmap, test_free_bitmap_unallocated);
+    tcase_add_test(free_bitmap, test_free_bitmap_allocated);
+    suite_add_tcase(test_suite, free_bitmap);
 
-    TCase* free_bitmap_unallocated = tcase_create("Free an unallocated Bitmap");
-    tcase_add_test(free_bitmap_unallocated, test_free_bitmap_unallocated);
-    suite_add_tcase(test_suite, free_bitmap_unallocated);
-
-    TCase* free_bitmap_allocated = tcase_create("Free an allocated Bitmap");
-    tcase_add_test(free_bitmap_allocated, test_free_bitmap_allocated);
-    suite_add_tcase(test_suite, free_bitmap_allocated);
-
-    TCase* copy_bitmap = tcase_create("Copy a Bitmap");
+    TCase* copy_bitmap = tcase_create("sxbp_copy_bitmap()");
     tcase_add_test(copy_bitmap, test_copy_bitmap);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_from_null);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_to_null);
     suite_add_tcase(test_suite, copy_bitmap);
-
-    TCase* copy_bitmap_from_null = tcase_create(
-        "Bitmap copying returns appropriate error code when from is NULL"
-    );
-    tcase_add_test(copy_bitmap_from_null, test_copy_bitmap_from_null);
-    suite_add_tcase(test_suite, copy_bitmap_from_null);
-
-    TCase* copy_bitmap_to_null = tcase_create(
-        "Bitmap copying returns appropriate error code when to is NULL"
-    );
-    tcase_add_test(copy_bitmap_to_null, test_copy_bitmap_to_null);
-    suite_add_tcase(test_suite, copy_bitmap_to_null);
 
     return test_suite;
 }

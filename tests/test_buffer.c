@@ -200,65 +200,34 @@ Suite* make_buffer_suite(void) {
     // Test cases for buffer data type
     Suite* test_suite = suite_create("Buffer");
 
-    TCase* blank_buffer = tcase_create("Create blank Buffer");
+    TCase* blank_buffer = tcase_create("sxbp_blank_buffer()");
     tcase_add_test(blank_buffer, test_blank_buffer);
     suite_add_tcase(test_suite, blank_buffer);
 
-    TCase* init_buffer = tcase_create("Allocate a Buffer");
+    TCase* init_buffer = tcase_create("sxbp_init_buffer()");
     tcase_add_test(init_buffer, test_init_buffer);
+    tcase_add_test(init_buffer, test_init_buffer_null);
     suite_add_tcase(test_suite, init_buffer);
 
-    TCase* init_buffer_null = tcase_create(
-        "Buffer allocation returns appropriate error code when given NULL pointer"
-    );
-    tcase_add_test(init_buffer_null, test_init_buffer_null);
-    suite_add_tcase(test_suite, init_buffer_null);
+    TCase* free_buffer = tcase_create("sxbp_free_buffer()");
+    tcase_add_test(free_buffer, test_free_buffer_unallocated);
+    tcase_add_test(free_buffer, test_free_buffer_allocated);
+    suite_add_tcase(test_suite, free_buffer);
 
-    TCase* free_buffer_unallocated = tcase_create("Free an unallocated Buffer");
-    tcase_add_test(free_buffer_unallocated, test_free_buffer_unallocated);
-    suite_add_tcase(test_suite, free_buffer_unallocated);
-
-    TCase* free_buffer_allocated = tcase_create("Free an allocated Buffer");
-    tcase_add_test(free_buffer_allocated, test_free_buffer_allocated);
-    suite_add_tcase(test_suite, free_buffer_allocated);
-
-    TCase* copy_buffer = tcase_create("Copy a Buffer");
+    TCase* copy_buffer = tcase_create("sxbp_copy_buffer()");
     tcase_add_test(copy_buffer, test_copy_buffer);
+    tcase_add_test(copy_buffer, test_copy_buffer_from_null);
+    tcase_add_test(copy_buffer, test_copy_buffer_to_null);
     suite_add_tcase(test_suite, copy_buffer);
 
-    TCase* copy_buffer_from_null = tcase_create(
-        "Buffer copying returns appropriate error code when from is NULL"
-    );
-    tcase_add_test(copy_buffer_from_null, test_copy_buffer_from_null);
-    suite_add_tcase(test_suite, copy_buffer_from_null);
-
-    TCase* copy_buffer_to_null = tcase_create(
-        "Buffer copying returns appropriate error code when to is NULL"
-    );
-    tcase_add_test(copy_buffer_to_null, test_copy_buffer_to_null);
-    suite_add_tcase(test_suite, copy_buffer_to_null);
-
     TCase* buffer_from_file = tcase_create(
-        "Buffer can be populated from the contents of an open file"
+        "sxbp_buffer_from_file()"
     );
     tcase_add_checked_fixture(buffer_from_file, setup, tear_down);
     tcase_add_test(buffer_from_file, test_buffer_from_file);
+    tcase_add_test(buffer_from_file, test_buffer_from_file_file_null);
+    tcase_add_test(buffer_from_file, test_buffer_from_file_buffer_null);
     suite_add_tcase(test_suite, buffer_from_file);
-
-    TCase* buffer_from_file_file_null = tcase_create(
-        "Buffer from file returns appropriate error code when file is NULL"
-    );
-    tcase_add_test(buffer_from_file_file_null, test_buffer_from_file_file_null);
-    suite_add_tcase(test_suite, buffer_from_file_file_null);
-
-    TCase* buffer_from_file_buffer_null = tcase_create(
-        "Buffer from file returns appropriate error code when buffer is NULL"
-    );
-    tcase_add_checked_fixture(buffer_from_file_buffer_null, setup, tear_down);
-    tcase_add_test(
-        buffer_from_file_buffer_null, test_buffer_from_file_buffer_null
-    );
-    suite_add_tcase(test_suite, buffer_from_file_buffer_null);
 
     return test_suite;
 }
