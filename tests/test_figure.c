@@ -56,13 +56,41 @@ START_TEST(test_init_figure_null) {
 } END_TEST
 
 START_TEST(test_free_figure_unallocated) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    /*
+     * it should be possible to safely call the freeing function on an
+     * unallocated figure
+     */
+    bool needed_free = sxbp_free_figure(&figure);
+
+    // no memory should be pointed to
+    ck_assert_ptr_null(figure.lines);
+    // the function should return false to tell us it didn't need to free
+    ck_assert(!needed_free);
 } END_TEST
 
 START_TEST(test_free_figure_allocated) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = {
+        .size = 100,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+
+    // calling the freeing function on this allocated figure should free memory
+    bool needed_free = sxbp_free_figure(&figure);
+
+    // no memory should be pointed to
+    ck_assert_ptr_null(figure.lines);
+    // the function should return true to tell us it needed to free
+    ck_assert(needed_free);
 } END_TEST
 
 START_TEST(test_copy_figure) {
