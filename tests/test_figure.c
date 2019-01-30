@@ -326,12 +326,11 @@ START_TEST(test_render_figure_figure_null) {
 
 START_TEST(test_render_figure_buffer_null) {
     sxbp_figure_t figure = sxbp_blank_figure();
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
 
     sxbp_result_t result = sxbp_render_figure(
         &figure,
-        &buffer,
-        NULL, // make sure to not pass any render backend
+        NULL,
+        sxbp_render_figure_to_null, // just pass it the dummy backend
         NULL,
         NULL
     );
@@ -342,11 +341,12 @@ START_TEST(test_render_figure_buffer_null) {
 
 START_TEST(test_render_figure_render_callback_null) {
     sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
 
     sxbp_result_t result = sxbp_render_figure(
         &figure,
-        NULL,
-        sxbp_render_figure_to_null, // just pass it the dummy backend
+        &buffer,
+        NULL, // make sure to not pass any render backend
         NULL,
         NULL
     );
