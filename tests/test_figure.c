@@ -148,9 +148,46 @@ START_TEST(test_copy_figure_to_null) {
 } END_TEST
 
 START_TEST(test_begin_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t data = { .size = 1, .bytes = NULL, };
+    /*
+     * allocate the buffer -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate buffer");
+    }
+    // populate our one byte
+    data.bytes[0] = 0x6DU;
+    // this should generate a figure of 9 lines
+    const size_t expected_size = 9;
+    // this is the pattern of line directions and lengths we expect
+    sxbp_line_t expected_lines[] = {
+        { .direction = SXBP_UP, .length = 1, },
+        { .direction = SXBP_RIGHT, .length = 1, },
+        { .direction = SXBP_UP, .length = 1, },
+        { .direction = SXBP_LEFT, .length = 2, },
+        { .direction = SXBP_UP, .length = 1, },
+        { .direction = SXBP_LEFT, .length = 1, },
+        { .direction = SXBP_DOWN, .length = 4, },
+        { .direction = SXBP_LEFT, .length = 1, },
+        { .direction = SXBP_DOWN, .length = 1, },
+    };
+    // create a blank figure to write the created figure into
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_begin_figure(&data, NULL, &figure);
+
+    // check the result was success
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that the figure contains the expected lines and quantity thereof
+    ck_assert(figure.size == expected_size);
+    for (size_t i = 0; i < expected_size; i++) {
+        ck_assert(figure.lines[i].direction == expected_lines[i].direction);
+        ck_assert(figure.lines[i].length == expected_lines[i].length);
+    }
 } END_TEST
+
+// TODO: add test for sxbp_begin_figure() with options.max_lines overridden
 
 START_TEST(test_begin_figure_data_too_big) {
     // create a buffer that is larger than SXBP_BEGIN_BUFFER_MAX_SIZE
