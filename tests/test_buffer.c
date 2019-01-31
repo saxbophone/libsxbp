@@ -72,6 +72,9 @@ START_TEST(test_init_buffer) {
     for (size_t i = 0; i < buffer.size; i++) {
         ck_assert(buffer.bytes[i] == 0);
     }
+
+    // cleanup
+    sxbp_free_buffer(&buffer);
 } END_TEST
 
 START_TEST(test_init_buffer_null) {
@@ -142,6 +145,10 @@ START_TEST(test_copy_buffer) {
     for (size_t i = 0; i < to.size; i++) {
         ck_assert(to.bytes[i] == from.bytes[i]);
     }
+
+    // cleanup
+    sxbp_free_buffer(&from);
+    sxbp_free_buffer(&to);
 } END_TEST
 
 START_TEST(test_copy_buffer_from_null) {
@@ -180,6 +187,10 @@ START_TEST(test_buffer_from_file) {
     for (size_t i = 0; i < sizeof(sample_data) / sizeof(uint8_t); i++) {
         ck_assert(buffer.bytes[i] == sample_data[i]);
     }
+
+    // cleanup
+    fclose(temp_file);
+    sxbp_free_buffer(&buffer);
 } END_TEST
 
 START_TEST(test_buffer_from_file_file_null) {
@@ -204,7 +215,8 @@ START_TEST(test_buffer_from_file_buffer_null) {
 
     // result should be precondition failure
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
-    // cleanup: close the file
+
+    // cleanup
     fclose(temp_file);
 } END_TEST
 

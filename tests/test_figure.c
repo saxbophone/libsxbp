@@ -46,6 +46,9 @@ START_TEST(test_init_figure) {
         ck_assert(figure.lines[i].length == 0);
         ck_assert(figure.lines[i].direction == 0);
     }
+
+    // cleanup
+    sxbp_free_figure(&figure);
 } END_TEST
 
 START_TEST(test_init_figure_null) {
@@ -127,6 +130,10 @@ START_TEST(test_copy_figure) {
         ck_assert(to.lines[i].direction == from.lines[i].direction);
         ck_assert(to.lines[i].length == from.lines[i].length);
     }
+
+    // cleanup
+    sxbp_free_figure(&from);
+    sxbp_free_figure(&to);
 } END_TEST
 
 START_TEST(test_copy_figure_from_null) {
@@ -185,6 +192,10 @@ START_TEST(test_begin_figure) {
         ck_assert(figure.lines[i].direction == expected_lines[i].direction);
         ck_assert(figure.lines[i].length == expected_lines[i].length);
     }
+
+    // cleanup
+    sxbp_free_buffer(&data);
+    sxbp_free_figure(&figure);
 } END_TEST
 
 // TODO: add test for sxbp_begin_figure() with options.max_lines overridden
@@ -206,6 +217,9 @@ START_TEST(test_begin_figure_data_too_big) {
 
     // precondition check error should be returned when data is too big
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+
+    // cleanup
+    sxbp_free_buffer(&data);
 } END_TEST
 
 START_TEST(test_begin_figure_data_null) {
@@ -233,6 +247,9 @@ START_TEST(test_begin_figure_figure_null) {
 
     // precondition check error should be returned when figure is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+
+    // cleanup
+    sxbp_free_buffer(&data);
 } END_TEST
 
 START_TEST(test_refine_figure) {
@@ -285,7 +302,10 @@ START_TEST(test_refine_figure_unimplemented_method) {
     sxbp_result_t result = sxbp_refine_figure(&figure, &options);
 
     // check that the return code was a not-implemented error
-    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);    
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+
+    // cleanup
+    sxbp_free_figure(&figure);
 } END_TEST
 
 START_TEST(test_dump_figure) {

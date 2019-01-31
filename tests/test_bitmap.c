@@ -47,6 +47,9 @@ START_TEST(test_init_bitmap) {
             ck_assert(bitmap.pixels[x][y] == false);
         }
     }
+
+    // cleanup
+    sxbp_free_bitmap(&bitmap);
 } END_TEST
 
 START_TEST(test_init_bitmap_null) {
@@ -122,6 +125,10 @@ START_TEST(test_copy_bitmap) {
             ck_assert(to.pixels[x][y] == from.pixels[x][y]);
         }
     }
+
+    // cleanup
+    sxbp_free_bitmap(&from);
+    sxbp_free_bitmap(&to);
 } END_TEST
 
 START_TEST(test_copy_bitmap_from_null) {
