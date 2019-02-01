@@ -598,8 +598,48 @@ START_TEST(test_render_figure_to_null) {
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = {
+        .size = SAMPLE_FIGURE_SIZE,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    sxbp_init_figure(&figure);
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with our pre-built lines
+    for (size_t i = 0; i < figure.size; i++) {
+        figure.lines[i] = REFINED_SAMPLE_FIGURE_LINES[i];
+    }
+    // the buffer we'll render the PBM file into
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    // read into another buffer the expected SVG file
+    sxbp_buffer_t expected = sxbp_blank_buffer();
+    FILE* pbm_file = fopen("../tests/pbm_output_test_data.pbm", "rb");
+    if (pbm_file == NULL) {
+        ck_abort_msg("Unable to open test file in read mode");
+    }
+    if (sxbp_buffer_from_file(pbm_file, &expected) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to read file into buffer");
+    }
+
+    // render the figure to PBM
+    sxbp_result_t result = sxbp_render_figure_to_pbm(
+        &figure,
+        &buffer,
+        NULL,
+        NULL
+    );
+
+    // check that the operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    // compare the buffer with the expected buffer
+    ck_assert(buffer.size == expected.size);
+    ck_assert_mem_eq(buffer.bytes, expected.bytes, buffer.size);
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm_figure_null) {
@@ -621,8 +661,48 @@ START_TEST(test_render_figure_to_pbm_buffer_null) {
 } END_TEST
 
 START_TEST(test_render_figure_to_svg) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = {
+        .size = SAMPLE_FIGURE_SIZE,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    sxbp_init_figure(&figure);
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with our pre-built lines
+    for (size_t i = 0; i < figure.size; i++) {
+        figure.lines[i] = REFINED_SAMPLE_FIGURE_LINES[i];
+    }
+    // the buffer we'll render the SVG file into
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    // read into another buffer the expected SVG file
+    sxbp_buffer_t expected = sxbp_blank_buffer();
+    FILE* svg_file = fopen("../tests/svg_output_test_data.svg", "rb");
+    if (svg_file == NULL) {
+        ck_abort_msg("Unable to open test file in read mode");
+    }
+    if (sxbp_buffer_from_file(svg_file, &expected) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to read file into buffer");
+    }
+
+    // render the figure to SVG
+    sxbp_result_t result = sxbp_render_figure_to_svg(
+        &figure,
+        &buffer,
+        NULL,
+        NULL
+    );
+
+    // check that the operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    // compare the buffer with the expected buffer
+    ck_assert(buffer.size == expected.size);
+    ck_assert_mem_eq(buffer.bytes, expected.bytes, buffer.size);
 } END_TEST
 
 START_TEST(test_render_figure_to_svg_figure_null) {
