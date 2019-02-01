@@ -112,6 +112,7 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
 void sxbp_walk_figure(
     const sxbp_figure_t* figure,
     size_t scale,
+    bool plot_vertices_only,
     bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
     void* callback_data
 ) {
@@ -126,16 +127,27 @@ void sxbp_walk_figure(
     if (!plot_point_callback(location, callback_data)) {
         return;
     }
-    // for each line, plot separate points along their length
+    // for each line, plot one or more points along it (depending on plot mode)
     for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
         sxbp_line_t line = figure->lines[i];
         // scale the line's size
-        for (sxbp_figure_size_t l = 0; l < line.length * scale; l++) {
-            // move the location
-            sxbp_move_location(&location, line.direction, 1);
+        sxbp_length_t length = line.length * scale;
+        // if plotting vertices only, plot one point at the end of this line
+        if (plot_vertices_only) {
+            // move the location length amount of units
+            sxbp_move_location(&location, line.direction, length);
             // plot a point, if callback returned false then exit
             if (!plot_point_callback(location, callback_data)) {
                 return;
+            }
+        } else { // otherwise, plot one point along each one unit of line length
+            for (sxbp_length_t l = 0; l < length; l++) {
+                // move the location one unit
+                sxbp_move_location(&location, line.direction, 1);
+                // plot a point, if callback returned false then exit
+                if (!plot_point_callback(location, callback_data)) {
+                    return;
+                }
             }
         }
     }
