@@ -93,7 +93,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     # enable warnings about mistakes in Doxygen documentation
     enable_c_compiler_flag_if_supported("-Wdocumentation")
     # there are some pragmas in tests/check_wrapper.h that are not for GCC
-    enable_c_compiler_flag_if_supported("-Wno-unknown-pragmas")
+    # enable_c_compiler_flag_if_supported("-Wno-unknown-pragmas")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
