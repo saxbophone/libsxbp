@@ -29,12 +29,12 @@ Concrete points of style:
 - Use `snake_case` throughout for symbol-naming
   - Variables and function names use `lower_snake_case`
   - Constants and Preprocessor Macros use `UPPER_SNAKE_CASE`
-- Type names are suffixed with a `_t`
+- Public type names are suffixed with a `_t`
 - Public symbols are prefixed with `sxbp_` or `SXBP_`, depending on the capitalisation state of the symbol
 - The asterisk (`*`) in pointer types goes with the type, not the identifier
 
 ## Testing
 
-The unit tests for libsxbp currently all reside in one C source file, `tests.c`. This isn't ideal, and I'm planning to clean these up at some point. Build and run the unit tests when you first pull down the code, rebuild and run them again when you've made your changes. Changes adding larger pieces of functionality will likely have additional tests requested for them, or an offer made to write the tests for them.
+The unit tests for libsxbp use the **libcheck** C unit-testing library. The unit tests are located in the `tests` directory. Changes adding larger pieces of functionality will likely require new tests in order to be accepted.
 
-Pull requests also go through [Travis CI](https://travis-ci.org/) for automated testing.
+Pull requests also go through [Travis CI](https://travis-ci.org/), which runs the unit tests on macOS and Linux, using the GCC and Clang compilers.
