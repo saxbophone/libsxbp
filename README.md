@@ -43,6 +43,8 @@ In other words, the library may be used and integrated into other projects regar
 
 A full verbatim of this license may be found in the [LICENSE](LICENSE) file in this repository. If for some reason you have not received this file, you can view a copy of the license at [https://www.mozilla.org/MPL/2.0/](https://www.mozilla.org/MPL/2.0/).
 
+Note that one file (`cmake/Modules/FindCheck.cmake`) is licensed under the BSD 3-Clause license, a copy of which is located in the same directory.
+
 ## Building
 
 Libsxbp can be built without installing for test purposes and for general usage, however if you plan on writing programs that use it I recommend you install it so it will be in your system's standard library and header include locations.
