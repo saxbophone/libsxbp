@@ -1,6 +1,5 @@
 language: c
-# On Ubuntu, run in Travis Container
-sudo: false
+sudo: true
 # Use Ubuntu 16.04 Xenial (for Clang 7)
 dist: xenial
 # helps to use actual GCC on OSX (not Clang!) and Clang version 6
@@ -14,6 +13,15 @@ compiler:
   - gcc
 cache:
   - ccache
+addons:
+  # NOTE: only install Check on OSX as the version in APT is too old
+  # apt:
+  #   packages:
+  #     - check
+  homebrew:
+    packages:
+      - gcc5
+      - check
 # branches safelist
 branches:
   only:
@@ -21,12 +29,8 @@ branches:
     - develop
     - /^test\/.*$/
     - /^feature\/.*$/
-before_install:
-  # fix for homebrew failling on Travis-CI
-  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew update; fi
 install:
-  # install gcc-5 on OSX
-  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then brew install gcc5; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ] ; then ./install_check.sh; fi
 before_script:
   # override $CC to use gcc-5 on OSX
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$CC" == "gcc" ]; then export CC="gcc-5"; fi

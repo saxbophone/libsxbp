@@ -6,7 +6,7 @@
  * freeing and copying the public data types of sxbp and those for checking
  * the error codes returned by certain functions in sxbp.
  *
- * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2018
+ * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018-2019
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -232,7 +232,7 @@ sxbp_result_t sxbp_copy_figure(
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the lines
-        memcpy(to->lines, from->lines, to->size);
+        memcpy(to->lines, from->lines, to->size * sizeof(sxbp_line_t));
         return SXBP_RESULT_OK;
     }
 }
@@ -284,8 +284,9 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
                 free(bitmap->pixels[col]);
             }
         }
-        // finally, deallocate the rows pointer
+        // finally, deallocate the rows pointer and set it to NULL
         free(bitmap->pixels);
+        bitmap->pixels = NULL;
         return true;
     } else {
         return false;

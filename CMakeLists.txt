@@ -92,11 +92,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wc99-c11-compat")
     # enable warnings about mistakes in Doxygen documentation
     enable_c_compiler_flag_if_supported("-Wdocumentation")
+    # there are some pragmas in tests/check_wrapper.h that are not for GCC
+    enable_c_compiler_flag_if_supported("-Wno-unknown-pragmas")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
 endif()
 
 # begin dependencies
+
 # add custom dependencies directory
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # libpng
@@ -132,10 +135,23 @@ else()
     # issue message
     message(STATUS "[sxbp] PNG output support disabled")
 endif()
+
+# Check (for unit tests)
+find_package(Check)
+if(CHECK_FOUND)
+    include_directories(${CHECK_INCLUDE_DIRS})
+    link_directories(${CHECK_LIBRARY_DIRS})
+    set(BUILD_UNIT_TESTS ON)
+else()
+    set(BUILD_UNIT_TESTS OFF)
+endif()
+
 # end dependencies
 
 # C source files
 file(GLOB SXBP_SOURCES "sxbp/*.c")
+# C source files for unit tests
+file(GLOB TEST_SOURCES "tests/*.c")
 # Header files
 set(SXBP_HEADERS "sxbp/sxbp.h")
 
@@ -152,9 +168,13 @@ if(SXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
-add_executable(sxp_test tests.c)
-
-target_link_libraries(sxp_test sxbp)
+# build unit tests if enabled
+if(BUILD_UNIT_TESTS)
+    add_executable(unit_tests ${TEST_SOURCES})
+    target_link_libraries(unit_tests sxbp ${CHECK_LIBRARIES})
+    enable_testing()
+    add_test(unit_tests unit_tests)
+endif()
 
 install(
     TARGETS sxbp
@@ -184,6 +204,3 @@ install(
     FILES ${SXBP_HEADERS}
     DESTINATION "include/${SXBP_PRECISE_HEADER_DESTINATION}"
 )
-
-enable_testing()
-add_test(unit_tests sxp_test)

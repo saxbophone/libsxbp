@@ -47,3 +47,6 @@ install_manifest.txt
 build/*
 # explicitly allow build directory .gitkeep file
 !build/.gitkeep
+
+# don't commit thumbnail cache files
+*.DS_Store
