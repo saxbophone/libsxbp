@@ -21,6 +21,42 @@
 #include "test_suites.h"
 
 
+// global module-private data that is useful for serialisation tests
+
+static const uint8_t SAMPLE_SEED = 0x6D;
+
+static const sxbp_line_t SAMPLE_FIGURE_LINES[] = {
+    { .direction = SXBP_UP, .length = 1, },
+    { .direction = SXBP_RIGHT, .length = 1, },
+    { .direction = SXBP_UP, .length = 1, },
+    { .direction = SXBP_LEFT, .length = 2, },
+    { .direction = SXBP_UP, .length = 1, },
+    { .direction = SXBP_LEFT, .length = 1, },
+    { .direction = SXBP_DOWN, .length = 4, },
+    { .direction = SXBP_LEFT, .length = 1, },
+    { .direction = SXBP_DOWN, .length = 1, },
+};
+
+static const uint8_t SAMPLE_FILE_DATA[] = {
+    0x73, 0x78, 0x62, 0x70, // "sxbp"
+    0x00, 0x00, // major version
+    0x00, 0x36, // minor version
+    0x00, 0x00, // patch version
+    0x00, 0x00, 0x00, 0x09, // number of lines total
+    0xFF, 0xFF, 0xFF, 0xFF, // unused, formerly number of lines solved
+    0xFF, 0xFF, 0xFF, 0xFF, // unused, formerly seconds spent solving
+    0x00, 0x00, 0x00, 0x00, // number of lines remaining to be solved
+    0x00, 0x00, 0x00, 0x01, // line 0
+    0x40, 0x00, 0x00, 0x01, // line 1
+    0x00, 0x00, 0x00, 0x01, // line 2
+    0xC0, 0x00, 0x00, 0x02, // line 3
+    0x00, 0x00, 0x00, 0x01, // line 4
+    0xC0, 0x00, 0x00, 0x01, // line 5
+    0x80, 0x00, 0x00, 0x04, // line 6
+    0xC0, 0x00, 0x00, 0x01, // line 7
+    0x80, 0x00, 0x00, 0x01, // line 8
+};
+
 START_TEST(test_blank_figure) {
     sxbp_figure_t figure = sxbp_blank_figure();
 
@@ -163,22 +199,10 @@ START_TEST(test_begin_figure) {
     if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate buffer");
     }
-    // populate our one byte
-    data.bytes[0] = 0x6DU;
+    // populate our one byte -this 'seed' should generate our sample lines
+    data.bytes[0] = SAMPLE_SEED;
     // this should generate a figure of 9 lines
     const size_t expected_size = 9;
-    // this is the pattern of line directions and lengths we expect
-    sxbp_line_t expected_lines[] = {
-        { .direction = SXBP_UP, .length = 1, },
-        { .direction = SXBP_RIGHT, .length = 1, },
-        { .direction = SXBP_UP, .length = 1, },
-        { .direction = SXBP_LEFT, .length = 2, },
-        { .direction = SXBP_UP, .length = 1, },
-        { .direction = SXBP_LEFT, .length = 1, },
-        { .direction = SXBP_DOWN, .length = 4, },
-        { .direction = SXBP_LEFT, .length = 1, },
-        { .direction = SXBP_DOWN, .length = 1, },
-    };
     // create a blank figure to write the created figure into
     sxbp_figure_t figure = sxbp_blank_figure();
 
@@ -186,11 +210,11 @@ START_TEST(test_begin_figure) {
 
     // check the result was success
     ck_assert(result == SXBP_RESULT_OK);
-    // check that the figure contains the expected lines and quantity thereof
+    // check that the figure contains the sample lines and quantity thereof
     ck_assert(figure.size == expected_size);
     for (size_t i = 0; i < expected_size; i++) {
-        ck_assert(figure.lines[i].direction == expected_lines[i].direction);
-        ck_assert(figure.lines[i].length == expected_lines[i].length);
+        ck_assert(figure.lines[i].direction == SAMPLE_FIGURE_LINES[i].direction);
+        ck_assert(figure.lines[i].length == SAMPLE_FIGURE_LINES[i].length);
     }
 
     // cleanup
@@ -322,52 +346,21 @@ START_TEST(test_dump_figure) {
     if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate figure");
     }
-    // populate the figure with these lines
-    sxbp_line_t figure_lines[] = {
-        { .direction = SXBP_UP, .length = 1, },
-        { .direction = SXBP_LEFT, .length = 2, },
-        { .direction = SXBP_UP, .length = 3, },
-        { .direction = SXBP_LEFT, .length = 4, },
-        { .direction = SXBP_UP, .length = 5, },
-        { .direction = SXBP_LEFT, .length = 6, },
-        { .direction = SXBP_UP, .length = 7, },
-        { .direction = SXBP_LEFT, .length = 8, },
-        { .direction = SXBP_UP, .length = 9, },
-    };
+    // populate the figure with our pre-built lines
     for (size_t i = 0; i < figure.size; i++) {
-        figure.lines[i] = figure_lines[i];
+        figure.lines[i] = SAMPLE_FIGURE_LINES[i];
     }
     // we'll try and dump the figure into here
     sxbp_buffer_t buffer = sxbp_blank_buffer();
-    // coincidentally, this is the figure we get from seed 0xaa
-    uint8_t expected_file_data[] = {
-        0x73, 0x78, 0x62, 0x70, // "sxbp"
-        0x00, 0x00, // major version
-        0x00, 0x36, // minor version
-        0x00, 0x00, // patch version
-        0x00, 0x00, 0x00, 0x09, // number of lines total
-        0xFF, 0xFF, 0xFF, 0xFF, // unused, formerly number of lines solved
-        0xFF, 0xFF, 0xFF, 0xFF, // unused, formerly seconds spent solving
-        0x00, 0x00, 0x00, 0x00, // number of lines remaining to be solved
-        0x00, 0x00, 0x00, 0x01, // line 0
-        0xC0, 0x00, 0x00, 0x02, // line 1
-        0x00, 0x00, 0x00, 0x03, // line 2
-        0xC0, 0x00, 0x00, 0x04, // line 3
-        0x00, 0x00, 0x00, 0x05, // line 4
-        0xC0, 0x00, 0x00, 0x06, // line 5
-        0x00, 0x00, 0x00, 0x07, // line 6
-        0xC0, 0x00, 0x00, 0x08, // line 7
-        0x00, 0x00, 0x00, 0x09, // line 8
-    };
 
     sxbp_result_t result = sxbp_dump_figure(&figure, &buffer);
 
     // check that the operation completed successfully
     ck_assert(result == SXBP_RESULT_OK);
     // check size is as expected
-    ck_assert(buffer.size == sizeof(expected_file_data));
+    ck_assert(buffer.size == sizeof(SAMPLE_FILE_DATA));
     // check that the contents of the buffer are as expected
-    ck_assert_mem_eq(buffer.bytes, expected_file_data, buffer.size);
+    ck_assert_mem_eq(buffer.bytes, SAMPLE_FILE_DATA, buffer.size);
 
     // cleanup
     sxbp_free_figure(&figure);
