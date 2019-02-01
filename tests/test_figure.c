@@ -309,8 +309,69 @@ START_TEST(test_refine_figure_unimplemented_method) {
 } END_TEST
 
 START_TEST(test_dump_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_figure_t figure = {
+        .size = 9,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    sxbp_init_figure(&figure);
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with these lines
+    sxbp_line_t figure_lines[] = {
+        { .direction = SXBP_UP, .length = 1, },
+        { .direction = SXBP_LEFT, .length = 2, },
+        { .direction = SXBP_UP, .length = 3, },
+        { .direction = SXBP_LEFT, .length = 4, },
+        { .direction = SXBP_UP, .length = 5, },
+        { .direction = SXBP_LEFT, .length = 6, },
+        { .direction = SXBP_UP, .length = 7, },
+        { .direction = SXBP_LEFT, .length = 8, },
+        { .direction = SXBP_UP, .length = 9, },
+    };
+    for (size_t i = 0; i < figure.size; i++) {
+        figure.lines[i] = figure_lines[i];
+    }
+    // we'll try and dump the figure into here
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    // coincidentally, this is the figure we get from seed 0xaa
+    uint8_t expected_file_data[] = {
+        0x73, 0x78, 0x62, 0x70, // "sxbp"
+        0x00, 0x00, // major version
+        0x00, 0x36, // minor version
+        0x00, 0x00, // patch version
+        0x00, 0x00, 0x00, 0x09, // number of lines total
+        0xFF, 0xFF, 0xFF, 0xFF, // unused, formerly number of lines solved
+        0xFF, 0xFF, 0xFF, 0xFF, // unused, formerly seconds spent solving
+        0x00, 0x00, 0x00, 0x00, // number of lines remaining to be solved
+        0x00, 0x00, 0x00, 0x01, // line 0
+        0xC0, 0x00, 0x00, 0x02, // line 1
+        0x00, 0x00, 0x00, 0x03, // line 2
+        0xC0, 0x00, 0x00, 0x04, // line 3
+        0x00, 0x00, 0x00, 0x05, // line 4
+        0xC0, 0x00, 0x00, 0x06, // line 5
+        0x00, 0x00, 0x00, 0x07, // line 6
+        0xC0, 0x00, 0x00, 0x08, // line 7
+        0x00, 0x00, 0x00, 0x09, // line 8
+    };
+
+    sxbp_result_t result = sxbp_dump_figure(&figure, &buffer);
+
+    // check that the operation completed successfully
+    ck_assert(result == SXBP_RESULT_OK);
+    // check size is as expected
+    ck_assert(buffer.size == sizeof(expected_file_data));
+    // check that the contents of the buffer are as expected
+    ck_assert_mem_eq(buffer.bytes, expected_file_data, buffer.size);
+
+    // cleanup
+    sxbp_free_figure(&figure);
+    sxbp_free_buffer(&buffer);
 } END_TEST
 
 START_TEST(test_dump_figure_figure_null) {
