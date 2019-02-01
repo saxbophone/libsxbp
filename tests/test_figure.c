@@ -483,9 +483,64 @@ START_TEST(test_load_figure_figure_null) {
  * - invalid data due to being compatible with an older version of sxbp only
  */
 
+// dummy struct type to test passing of custom options in sxbp_render_figure()
+struct test_render_figure_custom_options { const char* foo; };
+
+// global variables for test_render_figure test case
+static sxbp_figure_t test_render_figure_figure;
+static sxbp_buffer_t test_render_figure_buffer;
+static sxbp_render_options_t test_render_figure_render_options;
+static struct test_render_figure_custom_options test_render_figure_custom_options = {
+    .foo = "bar",
+};
+
+/*
+ * a dummy renderer backend which doesn't render anything at all, but which
+ * asserts that its arguments match the global variables declared above
+ */
+static sxbp_result_t unit_test_renderer_backend(
+    const sxbp_figure_t* const figure,
+    sxbp_buffer_t* const buffer,
+    const sxbp_render_options_t* const render_options,
+    const void* render_callback_options
+) {
+    // given arguments should match the global variables above
+    ck_assert_ptr_eq(figure, &test_render_figure_figure);
+    ck_assert_ptr_eq(buffer, &test_render_figure_buffer);
+    ck_assert_ptr_eq(render_options, &test_render_figure_render_options);
+    ck_assert_ptr_eq(render_callback_options, &test_render_figure_custom_options);
+    // always return success error code
+    return SXBP_RESULT_OK;
+}
+
 START_TEST(test_render_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    test_render_figure_figure.size = SAMPLE_FIGURE_SIZE;
+    sxbp_init_figure(&test_render_figure_figure);
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&test_render_figure_figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with our pre-built lines
+    for (size_t i = 0; i < test_render_figure_figure.size; i++) {
+        test_render_figure_figure.lines[i] = SAMPLE_FIGURE_LINES[i];
+    }
+    // set buffer and render options to blank/defaults
+    test_render_figure_buffer = sxbp_blank_buffer();
+    test_render_figure_render_options.scale = 1;
+
+    sxbp_result_t result = sxbp_render_figure(
+        &test_render_figure_figure,
+        &test_render_figure_buffer,
+        unit_test_renderer_backend,
+        &test_render_figure_render_options,
+        (void*)&test_render_figure_custom_options
+    );
+
+    // check the operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
 } END_TEST
 
 START_TEST(test_render_figure_figure_null) {
