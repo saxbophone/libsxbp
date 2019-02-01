@@ -149,6 +149,40 @@ START_TEST(test_copy_bitmap_to_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_copy_bitmap_blank) {
+    sxbp_bitmap_t from = sxbp_blank_bitmap();
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    /*
+     * it should be possible to successfully 'copy' a blank bitmap, though
+     * such an operation should have no effect
+     */
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that 'to' is indeed still blank
+    ck_assert(to.width == 0);
+    ck_assert(to.height == 0);
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
+START_TEST(test_copy_bitmap_pixels_null) {
+    sxbp_bitmap_t from = {
+        .width = 32,
+        .height = 32,
+        .pixels = NULL,
+    };
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    /*
+     * if the source has non-zero size but pixels are NULL, a precondition
+     * failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+} END_TEST
+
 Suite* make_bitmap_suite(void) {
     // Test cases for bitmap data type
     Suite* test_suite = suite_create("Bitmap");
@@ -171,6 +205,8 @@ Suite* make_bitmap_suite(void) {
     tcase_add_test(copy_bitmap, test_copy_bitmap);
     tcase_add_test(copy_bitmap, test_copy_bitmap_from_null);
     tcase_add_test(copy_bitmap, test_copy_bitmap_to_null);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_blank);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_pixels_null);
     suite_add_tcase(test_suite, copy_bitmap);
 
     return test_suite;
