@@ -356,7 +356,6 @@ START_TEST(test_refine_figure) {
         .lines = NULL,
         .lines_remaining = 0,
     };
-    sxbp_init_figure(&figure);
     /*
      * allocate the figure -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -387,6 +386,9 @@ START_TEST(test_refine_figure) {
             figure.lines[i].length == REFINED_SAMPLE_FIGURE_LINES[i].length
         );
     }
+
+    // cleanup
+    sxbp_free_figure(&figure);
 } END_TEST
 
 START_TEST(test_refine_figure_figure_null) {
@@ -442,7 +444,6 @@ START_TEST(test_dump_figure) {
         .lines = NULL,
         .lines_remaining = 0,
     };
-    sxbp_init_figure(&figure);
     /*
      * allocate the figure -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -578,7 +579,6 @@ static sxbp_result_t unit_test_renderer_backend(
 
 START_TEST(test_render_figure) {
     test_render_figure_figure.size = SAMPLE_FIGURE_SIZE;
-    sxbp_init_figure(&test_render_figure_figure);
     /*
      * allocate the figure -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -604,6 +604,10 @@ START_TEST(test_render_figure) {
 
     // check the operation was successful
     ck_assert(result == SXBP_RESULT_OK);
+
+    // cleanup
+    sxbp_free_figure(&test_render_figure_figure);
+    sxbp_free_buffer(&test_render_figure_buffer);
 } END_TEST
 
 START_TEST(test_render_figure_figure_null) {
@@ -666,7 +670,6 @@ START_TEST(test_render_figure_to_pbm) {
         .lines = NULL,
         .lines_remaining = 0,
     };
-    sxbp_init_figure(&figure);
     /*
      * allocate the figure -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -708,6 +711,11 @@ START_TEST(test_render_figure_to_pbm) {
     // compare the buffer with the expected buffer
     ck_assert(buffer.size == expected.size);
     ck_assert_mem_eq(buffer.bytes, expected.bytes, buffer.size);
+
+    // cleanup
+    sxbp_free_figure(&figure);
+    sxbp_free_buffer(&buffer);
+    sxbp_free_buffer(&expected);
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm_figure_null) {
@@ -776,6 +784,11 @@ START_TEST(test_render_figure_to_svg) {
     // compare the buffer with the expected buffer
     ck_assert(buffer.size == expected.size);
     ck_assert_mem_eq(buffer.bytes, expected.bytes, buffer.size);
+
+    // cleanup
+    sxbp_free_figure(&figure);
+    sxbp_free_buffer(&buffer);
+    sxbp_free_buffer(&expected);
 } END_TEST
 
 START_TEST(test_render_figure_to_svg_figure_null) {
