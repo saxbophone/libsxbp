@@ -24,6 +24,7 @@
 // global module-private data that is useful for serialisation tests
 
 static const uint8_t SAMPLE_SEED = 0x6D;
+static const size_t SAMPLE_FIGURE_SIZE = 9;
 
 static const sxbp_line_t SAMPLE_FIGURE_LINES[] = {
     { .direction = SXBP_UP, .length = 1, },
@@ -191,34 +192,32 @@ START_TEST(test_copy_figure_to_null) {
 } END_TEST
 
 START_TEST(test_begin_figure) {
-    sxbp_buffer_t data = { .size = 1, .bytes = NULL, };
+    sxbp_buffer_t buffer = { .size = 1, .bytes = NULL, };
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the init function
      */
-    if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
+    if (sxbp_init_buffer(&buffer) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate buffer");
     }
     // populate our one byte -this 'seed' should generate our sample lines
-    data.bytes[0] = SAMPLE_SEED;
-    // this should generate a figure of 9 lines
-    const size_t expected_size = 9;
+    buffer.bytes[0] = SAMPLE_SEED;
     // create a blank figure to write the created figure into
     sxbp_figure_t figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_begin_figure(&data, NULL, &figure);
+    sxbp_result_t result = sxbp_begin_figure(&buffer, NULL, &figure);
 
     // check the result was success
     ck_assert(result == SXBP_RESULT_OK);
     // check that the figure contains the sample lines and quantity thereof
-    ck_assert(figure.size == expected_size);
-    for (size_t i = 0; i < expected_size; i++) {
+    ck_assert(figure.size == SAMPLE_FIGURE_SIZE);
+    for (size_t i = 0; i < SAMPLE_FIGURE_SIZE; i++) {
         ck_assert(figure.lines[i].direction == SAMPLE_FIGURE_LINES[i].direction);
         ck_assert(figure.lines[i].length == SAMPLE_FIGURE_LINES[i].length);
     }
 
     // cleanup
-    sxbp_free_buffer(&data);
+    sxbp_free_buffer(&buffer);
     sxbp_free_figure(&figure);
 } END_TEST
 
@@ -226,24 +225,24 @@ START_TEST(test_begin_figure) {
 
 START_TEST(test_begin_figure_data_too_big) {
     // create a buffer that is larger than SXBP_BEGIN_BUFFER_MAX_SIZE
-    sxbp_buffer_t data = sxbp_blank_buffer();
-    data.size = SXBP_BEGIN_BUFFER_MAX_SIZE + 1;
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    buffer.size = SXBP_BEGIN_BUFFER_MAX_SIZE + 1;
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the buffer's init function
      */
-    if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
+    if (sxbp_init_buffer(&buffer) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate buffer");
     }
     sxbp_figure_t figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_begin_figure(&data, NULL, &figure);
+    sxbp_result_t result = sxbp_begin_figure(&buffer, NULL, &figure);
 
     // precondition check error should be returned when data is too big
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 
     // cleanup
-    sxbp_free_buffer(&data);
+    sxbp_free_buffer(&buffer);
 } END_TEST
 
 START_TEST(test_begin_figure_data_null) {
@@ -257,23 +256,23 @@ START_TEST(test_begin_figure_data_null) {
 
 START_TEST(test_begin_figure_figure_null) {
     // create a buffer that
-    sxbp_buffer_t data = sxbp_blank_buffer();
-    data.size = 100;
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    buffer.size = 100;
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the buffer's init function
      */
-    if (sxbp_init_buffer(&data) != SXBP_RESULT_OK) {
+    if (sxbp_init_buffer(&buffer) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate buffer");
     }
 
-    sxbp_result_t result = sxbp_begin_figure(&data, NULL, NULL);
+    sxbp_result_t result = sxbp_begin_figure(&buffer, NULL, NULL);
 
     // precondition check error should be returned when figure is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 
     // cleanup
-    sxbp_free_buffer(&data);
+    sxbp_free_buffer(&buffer);
 } END_TEST
 
 START_TEST(test_refine_figure) {
@@ -334,7 +333,7 @@ START_TEST(test_refine_figure_unimplemented_method) {
 
 START_TEST(test_dump_figure) {
     sxbp_figure_t figure = {
-        .size = 9,
+        .size = SAMPLE_FIGURE_SIZE,
         .lines = NULL,
         .lines_remaining = 0,
     };
@@ -386,8 +385,35 @@ START_TEST(test_dump_figure_buffer_null) {
 } END_TEST
 
 START_TEST(test_load_figure) {
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    buffer.size = sizeof(SAMPLE_FILE_DATA);
+    /*
+     * allocate the buffer -if this fails then we'll abort here because this
+     * test case is not testing the buffer's init function
+     */
+    if (sxbp_init_buffer(&buffer) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate buffer");
+    }
+    // copy the data into the buffer
+    for (size_t i = 0; i < buffer.size; i++) {
+        buffer.bytes[i] = SAMPLE_FILE_DATA[i];
+    }
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_load_figure(&buffer, &figure);
+
+    // check the operation completed successfully
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that the figure contains the sample lines and quantity thereof
+    ck_assert(figure.size == SAMPLE_FIGURE_SIZE);
+    for (size_t i = 0; i < SAMPLE_FIGURE_SIZE; i++) {
+        ck_assert(figure.lines[i].direction == SAMPLE_FIGURE_LINES[i].direction);
+        ck_assert(figure.lines[i].length == SAMPLE_FIGURE_LINES[i].length);
+    }
+
+    // cleanup
+    sxbp_free_buffer(&buffer);
+    sxbp_free_figure(&figure);
 } END_TEST
 
 START_TEST(test_load_figure_buffer_null) {
