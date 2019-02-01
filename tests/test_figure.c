@@ -38,6 +38,18 @@ static const sxbp_line_t SAMPLE_FIGURE_LINES[] = {
     { .direction = SXBP_DOWN, .length = 1, },
 };
 
+static const sxbp_line_t REFINED_SAMPLE_FIGURE_LINES[] = {
+    { .direction = SXBP_UP, .length = 1, },
+    { .direction = SXBP_RIGHT, .length = 1, },
+    { .direction = SXBP_UP, .length = 1, },
+    { .direction = SXBP_LEFT, .length = 1, },
+    { .direction = SXBP_UP, .length = 1, },
+    { .direction = SXBP_LEFT, .length = 1, },
+    { .direction = SXBP_DOWN, .length = 1, },
+    { .direction = SXBP_LEFT, .length = 1, },
+    { .direction = SXBP_DOWN, .length = 1, },
+};
+
 static const uint8_t SAMPLE_FILE_DATA[] = {
     0x73, 0x78, 0x62, 0x70, // "sxbp"
     0x00, 0x00, // major version
@@ -276,12 +288,42 @@ START_TEST(test_begin_figure_figure_null) {
 } END_TEST
 
 START_TEST(test_refine_figure) {
+    sxbp_figure_t figure = {
+        .size = SAMPLE_FIGURE_SIZE,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    sxbp_init_figure(&figure);
     /*
-     * NOTE: This function may be rather hard to unit-test as it suffers from
-     * the halting problem
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
      */
-    // TODO: replace this body with actual test code
-    ck_abort_msg("Test not implemented!");
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with our pre-built lines
+    for (size_t i = 0; i < figure.size; i++) {
+        figure.lines[i] = SAMPLE_FIGURE_LINES[i];
+    }
+
+    sxbp_result_t result = sxbp_refine_figure(&figure, NULL);
+
+    // check the operation was successful
+    ck_assert(result == SXBP_RESULT_OK);
+    /*
+     * check that the refined figure has the same number of lines and that these
+     * lines are identical to those of the refined version
+     */
+    ck_assert(figure.size == SAMPLE_FIGURE_SIZE);
+    for (size_t i = 0; i < SAMPLE_FIGURE_SIZE; i++) {
+        ck_assert(
+            figure.lines[i].direction ==
+            REFINED_SAMPLE_FIGURE_LINES[i].direction
+        );
+        ck_assert(
+            figure.lines[i].length == REFINED_SAMPLE_FIGURE_LINES[i].length
+        );
+    }
 } END_TEST
 
 START_TEST(test_refine_figure_figure_null) {
