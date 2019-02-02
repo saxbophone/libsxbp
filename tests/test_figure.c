@@ -266,6 +266,40 @@ START_TEST(test_copy_figure_to_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_copy_figure_blank) {
+    sxbp_figure_t from = sxbp_blank_figure();
+    sxbp_figure_t to = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+
+    /*
+     * it should be possible to successfully 'copy' a blank figure, though such
+     * an operation should have no effect
+     */
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that 'to' is indeed still blank
+    ck_assert(to.size == 0);
+    ck_assert_ptr_null(to.lines);
+    ck_assert(to.lines_remaining == 0);
+} END_TEST
+
+START_TEST(test_copy_figure_lines_null) {
+    sxbp_figure_t from = {
+        .size = 32,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    sxbp_figure_t to = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+
+    /*
+     * if the source has non-zero size but lines are NULL, a precondition
+     * failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+} END_TEST
+
 START_TEST(test_begin_figure) {
     sxbp_buffer_t buffer = { .size = 1, .bytes = NULL, };
     /*
@@ -831,6 +865,8 @@ Suite* make_figure_suite(void) {
     tcase_add_test(copy_figure, test_copy_figure);
     tcase_add_test(copy_figure, test_copy_figure_from_null);
     tcase_add_test(copy_figure, test_copy_figure_to_null);
+    tcase_add_test(copy_figure, test_copy_figure_blank);
+    tcase_add_test(copy_figure, test_copy_figure_lines_null);
     suite_add_tcase(test_suite, copy_figure);
 
     TCase* begin_figure = tcase_create("sxbp_begin_figure()");
