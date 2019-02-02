@@ -185,6 +185,58 @@ START_TEST(test_copy_bitmap_pixels_null) {
     ck_assert_ptr_null(to.pixels);
 } END_TEST
 
+START_TEST(test_copy_bitmap_width_zero_only) {
+    sxbp_bitmap_t from = {
+        .width = 0,
+        .height = 32,
+        .pixels = NULL,
+    };
+    /*
+     * allocate the bitmap -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_bitmap(&from) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate bitmap");
+    }
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    /*
+     * if the source has width that is zero but height that is not, a
+     * precondition failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
+START_TEST(test_copy_bitmap_height_zero_only) {
+    sxbp_bitmap_t from = {
+        .width = 32,
+        .height = 0,
+        .pixels = NULL,
+    };
+    /*
+     * allocate the bitmap -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_bitmap(&from) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate bitmap");
+    }
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    /*
+     * if the source has height that is zero but width that is not, a
+     * precondition failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
 Suite* make_bitmap_suite(void) {
     // Test cases for bitmap data type
     Suite* test_suite = suite_create("Bitmap");
@@ -209,6 +261,8 @@ Suite* make_bitmap_suite(void) {
     tcase_add_test(copy_bitmap, test_copy_bitmap_to_null);
     tcase_add_test(copy_bitmap, test_copy_bitmap_blank);
     tcase_add_test(copy_bitmap, test_copy_bitmap_pixels_null);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_width_zero_only);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_height_zero_only);
     suite_add_tcase(test_suite, copy_bitmap);
 
     return test_suite;
