@@ -199,6 +199,8 @@ START_TEST(test_copy_buffer_bytes_null) {
      * failure error should be returned
      */
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.bytes);
 } END_TEST
 
 START_TEST(test_buffer_from_file) {

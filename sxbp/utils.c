@@ -105,7 +105,15 @@ sxbp_result_t sxbp_copy_buffer(
     sxbp_free_buffer(to);
     // copy across the size
     to->size = from->size;
-    // allocate the 'to' buffer
+    // if size is zero, quit early and return success
+    if (from->size == 0) {
+        return SXBP_RESULT_OK;
+    }
+    // if bytes is NULL, quit early and return precondition failure
+    if (from->bytes == NULL) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    }
+    // if bytes is not NULL, allocate the 'to' buffer
     if (!sxbp_success(sxbp_init_buffer(to))) {
         // exit early if allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
@@ -226,6 +234,14 @@ sxbp_result_t sxbp_copy_figure(
     // copy across the static members
     to->size = from->size;
     to->lines_remaining = from->lines_remaining;
+    // if size is zero, quit early and return success
+    if (from->size == 0) {
+        return SXBP_RESULT_OK;
+    }
+    // if lines is NULL, quit early and return precondition failure
+    if (from->lines == NULL) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    }
     // allocate the 'to' figure
     if (!sxbp_init_figure(to)) {
         // exit early if allocation failed - this can only be a memory error
@@ -305,6 +321,14 @@ sxbp_result_t sxbp_copy_bitmap(
     // copy across width and height
     to->width = from->width;
     to->height = from->height;
+    // if both width and height are zero, return success early
+    if ((from->width | from->height) == 0) { // bitwise-or to check both are 0
+        return SXBP_RESULT_OK;
+    }
+    // if pixels is NULL, quit early and return precondition failure
+    if (from->pixels == NULL) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    }
     // allocate the 'to' bitmap
     if (!sxbp_success(sxbp_init_bitmap(to))) {
         // exit early if allocation failed - this can only be a memory error

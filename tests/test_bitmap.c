@@ -181,6 +181,8 @@ START_TEST(test_copy_bitmap_pixels_null) {
      * failure error should be returned
      */
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.pixels);
 } END_TEST
 
 Suite* make_bitmap_suite(void) {
