@@ -373,6 +373,9 @@ bool sxbp_free_buffer(sxbp_buffer_t* const buffer);
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
  * in which case `to` will be empty.
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `from` or `to` is `NULL`
+ * @note Memory is allocated only if `from` has memory allocated and `from.size`
+ * is non-zero. Copying a buffer with `size` of zero is not an error and does
+ * not return an error code.
  * @since v0.54.0
  */
 sxbp_result_t sxbp_copy_buffer(
@@ -470,6 +473,10 @@ bool sxbp_free_figure(sxbp_figure_t* const figure);
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
  * in which case `to` will be empty.
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `from` or `to` is `NULL`
+ * @note Memory is allocated only if `from` has memory allocated and `from.size`
+ * is non-zero. Copying a figure with `size` of zero is not an error and does
+ * not return an error code, the members of the data type that do not need
+ * dynamic memory allocation will still be copied across.
  * @since v0.54.0
  */
 sxbp_result_t sxbp_copy_figure(
@@ -528,6 +535,11 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap);
  * @returns `SXBP_RESULT_FAIL_MEMORY` if the data was not copied successfully,
  * in which case `to` will be empty.
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `from` or `to` is `NULL`
+ * @note Memory is allocated only if `from` has memory allocated and
+ * `from.width * from.height` is non-zero. Copying a bitmap where the result of
+ * this calculation is zero is not an error and does not return an error code,
+ * the members of the data type that do not need dynamic memory allocation will
+ * still be copied across.
  * @since v0.54.0
  */
 sxbp_result_t sxbp_copy_bitmap(

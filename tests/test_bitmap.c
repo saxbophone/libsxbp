@@ -64,13 +64,10 @@ START_TEST(test_init_bitmap_blank) {
 
     sxbp_result_t result = sxbp_init_bitmap(&bitmap);
 
-    // return code should be success
-    ck_assert(result == SXBP_RESULT_OK);
+    // return code should be 'not implemented'
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
     // no memory should have been allocated
     ck_assert_ptr_null(bitmap.pixels);
-    // all other fields should be zero
-    ck_assert(bitmap.width == 0);
-    ck_assert(bitmap.height == 0);
 } END_TEST
 
 START_TEST(test_init_bitmap_width_zero) {
@@ -78,8 +75,8 @@ START_TEST(test_init_bitmap_width_zero) {
 
     sxbp_result_t result = sxbp_init_bitmap(&bitmap);
 
-    // return code should be precondition failure
-    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // return code should be 'not implemented'
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
     // no memory should have been allocated
     ck_assert_ptr_null(bitmap.pixels);
 } END_TEST
@@ -89,8 +86,8 @@ START_TEST(test_init_bitmap_height_zero) {
 
     sxbp_result_t result = sxbp_init_bitmap(&bitmap);
 
-    // return code should be precondition failure
-    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // return code should be 'not implemented'
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
     // no memory should have been allocated
     ck_assert_ptr_null(bitmap.pixels);
 } END_TEST
@@ -228,23 +225,13 @@ START_TEST(test_copy_bitmap_width_zero_only) {
         .height = 32,
         .pixels = NULL,
     };
-    /*
-     * allocate the bitmap -if this fails then we'll abort here because this
-     * test case is not testing the init function
-     */
-    if (sxbp_init_bitmap(&from) != SXBP_RESULT_OK) {
-        ck_abort_msg("Unable to allocate bitmap");
-    }
     sxbp_bitmap_t to = sxbp_blank_bitmap();
 
     sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
 
-    /*
-     * if the source has width that is zero but height that is not, a
-     * precondition failure error should be returned
-     */
-    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
-    // just to be safe, also check that to has not been allocated
+    // the return code should be success
+    ck_assert(result == SXBP_RESULT_OK);
+    // to should not have been allocated
     ck_assert_ptr_null(to.pixels);
 } END_TEST
 
@@ -254,23 +241,13 @@ START_TEST(test_copy_bitmap_height_zero_only) {
         .height = 0,
         .pixels = NULL,
     };
-    /*
-     * allocate the bitmap -if this fails then we'll abort here because this
-     * test case is not testing the init function
-     */
-    if (sxbp_init_bitmap(&from) != SXBP_RESULT_OK) {
-        ck_abort_msg("Unable to allocate bitmap");
-    }
     sxbp_bitmap_t to = sxbp_blank_bitmap();
 
     sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
 
-    /*
-     * if the source has height that is zero but width that is not, a
-     * precondition failure error should be returned
-     */
-    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
-    // just to be safe, also check that to has not been allocated
+    // the return code should be success
+    ck_assert(result == SXBP_RESULT_OK);
+    // to should not have been allocated
     ck_assert_ptr_null(to.pixels);
 } END_TEST
 
