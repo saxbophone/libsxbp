@@ -324,6 +324,7 @@ sxbp_buffer_t sxbp_blank_buffer(void);
  * @returns `SXBP_RESULT_OK` if memory was allocated successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `buffer` is `NULL`
+ * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED` if `buffer.size` is `0`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer);
@@ -436,6 +437,7 @@ sxbp_figure_t sxbp_blank_figure(void);
  * @returns `SXBP_RESULT_FAIL_MEMORY` if any memory was not allocated
  * successfully
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `figure` is `NULL`
+ * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED` if `figure.size` is `0`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure);
@@ -494,6 +496,7 @@ sxbp_bitmap_t sxbp_blank_bitmap(void);
  * @returns `SXBP_RESULT_OK` if memory was allocated successfully
  * @returns `SXBP_RESULT_FAIL_MEMORY` if memory was not allocated successfully
  * @returns `SXBP_RESULT_FAIL_PRECONDITION` if `bitmap` is `NULL`
+ * @returns `SXBP_RESULT_FAIL_UNIMPLEMENTED` if `bitmap.width` or `bitmap.height` are `0`
  * @since v0.54.0
  */
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap);
