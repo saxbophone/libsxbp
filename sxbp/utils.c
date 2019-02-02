@@ -52,7 +52,7 @@ sxbp_buffer_t sxbp_blank_buffer(void) {
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
     // check buffer isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(buffer);
-    // return failure early if size is 0
+    // return failure early if size is 0 --we do not allocate 0 bytes of memory
     if (buffer->size == 0) {
         return SXBP_RESULT_FAIL_UNIMPLEMENTED;
     }
@@ -109,7 +109,10 @@ sxbp_result_t sxbp_copy_buffer(
     sxbp_free_buffer(to);
     // copy across the size
     to->size = from->size;
-    // if size is zero, quit early and return success
+    /*
+     * if size is zero, quit early and return success
+     * --we do not allocate 0 bytes of memory
+     */
     if (from->size == 0) {
         return SXBP_RESULT_OK;
     }
@@ -207,7 +210,7 @@ sxbp_figure_t sxbp_blank_figure(void) {
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
     // check figure isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
-    // return failure early if size is 0
+    // return failure early if size is 0 --we do not allocate 0 bytes of memory
     if (figure->size == 0) {
         return SXBP_RESULT_FAIL_UNIMPLEMENTED;
     }
@@ -242,7 +245,10 @@ sxbp_result_t sxbp_copy_figure(
     // copy across the static members
     to->size = from->size;
     to->lines_remaining = from->lines_remaining;
-    // if size is zero, quit early and return success
+    /*
+     * if size is zero, quit early and return success
+     * --we do not allocate 0 bytes of memory
+     */
     if (from->size == 0) {
         return SXBP_RESULT_OK;
     }
@@ -276,7 +282,10 @@ static bool sxbp_init_bitmap_col(bool** col, sxbp_figure_dimension_t size) {
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
     // check bitmap isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(bitmap);
-    // if calculated area is zero, don't continue
+    /*
+     * if calculated area is zero, don't continue --we do not allocate 0 bytes
+     * of memory
+     */
     if ((bitmap->width * bitmap->height) == 0) {
         return SXBP_RESULT_FAIL_UNIMPLEMENTED;
     }
@@ -333,7 +342,10 @@ sxbp_result_t sxbp_copy_bitmap(
     // copy across width and height
     to->width = from->width;
     to->height = from->height;
-    // if width * height is zero, return success early
+    /*
+     * if width * height is zero, quit early and return success
+     * --we do not allocate 0 bytes of memory
+     */
     if ((from->width * from->height) == 0) { // bitwise-or to check both are 0
         return SXBP_RESULT_OK;
     }
