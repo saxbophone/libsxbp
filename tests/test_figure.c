@@ -170,6 +170,15 @@ START_TEST(test_init_figure_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_init_figure_blank) {
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_init_figure(&figure);
+
+    // check that the return code was a 'not implemented' error
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+} END_TEST
+
 START_TEST(test_free_figure_unallocated) {
     sxbp_figure_t figure = sxbp_blank_figure();
 
@@ -264,6 +273,43 @@ START_TEST(test_copy_figure_to_null) {
 
     // precondition check error should be returned when to is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+} END_TEST
+
+START_TEST(test_copy_figure_blank) {
+    sxbp_figure_t from = sxbp_blank_figure();
+    sxbp_figure_t to = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+
+    /*
+     * it should be possible to successfully 'copy' a blank figure, with the
+     * result being that no memory is allocated for to, and that all fields of
+     * to are set to zero/NULL
+     */
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that 'to' is indeed still blank
+    ck_assert(to.size == 0);
+    ck_assert_ptr_null(to.lines);
+    ck_assert(to.lines_remaining == 0);
+} END_TEST
+
+START_TEST(test_copy_figure_lines_null) {
+    sxbp_figure_t from = {
+        .size = 32,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    sxbp_figure_t to = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+
+    /*
+     * if the source has non-zero size but lines are NULL, a precondition
+     * failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.lines);
 } END_TEST
 
 START_TEST(test_begin_figure) {
@@ -820,6 +866,7 @@ Suite* make_figure_suite(void) {
     TCase* init_figure = tcase_create("sxbp_init_figure()");
     tcase_add_test(init_figure, test_init_figure);
     tcase_add_test(init_figure, test_init_figure_null);
+    tcase_add_test(init_figure, test_init_figure_blank);
     suite_add_tcase(test_suite, init_figure);
 
     TCase* free_figure = tcase_create("sxbp_free_figure()");
@@ -831,6 +878,8 @@ Suite* make_figure_suite(void) {
     tcase_add_test(copy_figure, test_copy_figure);
     tcase_add_test(copy_figure, test_copy_figure_from_null);
     tcase_add_test(copy_figure, test_copy_figure_to_null);
+    tcase_add_test(copy_figure, test_copy_figure_blank);
+    tcase_add_test(copy_figure, test_copy_figure_lines_null);
     suite_add_tcase(test_suite, copy_figure);
 
     TCase* begin_figure = tcase_create("sxbp_begin_figure()");

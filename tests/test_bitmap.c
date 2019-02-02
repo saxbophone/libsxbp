@@ -59,6 +59,39 @@ START_TEST(test_init_bitmap_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_init_bitmap_blank) {
+    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+
+    // return code should be 'not implemented'
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+    // no memory should have been allocated
+    ck_assert_ptr_null(bitmap.pixels);
+} END_TEST
+
+START_TEST(test_init_bitmap_width_zero) {
+    sxbp_bitmap_t bitmap = { .width = 0, .height = 32, .pixels = NULL, };
+
+    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+
+    // return code should be 'not implemented'
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+    // no memory should have been allocated
+    ck_assert_ptr_null(bitmap.pixels);
+} END_TEST
+
+START_TEST(test_init_bitmap_height_zero) {
+    sxbp_bitmap_t bitmap = { .width = 32, .height = 0, .pixels = NULL, };
+
+    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+
+    // return code should be 'not implemented'
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+    // no memory should have been allocated
+    ck_assert_ptr_null(bitmap.pixels);
+} END_TEST
+
 START_TEST(test_free_bitmap_unallocated) {
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
 
@@ -149,6 +182,75 @@ START_TEST(test_copy_bitmap_to_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_copy_bitmap_blank) {
+    sxbp_bitmap_t from = sxbp_blank_bitmap();
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    /*
+     * it should be possible to successfully 'copy' a blank bitmap, with the
+     * result being that no memory is allocated for to, and that all fields of
+     * to are set to zero/NULL
+     */
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that 'to' is indeed still blank
+    ck_assert(to.width == 0);
+    ck_assert(to.height == 0);
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
+START_TEST(test_copy_bitmap_pixels_null) {
+    sxbp_bitmap_t from = {
+        .width = 32,
+        .height = 32,
+        .pixels = NULL,
+    };
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    /*
+     * if the source has non-zero size but pixels are NULL, a precondition
+     * failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
+START_TEST(test_copy_bitmap_width_zero_only) {
+    sxbp_bitmap_t from = {
+        .width = 0,
+        .height = 32,
+        .pixels = NULL,
+    };
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    // the return code should be success
+    ck_assert(result == SXBP_RESULT_OK);
+    // to should not have been allocated
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
+START_TEST(test_copy_bitmap_height_zero_only) {
+    sxbp_bitmap_t from = {
+        .width = 32,
+        .height = 0,
+        .pixels = NULL,
+    };
+    sxbp_bitmap_t to = sxbp_blank_bitmap();
+
+    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+
+    // the return code should be success
+    ck_assert(result == SXBP_RESULT_OK);
+    // to should not have been allocated
+    ck_assert_ptr_null(to.pixels);
+} END_TEST
+
 Suite* make_bitmap_suite(void) {
     // Test cases for bitmap data type
     Suite* test_suite = suite_create("Bitmap");
@@ -160,6 +262,9 @@ Suite* make_bitmap_suite(void) {
     TCase* init_bitmap = tcase_create("sxbp_init_bitmap()");
     tcase_add_test(init_bitmap, test_init_bitmap);
     tcase_add_test(init_bitmap, test_init_bitmap_null);
+    tcase_add_test(init_bitmap, test_init_bitmap_blank);
+    tcase_add_test(init_bitmap, test_init_bitmap_width_zero);
+    tcase_add_test(init_bitmap, test_init_bitmap_height_zero);
     suite_add_tcase(test_suite, init_bitmap);
 
     TCase* free_bitmap = tcase_create("sxbp_free_bitmap()");
@@ -171,6 +276,10 @@ Suite* make_bitmap_suite(void) {
     tcase_add_test(copy_bitmap, test_copy_bitmap);
     tcase_add_test(copy_bitmap, test_copy_bitmap_from_null);
     tcase_add_test(copy_bitmap, test_copy_bitmap_to_null);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_blank);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_pixels_null);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_width_zero_only);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_height_zero_only);
     suite_add_tcase(test_suite, copy_bitmap);
 
     return test_suite;

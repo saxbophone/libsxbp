@@ -84,6 +84,15 @@ START_TEST(test_init_buffer_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_init_buffer_blank) {
+    sxbp_buffer_t buffer = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_init_buffer(&buffer);
+
+    // check that the return code was a 'not implemented' error
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+} END_TEST
+
 START_TEST(test_free_buffer_unallocated) {
     sxbp_buffer_t buffer = sxbp_blank_buffer();
 
@@ -169,6 +178,41 @@ START_TEST(test_copy_buffer_to_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_copy_buffer_blank) {
+    sxbp_buffer_t from = sxbp_blank_buffer();
+    sxbp_buffer_t to = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+
+    /*
+     * it should be possible to successfully 'copy' a blank buffer, with the
+     * result being that no memory is allocated for to, and that all fields of
+     * to are set to zero/NULL
+     */
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that 'to' is indeed still blank
+    ck_assert(to.size == 0);
+    ck_assert_ptr_null(to.bytes);
+} END_TEST
+
+START_TEST(test_copy_buffer_bytes_null) {
+    sxbp_buffer_t from = {
+        .size = 32,
+        .bytes = NULL,
+    };
+    sxbp_buffer_t to = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+
+    /*
+     * if the source has non-zero size but bytes are NULL, a precondition
+     * failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+    // just to be safe, also check that to has not been allocated
+    ck_assert_ptr_null(to.bytes);
+} END_TEST
+
 START_TEST(test_buffer_from_file) {
     // open file in read mode, aborting if failure occurs
     FILE* temp_file = fopen(test_data_filename, "rb");
@@ -231,6 +275,7 @@ Suite* make_buffer_suite(void) {
     TCase* init_buffer = tcase_create("sxbp_init_buffer()");
     tcase_add_test(init_buffer, test_init_buffer);
     tcase_add_test(init_buffer, test_init_buffer_null);
+    tcase_add_test(init_buffer, test_init_buffer_blank);
     suite_add_tcase(test_suite, init_buffer);
 
     TCase* free_buffer = tcase_create("sxbp_free_buffer()");
@@ -242,6 +287,8 @@ Suite* make_buffer_suite(void) {
     tcase_add_test(copy_buffer, test_copy_buffer);
     tcase_add_test(copy_buffer, test_copy_buffer_from_null);
     tcase_add_test(copy_buffer, test_copy_buffer_to_null);
+    tcase_add_test(copy_buffer, test_copy_buffer_blank);
+    tcase_add_test(copy_buffer, test_copy_buffer_bytes_null);
     suite_add_tcase(test_suite, copy_buffer);
 
     TCase* buffer_from_file = tcase_create(

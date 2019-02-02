@@ -52,6 +52,10 @@ sxbp_buffer_t sxbp_blank_buffer(void) {
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
     // check buffer isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(buffer);
+    // return failure early if size is 0 --we do not allocate 0 bytes of memory
+    if (buffer->size == 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
     // if bytes is not NULL, then the operation was successful
@@ -105,7 +109,18 @@ sxbp_result_t sxbp_copy_buffer(
     sxbp_free_buffer(to);
     // copy across the size
     to->size = from->size;
-    // allocate the 'to' buffer
+    /*
+     * if size is zero, quit early and return success
+     * --we do not allocate 0 bytes of memory
+     */
+    if (from->size == 0) {
+        return SXBP_RESULT_OK;
+    }
+    // if bytes is NULL, quit early and return precondition failure
+    if (from->bytes == NULL) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    }
+    // if bytes is not NULL, allocate the 'to' buffer
     if (!sxbp_success(sxbp_init_buffer(to))) {
         // exit early if allocation failed - this can only be a memory error
         return SXBP_RESULT_FAIL_MEMORY;
@@ -195,6 +210,10 @@ sxbp_figure_t sxbp_blank_figure(void) {
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
     // check figure isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
+    // return failure early if size is 0 --we do not allocate 0 bytes of memory
+    if (figure->size == 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // allocate the lines, using calloc to set all fields of each one to zero
     figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
     // if lines is not NULL, then the operation was successful
@@ -226,6 +245,17 @@ sxbp_result_t sxbp_copy_figure(
     // copy across the static members
     to->size = from->size;
     to->lines_remaining = from->lines_remaining;
+    /*
+     * if size is zero, quit early and return success
+     * --we do not allocate 0 bytes of memory
+     */
+    if (from->size == 0) {
+        return SXBP_RESULT_OK;
+    }
+    // if lines is NULL, quit early and return precondition failure
+    if (from->lines == NULL) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    }
     // allocate the 'to' figure
     if (!sxbp_init_figure(to)) {
         // exit early if allocation failed - this can only be a memory error
@@ -252,6 +282,13 @@ static bool sxbp_init_bitmap_col(bool** col, sxbp_figure_dimension_t size) {
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
     // check bitmap isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(bitmap);
+    /*
+     * if calculated area is zero, don't continue --we do not allocate 0 bytes
+     * of memory
+     */
+    if ((bitmap->width * bitmap->height) == 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // first allocate pointers for the columns
     bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
@@ -305,6 +342,17 @@ sxbp_result_t sxbp_copy_bitmap(
     // copy across width and height
     to->width = from->width;
     to->height = from->height;
+    /*
+     * if width * height is zero, quit early and return success
+     * --we do not allocate 0 bytes of memory
+     */
+    if ((from->width * from->height) == 0) { // bitwise-or to check both are 0
+        return SXBP_RESULT_OK;
+    }
+    // if pixels is NULL, quit early and return precondition failure
+    if (from->pixels == NULL) {
+        return SXBP_RESULT_FAIL_PRECONDITION;
+    }
     // allocate the 'to' bitmap
     if (!sxbp_success(sxbp_init_bitmap(to))) {
         // exit early if allocation failed - this can only be a memory error
