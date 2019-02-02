@@ -268,6 +268,10 @@ static bool sxbp_init_bitmap_col(bool** col, sxbp_figure_dimension_t size) {
 sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
     // check bitmap isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(bitmap);
+    // if calculated area is zero, don't continue
+    if ((bitmap->width * bitmap->height) == 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // first allocate pointers for the columns
     bitmap->pixels = calloc(bitmap->width, sizeof(bool*));
     if (bitmap->pixels == NULL) {
@@ -321,8 +325,8 @@ sxbp_result_t sxbp_copy_bitmap(
     // copy across width and height
     to->width = from->width;
     to->height = from->height;
-    // if both width and height are zero, return success early
-    if ((from->width | from->height) == 0) { // bitwise-or to check both are 0
+    // if width * height is zero, return success early
+    if ((from->width * from->height) == 0) { // bitwise-or to check both are 0
         return SXBP_RESULT_OK;
     }
     // if pixels is NULL, quit early and return precondition failure
