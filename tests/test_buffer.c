@@ -84,7 +84,7 @@ START_TEST(test_init_buffer_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
-START_TEST(test_init_buffer_size_zero) {
+START_TEST(test_init_buffer_blank) {
     sxbp_buffer_t buffer = sxbp_blank_buffer();
 
     sxbp_result_t result = sxbp_init_buffer(&buffer);
@@ -275,7 +275,7 @@ Suite* make_buffer_suite(void) {
     TCase* init_buffer = tcase_create("sxbp_init_buffer()");
     tcase_add_test(init_buffer, test_init_buffer);
     tcase_add_test(init_buffer, test_init_buffer_null);
-    tcase_add_test(init_buffer, test_init_buffer_size_zero);
+    tcase_add_test(init_buffer, test_init_buffer_blank);
     suite_add_tcase(test_suite, init_buffer);
 
     TCase* free_buffer = tcase_create("sxbp_free_buffer()");
