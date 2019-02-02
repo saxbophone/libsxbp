@@ -169,6 +169,38 @@ START_TEST(test_copy_buffer_to_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_copy_buffer_blank) {
+    sxbp_buffer_t from = sxbp_blank_buffer();
+    sxbp_buffer_t to = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+
+    /*
+     * it should be possible to successfully 'copy' a blank buffer, though such
+     * an operation should have no effect
+     */
+    ck_assert(result == SXBP_RESULT_OK);
+    // check that 'to' is indeed still blank
+    ck_assert(to.size == 0);
+    ck_assert_ptr_null(to.bytes);
+} END_TEST
+
+START_TEST(test_copy_buffer_bytes_null) {
+    sxbp_buffer_t from = {
+        .size = 32,
+        .bytes = NULL,
+    };
+    sxbp_buffer_t to = sxbp_blank_buffer();
+
+    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+
+    /*
+     * if the source has non-zero size but bytes are NULL, a precondition
+     * failure error should be returned
+     */
+    ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
+} END_TEST
+
 START_TEST(test_buffer_from_file) {
     // open file in read mode, aborting if failure occurs
     FILE* temp_file = fopen(test_data_filename, "rb");
@@ -242,6 +274,8 @@ Suite* make_buffer_suite(void) {
     tcase_add_test(copy_buffer, test_copy_buffer);
     tcase_add_test(copy_buffer, test_copy_buffer_from_null);
     tcase_add_test(copy_buffer, test_copy_buffer_to_null);
+    tcase_add_test(copy_buffer, test_copy_buffer_blank);
+    tcase_add_test(copy_buffer, test_copy_buffer_bytes_null);
     suite_add_tcase(test_suite, copy_buffer);
 
     TCase* buffer_from_file = tcase_create(

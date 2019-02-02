@@ -156,8 +156,8 @@ START_TEST(test_copy_bitmap_blank) {
     sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
 
     /*
-     * it should be possible to successfully 'copy' a blank bitmap, though
-     * such an operation should have no effect
+     * it should be possible to successfully 'copy' a blank bitmap, though such
+     * an operation should have no effect
      */
     ck_assert(result == SXBP_RESULT_OK);
     // check that 'to' is indeed still blank
