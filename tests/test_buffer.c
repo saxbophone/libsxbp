@@ -176,8 +176,9 @@ START_TEST(test_copy_buffer_blank) {
     sxbp_result_t result = sxbp_copy_buffer(&from, &to);
 
     /*
-     * it should be possible to successfully 'copy' a blank buffer, though such
-     * an operation should have no effect
+     * it should be possible to successfully 'copy' a blank buffer, with the
+     * result being that no memory is allocated for to, and that all fields of
+     * to are set to zero/NULL
      */
     ck_assert(result == SXBP_RESULT_OK);
     // check that 'to' is indeed still blank

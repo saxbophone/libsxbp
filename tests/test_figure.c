@@ -273,8 +273,9 @@ START_TEST(test_copy_figure_blank) {
     sxbp_result_t result = sxbp_copy_figure(&from, &to);
 
     /*
-     * it should be possible to successfully 'copy' a blank figure, though such
-     * an operation should have no effect
+     * it should be possible to successfully 'copy' a blank figure, with the
+     * result being that no memory is allocated for to, and that all fields of
+     * to are set to zero/NULL
      */
     ck_assert(result == SXBP_RESULT_OK);
     // check that 'to' is indeed still blank
