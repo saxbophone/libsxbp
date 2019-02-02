@@ -52,6 +52,10 @@ sxbp_buffer_t sxbp_blank_buffer(void) {
 sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
     // check buffer isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(buffer);
+    // return failure early if size is 0
+    if (buffer->size == 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // allocate memory with calloc to make sure all bytes are set to zero
     buffer->bytes = calloc(buffer->size, sizeof(uint8_t));
     // if bytes is not NULL, then the operation was successful
@@ -203,6 +207,10 @@ sxbp_figure_t sxbp_blank_figure(void) {
 sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
     // check figure isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
+    // return failure early if size is 0
+    if (figure->size == 0) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // allocate the lines, using calloc to set all fields of each one to zero
     figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
     // if lines is not NULL, then the operation was successful

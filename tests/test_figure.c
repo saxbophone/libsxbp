@@ -170,6 +170,15 @@ START_TEST(test_init_figure_null) {
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
+START_TEST(test_init_figure_size_zero) {
+    sxbp_figure_t figure = sxbp_blank_figure();
+
+    sxbp_result_t result = sxbp_init_figure(&figure);
+
+    // check that the return code was a 'not implemented' error
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+} END_TEST
+
 START_TEST(test_free_figure_unallocated) {
     sxbp_figure_t figure = sxbp_blank_figure();
 
@@ -857,6 +866,7 @@ Suite* make_figure_suite(void) {
     TCase* init_figure = tcase_create("sxbp_init_figure()");
     tcase_add_test(init_figure, test_init_figure);
     tcase_add_test(init_figure, test_init_figure_null);
+    tcase_add_test(init_figure, test_init_figure_size_zero);
     suite_add_tcase(test_suite, init_figure);
 
     TCase* free_figure = tcase_create("sxbp_free_figure()");
