@@ -150,7 +150,7 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
  * private, macro which aborts via fale assertion with a message in expression,
  * to be used for indicating when supposedly unreachable code is reached
  */
-#define SXBP_ABORT_UNREACHABLE_CODE() assert((!"Unreachable code reached"))
+#define SXBP_ABORT_UNREACHABLE_CODE() assert("Unreachable code reached")
 
 #ifdef __cplusplus
 } // extern "C"
