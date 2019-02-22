@@ -72,7 +72,6 @@ static sxbp_length_t sxbp_next_length(
     assert(direction <= SXBP_LEFT);
     switch (direction % 4u) {
         case SXBP_UP:
-            SXBP_ABORT_UNREACHABLE_CODE();
             return labs(bounds.y_max - location.y) + 1;
         case SXBP_RIGHT:
             return labs(bounds.x_max - location.x) + 1;
@@ -87,6 +86,7 @@ static sxbp_length_t sxbp_next_length(
              * smart enough to realise that this is unreachable code
              */
             SXBP_ABORT_UNREACHABLE_CODE();
+            return 0;
     }
 }
 

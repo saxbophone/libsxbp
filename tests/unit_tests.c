@@ -20,7 +20,8 @@
 
 int main(void) {
     int number_failed = -1;
-    SRunner* suite_runner = srunner_create(make_bitmap_suite());
+    SRunner* suite_runner = srunner_create(make_internal_suite());
+    srunner_add_suite(suite_runner, make_bitmap_suite());
     srunner_add_suite(suite_runner, make_buffer_suite());
     srunner_add_suite(suite_runner, make_figure_suite());
 
