@@ -146,6 +146,12 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
 // private, macro to assist in 'return early if NULL pointer' error checks
 #define SXBP_RETURN_FAIL_IF_NULL(pointer) if (pointer == NULL) return SXBP_RESULT_FAIL_PRECONDITION
 
+/*
+ * private, macro which aborts via fale assertion with a message in expression,
+ * to be used for indicating when supposedly unreachable code is reached
+ */
+#define SXBP_ABORT_UNREACHABLE_CODE() assert((!"Unreachable code reached"))
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
