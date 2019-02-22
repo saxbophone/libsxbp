@@ -32,13 +32,13 @@ Suite* make_internal_suite(void) {
     // Test cases for sxbp_internal unit
     Suite* test_suite = suite_create("internal");
 
-    TCase* blank_bitmap = tcase_create("sxbp_blank_bitmap()");
+    TCase* abort_unreachable_code = tcase_create("SXBP_ABORT_UNREACHABLE_CODE()");
     tcase_add_test_raise_signal(
-        blank_bitmap,
+        abort_unreachable_code,
         test_unreachable_code_abort_macro,
         SIGABRT // expect that this test case will raise the abort signal
     );
-    suite_add_tcase(test_suite, blank_bitmap);
+    suite_add_tcase(test_suite, abort_unreachable_code);
 
     return test_suite;
 }
