@@ -85,7 +85,7 @@ static sxbp_length_t sxbp_next_length(
              * it is only provided to placate the GCC compiler, which isn't
              * smart enough to realise that this is unreachable code
              */
-            assert(false);
+            SXBP_ABORT_UNREACHABLE_CODE();
     }
 }
 
