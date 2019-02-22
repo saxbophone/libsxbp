@@ -86,7 +86,6 @@ static sxbp_length_t sxbp_next_length(
              * smart enough to realise that this is unreachable code
              */
             SXBP_ABORT_UNREACHABLE_CODE();
-            return 0;
     }
 }
 
