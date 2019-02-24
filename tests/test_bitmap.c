@@ -269,7 +269,7 @@ START_TEST(test_copy_bitmap_to_itself) {
     // store pixels pointer for checking later
     bool** pixels = bitmap.pixels;
 
-    // NOTE: copying the bitmap to itself
+    // try and copy the bitmap to itself
     sxbp_result_t result = sxbp_copy_bitmap(&bitmap, &bitmap);
 
     // not implemented error code should be returned
