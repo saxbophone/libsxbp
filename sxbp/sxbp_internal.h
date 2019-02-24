@@ -24,7 +24,6 @@
 #ifndef SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 #define SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
