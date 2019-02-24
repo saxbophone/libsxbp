@@ -312,6 +312,41 @@ START_TEST(test_copy_figure_lines_null) {
     ck_assert_ptr_null(to.lines);
 } END_TEST
 
+START_TEST(test_copy_figure_to_itself) {
+    sxbp_figure_t figure = {
+        .size = 100,
+        .lines = NULL,
+        .lines_remaining = 0,
+    };
+    /*
+     * allocate the figure -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_figure(&figure) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate figure");
+    }
+    // populate the figure with 'random' lines
+    for (size_t i = 0; i < figure.size; i++) {
+        figure.lines[i].direction = rand() & 0x03; // range 0..3
+        figure.lines[i].length = rand() & 0x3fffffff; // range 0..2^30
+    }
+    // store lines pointer for checking later
+    sxbp_line_t* lines = figure.lines;
+
+    // try and copy the figure to itself
+    sxbp_result_t result = sxbp_copy_figure(&figure, &figure);
+
+    // not implemented error code should be returned
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+    // memory should not have been deallocated
+    ck_assert_ptr_nonnull(figure.lines);
+    // the lines pointer should remain the same
+    ck_assert(figure.lines == lines);
+
+    // cleanup
+    sxbp_free_figure(&figure);
+} END_TEST
+
 START_TEST(test_begin_figure) {
     sxbp_buffer_t buffer = { .size = 1, .bytes = NULL, };
     /*
@@ -880,6 +915,7 @@ Suite* make_figure_suite(void) {
     tcase_add_test(copy_figure, test_copy_figure_to_null);
     tcase_add_test(copy_figure, test_copy_figure_blank);
     tcase_add_test(copy_figure, test_copy_figure_lines_null);
+    tcase_add_test(copy_figure, test_copy_figure_to_itself);
     suite_add_tcase(test_suite, copy_figure);
 
     TCase* begin_figure = tcase_create("sxbp_begin_figure()");

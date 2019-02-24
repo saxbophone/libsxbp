@@ -213,6 +213,36 @@ START_TEST(test_copy_buffer_bytes_null) {
     ck_assert_ptr_null(to.bytes);
 } END_TEST
 
+START_TEST(test_copy_buffer_to_itself) {
+    sxbp_buffer_t buffer = { .size = 10000, .bytes = NULL, };
+    /*
+     * allocate the buffer -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_buffer(&buffer) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate buffer");
+    }
+    // populate the buffer with 'random' bytes
+    for (size_t i = 0; i < buffer.size; i++) {
+        buffer.bytes[i] = rand() & 0xff;
+    }
+    // store bytes pointer for checking later
+    uint8_t* bytes = buffer.bytes;
+
+    // try and copy the buffer to itself
+    sxbp_result_t result = sxbp_copy_buffer(&buffer, &buffer);
+
+    // not implemented error code should be returned
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+    // memory should not have been deallocated
+    ck_assert_ptr_nonnull(buffer.bytes);
+    // the bytes pointer should remain the same
+    ck_assert(buffer.bytes == bytes);
+
+    // cleanup
+    sxbp_free_buffer(&buffer);
+} END_TEST
+
 START_TEST(test_buffer_from_file) {
     // open file in read mode, aborting if failure occurs
     FILE* temp_file = fopen(test_data_filename, "rb");
@@ -289,6 +319,7 @@ Suite* make_buffer_suite(void) {
     tcase_add_test(copy_buffer, test_copy_buffer_to_null);
     tcase_add_test(copy_buffer, test_copy_buffer_blank);
     tcase_add_test(copy_buffer, test_copy_buffer_bytes_null);
+    tcase_add_test(copy_buffer, test_copy_buffer_to_itself);
     suite_add_tcase(test_suite, copy_buffer);
 
     TCase* buffer_from_file = tcase_create(
