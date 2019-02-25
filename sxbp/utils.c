@@ -105,6 +105,10 @@ sxbp_result_t sxbp_copy_buffer(
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(from);
     SXBP_RETURN_FAIL_IF_NULL(to);
+    // copying a buffer to itself is not supported
+    if (from == to) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_buffer(to);
     // copy across the size
@@ -240,6 +244,10 @@ sxbp_result_t sxbp_copy_figure(
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(from);
     SXBP_RETURN_FAIL_IF_NULL(to);
+    // copying a figure to itself is not supported
+    if (from == to) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_figure(to);
     // copy across the static members
@@ -337,6 +345,10 @@ sxbp_result_t sxbp_copy_bitmap(
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(from);
     SXBP_RETURN_FAIL_IF_NULL(to);
+    // copying a bitmap to itself is not supported
+    if (from == to) {
+        return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    }
     // before we do anything else, make sure 'to' has been freed
     sxbp_free_bitmap(to);
     // copy across width and height

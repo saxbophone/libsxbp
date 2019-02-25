@@ -251,6 +251,38 @@ START_TEST(test_copy_bitmap_height_zero_only) {
     ck_assert_ptr_null(to.pixels);
 } END_TEST
 
+START_TEST(test_copy_bitmap_to_itself) {
+    sxbp_bitmap_t bitmap = { .width = 32, .height = 64, .pixels = NULL, };
+    /*
+     * allocate the bitmap -if this fails then we'll abort here because this
+     * test case is not testing the init function
+     */
+    if (sxbp_init_bitmap(&bitmap) != SXBP_RESULT_OK) {
+        ck_abort_msg("Unable to allocate bitmap");
+    }
+    // populate the bitmap with random pixels
+    for (sxbp_figure_size_t x = 0; x < bitmap.width; x++) {
+        for (sxbp_figure_size_t y = 0; y < bitmap.height; y++) {
+            bitmap.pixels[x][y] = rand() % 2;
+        }
+    }
+    // store pixels pointer for checking later
+    bool** pixels = bitmap.pixels;
+
+    // try and copy the bitmap to itself
+    sxbp_result_t result = sxbp_copy_bitmap(&bitmap, &bitmap);
+
+    // not implemented error code should be returned
+    ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
+    // pixels have not been deallocated
+    ck_assert_ptr_nonnull(bitmap.pixels);
+    // pixels pointer remains unchanged
+    ck_assert(bitmap.pixels == pixels);
+
+    // cleanup
+    sxbp_free_bitmap(&bitmap);
+} END_TEST
+
 Suite* make_bitmap_suite(void) {
     // Test cases for bitmap data type
     Suite* test_suite = suite_create("Bitmap");
@@ -280,6 +312,7 @@ Suite* make_bitmap_suite(void) {
     tcase_add_test(copy_bitmap, test_copy_bitmap_pixels_null);
     tcase_add_test(copy_bitmap, test_copy_bitmap_width_zero_only);
     tcase_add_test(copy_bitmap, test_copy_bitmap_height_zero_only);
+    tcase_add_test(copy_bitmap, test_copy_bitmap_to_itself);
     suite_add_tcase(test_suite, copy_bitmap);
 
     return test_suite;
