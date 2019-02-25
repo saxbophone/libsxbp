@@ -24,9 +24,10 @@
 #ifndef SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 #define SAXBOPHONE_SXBP_SXBP_INTERNAL_H
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "sxbp.h"
 
@@ -148,10 +149,10 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
 #define SXBP_RETURN_FAIL_IF_NULL(pointer) if (pointer == NULL) return SXBP_RESULT_FAIL_PRECONDITION
 
 /*
- * private, macro which aborts via fale assertion with a message in expression,
+ * private, macro which prints an error message, then aborts
  * to be used for indicating when supposedly unreachable code is reached
  */
-#define SXBP_ABORT_UNREACHABLE_CODE() assert(!"Unreachable code reached")
+#define SXBP_ABORT_UNREACHABLE_CODE() fprintf(stderr, "Unreachable code reached in function %s()\n", __func__); abort()
 
 #ifdef __cplusplus
 } // extern "C"
