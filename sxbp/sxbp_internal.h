@@ -37,57 +37,57 @@ extern "C" {
 #endif
 
 // private type for storing one of the items of a tuple
-typedef int32_t sxbp_tuple_item_t;
+typedef int32_t sxbp_TupleItem;
 
 // private generic tuple type for storing a vector-based quantity
-typedef struct sxbp_tuple_t {
-    sxbp_tuple_item_t x; // the x (horizontal) value of the tuple
-    sxbp_tuple_item_t y; // the y (vertical) value of the tuple
-} sxbp_tuple_t;
+typedef struct sxbp_Tuple {
+    sxbp_TupleItem x; // the x (horizontal) value of the tuple
+    sxbp_TupleItem y; // the y (vertical) value of the tuple
+} sxbp_Tuple;
 
 // private vector type used for representing directions
-typedef sxbp_tuple_t sxbp_vector_t;
+typedef sxbp_Tuple sxbp_Vector;
 // private coördinate type used for representing cartesian coördinates
-typedef sxbp_tuple_t sxbp_co_ord_t;
+typedef sxbp_Tuple sxbp_CoOrd;
 
 // private structure for storing figure's bounds (when line is plotted out)
-typedef struct sxbp_bounds_t {
-    sxbp_tuple_item_t x_min; // the smallest value x has been so far
-    sxbp_tuple_item_t x_max; // the largest value x has been so far
-    sxbp_tuple_item_t y_min; // the smallest value y has been so far
-    sxbp_tuple_item_t y_max; // the largest value y has been so far
-} sxbp_bounds_t;
+typedef struct sxbp_Bounds {
+    sxbp_TupleItem x_min; // the smallest value x has been so far
+    sxbp_TupleItem x_max; // the largest value x has been so far
+    sxbp_TupleItem y_min; // the smallest value y has been so far
+    sxbp_TupleItem y_max; // the largest value y has been so far
+} sxbp_Bounds;
 
 /*
  * vector direction constants (private)
  * these can be indexed by the cartesian direction constants
  */
-extern const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4];
+extern const sxbp_Vector SXBP_VECTOR_DIRECTIONS[4];
 
 /*
  * private, updates the current figure bounds given the location of the end of
  * the most recently-plotted line
  */
-void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds);
+void sxbp_update_bounds(sxbp_CoOrd location, sxbp_Bounds* bounds);
 
 // private, 'move' the given location in the given direction by the given amount
 void sxbp_move_location(
-    sxbp_co_ord_t* location,
+    sxbp_CoOrd* location,
     sxbp_Direction direction,
     sxbp_Length length
 );
 
 // private, 'move' the given location along the given line
-void sxbp_move_location_along_line(sxbp_co_ord_t* location, sxbp_Line line);
+void sxbp_move_location_along_line(sxbp_CoOrd* location, sxbp_Line line);
 
 // private, calculates the figure's complete bounds in one step
-sxbp_bounds_t sxbp_get_bounds(const sxbp_Figure* figure, size_t scale);
+sxbp_Bounds sxbp_get_bounds(const sxbp_Figure* figure, size_t scale);
 
 /*
  * private, calculates the correct starting coördinates of a line such that
  * every coördinate is a positive number from the line's bounds
  */
-sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds);
+sxbp_CoOrd sxbp_get_origin_from_bounds(const sxbp_Bounds bounds);
 
 /*
  * private, walks the line of the figure, calling the callback with the
@@ -103,7 +103,7 @@ void sxbp_walk_figure(
     const sxbp_Figure* figure,
     size_t scale,
     bool plot_vertices_only,
-    bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
+    bool( *plot_point_callback)(sxbp_CoOrd location, void* callback_data),
     void* callback_data
 );
 
@@ -113,7 +113,7 @@ void sxbp_walk_figure(
  * `height`
  */
 void sxbp_get_size_from_bounds(
-    const sxbp_bounds_t bounds,
+    const sxbp_Bounds bounds,
     sxbp_FigureDimension* restrict width,
     sxbp_FigureDimension* restrict height
 );
@@ -132,7 +132,7 @@ bool sxbp_dimension_to_string(
 
 // private, builds a bitmap large enough to fit coördinates in the given bounds
 sxbp_Result sxbp_make_bitmap_for_bounds(
-    const sxbp_bounds_t bounds,
+    const sxbp_Bounds bounds,
     sxbp_Bitmap* bitmap
 );
 

@@ -32,14 +32,14 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
-const sxbp_vector_t SXBP_VECTOR_DIRECTIONS[4] = {
+const sxbp_Vector SXBP_VECTOR_DIRECTIONS[4] = {
     [SXBP_UP]    = {  0,  1, },
     [SXBP_RIGHT] = {  1,  0, },
     [SXBP_DOWN]  = {  0, -1, },
     [SXBP_LEFT]  = { -1,  0, },
 };
 
-void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds) {
+void sxbp_update_bounds(sxbp_CoOrd location, sxbp_Bounds* bounds) {
     // preconditional assertions
     assert(bounds != NULL);
     if (location.x > bounds->x_max) {
@@ -55,19 +55,19 @@ void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds) {
 }
 
 void sxbp_move_location(
-    sxbp_co_ord_t* location,
+    sxbp_CoOrd* location,
     sxbp_Direction direction,
     sxbp_Length length
 ) {
     // preconditional assertions
     assert(location != NULL);
-    sxbp_vector_t vector = SXBP_VECTOR_DIRECTIONS[direction];
-    location->x += vector.x * (sxbp_tuple_item_t)length;
-    location->y += vector.y * (sxbp_tuple_item_t)length;
+    sxbp_Vector vector = SXBP_VECTOR_DIRECTIONS[direction];
+    location->x += vector.x * (sxbp_TupleItem)length;
+    location->y += vector.y * (sxbp_TupleItem)length;
 }
 
 void sxbp_move_location_along_line(
-    sxbp_co_ord_t* location,
+    sxbp_CoOrd* location,
     sxbp_Line line
 ) {
     // preconditional assertions
@@ -75,12 +75,12 @@ void sxbp_move_location_along_line(
     sxbp_move_location(location, line.direction, line.length);
 }
 
-sxbp_bounds_t sxbp_get_bounds(const sxbp_Figure* figure, size_t scale) {
+sxbp_Bounds sxbp_get_bounds(const sxbp_Figure* figure, size_t scale) {
     // preconditional assertions
     assert(figure != NULL);
     // loop state variables
-    sxbp_co_ord_t location = { 0 }; // where the end of the last line is
-    sxbp_bounds_t bounds = { 0 }; // the bounds of the line walked so far
+    sxbp_CoOrd location = { 0 }; // where the end of the last line is
+    sxbp_Bounds bounds = { 0 }; // the bounds of the line walked so far
     // walk the line!
     for (sxbp_FigureSize i = 0; i < figure->size; i++) {
         // update the location, scaling in proportion to scale
@@ -96,14 +96,14 @@ sxbp_bounds_t sxbp_get_bounds(const sxbp_Figure* figure, size_t scale) {
     return bounds;
 }
 
-sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
+sxbp_CoOrd sxbp_get_origin_from_bounds(const sxbp_Bounds bounds) {
     /*
      * the origin (also known as the transformation vector) for all coördinates
      * is the negative of the minimum bounds of the line
      * starting the line at this non-negative point ensures that all coördinates
      * of the line are positive
      */
-    return (sxbp_co_ord_t){
+    return (sxbp_CoOrd){
         .x = -bounds.x_min,
         .y = -bounds.y_min,
     };
@@ -113,16 +113,16 @@ void sxbp_walk_figure(
     const sxbp_Figure* figure,
     size_t scale,
     bool plot_vertices_only,
-    bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
+    bool( *plot_point_callback)(sxbp_CoOrd location, void* callback_data),
     void* callback_data
 ) {
     // preconditional assertions
     assert(figure != NULL);
     assert(plot_point_callback != NULL);
     // get figure's bounds
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure, scale);
+    sxbp_Bounds bounds = sxbp_get_bounds(figure, scale);
     // start the line at the origin
-    sxbp_co_ord_t location = sxbp_get_origin_from_bounds(bounds);
+    sxbp_CoOrd location = sxbp_get_origin_from_bounds(bounds);
     // plot the first point of the line, if callback returned false then exit
     if (!plot_point_callback(location, callback_data)) {
         return;
@@ -154,7 +154,7 @@ void sxbp_walk_figure(
 }
 
 void sxbp_get_size_from_bounds(
-    const sxbp_bounds_t bounds,
+    const sxbp_Bounds bounds,
     sxbp_FigureDimension* restrict width,
     sxbp_FigureDimension* restrict height
 ) {
@@ -194,7 +194,7 @@ bool sxbp_dimension_to_string(
 }
 
 sxbp_Result sxbp_make_bitmap_for_bounds(
-    const sxbp_bounds_t bounds,
+    const sxbp_Bounds bounds,
     sxbp_Bitmap* bitmap
 ) {
     // preconditional assertions

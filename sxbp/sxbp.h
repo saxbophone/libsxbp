@@ -74,7 +74,7 @@ typedef enum sxbp_Direction {
 /**
  * @brief Type for representing the length of a line segment of a spiral.
  * @note Although the width of this type is 32 bits, it is actually only 30 bits
- * when used in the sxbp_spiral_t struct type. This is because here it is a
+ * when used in the sxbp_Figure struct type. This is because here it is a
  * bitfield field with 30 bits allocated to it.
  * @since v0.27.0
  */

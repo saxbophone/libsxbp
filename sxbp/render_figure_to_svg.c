@@ -116,7 +116,7 @@ static sxbp_Result sxbp_write_svg_body_origin_dot(
         "    />\n"
     );
     // get the coördinates of the origin dot
-    sxbp_co_ord_t origin = sxbp_get_origin_from_bounds(
+    sxbp_CoOrd origin = sxbp_get_origin_from_bounds(
         sxbp_get_bounds(figure, 2)
     );
     sxbp_FigureDimension origin_x = (sxbp_FigureDimension)origin.x;
@@ -172,7 +172,7 @@ static sxbp_Result sxbp_write_svg_body_origin_dot(
 
 // private, callback function for sxbp_write_svg_body_figure_line()
 static bool sxbp_write_svg_body_figure_line_callback(
-    sxbp_co_ord_t location,
+    sxbp_CoOrd location,
     void* callback_data
 ) {
     // cast void pointer to a pointer to our context structure
@@ -392,7 +392,7 @@ sxbp_Result sxbp_render_figure_to_svg(
      * needs to have the same dimensions and scale.
      */
     // get figure bounds, at scale 2
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
+    sxbp_Bounds bounds = sxbp_get_bounds(figure, 2);
     // calculate width and height of the image from the bounds
     sxbp_FigureDimension width = 0;
     sxbp_FigureDimension height = 0;

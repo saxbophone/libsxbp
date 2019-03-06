@@ -29,10 +29,10 @@
  * This makes the maths for discerning the line directions read particularly
  * well and intuitively.
  */
-typedef enum sxbp_rotation_t {
+typedef enum sxbp_Rotation {
     SXBP_ANTI_CLOCKWISE = -1, // The rotational direction 'ANTI-CLOCKWISE'
     SXBP_CLOCKWISE = 1, // The rotational direction 'CLOCKWISE'
-} sxbp_rotation_t;
+} sxbp_Rotation;
 
 // private, builds a line from a direction and length
 static sxbp_Line sxbp_make_line(
@@ -43,7 +43,7 @@ static sxbp_Line sxbp_make_line(
 }
 
 // private, converts a binary bit into a rotational direction
-static sxbp_rotation_t sxbp_rotation_from_bit(bool bit) {
+static sxbp_Rotation sxbp_rotation_from_bit(bool bit) {
     return bit == 0 ? SXBP_CLOCKWISE : SXBP_ANTI_CLOCKWISE;
 }
 
@@ -53,7 +53,7 @@ static sxbp_rotation_t sxbp_rotation_from_bit(bool bit) {
  */
 static sxbp_Direction sxbp_change_line_direction(
     sxbp_Direction current,
-    sxbp_rotation_t turn
+    sxbp_Rotation turn
 ) {
     return (current + (sxbp_Direction)turn) % 4;
 }
@@ -63,9 +63,9 @@ static sxbp_Direction sxbp_change_line_direction(
  * it collide
  */
 static sxbp_Length sxbp_next_length(
-    sxbp_co_ord_t location,
+    sxbp_CoOrd location,
     sxbp_Direction direction,
-    sxbp_bounds_t bounds
+    sxbp_Bounds bounds
 ) {
     // preconditional assertions --direction should be one of the enum values
     assert(direction >= SXBP_UP);
@@ -96,8 +96,8 @@ static sxbp_Length sxbp_next_length(
  */
 static void sxbp_plot_lines(const sxbp_Buffer* data, sxbp_Figure* figure) {
     // loop state variables
-    sxbp_co_ord_t location = { 0 }; // where the end of the last line is
-    sxbp_bounds_t bounds = { 0 }; // the bounds of the line traced so far
+    sxbp_CoOrd location = { 0 }; // where the end of the last line is
+    sxbp_Bounds bounds = { 0 }; // the bounds of the line traced so far
     // the first line is always an up line - this is for orientation purposes
     sxbp_Direction facing = SXBP_UP;
     // add first line to the figure
@@ -124,7 +124,7 @@ static void sxbp_plot_lines(const sxbp_Buffer* data, sxbp_Figure* figure) {
                 return;
             }
             // set rotation direction based on the current bit
-            sxbp_rotation_t rotation = sxbp_rotation_from_bit(bit);
+            sxbp_Rotation rotation = sxbp_rotation_from_bit(bit);
             // calculate the new direction
             facing = sxbp_change_line_direction(facing, rotation);
             // calculate what length this line should be

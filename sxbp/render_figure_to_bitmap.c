@@ -36,7 +36,7 @@ typedef struct render_figure_to_bitmap_context {
 
 // private, callback function for sxbp_render_figure_to_bitmap()
 static bool sxbp_render_figure_to_bitmap_callback(
-    sxbp_co_ord_t location,
+    sxbp_CoOrd location,
     void* callback_data
 ) {
     // cast void pointer to a pointer to our context structure
@@ -68,7 +68,7 @@ sxbp_Result sxbp_render_figure_to_bitmap(
     // erase the bitmap structure first just in case
     sxbp_free_bitmap(bitmap);
     // get figure bounds, at scale 2
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
+    sxbp_Bounds bounds = sxbp_get_bounds(figure, 2);
     // build bitmap for bounds
     if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, bitmap))) {
         // couldn't allocate memory, return error early

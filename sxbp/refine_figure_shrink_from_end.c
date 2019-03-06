@@ -33,7 +33,7 @@ typedef struct figure_collides_context {
 } figure_collides_context;
 
 // private, callback function for sxbp_figure_collides()
-static bool sxbp_figure_collides_callback(sxbp_co_ord_t location, void* data) {
+static bool sxbp_figure_collides_callback(sxbp_CoOrd location, void* data) {
     // cast void pointer to a pointer to our context structure
     figure_collides_context* callback_data = (figure_collides_context*)data;
     // check if there's already a pixel here
@@ -56,7 +56,7 @@ static sxbp_Result sxbp_figure_collides(
     bool* collided
 ) {
     // get figure bounds first
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
+    sxbp_Bounds bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
     sxbp_Bitmap bitmap = sxbp_blank_bitmap();
     if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, &bitmap))) {
