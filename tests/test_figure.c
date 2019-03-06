@@ -2,7 +2,7 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides unit tests for the sxbp_figure_t data type.
+ * This compilation unit provides unit tests for the sxbp_Figure data type.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *
@@ -26,7 +26,7 @@
 static const uint8_t SAMPLE_SEED = 0x6D;
 static const size_t SAMPLE_FIGURE_SIZE = 9;
 
-static const sxbp_line_t SAMPLE_FIGURE_LINES[] = {
+static const sxbp_Line SAMPLE_FIGURE_LINES[] = {
     { .direction = SXBP_UP, .length = 1, },
     { .direction = SXBP_RIGHT, .length = 1, },
     { .direction = SXBP_UP, .length = 1, },
@@ -38,7 +38,7 @@ static const sxbp_line_t SAMPLE_FIGURE_LINES[] = {
     { .direction = SXBP_DOWN, .length = 1, },
 };
 
-static const sxbp_line_t REFINED_SAMPLE_FIGURE_LINES[] = {
+static const sxbp_Line REFINED_SAMPLE_FIGURE_LINES[] = {
     { .direction = SXBP_UP, .length = 1, },
     { .direction = SXBP_RIGHT, .length = 1, },
     { .direction = SXBP_UP, .length = 1, },
@@ -134,7 +134,7 @@ static const uint8_t SAMPLE_SVG_FILE_DATA[] = {
 };
 
 START_TEST(test_blank_figure) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
     // figure returned should have all fields set to zero/blank values
     ck_assert(figure.size == 0);
@@ -143,13 +143,13 @@ START_TEST(test_blank_figure) {
 } END_TEST
 
 START_TEST(test_init_figure) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = 100,
         .lines = NULL,
         .lines_remaining = 0,
     };
 
-    sxbp_result_t result = sxbp_init_figure(&figure);
+    sxbp_Result result = sxbp_init_figure(&figure);
 
     // check memory was allocated
     ck_assert(result == SXBP_RESULT_OK);
@@ -164,23 +164,23 @@ START_TEST(test_init_figure) {
 } END_TEST
 
 START_TEST(test_init_figure_null) {
-    sxbp_result_t result = sxbp_init_figure(NULL);
+    sxbp_Result result = sxbp_init_figure(NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_init_figure_blank) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_init_figure(&figure);
+    sxbp_Result result = sxbp_init_figure(&figure);
 
     // check that the return code was a 'not implemented' error
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
 } END_TEST
 
 START_TEST(test_free_figure_unallocated) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
     /*
      * it should be possible to safely call the freeing function on an
@@ -195,7 +195,7 @@ START_TEST(test_free_figure_unallocated) {
 } END_TEST
 
 START_TEST(test_free_figure_allocated) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = 100,
         .lines = NULL,
         .lines_remaining = 0,
@@ -218,7 +218,7 @@ START_TEST(test_free_figure_allocated) {
 } END_TEST
 
 START_TEST(test_copy_figure) {
-    sxbp_figure_t from = {
+    sxbp_Figure from = {
         .size = 100,
         .lines = NULL,
         .lines_remaining = 0,
@@ -236,9 +236,9 @@ START_TEST(test_copy_figure) {
         from.lines[i].length = rand() & 0x3fffffff; // range 0..2^30
     }
     // this is the destination figure to copy to
-    sxbp_figure_t to = sxbp_blank_figure();
+    sxbp_Figure to = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+    sxbp_Result result = sxbp_copy_figure(&from, &to);
 
     // check operation was successful
     ck_assert(result == SXBP_RESULT_OK);
@@ -258,28 +258,28 @@ START_TEST(test_copy_figure) {
 } END_TEST
 
 START_TEST(test_copy_figure_from_null) {
-    sxbp_figure_t to = sxbp_blank_figure();
+    sxbp_Figure to = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_copy_figure(NULL, &to);
+    sxbp_Result result = sxbp_copy_figure(NULL, &to);
 
     // precondition check error should be returned when from is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_figure_to_null) {
-    sxbp_figure_t from = sxbp_blank_figure();
+    sxbp_Figure from = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_copy_figure(&from, NULL);
+    sxbp_Result result = sxbp_copy_figure(&from, NULL);
 
     // precondition check error should be returned when to is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_figure_blank) {
-    sxbp_figure_t from = sxbp_blank_figure();
-    sxbp_figure_t to = sxbp_blank_figure();
+    sxbp_Figure from = sxbp_blank_figure();
+    sxbp_Figure to = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+    sxbp_Result result = sxbp_copy_figure(&from, &to);
 
     /*
      * it should be possible to successfully 'copy' a blank figure, with the
@@ -294,14 +294,14 @@ START_TEST(test_copy_figure_blank) {
 } END_TEST
 
 START_TEST(test_copy_figure_lines_null) {
-    sxbp_figure_t from = {
+    sxbp_Figure from = {
         .size = 32,
         .lines = NULL,
         .lines_remaining = 0,
     };
-    sxbp_figure_t to = sxbp_blank_figure();
+    sxbp_Figure to = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_copy_figure(&from, &to);
+    sxbp_Result result = sxbp_copy_figure(&from, &to);
 
     /*
      * if the source has non-zero size but lines are NULL, a precondition
@@ -313,7 +313,7 @@ START_TEST(test_copy_figure_lines_null) {
 } END_TEST
 
 START_TEST(test_copy_figure_to_itself) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = 100,
         .lines = NULL,
         .lines_remaining = 0,
@@ -331,10 +331,10 @@ START_TEST(test_copy_figure_to_itself) {
         figure.lines[i].length = rand() & 0x3fffffff; // range 0..2^30
     }
     // store lines pointer for checking later
-    sxbp_line_t* lines = figure.lines;
+    sxbp_Line* lines = figure.lines;
 
     // try and copy the figure to itself
-    sxbp_result_t result = sxbp_copy_figure(&figure, &figure);
+    sxbp_Result result = sxbp_copy_figure(&figure, &figure);
 
     // not implemented error code should be returned
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
@@ -348,7 +348,7 @@ START_TEST(test_copy_figure_to_itself) {
 } END_TEST
 
 START_TEST(test_begin_figure) {
-    sxbp_buffer_t buffer = { .size = 1, .bytes = NULL, };
+    sxbp_Buffer buffer = { .size = 1, .bytes = NULL, };
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -359,9 +359,9 @@ START_TEST(test_begin_figure) {
     // populate our one byte -this 'seed' should generate our sample lines
     buffer.bytes[0] = SAMPLE_SEED;
     // create a blank figure to write the created figure into
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_begin_figure(&buffer, NULL, &figure);
+    sxbp_Result result = sxbp_begin_figure(&buffer, NULL, &figure);
 
     // check the result was success
     ck_assert(result == SXBP_RESULT_OK);
@@ -381,7 +381,7 @@ START_TEST(test_begin_figure) {
 
 START_TEST(test_begin_figure_data_too_big) {
     // create a buffer that is larger than SXBP_BEGIN_BUFFER_MAX_SIZE
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
     buffer.size = SXBP_BEGIN_BUFFER_MAX_SIZE + 1;
     /*
      * allocate the buffer -if this fails then we'll abort here because this
@@ -390,9 +390,9 @@ START_TEST(test_begin_figure_data_too_big) {
     if (sxbp_init_buffer(&buffer) != SXBP_RESULT_OK) {
         ck_abort_msg("Unable to allocate buffer");
     }
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_begin_figure(&buffer, NULL, &figure);
+    sxbp_Result result = sxbp_begin_figure(&buffer, NULL, &figure);
 
     // precondition check error should be returned when data is too big
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -402,9 +402,9 @@ START_TEST(test_begin_figure_data_too_big) {
 } END_TEST
 
 START_TEST(test_begin_figure_data_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_begin_figure(NULL, NULL, &figure);
+    sxbp_Result result = sxbp_begin_figure(NULL, NULL, &figure);
 
     // precondition check error should be returned when data is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -412,7 +412,7 @@ START_TEST(test_begin_figure_data_null) {
 
 START_TEST(test_begin_figure_figure_null) {
     // create a buffer that
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
     buffer.size = 100;
     /*
      * allocate the buffer -if this fails then we'll abort here because this
@@ -422,7 +422,7 @@ START_TEST(test_begin_figure_figure_null) {
         ck_abort_msg("Unable to allocate buffer");
     }
 
-    sxbp_result_t result = sxbp_begin_figure(&buffer, NULL, NULL);
+    sxbp_Result result = sxbp_begin_figure(&buffer, NULL, NULL);
 
     // precondition check error should be returned when figure is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -432,7 +432,7 @@ START_TEST(test_begin_figure_figure_null) {
 } END_TEST
 
 START_TEST(test_refine_figure) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = SAMPLE_FIGURE_SIZE,
         .lines = NULL,
         .lines_remaining = 0,
@@ -449,7 +449,7 @@ START_TEST(test_refine_figure) {
         figure.lines[i] = SAMPLE_FIGURE_LINES[i];
     }
 
-    sxbp_result_t result = sxbp_refine_figure(&figure, NULL);
+    sxbp_Result result = sxbp_refine_figure(&figure, NULL);
 
     // check the operation was successful
     ck_assert(result == SXBP_RESULT_OK);
@@ -473,7 +473,7 @@ START_TEST(test_refine_figure) {
 } END_TEST
 
 START_TEST(test_refine_figure_figure_null) {
-    sxbp_result_t result = sxbp_refine_figure(NULL, NULL);
+    sxbp_Result result = sxbp_refine_figure(NULL, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -481,9 +481,9 @@ START_TEST(test_refine_figure_figure_null) {
 
 START_TEST(test_refine_figure_no_lines) {
     // create a figure with no lines
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_refine_figure(&figure, NULL);
+    sxbp_Result result = sxbp_refine_figure(&figure, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -491,7 +491,7 @@ START_TEST(test_refine_figure_no_lines) {
 
 START_TEST(test_refine_figure_unimplemented_method) {
     // make a figure with some lines, but we don't care what they are
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = 100,
         .lines = NULL,
         .lines_remaining = 0,
@@ -504,13 +504,13 @@ START_TEST(test_refine_figure_unimplemented_method) {
         ck_abort_msg("Unable to allocate figure");
     }
     // specify an unimplemented refinement method
-    sxbp_refine_figure_options_t options = {
+    sxbp_RefineFigureOptions options = {
         .refine_method = SXBP_REFINE_METHOD_RESERVED_END,
         .progress_callback = NULL,
         .callback_context = NULL,
     };
 
-    sxbp_result_t result = sxbp_refine_figure(&figure, &options);
+    sxbp_Result result = sxbp_refine_figure(&figure, &options);
 
     // check that the return code was a not-implemented error
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
@@ -520,7 +520,7 @@ START_TEST(test_refine_figure_unimplemented_method) {
 } END_TEST
 
 START_TEST(test_dump_figure) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = SAMPLE_FIGURE_SIZE,
         .lines = NULL,
         .lines_remaining = 0,
@@ -537,9 +537,9 @@ START_TEST(test_dump_figure) {
         figure.lines[i] = SAMPLE_FIGURE_LINES[i];
     }
     // we'll try and dump the figure into here
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_dump_figure(&figure, &buffer);
+    sxbp_Result result = sxbp_dump_figure(&figure, &buffer);
 
     // check that the operation completed successfully
     ck_assert(result == SXBP_RESULT_OK);
@@ -554,25 +554,25 @@ START_TEST(test_dump_figure) {
 } END_TEST
 
 START_TEST(test_dump_figure_figure_null) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_dump_figure(NULL, &buffer);
+    sxbp_Result result = sxbp_dump_figure(NULL, &buffer);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_dump_figure_buffer_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_dump_figure(&figure, NULL);
+    sxbp_Result result = sxbp_dump_figure(&figure, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_load_figure) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
     buffer.size = sizeof(SAMPLE_SXBP_FILE_DATA);
     /*
      * allocate the buffer -if this fails then we'll abort here because this
@@ -585,9 +585,9 @@ START_TEST(test_load_figure) {
     for (size_t i = 0; i < buffer.size; i++) {
         buffer.bytes[i] = SAMPLE_SXBP_FILE_DATA[i];
     }
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_load_figure(&buffer, &figure);
+    sxbp_Result result = sxbp_load_figure(&buffer, &figure);
 
     // check the operation completed successfully
     ck_assert(result == SXBP_RESULT_OK);
@@ -604,18 +604,18 @@ START_TEST(test_load_figure) {
 } END_TEST
 
 START_TEST(test_load_figure_buffer_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_load_figure(NULL, &figure);
+    sxbp_Result result = sxbp_load_figure(NULL, &figure);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_load_figure_figure_null) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_load_figure(&buffer, NULL);
+    sxbp_Result result = sxbp_load_figure(&buffer, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -632,9 +632,9 @@ START_TEST(test_load_figure_figure_null) {
 struct test_render_figure_custom_options { const char* foo; };
 
 // global variables for test_render_figure test case
-static sxbp_figure_t test_render_figure_figure;
-static sxbp_buffer_t test_render_figure_buffer;
-static sxbp_render_options_t test_render_figure_render_options;
+static sxbp_Figure test_render_figure_figure;
+static sxbp_Buffer test_render_figure_buffer;
+static sxbp_RenderOptions test_render_figure_render_options;
 static struct test_render_figure_custom_options test_render_figure_custom_options = {
     .foo = "bar",
 };
@@ -643,10 +643,10 @@ static struct test_render_figure_custom_options test_render_figure_custom_option
  * a dummy renderer backend which doesn't render anything at all, but which
  * asserts that its arguments match the global variables declared above
  */
-static sxbp_result_t unit_test_renderer_backend(
-    const sxbp_figure_t* const figure,
-    sxbp_buffer_t* const buffer,
-    const sxbp_render_options_t* const render_options,
+static sxbp_Result unit_test_renderer_backend(
+    const sxbp_Figure* const figure,
+    sxbp_Buffer* const buffer,
+    const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 ) {
     // given arguments should match the global variables above
@@ -675,7 +675,7 @@ START_TEST(test_render_figure) {
     test_render_figure_buffer = sxbp_blank_buffer();
     test_render_figure_render_options.scale = 1;
 
-    sxbp_result_t result = sxbp_render_figure(
+    sxbp_Result result = sxbp_render_figure(
         &test_render_figure_figure,
         &test_render_figure_buffer,
         unit_test_renderer_backend,
@@ -692,9 +692,9 @@ START_TEST(test_render_figure) {
 } END_TEST
 
 START_TEST(test_render_figure_figure_null) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_render_figure(
+    sxbp_Result result = sxbp_render_figure(
         NULL,
         &buffer,
         sxbp_render_figure_to_null, // just pass it the dummy backend
@@ -707,9 +707,9 @@ START_TEST(test_render_figure_figure_null) {
 } END_TEST
 
 START_TEST(test_render_figure_buffer_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_render_figure(
+    sxbp_Result result = sxbp_render_figure(
         &figure,
         NULL,
         sxbp_render_figure_to_null, // just pass it the dummy backend
@@ -722,10 +722,10 @@ START_TEST(test_render_figure_buffer_null) {
 } END_TEST
 
 START_TEST(test_render_figure_render_callback_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Figure figure = sxbp_blank_figure();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_render_figure(
+    sxbp_Result result = sxbp_render_figure(
         &figure,
         &buffer,
         NULL, // make sure to not pass any render backend
@@ -739,14 +739,14 @@ START_TEST(test_render_figure_render_callback_null) {
 
 START_TEST(test_render_figure_to_null) {
     // this function doesn't care if no objects are passed to it
-    sxbp_result_t result = sxbp_render_figure_to_null(NULL, NULL, NULL, NULL);
+    sxbp_Result result = sxbp_render_figure_to_null(NULL, NULL, NULL, NULL);
 
     // this function should always return the not-implemented error code
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = SAMPLE_FIGURE_SIZE,
         .lines = NULL,
         .lines_remaining = 0,
@@ -763,9 +763,9 @@ START_TEST(test_render_figure_to_pbm) {
         figure.lines[i] = REFINED_SAMPLE_FIGURE_LINES[i];
     }
     // the buffer we'll render the PBM file into
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
     // read into another buffer the expected PBM file data
-    sxbp_buffer_t expected = sxbp_blank_buffer();
+    sxbp_Buffer expected = sxbp_blank_buffer();
     expected.size = sizeof(SAMPLE_PBM_FILE_DATA);
     /*
      * allocate the buffer -if this fails then we'll abort here because this
@@ -780,7 +780,7 @@ START_TEST(test_render_figure_to_pbm) {
     }
 
     // render the figure to PBM
-    sxbp_result_t result = sxbp_render_figure_to_pbm(
+    sxbp_Result result = sxbp_render_figure_to_pbm(
         &figure,
         &buffer,
         NULL,
@@ -800,25 +800,25 @@ START_TEST(test_render_figure_to_pbm) {
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm_figure_null) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_render_figure_to_pbm(NULL, &buffer, NULL, NULL);
+    sxbp_Result result = sxbp_render_figure_to_pbm(NULL, &buffer, NULL, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_pbm_buffer_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_render_figure_to_pbm(&figure, NULL, NULL, NULL);
+    sxbp_Result result = sxbp_render_figure_to_pbm(&figure, NULL, NULL, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_svg) {
-    sxbp_figure_t figure = {
+    sxbp_Figure figure = {
         .size = SAMPLE_FIGURE_SIZE,
         .lines = NULL,
         .lines_remaining = 0,
@@ -836,9 +836,9 @@ START_TEST(test_render_figure_to_svg) {
         figure.lines[i] = REFINED_SAMPLE_FIGURE_LINES[i];
     }
     // the buffer we'll render the SVG file into
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
     // read into another buffer the expected SVG file data
-    sxbp_buffer_t expected = sxbp_blank_buffer();
+    sxbp_Buffer expected = sxbp_blank_buffer();
     expected.size = sizeof(SAMPLE_SVG_FILE_DATA);
     /*
      * allocate the buffer -if this fails then we'll abort here because this
@@ -853,7 +853,7 @@ START_TEST(test_render_figure_to_svg) {
     }
 
     // render the figure to SVG
-    sxbp_result_t result = sxbp_render_figure_to_svg(
+    sxbp_Result result = sxbp_render_figure_to_svg(
         &figure,
         &buffer,
         NULL,
@@ -873,18 +873,18 @@ START_TEST(test_render_figure_to_svg) {
 } END_TEST
 
 START_TEST(test_render_figure_to_svg_figure_null) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_render_figure_to_svg(NULL, &buffer, NULL, NULL);
+    sxbp_Result result = sxbp_render_figure_to_svg(NULL, &buffer, NULL, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_render_figure_to_svg_buffer_null) {
-    sxbp_figure_t figure = sxbp_blank_figure();
+    sxbp_Figure figure = sxbp_blank_figure();
 
-    sxbp_result_t result = sxbp_render_figure_to_svg(&figure, NULL, NULL, NULL);
+    sxbp_Result result = sxbp_render_figure_to_svg(&figure, NULL, NULL, NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
