@@ -25,7 +25,7 @@
 
 // private datatype for passing context data into sxbp_walk_figure() callback
 typedef struct render_figure_to_bitmap_context {
-    sxbp_bitmap_t* image; // the bitmap to draw to
+    sxbp_Bitmap* image; // the bitmap to draw to
     /*
      * the following unusual fields facilitate a low-tech way of skipping the
      * second pixel --this is done to assist in orientation of the shape
@@ -52,15 +52,15 @@ static bool sxbp_render_figure_to_bitmap_callback(
         // plot the pixel, but flip the y coördinate
         data->image
             ->pixels[location.x]
-            [data->image->height - 1 - (sxbp_figure_dimension_t)location.y] = true;
+            [data->image->height - 1 - (sxbp_FigureDimension)location.y] = true;
     }
     // return true --we always want to continue
     return true;
 }
 
-sxbp_result_t sxbp_render_figure_to_bitmap(
-    const sxbp_figure_t* figure,
-    sxbp_bitmap_t* bitmap
+sxbp_Result sxbp_render_figure_to_bitmap(
+    const sxbp_Figure* figure,
+    sxbp_Bitmap* bitmap
 ) {
     // figure and bitmap must not be NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);

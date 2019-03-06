@@ -26,10 +26,10 @@
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-sxbp_result_t sxbp_render_figure_to_null(
-    const sxbp_figure_t* const figure,
-    sxbp_buffer_t* const buffer,
-    const sxbp_render_options_t* const render_options,
+sxbp_Result sxbp_render_figure_to_null(
+    const sxbp_Figure* const figure,
+    sxbp_Buffer* const buffer,
+    const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 ) {
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;

@@ -56,8 +56,8 @@ void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds) {
 
 void sxbp_move_location(
     sxbp_co_ord_t* location,
-    sxbp_direction_t direction,
-    sxbp_length_t length
+    sxbp_Direction direction,
+    sxbp_Length length
 ) {
     // preconditional assertions
     assert(location != NULL);
@@ -68,21 +68,21 @@ void sxbp_move_location(
 
 void sxbp_move_location_along_line(
     sxbp_co_ord_t* location,
-    sxbp_line_t line
+    sxbp_Line line
 ) {
     // preconditional assertions
     assert(location != NULL);
     sxbp_move_location(location, line.direction, line.length);
 }
 
-sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure, size_t scale) {
+sxbp_bounds_t sxbp_get_bounds(const sxbp_Figure* figure, size_t scale) {
     // preconditional assertions
     assert(figure != NULL);
     // loop state variables
     sxbp_co_ord_t location = { 0 }; // where the end of the last line is
     sxbp_bounds_t bounds = { 0 }; // the bounds of the line walked so far
     // walk the line!
-    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+    for (sxbp_FigureSize i = 0; i < figure->size; i++) {
         // update the location, scaling in proportion to scale
         sxbp_move_location(
             &location,
@@ -110,7 +110,7 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds) {
 }
 
 void sxbp_walk_figure(
-    const sxbp_figure_t* figure,
+    const sxbp_Figure* figure,
     size_t scale,
     bool plot_vertices_only,
     bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
@@ -128,10 +128,10 @@ void sxbp_walk_figure(
         return;
     }
     // for each line, plot one or more points along it (depending on plot mode)
-    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
-        sxbp_line_t line = figure->lines[i];
+    for (sxbp_FigureSize i = 0; i < figure->size; i++) {
+        sxbp_Line line = figure->lines[i];
         // scale the line's size
-        sxbp_length_t length = line.length * scale;
+        sxbp_Length length = line.length * scale;
         // if plotting vertices only, plot one point at the end of this line
         if (plot_vertices_only) {
             // move the location length amount of units
@@ -141,7 +141,7 @@ void sxbp_walk_figure(
                 return;
             }
         } else { // otherwise, plot one point along each one unit of line length
-            for (sxbp_length_t l = 0; l < length; l++) {
+            for (sxbp_Length l = 0; l < length; l++) {
                 // move the location one unit
                 sxbp_move_location(&location, line.direction, 1);
                 // plot a point, if callback returned false then exit
@@ -155,8 +155,8 @@ void sxbp_walk_figure(
 
 void sxbp_get_size_from_bounds(
     const sxbp_bounds_t bounds,
-    sxbp_figure_dimension_t* restrict width,
-    sxbp_figure_dimension_t* restrict height
+    sxbp_FigureDimension* restrict width,
+    sxbp_FigureDimension* restrict height
 ) {
     // pointer arguments must not be NULL!
     assert(width != NULL);
@@ -167,12 +167,12 @@ void sxbp_get_size_from_bounds(
      * this makes sense because for example from 1 to 10 there are 10 values
      * and the difference of these is 9 so the number of values is 9+1 = 10
      */
-    *width = (sxbp_figure_dimension_t)((bounds.x_max - bounds.x_min) + 1);
-    *height = (sxbp_figure_dimension_t)((bounds.y_max - bounds.y_min) + 1);
+    *width = (sxbp_FigureDimension)((bounds.x_max - bounds.x_min) + 1);
+    *height = (sxbp_FigureDimension)((bounds.y_max - bounds.y_min) + 1);
 }
 
 bool sxbp_dimension_to_string(
-    sxbp_figure_dimension_t dimension,
+    sxbp_FigureDimension dimension,
     char(* output_string)[11],
     size_t* string_length
 ) {
@@ -193,9 +193,9 @@ bool sxbp_dimension_to_string(
     }
 }
 
-sxbp_result_t sxbp_make_bitmap_for_bounds(
+sxbp_Result sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
-    sxbp_bitmap_t* bitmap
+    sxbp_Bitmap* bitmap
 ) {
     // preconditional assertions
     assert(bitmap != NULL);
@@ -206,9 +206,9 @@ sxbp_result_t sxbp_make_bitmap_for_bounds(
     return sxbp_init_bitmap(bitmap);
 }
 
-void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream) {
-    for (sxbp_figure_size_t y = 0; y < bitmap->height; y++) {
-        for (sxbp_figure_size_t x = 0; x < bitmap->width; x++) {
+void sxbp_print_bitmap(sxbp_Bitmap* bitmap, FILE* stream) {
+    for (sxbp_FigureSize y = 0; y < bitmap->height; y++) {
+        for (sxbp_FigureSize x = 0; x < bitmap->width; x++) {
             fprintf(stream, bitmap->pixels[x][y] ? "█" : "░");
         }
         fprintf(stream, "\n");

@@ -23,11 +23,11 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
-sxbp_result_t sxbp_render_figure(
-    const sxbp_figure_t* const figure,
-    sxbp_buffer_t* const buffer,
+sxbp_Result sxbp_render_figure(
+    const sxbp_Figure* const figure,
+    sxbp_Buffer* const buffer,
     sxbp_figure_renderer_t render_callback,
-    const sxbp_render_options_t* const render_options,
+    const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 ) {
     // figure, buffer and render_callback must not be NULL

@@ -28,7 +28,7 @@
 
 // private datatype for passing context data into sxbp_walk_figure() callback
 typedef struct figure_collides_context {
-    sxbp_bitmap_t* image;
+    sxbp_Bitmap* image;
     bool* collided;
 } figure_collides_context;
 
@@ -51,14 +51,14 @@ static bool sxbp_figure_collides_callback(sxbp_co_ord_t location, void* data) {
 }
 
 // private, sets collided to true if the figure's line collides with itself
-static sxbp_result_t sxbp_figure_collides(
-    const sxbp_figure_t* figure,
+static sxbp_Result sxbp_figure_collides(
+    const sxbp_Figure* figure,
     bool* collided
 ) {
     // get figure bounds first
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_Bitmap bitmap = sxbp_blank_bitmap();
     if (!sxbp_success(sxbp_make_bitmap_for_bounds(bounds, &bitmap))) {
         // a memory allocation error occurred
         return SXBP_RESULT_FAIL_MEMORY;
@@ -87,22 +87,22 @@ static sxbp_result_t sxbp_figure_collides(
  * if it succeeds, it will call itself recursively for each line after l from
  * max to l, in that order.
  */
-static sxbp_result_t sxbp_attempt_line_shorten(
-    sxbp_figure_t* figure,
-    const sxbp_figure_size_t l,
-    const sxbp_figure_size_t max
+static sxbp_Result sxbp_attempt_line_shorten(
+    sxbp_Figure* figure,
+    const sxbp_FigureSize l,
+    const sxbp_FigureSize max
 ) {
-    sxbp_line_t* line = &figure->lines[l];
+    sxbp_Line* line = &figure->lines[l];
     // it only makes sense to try and shorten lines longer than 1
     if (line->length > 1) {
         // we'll need this later to check if we were actually able to shorten it
-        sxbp_length_t original_length = line->length;
+        sxbp_Length original_length = line->length;
         // as an ambitious first step, set to 1 (try best case scenario first)
         line->length = 1;
         // check if it collided
         bool collided = false;
         // we'll store any errors encountered by this function here
-        sxbp_result_t status = SXBP_RESULT_UNKNOWN;
+        sxbp_Result status = SXBP_RESULT_UNKNOWN;
         if (!sxbp_check(sxbp_figure_collides(figure, &collided), &status)) {
             // handle error
             return status;
@@ -131,7 +131,7 @@ static sxbp_result_t sxbp_attempt_line_shorten(
              */
             if (line->length < original_length) {
                 // try and shorten other lines some more
-                for (sxbp_figure_size_t i = max; i >= l; i--) {
+                for (sxbp_FigureSize i = max; i >= l; i--) {
                     // handle any errors returned by the call
                     if (
                         !sxbp_check(
@@ -147,14 +147,14 @@ static sxbp_result_t sxbp_attempt_line_shorten(
     return SXBP_RESULT_OK;
 }
 
-sxbp_result_t sxbp_refine_figure_shrink_from_end(
-    sxbp_figure_t* figure,
-    const sxbp_refine_figure_options_t* options
+sxbp_Result sxbp_refine_figure_shrink_from_end(
+    sxbp_Figure* figure,
+    const sxbp_RefineFigureOptions* options
 ) {
     // variable to store any errors in
-    sxbp_result_t status = SXBP_RESULT_UNKNOWN;
+    sxbp_Result status = SXBP_RESULT_UNKNOWN;
     // iterate over lines backwards - we don't care about line 0
-    for (sxbp_figure_size_t i = figure->size - 1; i > 0; i--) {
+    for (sxbp_FigureSize i = figure->size - 1; i > 0; i--) {
         // try and shorten it, or return error if not
         if (
             !sxbp_check(

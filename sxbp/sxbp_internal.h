@@ -73,15 +73,15 @@ void sxbp_update_bounds(sxbp_co_ord_t location, sxbp_bounds_t* bounds);
 // private, 'move' the given location in the given direction by the given amount
 void sxbp_move_location(
     sxbp_co_ord_t* location,
-    sxbp_direction_t direction,
-    sxbp_length_t length
+    sxbp_Direction direction,
+    sxbp_Length length
 );
 
 // private, 'move' the given location along the given line
-void sxbp_move_location_along_line(sxbp_co_ord_t* location, sxbp_line_t line);
+void sxbp_move_location_along_line(sxbp_co_ord_t* location, sxbp_Line line);
 
 // private, calculates the figure's complete bounds in one step
-sxbp_bounds_t sxbp_get_bounds(const sxbp_figure_t* figure, size_t scale);
+sxbp_bounds_t sxbp_get_bounds(const sxbp_Figure* figure, size_t scale);
 
 /*
  * private, calculates the correct starting coördinates of a line such that
@@ -100,7 +100,7 @@ sxbp_co_ord_t sxbp_get_origin_from_bounds(const sxbp_bounds_t bounds);
  * walking the line, otherwise it should return true.
  */
 void sxbp_walk_figure(
-    const sxbp_figure_t* figure,
+    const sxbp_Figure* figure,
     size_t scale,
     bool plot_vertices_only,
     bool( *plot_point_callback)(sxbp_co_ord_t location, void* callback_data),
@@ -114,8 +114,8 @@ void sxbp_walk_figure(
  */
 void sxbp_get_size_from_bounds(
     const sxbp_bounds_t bounds,
-    sxbp_figure_dimension_t* restrict width,
-    sxbp_figure_dimension_t* restrict height
+    sxbp_FigureDimension* restrict width,
+    sxbp_FigureDimension* restrict height
 );
 
 /*
@@ -125,24 +125,24 @@ void sxbp_get_size_from_bounds(
  * returns true/false for whether the operation succeeded or not
  */
 bool sxbp_dimension_to_string(
-    sxbp_figure_dimension_t dimension,
+    sxbp_FigureDimension dimension,
     char(* output_string)[11],
     size_t* string_length
 );
 
 // private, builds a bitmap large enough to fit coördinates in the given bounds
-sxbp_result_t sxbp_make_bitmap_for_bounds(
+sxbp_Result sxbp_make_bitmap_for_bounds(
     const sxbp_bounds_t bounds,
-    sxbp_bitmap_t* bitmap
+    sxbp_Bitmap* bitmap
 );
 
 // private, prints out a bitmap to the given stream, for debugging
-void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream);
+void sxbp_print_bitmap(sxbp_Bitmap* bitmap, FILE* stream);
 
 // private, refines a figure using the 'shrink from end' method
-sxbp_result_t sxbp_refine_figure_shrink_from_end(
-    sxbp_figure_t* figure,
-    const sxbp_refine_figure_options_t* options
+sxbp_Result sxbp_refine_figure_shrink_from_end(
+    sxbp_Figure* figure,
+    const sxbp_RefineFigureOptions* options
 );
 
 // private, macro to assist in 'return early if NULL pointer' error checks
