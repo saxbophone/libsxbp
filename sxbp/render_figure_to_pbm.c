@@ -143,7 +143,7 @@ static void sxbp_write_pbm_data(
 }
 
 // private, serialises a bitmap to PBM image data
-static sxbp_Result sxbp_Bitmapo_pbm(
+static sxbp_Result sxbp_bitmap_to_pbm(
     const sxbp_Bitmap* const bitmap,
     sxbp_Buffer* const buffer
 ) {
@@ -200,7 +200,7 @@ sxbp_Result sxbp_render_figure_to_pbm(
         return error;
     } else {
         // rasterisation was successful, now convert the raw bitmap to PBM
-        sxbp_Result outcome = sxbp_Bitmapo_pbm(&bitmap, buffer);
+        sxbp_Result outcome = sxbp_bitmap_to_pbm(&bitmap, buffer);
         // free the bitmap and return the result code
         sxbp_free_bitmap(&bitmap);
         return outcome;

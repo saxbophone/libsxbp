@@ -189,7 +189,7 @@ sxbp_Result sxbp_buffer_from_file(
     }
 }
 
-sxbp_Result sxbp_Buffero_file(
+sxbp_Result sxbp_buffer_to_file(
     const sxbp_Buffer* const buffer,
     FILE* file_handle
 ) {

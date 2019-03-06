@@ -250,7 +250,7 @@ typedef enum sxbp_Result {
  * @todo Try and use Doxygen's `at-param` syntax to document the arguments and
  * use `at-returns` to document the return details.
  */
-typedef sxbp_Result(* sxbp_figure_renderer_t)(
+typedef sxbp_Result(* sxbp_FigureRenderer)(
     const sxbp_Figure* const figure,
     sxbp_Buffer* const buffer,
     const sxbp_RenderOptions* const render_options,
@@ -416,7 +416,7 @@ sxbp_Result sxbp_buffer_from_file(
  * `NULL`
  * @since v0.54.0
  */
-sxbp_Result sxbp_Buffero_file(
+sxbp_Result sxbp_buffer_to_file(
     const sxbp_Buffer* const buffer,
     FILE* file_handle
 );
@@ -699,7 +699,7 @@ sxbp_Result sxbp_render_figure_to_bitmap(
 sxbp_Result sxbp_render_figure(
     const sxbp_Figure* const figure,
     sxbp_Buffer* const buffer,
-    sxbp_figure_renderer_t render_callback,
+    sxbp_FigureRenderer render_callback,
     const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 );

@@ -26,7 +26,7 @@
 sxbp_Result sxbp_render_figure(
     const sxbp_Figure* const figure,
     sxbp_Buffer* const buffer,
-    sxbp_figure_renderer_t render_callback,
+    sxbp_FigureRenderer render_callback,
     const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 ) {
