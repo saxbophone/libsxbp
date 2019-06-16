@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sxbp.h"
 #include "sxbp_internal.h"
@@ -36,6 +37,8 @@ typedef struct figure_solution {
     sxbp_figure_size_t size;
     // bit string containing the lengths of all lines in this solution
     bool* bit_string;
+    // the measured fitness of this solution
+    double fitness;
 } figure_solution;
 
 /*
@@ -97,6 +100,14 @@ static void sxbp_copy_solution_to_figure(
             }
         }
     }
+}
+
+// private, copies one solution to another. NOTE: size must match!
+static void sxbp_copy_solution_to_solution(
+    const figure_solution* restrict from,
+    figure_solution* restrict to
+) {
+    memcpy(to->bit_string, from->bit_string, to->size * 30 * sizeof(bool));
 }
 
 // private, fitness function for scoring figure candidate solutions
@@ -168,6 +179,47 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - CROSSOVER (breed) random pairs of breeding individuals
      *   - MUTATE offspring
      */
+    const size_t population_size = 50;
+    const size_t generations = 100;
+    const double mutation_rate = 0.05;
+    const double breeding_rate = 0.5;
+    figure_solution* population = calloc(
+        population_size,
+        sizeof(figure_solution)
+    );
+    if (population == NULL) {
+        fprintf(stderr, "Can't allocate memory for population.\n");
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
+    figure_solution starting_solution = { .size = figure->size, };
+    if (!sxbp_init_figure_solution(&starting_solution)) {
+        fprintf(stderr, "Can't allocate memory for starting solution.\n");
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
+    sxbp_figure_t temporary_figure = sxbp_blank_figure();
+    sxbp_result_t status = SXBP_RESULT_UNKNOWN;
+    if (!sxbp_check(sxbp_copy_figure(figure, &temporary_figure), &status)) {
+        fprintf(stderr, "Can't copy figure into temporary figure.\n");
+        return status;
+    }
+    // extract the figure as it is currently --this is the seed
+    sxbp_copy_figure_to_solution(figure, &starting_solution);
+    // initialise the population with mutated versions of the starting figure
+    for (size_t i = 0; i < population_size; i++) {
+        // allocate each figure in turn
+        population[i].size = starting_solution.size;
+        if (!sxbp_init_figure_solution(&population[i])) {
+            fprintf(stderr, "Can't allocate memory for individual #%zu.\n", i);
+            return SXBP_RESULT_FAIL_MEMORY;
+        }
+        // copy the starting figure into it and mutate it
+        sxbp_copy_solution_to_solution(&starting_solution, &population[i]);
+        sxbp_mutate_solution(&population[i], mutation_rate);
+        // store the fitness value of the new individual
+        sxbp_copy_solution_to_figure(&population[i], &temporary_figure);
+        population[i].fitness = sxbp_solution_fitness_function(&temporary_figure);
+    }
+    // TODO: now, tidy up your memory!
     // XXX: allow dummy implementation to compile by calling the callback
     if (options != NULL && options->progress_callback != NULL) {
         options->progress_callback(figure, options->callback_context);
