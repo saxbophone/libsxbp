@@ -31,37 +31,37 @@
  * private datatype used for representing a figure candidate solution from the
  * point of view of the genetic algorithm
  */
-typedef struct figure_chromosome {
+typedef struct figure_solution {
     // the number of lines in the figure this solution is for
     sxbp_figure_size_t size;
     // bit string containing the lengths of all lines in this solution
     bool* bit_string;
-} figure_chromosome;
+} figure_solution;
 
 /*
- * private, allocates memory for the given chromosome
+ * private, allocates memory for the given solution
  * returns whether or not this was done successfully
  */
-static bool sxbp_init_figure_chromosome(figure_chromosome* chromosome) {
-    chromosome->bit_string = calloc(
-        chromosome->size * 30, // each line length is stored as 30 bits
+static bool sxbp_init_figure_solution(figure_solution* solution) {
+    solution->bit_string = calloc(
+        solution->size * 30, // each line length is stored as 30 bits
         sizeof(bool)
     );
-    return (chromosome->bit_string != NULL);
+    return (solution->bit_string != NULL);
 }
 
-// private, deallocates memory for the given chromosome
-static void sxbp_free_figure_chromosome(figure_chromosome* chromosome) {
-    free(chromosome->bit_string);
+// private, deallocates memory for the given solution
+static void sxbp_free_figure_solution(figure_solution* solution) {
+    free(solution->bit_string);
 }
 
 /*
- * private, copies the line lengths of a figure into a chromosome
+ * private, copies the line lengths of a figure into a solution
  * NOTE: size must be the same for both data structures
  */
-static void sxbp_copy_figure_to_chromosome(
+static void sxbp_copy_figure_to_solution(
     const sxbp_figure_t* figure,
-    figure_chromosome* chromosome
+    figure_solution* solution
 ) {
     for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
         // extract all 30 bits, in big-endian order
@@ -69,27 +69,27 @@ static void sxbp_copy_figure_to_chromosome(
             size_t shift = 30 - 1 - j;
             sxbp_length_t mask = 1u << shift;
             // set to true if the bit in this location is set
-            chromosome->bit_string[i * 30 + j] =
+            solution->bit_string[i * 30 + j] =
                 (figure->lines[i].length & mask) >> shift;
         }
     }
 }
 
 /*
- * private, copies the line lengths from a chromosome into a figure
+ * private, copies the line lengths from a solution into a figure
  * NOTE: size must be the same for both data structures
  */
-static void sxbp_copy_chromosome_to_figure(
-    const figure_chromosome* chromosome,
+static void sxbp_copy_solution_to_figure(
+    const figure_solution* solution,
     sxbp_figure_t* figure
 ) {
-    for (sxbp_figure_size_t i = 0; i < chromosome->size; i++) {
+    for (sxbp_figure_size_t i = 0; i < solution->size; i++) {
         // clear the line length to 0 (we are setting bits when 1)
         figure->lines[i].length = 0;
         // line lengths are 30 bits, packed in big-endian order
         for (size_t j = 0; j < 30; j++) {
             // if this bit is set
-            if (chromosome->bit_string[i * 30 + j]) {
+            if (solution->bit_string[i * 30 + j]) {
                 size_t shift = 30 - 1 - j;
                 sxbp_length_t mask = 1u << shift;
                 // or-mask to set the bit in this position
@@ -100,7 +100,7 @@ static void sxbp_copy_chromosome_to_figure(
 }
 
 // private, fitness function for scoring figure candidate solutions
-static double sxbp_chromosome_fitness_function(const sxbp_figure_t* figure) {
+static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
     // first, check if the figure collides
     bool collided = false;
     if (!sxbp_success(sxbp_figure_collides(figure, &collided))) {
@@ -124,13 +124,13 @@ static double sxbp_chromosome_fitness_function(const sxbp_figure_t* figure) {
 
 /*
  * private, produces new offspring from two parents using uniform crossover
- * NOTE: all chromosomes MUST be the same size
+ * NOTE: all solutions MUST be the same size
  */
 static void sxbp_crossover_breed(
-    const figure_chromosome* restrict parent_a,
-    const figure_chromosome* restrict parent_b,
-    figure_chromosome* restrict offspring_a,
-    figure_chromosome* restrict offspring_b
+    const figure_solution* restrict parent_a,
+    const figure_solution* restrict parent_b,
+    figure_solution* restrict offspring_a,
+    figure_solution* restrict offspring_b
 ) {
     for (sxbp_figure_size_t i = 0; i < parent_a->size * 30; i++) {
         // flip a coin
@@ -143,15 +143,15 @@ static void sxbp_crossover_breed(
     }
 }
 
-static void sxbp_mutate_chromosome(
-    figure_chromosome* chromosome,
+static void sxbp_mutate_solution(
+    figure_solution* solution,
     double mutation_rate
 ) {
-    // mutate each bit of the chromosome according to the mutation rate
-    for (sxbp_figure_size_t i = 0; i < chromosome->size * 30; i++) {
+    // mutate each bit of the solution according to the mutation rate
+    for (sxbp_figure_size_t i = 0; i < solution->size * 30; i++) {
         bool flip = ((double)rand() / RAND_MAX) < mutation_rate;
         if (flip) {
-            chromosome->bit_string[i] = !chromosome->bit_string[i];
+            solution->bit_string[i] = !solution->bit_string[i];
         }
     }
 }
