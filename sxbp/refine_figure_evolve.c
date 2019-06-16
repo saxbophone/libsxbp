@@ -101,7 +101,25 @@ static void sxbp_copy_chromosome_to_figure(
 
 // private, fitness function for scoring figure candidate solutions
 static double sxbp_chromosome_fitness_function(const sxbp_figure_t* figure) {
-    return 0.0;
+    // first, check if the figure collides
+    bool collided = false;
+    if (!sxbp_success(sxbp_figure_collides(figure, &collided))) {
+        // if there was an error, then return negative
+        return -1.0;
+    } else if (collided) {
+        // figures that collide are invalid so we need to return the worst value
+        return 0.0;
+    } else {
+        // calculate figure area and return 1/area
+        sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
+        sxbp_figure_dimension_t dimensions[2];
+        sxbp_get_size_from_bounds(bounds, &dimensions[0], &dimensions[1]);
+        /*
+         * we would calculate 1/area as 1/(x*y), but to reduce error, instead we
+         * rearrange to (1/x) * (1/y) as follows:
+         */
+        return 1.0 / dimensions[0] * 1.0 / dimensions[1];
+    }
 }
 
 /*

@@ -136,6 +136,12 @@ sxbp_result_t sxbp_make_bitmap_for_bounds(
     sxbp_bitmap_t* bitmap
 );
 
+// private, sets collided to true if the figure's line collides with itself
+sxbp_result_t sxbp_figure_collides(
+    const sxbp_figure_t* figure,
+    bool* collided
+);
+
 // private, prints out a bitmap to the given stream, for debugging
 void sxbp_print_bitmap(sxbp_bitmap_t* bitmap, FILE* stream);
 
