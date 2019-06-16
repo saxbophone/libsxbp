@@ -105,10 +105,10 @@ static void sxbp_crossover_breed(
         // flip a coin
         bool flip = rand() > (RAND_MAX / 2); // equal chance of choosing parents
         // allocate the alleles accordingly
-        offspring_a.bit_string[i] = flip ? parent_a.bit_string[i]
-                                         : parent_b.bit_string[i];
-        offspring_b.bit_string[i] = flip ? parent_b.bit_string[i]
-                                         : parent_a.bit_string[i];
+        offspring_a->bit_string[i] = flip ? parent_a->bit_string[i]
+                                          : parent_b->bit_string[i];
+        offspring_b->bit_string[i] = flip ? parent_b->bit_string[i]
+                                          : parent_a->bit_string[i];
     }
 }
 
