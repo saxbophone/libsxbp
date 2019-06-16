@@ -145,6 +145,12 @@ sxbp_result_t sxbp_refine_figure_shrink_from_end(
     const sxbp_refine_figure_options_t* options
 );
 
+// private, refines a figure using an evolutionary algorithm
+sxbp_result_t sxbp_refine_figure_evolve(
+    sxbp_figure_t* figure,
+    const sxbp_refine_figure_options_t* options
+);
+
 // private, macro to assist in 'return early if NULL pointer' error checks
 #define SXBP_RETURN_FAIL_IF_NULL(pointer) if (pointer == NULL) return SXBP_RESULT_FAIL_PRECONDITION
 

@@ -168,6 +168,10 @@ if(SXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
+# XXX: compile functional tests program
+add_executable(functional_tests "functional_tests.c")
+target_link_libraries(functional_tests sxbp)
+
 # build unit tests if enabled
 if(BUILD_UNIT_TESTS)
     add_executable(unit_tests ${TEST_SOURCES})

@@ -153,12 +153,14 @@ typedef enum sxbp_refine_method_t {
     SXBP_REFINE_METHOD_ANY = 0u, /**< use any method, the default */
     SXBP_REFINE_METHOD_GROW_FROM_START, /**< the original refinement method */
     SXBP_REFINE_METHOD_SHRINK_FROM_END, /**< the current refinement method */
+    SXBP_REFINE_METHOD_EVOLVE, /**< use an evolutionary algorithm */
     SXBP_REFINE_METHOD_RESERVED_START = 10u, /**< reserved for future use */
     SXBP_REFINE_METHOD_RESERVED_END = 255u, /**< reserved for future use */
 } sxbp_refine_method_t;
 
 /**
  * @brief A structure used for providing options to `sxbp_refine_figure()`
+ * @todo Add parameters for `SXBP_REFINE_METHOD_EVOLVE`
  * @since v0.54.0
  */
 typedef struct sxbp_refine_figure_options_t {

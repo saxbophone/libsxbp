@@ -38,39 +38,7 @@ static void print_progress(const sxbp_figure_t* figure, void* context) {
 
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
-    // test that the public API is resistant to NULL-pointer-deref errors
-    assert(sxbp_init_buffer(NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_free_buffer(NULL) == false);
-    assert(sxbp_copy_buffer(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_buffer_from_file(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_buffer_to_file(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_init_figure(NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_free_figure(NULL) == false);
-    assert(sxbp_copy_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_init_bitmap(NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_free_bitmap(NULL) == false);
-    assert(sxbp_copy_bitmap(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_begin_figure(NULL, NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_refine_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_dump_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(sxbp_load_figure(NULL, NULL) == SXBP_RESULT_FAIL_PRECONDITION);
-    assert(
-        sxbp_render_figure_to_bitmap(NULL, NULL)
-        == SXBP_RESULT_FAIL_PRECONDITION
-    );
-    assert(
-        sxbp_render_figure(NULL, NULL, NULL, NULL, NULL)
-        == SXBP_RESULT_FAIL_PRECONDITION
-    );
-    assert(
-        sxbp_render_figure_to_null(NULL, NULL, NULL, NULL)
-        == SXBP_RESULT_FAIL_UNIMPLEMENTED
-    );
-    assert(
-        sxbp_render_figure_to_pbm(NULL, NULL, NULL, NULL)
-        == SXBP_RESULT_FAIL_PRECONDITION
-    );
-    // now test normal usage of the public API
+    // test normal usage of the public API
     const char* string = "sxbp";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
@@ -85,6 +53,7 @@ int main(void) {
         sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
         sxbp_render_figure_to_bitmap(&figure, &bitmap);
         sxbp_refine_figure_options_t options = {
+            .refine_method = SXBP_REFINE_METHOD_EVOLVE,
             .progress_callback = print_progress,
         };
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
