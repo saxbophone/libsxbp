@@ -16,6 +16,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "sxbp.h"
@@ -54,15 +55,30 @@ static void sxbp_free_figure_chromosome(figure_chromosome* chromosome) {
     free(chromosome->bit_string);
 }
 
-// private, copies the line lengths of a figure into a chromosome
+/*
+ * private, copies the line lengths of a figure into a chromosome
+ * NOTE: size must be the same for both data structures
+ */
 static void sxbp_copy_figure_to_chromosome(
     const sxbp_figure_t* figure,
     figure_chromosome* chromosome
 ) {
-    return;
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+        // extract all 30 bits, in big-endian order
+        for (size_t j = 0; j < 30; j++) {
+            size_t shift = 30 - 1 - j;
+            sxbp_length_t mask = 1u << shift;
+            // set to true if the bit in this location is set
+            chromosome->bit_string[i * 30 + j] =
+                (figure->lines[i].length & mask) >> shift;
+        }
+    }
 }
 
-// private, copies the line lengths from a chromosome into a figure
+/*
+ * private, copies the line lengths from a chromosome into a figure
+ * NOTE: size must be the same for both data structures
+ */
 static void sxbp_copy_chromosome_to_figure(
     const figure_chromosome* chromosome,
     sxbp_figure_t* figure
