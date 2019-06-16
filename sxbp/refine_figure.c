@@ -42,7 +42,7 @@ sxbp_result_t sxbp_refine_figure(
         case SXBP_REFINE_METHOD_SHRINK_FROM_END:
             return sxbp_refine_figure_shrink_from_end(figure, options);
         case SXBP_REFINE_METHOD_EVOLVE:
-            return false;
+            return sxbp_refine_figure_evolve(figure, options);
         default:
             // an unimplemented refinement method was requested
             return SXBP_RESULT_FAIL_UNIMPLEMENTED;
