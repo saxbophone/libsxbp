@@ -154,6 +154,15 @@ static void sxbp_crossover_breed(
     }
 }
 
+// private, sorts the population array by fitness
+static void sxbp_sort_population_by_fitness(
+    figure_solution** population,
+    size_t size
+) {
+    // I was going to write some sorting code here but I don't have the energy
+    return;
+}
+
 static void sxbp_mutate_solution(
     figure_solution* solution,
     double mutation_rate
@@ -219,6 +228,8 @@ sxbp_result_t sxbp_refine_figure_evolve(
         sxbp_copy_solution_to_figure(&population[i], &temporary_figure);
         population[i].fitness = sxbp_solution_fitness_function(&temporary_figure);
     }
+    // sort the population by fitness
+    sxbp_sort_population_by_fitness(&population, population_size);
     // TODO: now, tidy up your memory!
     // XXX: allow dummy implementation to compile by calling the callback
     if (options != NULL && options->progress_callback != NULL) {
