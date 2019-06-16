@@ -83,7 +83,20 @@ static void sxbp_copy_chromosome_to_figure(
     const figure_chromosome* chromosome,
     sxbp_figure_t* figure
 ) {
-    return;
+    for (sxbp_figure_size_t i = 0; i < chromosome->size; i++) {
+        // clear the line length to 0 (we are setting bits when 1)
+        figure->lines[i].length = 0;
+        // line lengths are 30 bits, packed in big-endian order
+        for (size_t j = 0; j < 30; j++) {
+            // if this bit is set
+            if (chromosome->bit_string[i * 30 + j]) {
+                size_t shift = 30 - 1 - j;
+                sxbp_length_t mask = 1u << shift;
+                // or-mask to set the bit in this position
+                figure->lines[i].length |= mask;
+            }
+        }
+    }
 }
 
 // private, fitness function for scoring figure candidate solutions
