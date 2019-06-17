@@ -115,8 +115,8 @@ static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
     // first, check if the figure collides
     bool collided = false;
     if (!sxbp_success(sxbp_figure_collides(figure, &collided))) {
-        // if there was an error, then return negative
-        return -1.0;
+        // if there was an error, it was because the figure is too big
+        return 0.0; // assume that a figure that's too big is unworkable
     } else if (collided) {
         // figures that collide are invalid so we need to return the worst value
         return 0.0;
