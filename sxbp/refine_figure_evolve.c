@@ -217,7 +217,7 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - MUTATE offspring
      */
     const size_t population_size = 1000;
-    const size_t generations = 1000000;
+    const size_t generations = 20000;
     const double mutation_rate = 0.25;
     const double breeding_rate = 0.5;
     figure_solution* population = calloc(
@@ -312,7 +312,8 @@ sxbp_result_t sxbp_refine_figure_evolve(
             }
         }
     }
+    // now that we're finished, store the fittest in the original figure
+    sxbp_copy_solution_to_figure(&population[0], figure);
     // TODO: now, tidy up your memory!
-    // do nothing, unsuccessfully
-    return SXBP_RESULT_FAIL_UNIMPLEMENTED;
+    return SXBP_RESULT_OK;
 }
