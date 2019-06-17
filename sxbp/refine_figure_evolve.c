@@ -15,6 +15,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <float.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -67,9 +69,9 @@ static void sxbp_copy_figure_to_solution(
     figure_solution* solution
 ) {
     for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
-        // extract all 30 bits, in big-endian order
-        for (size_t j = 0; j < 30; j++) {
-            size_t shift = 30 - 1 - j;
+        // extract 14 bits only, in big-endian order
+        for (size_t j = 16; j < 30; j++) {
+            size_t shift = 17 - 1 - j;
             sxbp_length_t mask = 1u << shift;
             // set to true if the bit in this location is set
             solution->bit_string[i * 30 + j] =
@@ -89,11 +91,11 @@ static void sxbp_copy_solution_to_figure(
     for (sxbp_figure_size_t i = 0; i < solution->size; i++) {
         // clear the line length to 0 (we are setting bits when 1)
         figure->lines[i].length = 0;
-        // line lengths are 30 bits, packed in big-endian order
-        for (size_t j = 0; j < 30; j++) {
+        // line lengths are 30 bits, packed in big-endian order --insert 14 only
+        for (size_t j = 0; j < 16; j++) {
             // if this bit is set
             if (solution->bit_string[i * 30 + j]) {
-                size_t shift = 30 - 1 - j;
+                size_t shift = 17 - 1 - j;
                 sxbp_length_t mask = 1u << shift;
                 // or-mask to set the bit in this position
                 figure->lines[i].length |= mask;
@@ -107,29 +109,37 @@ static void sxbp_copy_solution_to_solution(
     const figure_solution* restrict from,
     figure_solution* restrict to
 ) {
+    to->fitness = from->fitness;
     memcpy(to->bit_string, from->bit_string, to->size * 30 * sizeof(bool));
 }
 
 // private, fitness function for scoring figure candidate solutions
 static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
-    // first, check if the figure collides
+    // first, get the figure size --if it's too large, we won't check collision
+    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
+    sxbp_figure_dimension_t dimensions[2];
+    sxbp_get_size_from_bounds(bounds, &dimensions[0], &dimensions[1]);
+    printf("%"PRIu32"x%"PRIu32"\n", dimensions[0], dimensions[1]);
+    /*
+     * we would calculate 1/area as 1/(x*y), but to reduce error, instead we
+     * rearrange to (1/x) * (1/y) as follows:
+     */
+    double area_score = 1.0 / dimensions[0] * 1.0 / dimensions[1];
+    if (dimensions[0] > 92681 || dimensions[1] > 92681) {
+        // TOO BIG --assume it collided
+        return area_score - 1.0;
+    }
+    // next, check if the figure collides
     bool collided = false;
     if (!sxbp_success(sxbp_figure_collides(figure, &collided))) {
         // if there was an error, it was because the figure is too big
-        return 0.0; // assume that a figure that's too big is unworkable
+        return area_score - 1.0; // assume that a figure that's too big is unworkable
     } else if (collided) {
-        // figures that collide are invalid so we need to return the worst value
-        return 0.0;
+        // figures that collide are invalid --return area score with penalty
+        return area_score - 1.0;
     } else {
-        // calculate figure area and return 1/area
-        sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
-        sxbp_figure_dimension_t dimensions[2];
-        sxbp_get_size_from_bounds(bounds, &dimensions[0], &dimensions[1]);
-        /*
-         * we would calculate 1/area as 1/(x*y), but to reduce error, instead we
-         * rearrange to (1/x) * (1/y) as follows:
-         */
-        return 1.0 / dimensions[0] * 1.0 / dimensions[1];
+        printf("SMALL ENOUGH!\n");
+        return area_score;
     }
 }
 
@@ -137,30 +147,53 @@ static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
  * private, produces new offspring from two parents using uniform crossover
  * NOTE: all solutions MUST be the same size
  */
-static void sxbp_crossover_breed(
-    const figure_solution* restrict parent_a,
-    const figure_solution* restrict parent_b,
-    figure_solution* restrict offspring_a,
-    figure_solution* restrict offspring_b
-) {
-    for (sxbp_figure_size_t i = 0; i < parent_a->size * 30; i++) {
-        // flip a coin
-        bool flip = rand() > (RAND_MAX / 2); // equal chance of choosing parents
-        // allocate the alleles accordingly
-        offspring_a->bit_string[i] = flip ? parent_a->bit_string[i]
-                                          : parent_b->bit_string[i];
-        offspring_b->bit_string[i] = flip ? parent_b->bit_string[i]
-                                          : parent_a->bit_string[i];
-    }
-}
+// static void sxbp_crossover_breed(
+//     const figure_solution* restrict parent_a,
+//     const figure_solution* restrict parent_b,
+//     figure_solution* restrict offspring_a,
+//     figure_solution* restrict offspring_b
+// ) {
+//     for (sxbp_figure_size_t i = 0; i < parent_a->size * 30; i++) {
+//         // flip a coin
+//         bool flip = rand() > (RAND_MAX / 2); // equal chance of choosing parents
+//         // allocate the alleles accordingly
+//         offspring_a->bit_string[i] = flip ? parent_a->bit_string[i]
+//                                           : parent_b->bit_string[i];
+//         offspring_b->bit_string[i] = flip ? parent_b->bit_string[i]
+//                                           : parent_a->bit_string[i];
+//     }
+// }
 
 // private, sorts the population array by fitness
-static void sxbp_sort_population_by_fitness(
-    figure_solution** population,
+static bool sxbp_sort_population_by_fitness(
+    figure_solution* population,
     size_t size
 ) {
-    // I was going to write some sorting code here but I don't have the energy
-    return;
+    /*
+     * XXX: uses bubble-sort for now because it is simple and quick to write,
+     * but in the future this should be optimised by replacing it with a
+     * different, more efficient sorting algorithm
+     */
+    // we need a temporary figure for swapping
+    figure_solution temporary = { .size = (population[0]).size, };
+    // if this allocation fails then we can't go on
+    if (!sxbp_init_figure_solution(&temporary)) {
+        return false;
+    }
+    for (size_t end = size; end > 0; end--) {
+        for (size_t i = 0; i < end - 1; i++) {
+            // NOTE: we are sorting for descending order
+            if ((population[i]).fitness < (population[i + 1]).fitness) {
+                // swap through temporary
+                sxbp_copy_solution_to_solution(&population[i], &temporary);
+                sxbp_copy_solution_to_solution(&population[i + 1], &population[i]);
+                sxbp_copy_solution_to_solution(&temporary, &population[i + 1]);
+            }
+        }
+    }
+    // deallocate memory, very important!
+    sxbp_free_figure_solution(&temporary);
+    return true;
 }
 
 static void sxbp_mutate_solution(
@@ -189,9 +222,9 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - MUTATE offspring
      */
     const size_t population_size = 50;
-    const size_t generations = 100;
+    // const size_t generations = 100;
     const double mutation_rate = 0.05;
-    const double breeding_rate = 0.5;
+    // const double breeding_rate = 0.5;
     figure_solution* population = calloc(
         population_size,
         sizeof(figure_solution)
@@ -200,19 +233,23 @@ sxbp_result_t sxbp_refine_figure_evolve(
         fprintf(stderr, "Can't allocate memory for population.\n");
         return SXBP_RESULT_FAIL_MEMORY;
     }
+    printf("calloc(figure_solution)\n");
     figure_solution starting_solution = { .size = figure->size, };
     if (!sxbp_init_figure_solution(&starting_solution)) {
         fprintf(stderr, "Can't allocate memory for starting solution.\n");
         return SXBP_RESULT_FAIL_MEMORY;
     }
+    printf("calloc(starting_solution)\n");
     sxbp_figure_t temporary_figure = sxbp_blank_figure();
     sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     if (!sxbp_check(sxbp_copy_figure(figure, &temporary_figure), &status)) {
         fprintf(stderr, "Can't copy figure into temporary figure.\n");
         return status;
     }
+    printf("copy_figure()\n");
     // extract the figure as it is currently --this is the seed
     sxbp_copy_figure_to_solution(figure, &starting_solution);
+    printf("copy_figure_to_solution()\n");
     // initialise the population with mutated versions of the starting figure
     for (size_t i = 0; i < population_size; i++) {
         // allocate each figure in turn
@@ -221,15 +258,27 @@ sxbp_result_t sxbp_refine_figure_evolve(
             fprintf(stderr, "Can't allocate memory for individual #%zu.\n", i);
             return SXBP_RESULT_FAIL_MEMORY;
         }
+        printf("allocate(individual #%zu)\n", i);
         // copy the starting figure into it and mutate it
         sxbp_copy_solution_to_solution(&starting_solution, &population[i]);
+        printf("copy(individual #%zu)\n", i);
         sxbp_mutate_solution(&population[i], mutation_rate);
+        printf("mutate(individual #%zu)\n", i);
         // store the fitness value of the new individual
         sxbp_copy_solution_to_figure(&population[i], &temporary_figure);
+        printf("convert(individual #%zu)\n", i);
         population[i].fitness = sxbp_solution_fitness_function(&temporary_figure);
+        printf("fitness(individual #%zu\n", i);
     }
     // sort the population by fitness
-    sxbp_sort_population_by_fitness(&population, population_size);
+    if (!sxbp_sort_population_by_fitness(population, population_size)) {
+        fprintf(stderr, "Could not allocate memory for initial sort\n");
+        return SXBP_RESULT_FAIL_MEMORY;
+    }
+    // for curiosity's sake, print the sorted population
+    for (size_t i = 0; i < population_size; i++) {
+        printf("Individual #%zu: %.*e\n", i, DECIMAL_DIG, population[i].fitness);
+    }
     // TODO: now, tidy up your memory!
     // XXX: allow dummy implementation to compile by calling the callback
     if (options != NULL && options->progress_callback != NULL) {

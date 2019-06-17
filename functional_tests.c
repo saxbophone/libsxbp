@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "sxbp/sxbp.h"
 #include "sxbp/sxbp_internal.h"
@@ -56,6 +57,8 @@ int main(void) {
             .refine_method = SXBP_REFINE_METHOD_EVOLVE,
             .progress_callback = print_progress,
         };
+        // seed the mediocre random number generator
+        srand(time(NULL));
         sxbp_result_t outcome = sxbp_refine_figure(&figure, &options);
         assert(outcome == SXBP_RESULT_OK);
         // test null renderer can be called
