@@ -115,11 +115,17 @@ static void sxbp_copy_solution_to_solution(
 
 // private, fitness function for scoring figure candidate solutions
 static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
-    // first, get the figure size --if it's too large, we won't check collision
+    // first, normalise any 0-length lines
+    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+        if (figure->lines[i].length == 0) {
+            figure->lines[i].length = 1;
+        }
+    }
+    // next, get the figure size --if it's too large, we won't check collision
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     sxbp_figure_dimension_t dimensions[2];
     sxbp_get_size_from_bounds(bounds, &dimensions[0], &dimensions[1]);
-    printf("%"PRIu32"x%"PRIu32"\n", dimensions[0], dimensions[1]);
+    // printf("%"PRIu32"x%"PRIu32"\n", dimensions[0], dimensions[1]);
     /*
      * we would calculate 1/area as 1/(x*y), but to reduce error, instead we
      * rearrange to (1/x) * (1/y) as follows:
@@ -138,7 +144,7 @@ static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
         // figures that collide are invalid --return area score with penalty
         return area_score - 1.0;
     } else {
-        printf("SMALL ENOUGH!\n");
+        // printf("SMALL ENOUGH!\n");
         return area_score;
     }
 }
@@ -147,22 +153,22 @@ static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
  * private, produces new offspring from two parents using uniform crossover
  * NOTE: all solutions MUST be the same size
  */
-// static void sxbp_crossover_breed(
-//     const figure_solution* restrict parent_a,
-//     const figure_solution* restrict parent_b,
-//     figure_solution* restrict offspring_a,
-//     figure_solution* restrict offspring_b
-// ) {
-//     for (sxbp_figure_size_t i = 0; i < parent_a->size * 30; i++) {
-//         // flip a coin
-//         bool flip = rand() > (RAND_MAX / 2); // equal chance of choosing parents
-//         // allocate the alleles accordingly
-//         offspring_a->bit_string[i] = flip ? parent_a->bit_string[i]
-//                                           : parent_b->bit_string[i];
-//         offspring_b->bit_string[i] = flip ? parent_b->bit_string[i]
-//                                           : parent_a->bit_string[i];
-//     }
-// }
+static void sxbp_crossover_breed(
+    const figure_solution* restrict parent_a,
+    const figure_solution* restrict parent_b,
+    figure_solution* restrict offspring_a,
+    figure_solution* restrict offspring_b
+) {
+    for (sxbp_figure_size_t i = 0; i < parent_a->size * 30; i++) {
+        // flip a coin
+        bool flip = rand() > (RAND_MAX / 2); // equal chance of choosing parents
+        // allocate the alleles accordingly
+        offspring_a->bit_string[i] = flip ? parent_a->bit_string[i]
+                                          : parent_b->bit_string[i];
+        offspring_b->bit_string[i] = flip ? parent_b->bit_string[i]
+                                          : parent_a->bit_string[i];
+    }
+}
 
 // private, sorts the population array by fitness
 static bool sxbp_sort_population_by_fitness(
@@ -201,10 +207,13 @@ static void sxbp_mutate_solution(
     double mutation_rate
 ) {
     // mutate each bit of the solution according to the mutation rate
-    for (sxbp_figure_size_t i = 0; i < solution->size * 30; i++) {
-        bool flip = ((double)rand() / RAND_MAX) < mutation_rate;
-        if (flip) {
-            solution->bit_string[i] = !solution->bit_string[i];
+    for (sxbp_figure_size_t i = 0; i < solution->size; i++) {
+        for (size_t j = 0; j < 16; j++) {
+            bool flip = ((double)rand() / RAND_MAX) < mutation_rate;
+            if (flip) {
+                solution->bit_string[i * 30 + (30 - j)] =
+                    !solution->bit_string[i * 30 + (30 - j)];
+            }
         }
     }
 }
@@ -221,10 +230,10 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - CROSSOVER (breed) random pairs of breeding individuals
      *   - MUTATE offspring
      */
-    const size_t population_size = 50;
-    // const size_t generations = 100;
+    const size_t population_size = 1000;
+    const size_t generations = 1000000;
     const double mutation_rate = 0.05;
-    // const double breeding_rate = 0.5;
+    const double breeding_rate = 0.25;
     figure_solution* population = calloc(
         population_size,
         sizeof(figure_solution)
@@ -252,38 +261,71 @@ sxbp_result_t sxbp_refine_figure_evolve(
     printf("copy_figure_to_solution()\n");
     // initialise the population with mutated versions of the starting figure
     for (size_t i = 0; i < population_size; i++) {
+        printf("initialise individual #%zu\n", i);
         // allocate each figure in turn
         population[i].size = starting_solution.size;
         if (!sxbp_init_figure_solution(&population[i])) {
             fprintf(stderr, "Can't allocate memory for individual #%zu.\n", i);
             return SXBP_RESULT_FAIL_MEMORY;
         }
-        printf("allocate(individual #%zu)\n", i);
         // copy the starting figure into it and mutate it
         sxbp_copy_solution_to_solution(&starting_solution, &population[i]);
-        printf("copy(individual #%zu)\n", i);
         sxbp_mutate_solution(&population[i], mutation_rate);
-        printf("mutate(individual #%zu)\n", i);
         // store the fitness value of the new individual
         sxbp_copy_solution_to_figure(&population[i], &temporary_figure);
-        printf("convert(individual #%zu)\n", i);
         population[i].fitness = sxbp_solution_fitness_function(&temporary_figure);
-        printf("fitness(individual #%zu\n", i);
     }
     // sort the population by fitness
     if (!sxbp_sort_population_by_fitness(population, population_size)) {
         fprintf(stderr, "Could not allocate memory for initial sort\n");
         return SXBP_RESULT_FAIL_MEMORY;
     }
-    // for curiosity's sake, print the sorted population
-    for (size_t i = 0; i < population_size; i++) {
-        printf("Individual #%zu: %.*e\n", i, DECIMAL_DIG, population[i].fitness);
+    printf("Fittest: %.*e\n", DECIMAL_DIG, population[0].fitness);
+    // now, simulate each generation of evolution
+    for (size_t g = 0; g < generations; g++) {
+        printf("Generation #%zu\n", g);
+        // select breeding rate % of fittest individuals
+        size_t breeding_size = (size_t)(population_size * breeding_rate);
+        // select half as many pairs of parents from top fittest to breed
+        for (size_t b = 0; b < breeding_size / 2; b++) {
+            size_t p_a = (size_t)(((double)rand() / RAND_MAX) * breeding_size);
+            size_t p_b = (size_t)(((double)rand() / RAND_MAX) * breeding_size);
+            size_t o_a = population_size - b * 2 - 1;
+            size_t o_b = population_size - b * 2 - 2;
+            // breed the parents and replace weakest with offspring
+            sxbp_crossover_breed(
+                &population[p_a], &population[p_b], // parents
+                &population[o_a], &population[o_b] // offspring
+            );
+            // mutate the offspring
+            sxbp_mutate_solution(&population[o_a], mutation_rate);
+            sxbp_mutate_solution(&population[o_b], mutation_rate);
+            // calculate new offspring fitnesses
+            sxbp_copy_solution_to_figure(&population[o_a], &temporary_figure);
+            population[o_a].fitness = sxbp_solution_fitness_function(&temporary_figure);
+            // printf("b");
+            fflush(stdout);
+            sxbp_copy_solution_to_figure(&population[o_b], &temporary_figure);
+            population[o_b].fitness = sxbp_solution_fitness_function(&temporary_figure);
+            // printf("b");
+            // fflush(stdout);
+        }
+        // sort the population by fitness
+        if (!sxbp_sort_population_by_fitness(population, population_size)) {
+            fprintf(stderr, "Could not allocate memory for initial sort\n");
+            return SXBP_RESULT_FAIL_MEMORY;
+        }
+        // print fitness value of fittest
+        printf("\nFittest: %.*e\n", DECIMAL_DIG, population[0].fitness);
+        // after every generation has been generated, call callback with fittest
+        if (options != NULL && options->progress_callback != NULL) {
+            if (population[0].fitness > 0.0) { // if the fittest is not invalid
+                sxbp_copy_solution_to_figure(&population[0], &temporary_figure);
+                options->progress_callback(&temporary_figure, options->callback_context);
+            }
+        }
     }
     // TODO: now, tidy up your memory!
-    // XXX: allow dummy implementation to compile by calling the callback
-    if (options != NULL && options->progress_callback != NULL) {
-        options->progress_callback(figure, options->callback_context);
-    }
     // do nothing, unsuccessfully
     return SXBP_RESULT_FAIL_UNIMPLEMENTED;
 }

@@ -202,7 +202,7 @@ sxbp_result_t sxbp_make_bitmap_for_bounds(
     assert(bitmap != NULL);
     // calculate the width and height
     sxbp_get_size_from_bounds(bounds, &bitmap->width, &bitmap->height);
-    printf("w = %"PRIu32" h = %"PRIu32"\n", bitmap->width, bitmap->height);
+    // printf("w = %"PRIu32" h = %"PRIu32"\n", bitmap->width, bitmap->height);
     bitmap->pixels = NULL;
     // allocate memory for the bitmap and return the status of this operation
     return sxbp_init_bitmap(bitmap);
