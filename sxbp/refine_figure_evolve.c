@@ -37,8 +37,8 @@
 typedef struct figure_solution {
     // the number of lines in the figure this solution is for
     sxbp_figure_size_t size;
-    // bit string containing the lengths of all lines in this solution
-    bool* bit_string;
+    // array containing the lengths of all lines in this solution
+    sxbp_length_t* lengths;
     // the measured fitness of this solution
     double fitness;
 } figure_solution;
@@ -48,16 +48,13 @@ typedef struct figure_solution {
  * returns whether or not this was done successfully
  */
 static bool sxbp_init_figure_solution(figure_solution* solution) {
-    solution->bit_string = calloc(
-        solution->size * 30, // each line length is stored as 30 bits
-        sizeof(bool)
-    );
-    return (solution->bit_string != NULL);
+    solution->lengths = calloc(solution->size, sizeof(sxbp_length_t));
+    return (solution->lengths != NULL);
 }
 
 // private, deallocates memory for the given solution
 static void sxbp_free_figure_solution(figure_solution* solution) {
-    free(solution->bit_string);
+    free(solution->lengths);
 }
 
 /*
@@ -69,14 +66,7 @@ static void sxbp_copy_figure_to_solution(
     figure_solution* solution
 ) {
     for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
-        // extract 14 bits only, in big-endian order
-        for (size_t j = 16; j < 30; j++) {
-            size_t shift = 17 - 1 - j;
-            sxbp_length_t mask = 1u << shift;
-            // set to true if the bit in this location is set
-            solution->bit_string[i * 30 + j] =
-                (figure->lines[i].length & mask) >> shift;
-        }
+        solution->lengths[i] = figure->lines[i].length;
     }
 }
 
@@ -89,18 +79,7 @@ static void sxbp_copy_solution_to_figure(
     sxbp_figure_t* figure
 ) {
     for (sxbp_figure_size_t i = 0; i < solution->size; i++) {
-        // clear the line length to 0 (we are setting bits when 1)
-        figure->lines[i].length = 0;
-        // line lengths are 30 bits, packed in big-endian order --insert 14 only
-        for (size_t j = 0; j < 16; j++) {
-            // if this bit is set
-            if (solution->bit_string[i * 30 + j]) {
-                size_t shift = 17 - 1 - j;
-                sxbp_length_t mask = 1u << shift;
-                // or-mask to set the bit in this position
-                figure->lines[i].length |= mask;
-            }
-        }
+        figure->lines[i].length = solution->lengths[i];
     }
 }
 
@@ -110,18 +89,12 @@ static void sxbp_copy_solution_to_solution(
     figure_solution* restrict to
 ) {
     to->fitness = from->fitness;
-    memcpy(to->bit_string, from->bit_string, to->size * 30 * sizeof(bool));
+    memcpy(to->lengths, from->lengths, to->size * sizeof(sxbp_length_t));
 }
 
 // private, fitness function for scoring figure candidate solutions
 static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
-    // first, normalise any 0-length lines
-    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
-        if (figure->lines[i].length == 0) {
-            figure->lines[i].length = 1;
-        }
-    }
-    // next, get the figure size --if it's too large, we won't check collision
+    // first, get the figure size --if it's too large, we won't check collision
     sxbp_bounds_t bounds = sxbp_get_bounds(figure, 1);
     sxbp_figure_dimension_t dimensions[2];
     sxbp_get_size_from_bounds(bounds, &dimensions[0], &dimensions[1]);
@@ -159,14 +132,14 @@ static void sxbp_crossover_breed(
     figure_solution* restrict offspring_a,
     figure_solution* restrict offspring_b
 ) {
-    for (sxbp_figure_size_t i = 0; i < parent_a->size * 30; i++) {
+    for (sxbp_figure_size_t i = 0; i < parent_a->size; i++) {
         // flip a coin
         bool flip = rand() > (RAND_MAX / 2); // equal chance of choosing parents
         // allocate the alleles accordingly
-        offspring_a->bit_string[i] = flip ? parent_a->bit_string[i]
-                                          : parent_b->bit_string[i];
-        offspring_b->bit_string[i] = flip ? parent_b->bit_string[i]
-                                          : parent_a->bit_string[i];
+        offspring_a->lengths[i] = flip ? parent_a->lengths[i]
+                                          : parent_b->lengths[i];
+        offspring_b->lengths[i] = flip ? parent_b->lengths[i]
+                                          : parent_a->lengths[i];
     }
 }
 
@@ -206,13 +179,26 @@ static void sxbp_mutate_solution(
     figure_solution* solution,
     double mutation_rate
 ) {
-    // mutate each bit of the solution according to the mutation rate
+    // mutate each length according to the mutation rate, by a constrained delta
     for (sxbp_figure_size_t i = 0; i < solution->size; i++) {
-        for (size_t j = 0; j < 16; j++) {
-            bool flip = ((double)rand() / RAND_MAX) < mutation_rate;
-            if (flip) {
-                solution->bit_string[i * 30 + (30 - j)] =
-                    !solution->bit_string[i * 30 + (30 - j)];
+        bool flip = ((double)rand() / RAND_MAX) < mutation_rate;
+        if (flip) {
+            // // we are mutating this line, we need to specify the range of values
+            // const sxbp_length_t min_length = 1;
+            // const sxbp_length_t max_length = solution->size / 2;
+            // // pick a new random value (this is uniform mutation)
+            // solution->lengths[i] =
+            //     min_length + ((double)rand() / RAND_MAX) * max_length;
+            // XXX: experimental gaussian mutation
+            // pick a delta from the set { -2, -1, +1, +2, }
+            const int deltas[] = { -2, -1, +1, +2, };
+            size_t picked = ((double)rand() / RAND_MAX) * 4;
+            solution->lengths[i] += (sxbp_length_t)deltas[picked];
+            // clip the length
+            if (solution->lengths[i] < 1) {
+                solution->lengths[i] = 1;
+            } else if (solution->lengths[i] > solution->size / 2) {
+                solution->lengths[i] = solution->size / 2;
             }
         }
     }
@@ -232,8 +218,8 @@ sxbp_result_t sxbp_refine_figure_evolve(
      */
     const size_t population_size = 1000;
     const size_t generations = 1000000;
-    const double mutation_rate = 0.05;
-    const double breeding_rate = 0.25;
+    const double mutation_rate = 0.25;
+    const double breeding_rate = 0.5;
     figure_solution* population = calloc(
         population_size,
         sizeof(figure_solution)
@@ -280,10 +266,11 @@ sxbp_result_t sxbp_refine_figure_evolve(
         fprintf(stderr, "Could not allocate memory for initial sort\n");
         return SXBP_RESULT_FAIL_MEMORY;
     }
-    printf("Fittest: %.*e\n", DECIMAL_DIG, population[0].fitness);
+    double best = population[0].fitness;
+    printf("Fittest: %.*e\n", DECIMAL_DIG, best);
     // now, simulate each generation of evolution
     for (size_t g = 0; g < generations; g++) {
-        printf("Generation #%zu\n", g);
+        // printf("Generation #%zu\n", g);
         // select breeding rate % of fittest individuals
         size_t breeding_size = (size_t)(population_size * breeding_rate);
         // select half as many pairs of parents from top fittest to breed
@@ -315,13 +302,13 @@ sxbp_result_t sxbp_refine_figure_evolve(
             fprintf(stderr, "Could not allocate memory for initial sort\n");
             return SXBP_RESULT_FAIL_MEMORY;
         }
-        // print fitness value of fittest
-        printf("\nFittest: %.*e\n", DECIMAL_DIG, population[0].fitness);
         // after every generation has been generated, call callback with fittest
         if (options != NULL && options->progress_callback != NULL) {
-            if (population[0].fitness > 0.0) { // if the fittest is not invalid
+            if (population[0].fitness != best) { // if the fittest is not invalid
                 sxbp_copy_solution_to_figure(&population[0], &temporary_figure);
                 options->progress_callback(&temporary_figure, options->callback_context);
+                best = population[0].fitness;
+                printf("Generations: %zu\n", g);
             }
         }
     }
