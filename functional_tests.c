@@ -32,6 +32,7 @@
 static void print_progress(const sxbp_figure_t* figure, void* context) {
     sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
     sxbp_render_figure_to_bitmap(figure, &bitmap);
+    printf("\n");
     sxbp_print_bitmap(&bitmap, stdout);
 }
 // reënable all warnings
@@ -41,7 +42,7 @@ static void print_progress(const sxbp_figure_t* figure, void* context) {
 int main(void) {
     printf("This is SXBP v%s\n", SXBP_VERSION.string);
     // test normal usage of the public API
-    const char* string = "sxbp";
+    const char* string = "Joshua";
     size_t length = strlen(string);
     sxbp_buffer_t buffer = { .size = length, .bytes = NULL, };
     if (!sxbp_init_buffer(&buffer)) {
