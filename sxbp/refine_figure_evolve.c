@@ -216,10 +216,10 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - CROSSOVER (breed) random pairs of breeding individuals
      *   - MUTATE offspring
      */
-    const size_t population_size = 2000;
-    const size_t generations = 40000;
+    const size_t population_size = 1000;
+    const size_t generations = 20000;
     const double mutation_rate = 0.25;
-    const double breeding_rate = 0.5;
+    const double breeding_rate = 0.333;
     figure_solution* population = calloc(
         population_size,
         sizeof(figure_solution)
@@ -228,23 +228,19 @@ sxbp_result_t sxbp_refine_figure_evolve(
         fprintf(stderr, "Can't allocate memory for population.\n");
         return SXBP_RESULT_FAIL_MEMORY;
     }
-    printf("calloc(figure_solution)\n");
     figure_solution starting_solution = { .size = figure->size, };
     if (!sxbp_init_figure_solution(&starting_solution)) {
         fprintf(stderr, "Can't allocate memory for starting solution.\n");
         return SXBP_RESULT_FAIL_MEMORY;
     }
-    printf("calloc(starting_solution)\n");
     sxbp_figure_t temporary_figure = sxbp_blank_figure();
     sxbp_result_t status = SXBP_RESULT_UNKNOWN;
     if (!sxbp_check(sxbp_copy_figure(figure, &temporary_figure), &status)) {
         fprintf(stderr, "Can't copy figure into temporary figure.\n");
         return status;
     }
-    printf("copy_figure()\n");
     // extract the figure as it is currently --this is the seed
     sxbp_copy_figure_to_solution(figure, &starting_solution);
-    printf("copy_figure_to_solution()\n");
     // initialise the population with mutated versions of the starting figure
     for (size_t i = 0; i < population_size; i++) {
         printf("initialise individual #%zu\n", i);
@@ -271,6 +267,7 @@ sxbp_result_t sxbp_refine_figure_evolve(
     // now, simulate each generation of evolution
     for (size_t g = 0; g < generations; g++) {
         // printf("Generation #%zu\n", g);
+        // NOTE: This is truncation selection and possibly not a good idea
         // select breeding rate % of fittest individuals
         size_t breeding_size = (size_t)(population_size * breeding_rate);
         // select half as many pairs of parents from top fittest to breed
@@ -309,6 +306,7 @@ sxbp_result_t sxbp_refine_figure_evolve(
                 options->progress_callback(&temporary_figure, options->callback_context);
                 best = population[0].fitness;
                 printf("Generations: %zu\n", g);
+                printf("Area: %zu\n", (size_t)(1.0 / best));
             }
         }
     }
