@@ -106,16 +106,16 @@ static double sxbp_solution_fitness_function(const sxbp_figure_t* figure) {
     double area_score = 1.0 / dimensions[0] * 1.0 / dimensions[1];
     if (dimensions[0] > 92681 || dimensions[1] > 92681) {
         // TOO BIG --assume it collided
-        return area_score - 1.0;
+        return -area_score;
     }
     // next, check if the figure collides
     bool collided = false;
     if (!sxbp_success(sxbp_figure_collides(figure, &collided))) {
         // if there was an error, it was because the figure is too big
-        return area_score - 1.0; // assume that a figure that's too big is unworkable
+        return -area_score; // assume that a figure that's too big is unworkable
     } else if (collided) {
         // figures that collide are invalid --return area score with penalty
-        return area_score - 1.0;
+        return -area_score;
     } else {
         // printf("SMALL ENOUGH!\n");
         return area_score;
@@ -216,8 +216,8 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - CROSSOVER (breed) random pairs of breeding individuals
      *   - MUTATE offspring
      */
-    const size_t population_size = 1000;
-    const size_t generations = 20000;
+    const size_t population_size = 2000;
+    const size_t generations = 40000;
     const double mutation_rate = 0.25;
     const double breeding_rate = 0.5;
     figure_solution* population = calloc(
@@ -304,7 +304,7 @@ sxbp_result_t sxbp_refine_figure_evolve(
         }
         // after every generation has been generated, call callback with fittest
         if (options != NULL && options->progress_callback != NULL) {
-            if (population[0].fitness != best) { // if the fittest is not invalid
+            if (population[0].fitness > 0.0 && population[0].fitness != best) { // if the fittest is not invalid
                 sxbp_copy_solution_to_figure(&population[0], &temporary_figure);
                 options->progress_callback(&temporary_figure, options->callback_context);
                 best = population[0].fitness;
