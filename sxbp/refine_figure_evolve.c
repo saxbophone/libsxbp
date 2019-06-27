@@ -217,8 +217,8 @@ sxbp_result_t sxbp_refine_figure_evolve(
      *   - MUTATE offspring
      */
     const size_t population_size = 1000;
-    const size_t generations = 20000;
-    const double mutation_rate = 0.25;
+    const size_t generations = 40000;
+    const double mutation_rate = 0.333;
     const double breeding_rate = 0.333;
     figure_solution* population = calloc(
         population_size,
@@ -266,7 +266,9 @@ sxbp_result_t sxbp_refine_figure_evolve(
     printf("Fittest: %.*e\n", DECIMAL_DIG, best);
     // now, simulate each generation of evolution
     for (size_t g = 0; g < generations; g++) {
-        // printf("Generation #%zu\n", g);
+        if (g % 1000 == 0) {
+            printf("Generation #%zu\n", g);
+        }
         // NOTE: This is truncation selection and possibly not a good idea
         // select breeding rate % of fittest individuals
         size_t breeding_size = (size_t)(population_size * breeding_rate);
