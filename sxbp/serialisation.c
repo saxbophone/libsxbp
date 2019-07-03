@@ -36,11 +36,11 @@ static const size_t SXBP_FILE_HEADER_SIZE = (
     4 + // number of seconds spent solving, 32 bit uint
     4 // number of seconds accuracy of solve time, 32 bit uint
 );
-static const size_t sxbp_Line_PACK_SIZE = 4;
+static const size_t SXBP_LINE_PACK_SIZE = 4;
 
 // private, returns the size in bytes needed to serialise a figure
 static size_t sxbp_get_figure_serialised_size(const sxbp_Figure* figure) {
-    return SXBP_FILE_HEADER_SIZE + sxbp_Line_PACK_SIZE * figure->size;
+    return SXBP_FILE_HEADER_SIZE + SXBP_LINE_PACK_SIZE * figure->size;
 }
 
 /*
