@@ -50,13 +50,13 @@ static size_t sxbp_get_pbm_image_size(
 }
 
 // private, tries to allocate data for the whole image and writes the header
-static sxbp_result_t sxbp_write_pbm_header(
-    const sxbp_bitmap_t* const bitmap,
-    sxbp_buffer_t* const buffer,
+static sxbp_Result sxbp_write_pbm_header(
+    const sxbp_Bitmap* const bitmap,
+    sxbp_Buffer* const buffer,
     size_t* bytes_per_row_ptr,
     size_t* index_ptr
 ) {
-    sxbp_result_t error;
+    sxbp_Result error;
     /*
      * allocate two char arrays for the width and height strings - these may be
      * up to 10 characters each (max uint32_t is 10 digits long), so allocate 2
@@ -119,8 +119,8 @@ static sxbp_result_t sxbp_write_pbm_header(
 
 // private, writes the image data out to the buffer
 static void sxbp_write_pbm_data(
-    const sxbp_bitmap_t* const bitmap,
-    sxbp_buffer_t* const buffer,
+    const sxbp_Bitmap* const bitmap,
+    sxbp_Buffer* const buffer,
     size_t bytes_per_row,
     size_t index
 ) {
@@ -143,11 +143,11 @@ static void sxbp_write_pbm_data(
 }
 
 // private, serialises a bitmap to PBM image data
-static sxbp_result_t sxbp_bitmap_to_pbm(
-    const sxbp_bitmap_t* const bitmap,
-    sxbp_buffer_t* const buffer
+static sxbp_Result sxbp_bitmap_to_pbm(
+    const sxbp_Bitmap* const bitmap,
+    sxbp_Buffer* const buffer
 ) {
-    sxbp_result_t error;
+    sxbp_Result error;
     // index into the image data
     size_t index = 0;
     // we'll use this later to track how many bytes we pack each row into
@@ -182,25 +182,25 @@ static sxbp_result_t sxbp_bitmap_to_pbm(
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-sxbp_result_t sxbp_render_figure_to_pbm(
-    const sxbp_figure_t* const figure,
-    sxbp_buffer_t* const buffer,
-    const sxbp_render_options_t* const render_options,
+sxbp_Result sxbp_render_figure_to_pbm(
+    const sxbp_Figure* const figure,
+    sxbp_Buffer* const buffer,
+    const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 ) {
     // figure, figure lines and buffer must not be NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
     SXBP_RETURN_FAIL_IF_NULL(figure->lines);
     SXBP_RETURN_FAIL_IF_NULL(buffer);
-    sxbp_result_t error;
+    sxbp_Result error;
     // rasterise the figure to bitmap first of all
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_Bitmap bitmap = sxbp_blank_bitmap();
     if (!sxbp_check(sxbp_render_figure_to_bitmap(figure, &bitmap), &error)) {
         // catch and return raised error
         return error;
     } else {
         // rasterisation was successful, now convert the raw bitmap to PBM
-        sxbp_result_t outcome = sxbp_bitmap_to_pbm(&bitmap, buffer);
+        sxbp_Result outcome = sxbp_bitmap_to_pbm(&bitmap, buffer);
         // free the bitmap and return the result code
         sxbp_free_bitmap(&bitmap);
         return outcome;

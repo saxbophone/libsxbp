@@ -2,7 +2,7 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides unit tests for the sxbp_bitmap_t data type.
+ * This compilation unit provides unit tests for the sxbp_Bitmap data type.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *
@@ -23,7 +23,7 @@
 
 
 START_TEST(test_blank_bitmap) {
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_Bitmap bitmap = sxbp_blank_bitmap();
 
     // bitmap returned should have all fields set to zero/blank values
     ck_assert(bitmap.width == 0);
@@ -32,18 +32,18 @@ START_TEST(test_blank_bitmap) {
 } END_TEST
 
 START_TEST(test_init_bitmap) {
-    sxbp_bitmap_t bitmap = { .width = 32, .height = 64, .pixels = NULL, };
+    sxbp_Bitmap bitmap = { .width = 32, .height = 64, .pixels = NULL, };
 
-    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+    sxbp_Result result = sxbp_init_bitmap(&bitmap);
 
     // check memory was allocated
     ck_assert(result == SXBP_RESULT_OK);
     ck_assert_ptr_nonnull(bitmap.pixels);
     // check all columns were allocated
-    for (sxbp_figure_size_t x = 0; x < bitmap.width; x++) {
+    for (sxbp_FigureSize x = 0; x < bitmap.width; x++) {
         ck_assert_ptr_nonnull(bitmap.pixels[x]);
         // each pixel should be 'false'
-        for (sxbp_figure_size_t y = 0; y < bitmap.height; y++) {
+        for (sxbp_FigureSize y = 0; y < bitmap.height; y++) {
             ck_assert(bitmap.pixels[x][y] == false);
         }
     }
@@ -53,16 +53,16 @@ START_TEST(test_init_bitmap) {
 } END_TEST
 
 START_TEST(test_init_bitmap_null) {
-    sxbp_result_t result = sxbp_init_bitmap(NULL);
+    sxbp_Result result = sxbp_init_bitmap(NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_init_bitmap_blank) {
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_Bitmap bitmap = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+    sxbp_Result result = sxbp_init_bitmap(&bitmap);
 
     // return code should be 'not implemented'
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
@@ -71,9 +71,9 @@ START_TEST(test_init_bitmap_blank) {
 } END_TEST
 
 START_TEST(test_init_bitmap_width_zero) {
-    sxbp_bitmap_t bitmap = { .width = 0, .height = 32, .pixels = NULL, };
+    sxbp_Bitmap bitmap = { .width = 0, .height = 32, .pixels = NULL, };
 
-    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+    sxbp_Result result = sxbp_init_bitmap(&bitmap);
 
     // return code should be 'not implemented'
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
@@ -82,9 +82,9 @@ START_TEST(test_init_bitmap_width_zero) {
 } END_TEST
 
 START_TEST(test_init_bitmap_height_zero) {
-    sxbp_bitmap_t bitmap = { .width = 32, .height = 0, .pixels = NULL, };
+    sxbp_Bitmap bitmap = { .width = 32, .height = 0, .pixels = NULL, };
 
-    sxbp_result_t result = sxbp_init_bitmap(&bitmap);
+    sxbp_Result result = sxbp_init_bitmap(&bitmap);
 
     // return code should be 'not implemented'
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
@@ -93,7 +93,7 @@ START_TEST(test_init_bitmap_height_zero) {
 } END_TEST
 
 START_TEST(test_free_bitmap_unallocated) {
-    sxbp_bitmap_t bitmap = sxbp_blank_bitmap();
+    sxbp_Bitmap bitmap = sxbp_blank_bitmap();
 
     /*
      * it should be possible to safely call the freeing function on an
@@ -108,7 +108,7 @@ START_TEST(test_free_bitmap_unallocated) {
 } END_TEST
 
 START_TEST(test_free_bitmap_allocated) {
-    sxbp_bitmap_t bitmap = { .width = 32, .height = 64, .pixels = NULL, };
+    sxbp_Bitmap bitmap = { .width = 32, .height = 64, .pixels = NULL, };
     /*
      * allocate the bitmap -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -127,7 +127,7 @@ START_TEST(test_free_bitmap_allocated) {
 } END_TEST
 
 START_TEST(test_copy_bitmap) {
-    sxbp_bitmap_t from = { .width = 32, .height = 64, .pixels = NULL, };
+    sxbp_Bitmap from = { .width = 32, .height = 64, .pixels = NULL, };
     /*
      * allocate the bitmap -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -136,15 +136,15 @@ START_TEST(test_copy_bitmap) {
         ck_abort_msg("Unable to allocate bitmap");
     }
     // populate the bitmap with random pixels
-    for (sxbp_figure_size_t x = 0; x < from.width; x++) {
-        for (sxbp_figure_size_t y = 0; y < from.height; y++) {
+    for (sxbp_FigureSize x = 0; x < from.width; x++) {
+        for (sxbp_FigureSize y = 0; y < from.height; y++) {
             from.pixels[x][y] = rand() % 2;
         }
     }
     // this is the destination bitmap to copy to
-    sxbp_bitmap_t to = sxbp_blank_bitmap();
+    sxbp_Bitmap to = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+    sxbp_Result result = sxbp_copy_bitmap(&from, &to);
 
     // check operation was successful
     ck_assert(result == SXBP_RESULT_OK);
@@ -153,8 +153,8 @@ START_TEST(test_copy_bitmap) {
     // check that contents are actually identical
     ck_assert(to.width == from.width);
     ck_assert(to.height == from.height);
-    for (sxbp_figure_size_t x = 0; x < to.width; x++) {
-        for (sxbp_figure_size_t y = 0; y < to.height; y++) {
+    for (sxbp_FigureSize x = 0; x < to.width; x++) {
+        for (sxbp_FigureSize y = 0; y < to.height; y++) {
             ck_assert(to.pixels[x][y] == from.pixels[x][y]);
         }
     }
@@ -165,28 +165,28 @@ START_TEST(test_copy_bitmap) {
 } END_TEST
 
 START_TEST(test_copy_bitmap_from_null) {
-    sxbp_bitmap_t to = sxbp_blank_bitmap();
+    sxbp_Bitmap to = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(NULL, &to);
+    sxbp_Result result = sxbp_copy_bitmap(NULL, &to);
 
     // precondition check error should be returned when from is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_bitmap_to_null) {
-    sxbp_bitmap_t from = sxbp_blank_bitmap();
+    sxbp_Bitmap from = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(&from, NULL);
+    sxbp_Result result = sxbp_copy_bitmap(&from, NULL);
 
     // precondition check error should be returned when to is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_bitmap_blank) {
-    sxbp_bitmap_t from = sxbp_blank_bitmap();
-    sxbp_bitmap_t to = sxbp_blank_bitmap();
+    sxbp_Bitmap from = sxbp_blank_bitmap();
+    sxbp_Bitmap to = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+    sxbp_Result result = sxbp_copy_bitmap(&from, &to);
 
     /*
      * it should be possible to successfully 'copy' a blank bitmap, with the
@@ -201,14 +201,14 @@ START_TEST(test_copy_bitmap_blank) {
 } END_TEST
 
 START_TEST(test_copy_bitmap_pixels_null) {
-    sxbp_bitmap_t from = {
+    sxbp_Bitmap from = {
         .width = 32,
         .height = 32,
         .pixels = NULL,
     };
-    sxbp_bitmap_t to = sxbp_blank_bitmap();
+    sxbp_Bitmap to = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+    sxbp_Result result = sxbp_copy_bitmap(&from, &to);
 
     /*
      * if the source has non-zero size but pixels are NULL, a precondition
@@ -220,14 +220,14 @@ START_TEST(test_copy_bitmap_pixels_null) {
 } END_TEST
 
 START_TEST(test_copy_bitmap_width_zero_only) {
-    sxbp_bitmap_t from = {
+    sxbp_Bitmap from = {
         .width = 0,
         .height = 32,
         .pixels = NULL,
     };
-    sxbp_bitmap_t to = sxbp_blank_bitmap();
+    sxbp_Bitmap to = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+    sxbp_Result result = sxbp_copy_bitmap(&from, &to);
 
     // the return code should be success
     ck_assert(result == SXBP_RESULT_OK);
@@ -236,14 +236,14 @@ START_TEST(test_copy_bitmap_width_zero_only) {
 } END_TEST
 
 START_TEST(test_copy_bitmap_height_zero_only) {
-    sxbp_bitmap_t from = {
+    sxbp_Bitmap from = {
         .width = 32,
         .height = 0,
         .pixels = NULL,
     };
-    sxbp_bitmap_t to = sxbp_blank_bitmap();
+    sxbp_Bitmap to = sxbp_blank_bitmap();
 
-    sxbp_result_t result = sxbp_copy_bitmap(&from, &to);
+    sxbp_Result result = sxbp_copy_bitmap(&from, &to);
 
     // the return code should be success
     ck_assert(result == SXBP_RESULT_OK);
@@ -252,7 +252,7 @@ START_TEST(test_copy_bitmap_height_zero_only) {
 } END_TEST
 
 START_TEST(test_copy_bitmap_to_itself) {
-    sxbp_bitmap_t bitmap = { .width = 32, .height = 64, .pixels = NULL, };
+    sxbp_Bitmap bitmap = { .width = 32, .height = 64, .pixels = NULL, };
     /*
      * allocate the bitmap -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -261,8 +261,8 @@ START_TEST(test_copy_bitmap_to_itself) {
         ck_abort_msg("Unable to allocate bitmap");
     }
     // populate the bitmap with random pixels
-    for (sxbp_figure_size_t x = 0; x < bitmap.width; x++) {
-        for (sxbp_figure_size_t y = 0; y < bitmap.height; y++) {
+    for (sxbp_FigureSize x = 0; x < bitmap.width; x++) {
+        for (sxbp_FigureSize y = 0; y < bitmap.height; y++) {
             bitmap.pixels[x][y] = rand() % 2;
         }
     }
@@ -270,7 +270,7 @@ START_TEST(test_copy_bitmap_to_itself) {
     bool** pixels = bitmap.pixels;
 
     // try and copy the bitmap to itself
-    sxbp_result_t result = sxbp_copy_bitmap(&bitmap, &bitmap);
+    sxbp_Result result = sxbp_copy_bitmap(&bitmap, &bitmap);
 
     // not implemented error code should be returned
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);

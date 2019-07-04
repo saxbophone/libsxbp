@@ -36,11 +36,11 @@ static const size_t SXBP_FILE_HEADER_SIZE = (
     4 + // number of seconds spent solving, 32 bit uint
     4 // number of seconds accuracy of solve time, 32 bit uint
 );
-static const size_t SXBP_LINE_T_PACK_SIZE = 4;
+static const size_t SXBP_LINE_PACK_SIZE = 4;
 
 // private, returns the size in bytes needed to serialise a figure
-static size_t sxbp_get_figure_serialised_size(const sxbp_figure_t* figure) {
-    return SXBP_FILE_HEADER_SIZE + SXBP_LINE_T_PACK_SIZE * figure->size;
+static size_t sxbp_get_figure_serialised_size(const sxbp_Figure* figure) {
+    return SXBP_FILE_HEADER_SIZE + SXBP_LINE_PACK_SIZE * figure->size;
 }
 
 /*
@@ -52,7 +52,7 @@ static size_t sxbp_get_figure_serialised_size(const sxbp_figure_t* figure) {
  * - That buffer->bytes is not NULL
  */
 static void sxbp_dump_uint16_t(
-    uint16_t value, sxbp_buffer_t* buffer, size_t* start_index
+    uint16_t value, sxbp_Buffer* buffer, size_t* start_index
 ) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
@@ -73,7 +73,7 @@ static void sxbp_dump_uint16_t(
  * - That buffer->bytes is not NULL
  */
 static void sxbp_dump_uint32_t(
-    uint32_t value, sxbp_buffer_t* buffer, size_t* start_index
+    uint32_t value, sxbp_Buffer* buffer, size_t* start_index
 ) {
     // preconditional assertions
     assert(buffer->bytes != NULL);
@@ -91,8 +91,8 @@ static void sxbp_dump_uint32_t(
 
 // private, writes the header of a serialised figure to a buffer
 static void sxbp_write_sxbp_data_header(
-    const sxbp_figure_t* figure,
-    sxbp_buffer_t* buffer,
+    const sxbp_Figure* figure,
+    sxbp_Buffer* buffer,
     size_t* index
 ) {
     // write the magic number
@@ -124,8 +124,8 @@ static void sxbp_write_sxbp_data_header(
 
 // private, writes one line in serialised form to a buffer
 static void sxbp_write_sxbp_data_line(
-    const sxbp_line_t line,
-    sxbp_buffer_t* buffer,
+    const sxbp_Line line,
+    sxbp_Buffer* buffer,
     size_t* start_index
 ) {
     size_t index = *start_index;
@@ -146,11 +146,11 @@ static void sxbp_write_sxbp_data_line(
 
 // private, writes the body of a serialised figure to a buffer
 static void sxbp_write_sxbp_data_body(
-    const sxbp_figure_t* figure,
-    sxbp_buffer_t* buffer,
+    const sxbp_Figure* figure,
+    sxbp_Buffer* buffer,
     size_t* index
 ) {
-    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+    for (sxbp_FigureSize i = 0; i < figure->size; i++) {
         sxbp_write_sxbp_data_line(figure->lines[i], buffer, index);
     }
 }
@@ -163,7 +163,7 @@ static void sxbp_write_sxbp_data_body(
  * - That buffer->bytes is not NULL
  */
 static uint16_t sxbp_load_uint16_t(
-    const sxbp_buffer_t* buffer,
+    const sxbp_Buffer* buffer,
     size_t* start_index
 ) {
     // preconditional assertions
@@ -187,7 +187,7 @@ static uint16_t sxbp_load_uint16_t(
  * - That buffer->bytes is not NULL
  */
 static uint32_t sxbp_load_uint32_t(
-    const sxbp_buffer_t* buffer,
+    const sxbp_Buffer* buffer,
     size_t* start_index
 ) {
     // preconditional assertions
@@ -204,17 +204,17 @@ static uint32_t sxbp_load_uint32_t(
 }
 
 // private, checks that the version of the data in the buffer is compatible
-static bool sxbp_check_sxbp_data_version(const sxbp_buffer_t* buffer) {
+static bool sxbp_check_sxbp_data_version(const sxbp_Buffer* buffer) {
     // the version number is encoded starting at index 4 into the file
     size_t index = 4;
     // extract file version from header
-    sxbp_version_t buffer_version = {
+    sxbp_Version buffer_version = {
         .major = sxbp_load_uint16_t(buffer, &index),
         .minor = sxbp_load_uint16_t(buffer, &index),
         .patch = sxbp_load_uint16_t(buffer, &index),
     };
     // this is the minimum version supported by this version of sxbp
-    sxbp_version_t min_version = { .major = 0, .minor = 54, .patch = 0, };
+    sxbp_Version min_version = { .major = 0, .minor = 54, .patch = 0, };
     // compare the extracted version with the minimum one
     return (
         buffer_version.major == min_version.major &&
@@ -223,7 +223,7 @@ static bool sxbp_check_sxbp_data_version(const sxbp_buffer_t* buffer) {
 }
 
 // private, checks if the data in given buffer is a valid serialised sxbp figure
-static bool sxbp_check_sxbp_data_is_valid(const sxbp_buffer_t* buffer) {
+static bool sxbp_check_sxbp_data_is_valid(const sxbp_Buffer* buffer) {
     /*
      * first, check if the file is big enough to contain the header
      * if it is, then check the magic number
@@ -242,8 +242,8 @@ static bool sxbp_check_sxbp_data_is_valid(const sxbp_buffer_t* buffer) {
 
 // private, extracts one line from a data buffer to a line object
 static void sxbp_read_sxbp_data_line(
-    const sxbp_buffer_t* buffer,
-    sxbp_line_t* line,
+    const sxbp_Buffer* buffer,
+    sxbp_Line* line,
     size_t* start_index
 ) {
     size_t index = *start_index;
@@ -270,18 +270,18 @@ static void sxbp_read_sxbp_data_line(
 
 // private, reads in serialised figure lines from a buffer to a figure
 static void sxbp_read_sxbp_data_body(
-    const sxbp_buffer_t* buffer,
-    sxbp_figure_t* figure,
+    const sxbp_Buffer* buffer,
+    sxbp_Figure* figure,
     size_t* index
 ) {
-    for (sxbp_figure_size_t i = 0; i < figure->size; i++) {
+    for (sxbp_FigureSize i = 0; i < figure->size; i++) {
         sxbp_read_sxbp_data_line(buffer, &figure->lines[i], index);
     }
 }
 
-sxbp_result_t sxbp_dump_figure(
-    const sxbp_figure_t* figure,
-    sxbp_buffer_t* buffer
+sxbp_Result sxbp_dump_figure(
+    const sxbp_Figure* figure,
+    sxbp_Buffer* buffer
 ) {
     // figure and buffer must not be NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
@@ -306,9 +306,9 @@ sxbp_result_t sxbp_dump_figure(
     }
 }
 
-sxbp_result_t sxbp_load_figure(
-    const sxbp_buffer_t* buffer,
-    sxbp_figure_t* figure
+sxbp_Result sxbp_load_figure(
+    const sxbp_Buffer* buffer,
+    sxbp_Figure* figure
 ) {
     // buffer and figure must not be NULL
     SXBP_RETURN_FAIL_IF_NULL(buffer);

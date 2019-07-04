@@ -20,7 +20,7 @@
 #endif
 
 // Version numbers are passed as preprocessor definitions by CMake
-const sxbp_version_t SXBP_VERSION = {
+const sxbp_Version SXBP_VERSION = {
     .major = SXBP_VERSION_MAJOR,
     .minor = SXBP_VERSION_MINOR,
     .patch = SXBP_VERSION_PATCH,
@@ -29,9 +29,9 @@ const sxbp_version_t SXBP_VERSION = {
 
 const size_t SXBP_BEGIN_BUFFER_MAX_SIZE = 1073741823;
 
-const sxbp_begin_figure_options_t SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT = {
+const sxbp_BeginFigureOptions SXBP_BEGIN_FIGURE_OPTIONS_DEFAULT = {
     .max_lines = 0,
 };
 
-const sxbp_refine_method_t SXBP_REFINE_METHOD_DEFAULT =
+const sxbp_RefineMethod SXBP_REFINE_METHOD_DEFAULT =
     SXBP_REFINE_METHOD_SHRINK_FROM_END;

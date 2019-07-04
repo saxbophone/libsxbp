@@ -26,12 +26,12 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
-bool sxbp_success(sxbp_result_t state) {
+bool sxbp_success(sxbp_Result state) {
     // return whether state was 'OK or not'
     return state == SXBP_RESULT_OK;
 }
 
-bool sxbp_check(sxbp_result_t state, sxbp_result_t* const report_to) {
+bool sxbp_check(sxbp_Result state, sxbp_Result* const report_to) {
     // return true immediately if the state is 'OK'
     if (sxbp_success(state)) {
         return true;
@@ -45,11 +45,11 @@ bool sxbp_check(sxbp_result_t state, sxbp_result_t* const report_to) {
     }
 }
 
-sxbp_buffer_t sxbp_blank_buffer(void) {
-    return (sxbp_buffer_t){ .size = 0, .bytes = NULL, };
+sxbp_Buffer sxbp_blank_buffer(void) {
+    return (sxbp_Buffer){ .size = 0, .bytes = NULL, };
 }
 
-sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
+sxbp_Result sxbp_init_buffer(sxbp_Buffer* const buffer) {
     // check buffer isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     // return failure early if size is 0 --we do not allocate 0 bytes of memory
@@ -62,7 +62,7 @@ sxbp_result_t sxbp_init_buffer(sxbp_buffer_t* const buffer) {
     return buffer->bytes != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
-sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size) {
+sxbp_Result sxbp_resize_buffer(sxbp_Buffer* const buffer, size_t size) {
     // check buffer and buffer->bytes aren't NULL
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     SXBP_RETURN_FAIL_IF_NULL(buffer->bytes);
@@ -85,7 +85,7 @@ sxbp_result_t sxbp_resize_buffer(sxbp_buffer_t* const buffer, size_t size) {
     }
 }
 
-bool sxbp_free_buffer(sxbp_buffer_t* const buffer) {
+bool sxbp_free_buffer(sxbp_Buffer* const buffer) {
     // if buffer and bytes are not NULL, assume there's memory to be deallocated
     if (buffer != NULL && buffer->bytes != NULL) {
         free(buffer->bytes);
@@ -98,9 +98,9 @@ bool sxbp_free_buffer(sxbp_buffer_t* const buffer) {
     }
 }
 
-sxbp_result_t sxbp_copy_buffer(
-    const sxbp_buffer_t* const from,
-    sxbp_buffer_t* const to
+sxbp_Result sxbp_copy_buffer(
+    const sxbp_Buffer* const from,
+    sxbp_Buffer* const to
 ) {
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(from);
@@ -150,9 +150,9 @@ static size_t sxbp_get_file_size(FILE* file_handle) {
     return file_size;
 }
 
-sxbp_result_t sxbp_buffer_from_file(
+sxbp_Result sxbp_buffer_from_file(
     FILE* file_handle,
-    sxbp_buffer_t* const buffer
+    sxbp_Buffer* const buffer
 ) {
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(file_handle);
@@ -189,8 +189,8 @@ sxbp_result_t sxbp_buffer_from_file(
     }
 }
 
-sxbp_result_t sxbp_buffer_to_file(
-    const sxbp_buffer_t* const buffer,
+sxbp_Result sxbp_buffer_to_file(
+    const sxbp_Buffer* const buffer,
     FILE* file_handle
 ) {
     // check both pointers to ensure they're not NULL
@@ -207,11 +207,11 @@ sxbp_result_t sxbp_buffer_to_file(
     return bytes_written == buffer->size ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_IO;
 }
 
-sxbp_figure_t sxbp_blank_figure(void) {
-    return (sxbp_figure_t){ .size = 0, .lines = NULL, .lines_remaining = 0, };
+sxbp_Figure sxbp_blank_figure(void) {
+    return (sxbp_Figure){ .size = 0, .lines = NULL, .lines_remaining = 0, };
 }
 
-sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
+sxbp_Result sxbp_init_figure(sxbp_Figure* const figure) {
     // check figure isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
     // return failure early if size is 0 --we do not allocate 0 bytes of memory
@@ -219,12 +219,12 @@ sxbp_result_t sxbp_init_figure(sxbp_figure_t* const figure) {
         return SXBP_RESULT_FAIL_UNIMPLEMENTED;
     }
     // allocate the lines, using calloc to set all fields of each one to zero
-    figure->lines = calloc(figure->size, sizeof(sxbp_line_t));
+    figure->lines = calloc(figure->size, sizeof(sxbp_Line));
     // if lines is not NULL, then the operation was successful
     return figure->lines != NULL ? SXBP_RESULT_OK : SXBP_RESULT_FAIL_MEMORY;
 }
 
-bool sxbp_free_figure(sxbp_figure_t* const figure) {
+bool sxbp_free_figure(sxbp_Figure* const figure) {
     // if figure and lines are not NULL, assume there's memory to be deallocated
     if (figure != NULL && figure->lines != NULL) {
         free(figure->lines);
@@ -237,9 +237,9 @@ bool sxbp_free_figure(sxbp_figure_t* const figure) {
     }
 }
 
-sxbp_result_t sxbp_copy_figure(
-    const sxbp_figure_t* const from,
-    sxbp_figure_t* const to
+sxbp_Result sxbp_copy_figure(
+    const sxbp_Figure* const from,
+    sxbp_Figure* const to
 ) {
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(from);
@@ -270,24 +270,24 @@ sxbp_result_t sxbp_copy_figure(
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the lines
-        memcpy(to->lines, from->lines, to->size * sizeof(sxbp_line_t));
+        memcpy(to->lines, from->lines, to->size * sizeof(sxbp_Line));
         return SXBP_RESULT_OK;
     }
 }
 
-sxbp_bitmap_t sxbp_blank_bitmap(void) {
-    return (sxbp_bitmap_t){ .width = 0, .height = 0, .pixels = NULL, };
+sxbp_Bitmap sxbp_blank_bitmap(void) {
+    return (sxbp_Bitmap){ .width = 0, .height = 0, .pixels = NULL, };
 }
 
 // allocates memory for one column of a bitmap, returning whether it succeeded
-static bool sxbp_init_bitmap_col(bool** col, sxbp_figure_dimension_t size) {
+static bool sxbp_init_bitmap_col(bool** col, sxbp_FigureDimension size) {
     // allocate col with calloc
     *col = calloc(size, sizeof(bool));
     // if col is not NULL, then the operation was successful
     return *col != NULL;
 }
 
-sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
+sxbp_Result sxbp_init_bitmap(sxbp_Bitmap* const bitmap) {
     // check bitmap isn't NULL
     SXBP_RETURN_FAIL_IF_NULL(bitmap);
     /*
@@ -304,7 +304,7 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation of col pointers succeeded, now try and allocate each col
-        for (sxbp_figure_dimension_t col = 0; col < bitmap->width; col++) {
+        for (sxbp_FigureDimension col = 0; col < bitmap->width; col++) {
             if (
                 !sxbp_success(
                     sxbp_init_bitmap_col(&bitmap->pixels[col], bitmap->height)
@@ -320,11 +320,11 @@ sxbp_result_t sxbp_init_bitmap(sxbp_bitmap_t* const bitmap) {
     }
 }
 
-bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
+bool sxbp_free_bitmap(sxbp_Bitmap* const bitmap) {
     // if bitmap and pixels aren't NULL, assume there are cols to be deallocated
     if (bitmap != NULL && bitmap->pixels != NULL) {
         // deallocate each col that needs deallocating first
-        for (sxbp_figure_dimension_t col = 0; col < bitmap->width; col++) {
+        for (sxbp_FigureDimension col = 0; col < bitmap->width; col++) {
             if (bitmap->pixels[col] != NULL) {
                 free(bitmap->pixels[col]);
             }
@@ -338,9 +338,9 @@ bool sxbp_free_bitmap(sxbp_bitmap_t* const bitmap) {
     }
 }
 
-sxbp_result_t sxbp_copy_bitmap(
-    const sxbp_bitmap_t* const from,
-    sxbp_bitmap_t* const to
+sxbp_Result sxbp_copy_bitmap(
+    const sxbp_Bitmap* const from,
+    sxbp_Bitmap* const to
 ) {
     // check both pointers to ensure they're not NULL
     SXBP_RETURN_FAIL_IF_NULL(from);
@@ -371,7 +371,7 @@ sxbp_result_t sxbp_copy_bitmap(
         return SXBP_RESULT_FAIL_MEMORY;
     } else {
         // allocation succeeded, so now copy the pixels
-        for (sxbp_figure_dimension_t col = 0; col < to->width; col++) {
+        for (sxbp_FigureDimension col = 0; col < to->width; col++) {
             memcpy(to->pixels[col], from->pixels[col], to->height);
         }
         return SXBP_RESULT_OK;

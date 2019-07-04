@@ -25,15 +25,15 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
-sxbp_result_t sxbp_refine_figure(
-    sxbp_figure_t* figure,
-    const sxbp_refine_figure_options_t* options
+sxbp_Result sxbp_refine_figure(
+    sxbp_Figure* figure,
+    const sxbp_RefineFigureOptions* options
 ) {
     // figure and figure's lines must not be NULL
     SXBP_RETURN_FAIL_IF_NULL(figure);
     SXBP_RETURN_FAIL_IF_NULL(figure->lines);
     // work out which refinement method to use
-    sxbp_refine_method_t method = SXBP_REFINE_METHOD_DEFAULT;
+    sxbp_RefineMethod method = SXBP_REFINE_METHOD_DEFAULT;
     if (options != NULL && options->refine_method != SXBP_REFINE_METHOD_ANY) {
         method = options->refine_method;
     }

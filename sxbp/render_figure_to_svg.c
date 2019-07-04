@@ -24,19 +24,19 @@
 
 // private datatype for passing context data into sxbp_walk_figure() callback
 typedef struct write_polyline_context {
-    sxbp_buffer_t* buffer; // the buffer to write out SVG code fragments to
-    sxbp_figure_dimension_t height; // the height of the image being written
+    sxbp_Buffer* buffer; // the buffer to write out SVG code fragments to
+    sxbp_FigureDimension height; // the height of the image being written
     size_t current_point; // the index of the point currently being rendered
-    sxbp_result_t error; // any error conditions that occur will be stored here
+    sxbp_Result error; // any error conditions that occur will be stored here
 } write_polyline_context;
 
 // private, given a figure and a buffer, writes out the SVG header to the buffer
-static sxbp_result_t sxbp_write_svg_head(
-    sxbp_figure_dimension_t width,
-    sxbp_figure_dimension_t height,
-    sxbp_buffer_t* const buffer
+static sxbp_Result sxbp_write_svg_head(
+    sxbp_FigureDimension width,
+    sxbp_FigureDimension height,
+    sxbp_Buffer* const buffer
 ) {
-    sxbp_result_t error;
+    sxbp_Result error;
     // the fixed data that is always at the start of the file
     const char* head = (
         "<svg\n"
@@ -100,10 +100,10 @@ static sxbp_result_t sxbp_write_svg_head(
  * private, given a figure and a buffer, writes out the SVG code for the origin
  * dot of the figure to the buffer
  */
-static sxbp_result_t sxbp_write_svg_body_origin_dot(
-    const sxbp_figure_t* const figure,
-    sxbp_figure_dimension_t height,
-    sxbp_buffer_t* const buffer
+static sxbp_Result sxbp_write_svg_body_origin_dot(
+    const sxbp_Figure* const figure,
+    sxbp_FigureDimension height,
+    sxbp_Buffer* const buffer
 ) {
     // generate the code for the origin dot
     const char* origin_dot = (
@@ -116,13 +116,13 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
         "    />\n"
     );
     // get the coördinates of the origin dot
-    sxbp_co_ord_t origin = sxbp_get_origin_from_bounds(
+    sxbp_CoOrd origin = sxbp_get_origin_from_bounds(
         sxbp_get_bounds(figure, 2)
     );
-    sxbp_figure_dimension_t origin_x = (sxbp_figure_dimension_t)origin.x;
+    sxbp_FigureDimension origin_x = (sxbp_FigureDimension)origin.x;
     // y coördinate is flipped
-    sxbp_figure_dimension_t origin_y =
-        height - 1 - (sxbp_figure_dimension_t)origin.y;
+    sxbp_FigureDimension origin_y =
+        height - 1 - (sxbp_FigureDimension)origin.y;
     char origin_x_str[11], origin_y_str[11];
     size_t origin_x_length, origin_y_length = 0;
     // stringify the origin dot x/y values
@@ -172,7 +172,7 @@ static sxbp_result_t sxbp_write_svg_body_origin_dot(
 
 // private, callback function for sxbp_write_svg_body_figure_line()
 static bool sxbp_write_svg_body_figure_line_callback(
-    sxbp_co_ord_t location,
+    sxbp_CoOrd location,
     void* callback_data
 ) {
     // cast void pointer to a pointer to our context structure
@@ -181,10 +181,10 @@ static bool sxbp_write_svg_body_figure_line_callback(
     // skip plotting the first and second line segments
     if (data->current_point >= 2) {
         // stringify this point's coördinates
-        sxbp_figure_dimension_t x = (sxbp_figure_dimension_t)location.x;
+        sxbp_FigureDimension x = (sxbp_FigureDimension)location.x;
         // y coördinate is flipped
-        sxbp_figure_dimension_t y =
-            data->height - 1 - (sxbp_figure_dimension_t)location.y;
+        sxbp_FigureDimension y =
+            data->height - 1 - (sxbp_FigureDimension)location.y;
         char x_str[11], y_str[11];
         size_t x_str_length, y_str_length = 0;
         if (
@@ -205,7 +205,7 @@ static bool sxbp_write_svg_body_figure_line_callback(
             + 1 // NUL-terminator
         );
         // de-reference buffer pointer for ease
-        sxbp_buffer_t* buffer = data->buffer;
+        sxbp_Buffer* buffer = data->buffer;
         // try and allocate more memory
         if (
             !sxbp_success(
@@ -246,10 +246,10 @@ static bool sxbp_write_svg_body_figure_line_callback(
  * private, given a figure and a buffer, writes out the SVG code for the
  * figure's line to the buffer
  */
-static sxbp_result_t sxbp_write_svg_body_figure_line(
-    const sxbp_figure_t* const figure,
-    sxbp_figure_dimension_t height,
-    sxbp_buffer_t* const buffer
+static sxbp_Result sxbp_write_svg_body_figure_line(
+    const sxbp_Figure* const figure,
+    sxbp_FigureDimension height,
+    sxbp_Buffer* const buffer
 ) {
     const char* polyline_boilerplate = (
         "    <polyline\n"
@@ -309,13 +309,13 @@ static sxbp_result_t sxbp_write_svg_body_figure_line(
  * private, given a figure and a buffer, writes out the bulk of the SVG markup
  * to the buffer
  */
-static sxbp_result_t sxbp_write_svg_body(
-    const sxbp_figure_t* const figure,
-    sxbp_figure_dimension_t height,
-    sxbp_buffer_t* const buffer
+static sxbp_Result sxbp_write_svg_body(
+    const sxbp_Figure* const figure,
+    sxbp_FigureDimension height,
+    sxbp_Buffer* const buffer
 ) {
     // any errors encountered will be stored here
-    sxbp_result_t error;
+    sxbp_Result error;
     // write the origin dot
     if (!sxbp_check(
         sxbp_write_svg_body_origin_dot(figure, height, buffer), &error)
@@ -335,7 +335,7 @@ static sxbp_result_t sxbp_write_svg_body(
 }
 
 // private, given a buffer, writes out the end of the SVG file to the buffer
-static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
+static sxbp_Result sxbp_write_svg_tail(sxbp_Buffer* const buffer) {
     /*
      * the 'tail' of the SVG images produced by libsxbp never change, the only
      * way this function can fail is if reallocating memory was refused
@@ -348,7 +348,7 @@ static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
     );
     size_t tail_length = strlen(tail);
     // any errors encountered will be stored here
-    sxbp_result_t error;
+    sxbp_Result error;
     // try and reallocate memory to include the tail
     if (
         !sxbp_check(
@@ -371,10 +371,10 @@ static sxbp_result_t sxbp_write_svg_tail(sxbp_buffer_t* const buffer) {
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-sxbp_result_t sxbp_render_figure_to_svg(
-    const sxbp_figure_t* const figure,
-    sxbp_buffer_t* const buffer,
-    const sxbp_render_options_t* const render_options,
+sxbp_Result sxbp_render_figure_to_svg(
+    const sxbp_Figure* const figure,
+    sxbp_Buffer* const buffer,
+    const sxbp_RenderOptions* const render_options,
     const void* render_callback_options
 ) {
     // figure, figure lines and buffer must not be NULL
@@ -382,7 +382,7 @@ sxbp_result_t sxbp_render_figure_to_svg(
     SXBP_RETURN_FAIL_IF_NULL(figure->lines);
     SXBP_RETURN_FAIL_IF_NULL(buffer);
     // any errors encountered will be stored here
-    sxbp_result_t error;
+    sxbp_Result error;
     /*
      * because SVG is a vector-based format, this backend differs from the
      * others as we don't need to plot a bunch of pixels, instead we need to use
@@ -392,10 +392,10 @@ sxbp_result_t sxbp_render_figure_to_svg(
      * needs to have the same dimensions and scale.
      */
     // get figure bounds, at scale 2
-    sxbp_bounds_t bounds = sxbp_get_bounds(figure, 2);
+    sxbp_Bounds bounds = sxbp_get_bounds(figure, 2);
     // calculate width and height of the image from the bounds
-    sxbp_figure_dimension_t width = 0;
-    sxbp_figure_dimension_t height = 0;
+    sxbp_FigureDimension width = 0;
+    sxbp_FigureDimension height = 0;
     sxbp_get_size_from_bounds(bounds, &width, &height);
     // write image head, including everything up to the line's points
     if (!sxbp_check(

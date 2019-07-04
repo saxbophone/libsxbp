@@ -2,7 +2,7 @@
  * This source file forms part of sxbp, a library which generates experimental
  * 2D spiral-like shapes based on input binary data.
  *
- * This compilation unit provides unit tests for the sxbp_buffer_t data type.
+ * This compilation unit provides unit tests for the sxbp_Buffer data type.
  *
  * Copyright (C) Joshua Saxby <joshua.a.saxby@gmail.com> 2016-2017, 2018
  *
@@ -51,7 +51,7 @@ static void tear_down(void) {
 }
 
 START_TEST(test_blank_buffer) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
     // buffer returned should have all fields set to zero/blank values
     ck_assert(buffer.size == 0);
@@ -59,12 +59,12 @@ START_TEST(test_blank_buffer) {
 } END_TEST
 
 START_TEST(test_init_buffer) {
-    sxbp_buffer_t buffer = {
+    sxbp_Buffer buffer = {
         .bytes = NULL,
         .size = 10000,
     };
 
-    sxbp_result_t result = sxbp_init_buffer(&buffer);
+    sxbp_Result result = sxbp_init_buffer(&buffer);
 
     // check memory was allocated
     ck_assert(result == SXBP_RESULT_OK);
@@ -78,23 +78,23 @@ START_TEST(test_init_buffer) {
 } END_TEST
 
 START_TEST(test_init_buffer_null) {
-    sxbp_result_t result = sxbp_init_buffer(NULL);
+    sxbp_Result result = sxbp_init_buffer(NULL);
 
     // check that the return code was a precondition check error
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_init_buffer_blank) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_init_buffer(&buffer);
+    sxbp_Result result = sxbp_init_buffer(&buffer);
 
     // check that the return code was a 'not implemented' error
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
 } END_TEST
 
 START_TEST(test_free_buffer_unallocated) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
     /*
      * it should be possible to safely call the freeing function on an
@@ -109,7 +109,7 @@ START_TEST(test_free_buffer_unallocated) {
 } END_TEST
 
 START_TEST(test_free_buffer_allocated) {
-    sxbp_buffer_t buffer = { .size = 10000, .bytes = NULL, };
+    sxbp_Buffer buffer = { .size = 10000, .bytes = NULL, };
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -128,7 +128,7 @@ START_TEST(test_free_buffer_allocated) {
 } END_TEST
 
 START_TEST(test_copy_buffer) {
-    sxbp_buffer_t from = { .size = 10000, .bytes = NULL, };
+    sxbp_Buffer from = { .size = 10000, .bytes = NULL, };
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -141,9 +141,9 @@ START_TEST(test_copy_buffer) {
         from.bytes[i] = rand() & 0xff;
     }
     // this is the destination buffer to copy to
-    sxbp_buffer_t to = sxbp_blank_buffer();
+    sxbp_Buffer to = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+    sxbp_Result result = sxbp_copy_buffer(&from, &to);
 
     // check operation was successful
     ck_assert(result == SXBP_RESULT_OK);
@@ -161,28 +161,28 @@ START_TEST(test_copy_buffer) {
 } END_TEST
 
 START_TEST(test_copy_buffer_from_null) {
-    sxbp_buffer_t to = sxbp_blank_buffer();
+    sxbp_Buffer to = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_copy_buffer(NULL, &to);
+    sxbp_Result result = sxbp_copy_buffer(NULL, &to);
 
     // precondition check error should be returned when from is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_buffer_to_null) {
-    sxbp_buffer_t from = sxbp_blank_buffer();
+    sxbp_Buffer from = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_copy_buffer(&from, NULL);
+    sxbp_Result result = sxbp_copy_buffer(&from, NULL);
 
     // precondition check error should be returned when to is NULL
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
 } END_TEST
 
 START_TEST(test_copy_buffer_blank) {
-    sxbp_buffer_t from = sxbp_blank_buffer();
-    sxbp_buffer_t to = sxbp_blank_buffer();
+    sxbp_Buffer from = sxbp_blank_buffer();
+    sxbp_Buffer to = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+    sxbp_Result result = sxbp_copy_buffer(&from, &to);
 
     /*
      * it should be possible to successfully 'copy' a blank buffer, with the
@@ -196,13 +196,13 @@ START_TEST(test_copy_buffer_blank) {
 } END_TEST
 
 START_TEST(test_copy_buffer_bytes_null) {
-    sxbp_buffer_t from = {
+    sxbp_Buffer from = {
         .size = 32,
         .bytes = NULL,
     };
-    sxbp_buffer_t to = sxbp_blank_buffer();
+    sxbp_Buffer to = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_copy_buffer(&from, &to);
+    sxbp_Result result = sxbp_copy_buffer(&from, &to);
 
     /*
      * if the source has non-zero size but bytes are NULL, a precondition
@@ -214,7 +214,7 @@ START_TEST(test_copy_buffer_bytes_null) {
 } END_TEST
 
 START_TEST(test_copy_buffer_to_itself) {
-    sxbp_buffer_t buffer = { .size = 10000, .bytes = NULL, };
+    sxbp_Buffer buffer = { .size = 10000, .bytes = NULL, };
     /*
      * allocate the buffer -if this fails then we'll abort here because this
      * test case is not testing the init function
@@ -230,7 +230,7 @@ START_TEST(test_copy_buffer_to_itself) {
     uint8_t* bytes = buffer.bytes;
 
     // try and copy the buffer to itself
-    sxbp_result_t result = sxbp_copy_buffer(&buffer, &buffer);
+    sxbp_Result result = sxbp_copy_buffer(&buffer, &buffer);
 
     // not implemented error code should be returned
     ck_assert(result == SXBP_RESULT_FAIL_UNIMPLEMENTED);
@@ -250,10 +250,10 @@ START_TEST(test_buffer_from_file) {
         ck_abort_msg("Unable to open test file in read mode");
     }
     // create a buffer to read the file into
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
     // try and read the file into the buffer
-    sxbp_result_t result = sxbp_buffer_from_file(temp_file, &buffer);
+    sxbp_Result result = sxbp_buffer_from_file(temp_file, &buffer);
 
     // assert that the operation was successful
     ck_assert(result == SXBP_RESULT_OK);
@@ -268,9 +268,9 @@ START_TEST(test_buffer_from_file) {
 } END_TEST
 
 START_TEST(test_buffer_from_file_file_null) {
-    sxbp_buffer_t buffer = sxbp_blank_buffer();
+    sxbp_Buffer buffer = sxbp_blank_buffer();
 
-    sxbp_result_t result = sxbp_buffer_from_file(NULL, &buffer);
+    sxbp_Result result = sxbp_buffer_from_file(NULL, &buffer);
 
     // result should be precondition failure
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
@@ -285,7 +285,7 @@ START_TEST(test_buffer_from_file_buffer_null) {
     if (temp_file == NULL) {
         ck_abort_msg("Unable to open test file in read mode");
     }
-    sxbp_result_t result = sxbp_buffer_from_file(temp_file, NULL);
+    sxbp_Result result = sxbp_buffer_from_file(temp_file, NULL);
 
     // result should be precondition failure
     ck_assert(result == SXBP_RESULT_FAIL_PRECONDITION);
