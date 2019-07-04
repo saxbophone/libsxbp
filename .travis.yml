@@ -22,6 +22,7 @@ addons:
     packages:
       - gcc5
       - check
+    update: true
 # branches safelist
 branches:
   only:
