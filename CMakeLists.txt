@@ -168,6 +168,9 @@ if(SXBP_PNG_SUPPORT)
     target_link_libraries(sxbp ${PNG_LIBRARY})
 endif()
 
+# build the new algorithm experiments
+add_executable(new_algorithm_experiment "new_algorithm_experiment.c")
+
 # build unit tests if enabled
 if(BUILD_UNIT_TESTS)
     add_executable(unit_tests ${TEST_SOURCES})
