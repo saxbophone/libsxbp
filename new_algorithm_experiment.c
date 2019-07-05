@@ -29,6 +29,19 @@ static size_t two_to_the_power_of(size_t power) {
     return (size_t)powl(2.0L, (long double)power);
 }
 
+// private data structure for storing proportion of valid solutions for problems
+typedef struct ValidSolutionsStatistics {
+    size_t problem_size; // for what size of problem (in bits) is this data?
+    // the fewest number of valid solutions found across problems of this size
+    size_t lowest_validity;
+    // the highest number of valid solutions found across problems of this size
+    size_t highest_validity;
+    // the mean number of valid solutions found across problems of this size
+    long double mean_validity;
+    // NOTE: to get validity rates as percentages:
+    // divide validity count by 2^problem_size
+} ValidSolutionsStatistics;
+
 int main(void) {
     // pre-conditional assertions
     assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
@@ -46,9 +59,13 @@ int main(void) {
                 // printf("%zu\t%zu\t%zu\n", z, p, s);
                 // TODO: generate a solution for bit string s
                 // TODO: check if the solution is valid for the problem
-                // TODO: adjust the tally of valid solutions as appropriate
+                // TODO: increment number of solutions if valid
             }
+            // TODO: update lowest, highest and cumulative total validity values
         }
+        // TODO: divide cumulative total validity by number of problems tested
+        // NOTE: this calculation produces the mean validity for this size
+        // TODO: store lowest, highest and mean validity values with problem size
         printf("Finished %zu\n", z);
     }
     return 0;
