@@ -15,7 +15,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "sxbp/sxbp.h"
 #include "sxbp/sxbp_internal.h"
@@ -70,14 +69,15 @@ int main(void) {
         (MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1,
         sizeof(ValidSolutionsStatistics)
     );
-    // allocate a data structure for storing the bits strings of all sizes
-    bool* bit_string = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
+    // allocate data structure for storing problem and solution bit strings
+    bool* problem = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
+    bool* solution = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
     // let it abort if any memory allocations were refused
     assert(statistics != NULL);
-    assert(bit_string != NULL);
+    assert(problem != NULL);
+    assert(solution != NULL);
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
-        clock_t start = clock();
         // how many problems of that size exist
         uint32_t problem_size = two_to_the_power_of(z);
         // init highest, lowest and cumulative validity counters
@@ -88,15 +88,12 @@ int main(void) {
         for (uint32_t p = 0; p < problem_size; p++) {
             uint64_t solutions_to_problem = 0;
             // TODO: generate a problem for bit string p
-            integer_to_bit_string(p, bit_string, z);
-            for (size_t i = 0; i < z; i++) {
-                printf("%i", bit_string[i]);
-            }
-            printf("\n");
+            integer_to_bit_string(p, problem, z);
             // for every potential solution for a problem of that size...
             for (uint32_t s = 0; s < problem_size; s++) {
                 // printf("%zu\t%zu\t%zu\n", z, p, s);
                 // TODO: generate a solution for bit string s
+                integer_to_bit_string(s, solution, z);
                 // TODO: check if the solution is valid for the problem
                 bool solution_is_valid = true;
                 if (solution_is_valid) {
@@ -122,8 +119,7 @@ int main(void) {
          * this calculation produces the mean validity for this size
          */
         statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
-        clock_t end = clock();
-        printf("Finished %" PRIu8 "\t(%Lf)\n", z, (long double)(end - start) / CLOCKS_PER_SEC);
+        printf("Finished %" PRIu8 "\n", z);
         printf(
             "problem_size = %" PRIu32
             "\nlowest_validity = %" PRIu64
