@@ -9,9 +9,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include <assert.h>
+#include <inttypes.h>
 #include <math.h>
-#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "sxbp/sxbp.h"
 #include "sxbp/sxbp_internal.h"
@@ -22,20 +25,20 @@
 #endif
 
 // tweak these variables to change which range of problem sizes to test
-static const size_t MIN_PROBLEM_SIZE = 1;
-static const size_t MAX_PROBLEM_SIZE = 24;
+static const uint8_t MIN_PROBLEM_SIZE = 1;
+static const uint8_t MAX_PROBLEM_SIZE = 24;
 
-static size_t two_to_the_power_of(size_t power) {
-    return (size_t)powl(2.0L, (long double)power);
+static uint32_t two_to_the_power_of(uint8_t power) {
+    return (uint32_t)powl(2.0L, (long double)power);
 }
 
 // private data structure for storing proportion of valid solutions for problems
 typedef struct ValidSolutionsStatistics {
-    size_t problem_size; // for what size of problem (in bits) is this data?
+    uint8_t problem_size; // for what size of problem (in bits) is this data?
     // the fewest number of valid solutions found across problems of this size
-    size_t lowest_validity;
+    uint64_t lowest_validity;
     // the highest number of valid solutions found across problems of this size
-    size_t highest_validity;
+    uint64_t highest_validity;
     // the mean number of valid solutions found across problems of this size
     long double mean_validity;
     // NOTE: to get validity rates as percentages:
@@ -46,27 +49,70 @@ int main(void) {
     // pre-conditional assertions
     assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
     assert(MIN_PROBLEM_SIZE <= MAX_PROBLEM_SIZE); // max mustn't be < min
-    // TODO: allocate a data structure for tallying % of valid solutions / size
+    // this program works on problem sizes up to 32 bits
+    assert(MAX_PROBLEM_SIZE <= 32);
+    // allocate a data structure for tallying % of valid solutions / size
+    ValidSolutionsStatistics* statistics = calloc(
+        (MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1,
+        sizeof(ValidSolutionsStatistics)
+    );
+    assert(statistics != NULL);
     // for every size of problem...
-    for (size_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
+    for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
+        clock_t start = clock();
         // how many problems of that size exist
-        size_t problem_size = two_to_the_power_of(z);
+        uint32_t problem_size = two_to_the_power_of(z);
+        // init highest, lowest and cumulative validity counters
+        uint64_t lowest_validity = UINT64_MAX;
+        uint64_t highest_validity = 0;
+        uint64_t cumulative_validity = 0;
         // for every problem of that size...
-        for (size_t p = 0; p < problem_size; p++) {
+        for (uint32_t p = 0; p < problem_size; p++) {
+            uint64_t solutions_to_problem = 0;
             // TODO: generate a problem for bit string p
             // for every potential solution for a problem of that size...
-            for (size_t s = 0; s < problem_size; s++) {
+            for (uint32_t s = 0; s < problem_size; s++) {
                 // printf("%zu\t%zu\t%zu\n", z, p, s);
                 // TODO: generate a solution for bit string s
                 // TODO: check if the solution is valid for the problem
-                // TODO: increment number of solutions if valid
+                bool solution_is_valid = true;
+                if (solution_is_valid) {
+                    // increment number of solutions if valid
+                    solutions_to_problem++;
+                }
             }
-            // TODO: update lowest, highest and cumulative total validity values
+            // update lowest, highest and cumulative total validity values
+            if (solutions_to_problem < lowest_validity) {
+                lowest_validity = solutions_to_problem;
+            }
+            if (solutions_to_problem > highest_validity) {
+                highest_validity = solutions_to_problem;
+            }
+            cumulative_validity += solutions_to_problem;
         }
-        // TODO: divide cumulative total validity by number of problems tested
-        // NOTE: this calculation produces the mean validity for this size
         // TODO: store lowest, highest and mean validity values with problem size
-        printf("Finished %zu\n", z);
+        statistics[z].problem_size = z; // store size in bits, not raw size!
+        statistics[z].lowest_validity = lowest_validity;
+        statistics[z].highest_validity = highest_validity;
+        /*
+         * divide cumulative total validity by number of problems tested
+         * this calculation produces the mean validity for this size
+         */
+        statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
+        clock_t end = clock();
+        printf("Finished %" PRIu8 "\t(%Lf)\n", z, (long double)(end - start) / CLOCKS_PER_SEC);
+        printf(
+            "problem_size = %" PRIu32
+            "\nlowest_validity = %" PRIu64
+            "\nhighest_validity = %" PRIu64
+            "\nmean_validity = %Lf\n",
+            two_to_the_power_of(statistics[z].problem_size),
+            statistics[z].lowest_validity,
+            statistics[z].highest_validity,
+            statistics[z].mean_validity
+        );
     }
+    // deallocate memory
+    free(statistics);
     return 0;
 }
