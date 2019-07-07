@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +31,19 @@ static const uint8_t MAX_PROBLEM_SIZE = 24;
 
 static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
+}
+
+// unpacks all the bits up to `size` from the given `source` integer into `dest`
+static void integer_to_bit_string(uint32_t source, bool* dest, uint8_t size) {
+    // NOTE: we handle integers big-endian, but only handle the x lowest bits
+    for (uint8_t i = 0; i < size; i++) {
+        uint32_t mask = 1U << (size - i - 1);
+        if ((source & mask) != 0) {
+            dest[i] = true;
+        } else {
+            dest[i] = false;
+        }
+    }
 }
 
 // private data structure for storing proportion of valid solutions for problems
@@ -56,7 +70,11 @@ int main(void) {
         (MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1,
         sizeof(ValidSolutionsStatistics)
     );
+    // allocate a data structure for storing the bits strings of all sizes
+    bool* bit_string = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
+    // let it abort if any memory allocations were refused
     assert(statistics != NULL);
+    assert(bit_string != NULL);
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
         clock_t start = clock();
@@ -70,6 +88,11 @@ int main(void) {
         for (uint32_t p = 0; p < problem_size; p++) {
             uint64_t solutions_to_problem = 0;
             // TODO: generate a problem for bit string p
+            integer_to_bit_string(p, bit_string, z);
+            for (size_t i = 0; i < z; i++) {
+                printf("%i", bit_string[i]);
+            }
+            printf("\n");
             // for every potential solution for a problem of that size...
             for (uint32_t s = 0; s < problem_size; s++) {
                 // printf("%zu\t%zu\t%zu\n", z, p, s);
