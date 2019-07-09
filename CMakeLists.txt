@@ -170,7 +170,7 @@ endif()
 
 # build the new algorithm experiments
 add_executable(new_algorithm_experiment "new_algorithm_experiment.c")
-target_link_libraries(new_algorithm_experiment m)
+target_link_libraries(new_algorithm_experiment sxbp m)
 
 # build unit tests if enabled
 if(BUILD_UNIT_TESTS)

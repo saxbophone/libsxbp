@@ -16,13 +16,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sxbp/figure_collides.h"
 #include "sxbp/sxbp.h"
-#include "sxbp/sxbp_internal.h"
 
 
 #ifdef __cplusplus
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
+
+// private data structure for storing proportion of valid solutions for problems
+typedef struct ValidSolutionsStatistics {
+    uint8_t problem_size; // for what size of problem (in bits) is this data?
+    // the fewest number of valid solutions found across problems of this size
+    uint64_t lowest_validity;
+    // the highest number of valid solutions found across problems of this size
+    uint64_t highest_validity;
+    // the mean number of valid solutions found across problems of this size
+    long double mean_validity;
+    // NOTE: to get validity rates as percentages:
+    // divide validity count by 2^problem_size
+} ValidSolutionsStatistics;
 
 // tweak these variables to change which range of problem sizes to test
 static const uint8_t MIN_PROBLEM_SIZE = 1;
@@ -45,18 +58,47 @@ static void integer_to_bit_string(uint32_t source, bool* dest, uint8_t size) {
     }
 }
 
-// private data structure for storing proportion of valid solutions for problems
-typedef struct ValidSolutionsStatistics {
-    uint8_t problem_size; // for what size of problem (in bits) is this data?
-    // the fewest number of valid solutions found across problems of this size
-    uint64_t lowest_validity;
-    // the highest number of valid solutions found across problems of this size
-    uint64_t highest_validity;
-    // the mean number of valid solutions found across problems of this size
-    long double mean_validity;
-    // NOTE: to get validity rates as percentages:
-    // divide validity count by 2^problem_size
-} ValidSolutionsStatistics;
+static bool is_solution_valid_for_problem(
+    uint8_t size,
+    bool* solution,
+    bool* problem
+) {
+    // create and allocate memory for a figure of the correct size
+    sxbp_Figure figure = sxbp_blank_figure();
+    figure.size = size + 1; // inlcudes 1 additional starter line as orientation
+    assert(sxbp_success(sxbp_init_figure(&figure)));
+    // hardcode the first line, which is always the same
+    figure.lines[0].direction = SXBP_UP;
+    figure.lines[0].length = 3;
+    // set the line lengths and directions from the problem and solution
+    sxbp_Direction current_direction = SXBP_UP;
+    for (uint8_t i = 0; i < size; i++) {
+        // if bit is 1, turn right, otherwise, turn left
+        if (solution[i]) {
+            current_direction = (current_direction - 1) % 4;
+        } else {
+            current_direction = (current_direction + 1) % 4;
+        }
+        figure.lines[i + 1].length = problem[i] ? 2 : 1;
+        figure.lines[i + 1].direction = current_direction;
+    }
+
+    // XXX: DEBUGGING CODE FOR PRINTING EVERY SINGLE TESTED CANDIDATE
+    // {
+    //     sxbp_Bitmap bitmap = sxbp_blank_bitmap();
+    //     sxbp_render_figure_to_bitmap(&figure, &bitmap);
+    //     sxbp_print_bitmap(&bitmap, stdout);
+    //     sxbp_free_bitmap(&bitmap);
+    // }
+
+    // check if figure collides and store result
+    bool figure_collides = false;
+    assert(sxbp_success(sxbp_figure_collides(&figure, &figure_collides)));
+    // free memory for figure
+    sxbp_free_figure(&figure);
+    // return result
+    return !figure_collides;
+}
 
 int main(void) {
     // pre-conditional assertions
@@ -76,6 +118,8 @@ int main(void) {
     assert(statistics != NULL);
     assert(problem != NULL);
     assert(solution != NULL);
+    // print out the CSV file row headings
+    printf("Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n");
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
         // how many problems of that size exist
@@ -87,16 +131,14 @@ int main(void) {
         // for every problem of that size...
         for (uint32_t p = 0; p < problem_size; p++) {
             uint64_t solutions_to_problem = 0;
-            // TODO: generate a problem for bit string p
+            // generate a problem for bit string p
             integer_to_bit_string(p, problem, z);
             // for every potential solution for a problem of that size...
             for (uint32_t s = 0; s < problem_size; s++) {
-                // printf("%zu\t%zu\t%zu\n", z, p, s);
-                // TODO: generate a solution for bit string s
+                // generate a solution for bit string s
                 integer_to_bit_string(s, solution, z);
-                // TODO: check if the solution is valid for the problem
-                bool solution_is_valid = true;
-                if (solution_is_valid) {
+                // check if the solution is valid for the problem
+                if (is_solution_valid_for_problem(z, solution, problem)) {
                     // increment number of solutions if valid
                     solutions_to_problem++;
                 }
@@ -119,12 +161,9 @@ int main(void) {
          * this calculation produces the mean validity for this size
          */
         statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
-        printf("Finished %" PRIu8 "\n", z);
         printf(
-            "problem_size = %" PRIu32
-            "\nlowest_validity = %" PRIu64
-            "\nhighest_validity = %" PRIu64
-            "\nmean_validity = %Lf\n",
+            "%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
+            z,
             two_to_the_power_of(statistics[z].problem_size),
             statistics[z].lowest_validity,
             statistics[z].highest_validity,
