@@ -65,8 +65,10 @@ static bool is_solution_valid_for_problem(
 ) {
     // create and allocate memory for a figure of the correct size
     sxbp_Figure figure = sxbp_blank_figure();
-    figure.size = size + 1; // inlcudes 1 additional starter line as orientation
-    assert(sxbp_success(sxbp_init_figure(&figure)));
+    figure.size = size + 1U; // inlcudes 1 additional starter line as orientation
+    if(!sxbp_success(sxbp_init_figure(&figure))) {
+        abort(); // XXX: Cheap allocation failure exit!
+    }
     // hardcode the first line, which is always the same
     figure.lines[0].direction = SXBP_UP;
     figure.lines[0].length = 3;
@@ -93,7 +95,9 @@ static bool is_solution_valid_for_problem(
 
     // check if figure collides and store result
     bool figure_collides = false;
-    assert(sxbp_success(sxbp_figure_collides(&figure, &figure_collides)));
+    if(!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
+        abort(); // XXX: Cheap allocation failure exit!
+    }
     // free memory for figure
     sxbp_free_figure(&figure);
     // return result
@@ -108,7 +112,7 @@ int main(void) {
     assert(MAX_PROBLEM_SIZE <= 32);
     // allocate a data structure for tallying % of valid solutions / size
     ValidSolutionsStatistics* statistics = calloc(
-        (MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1,
+        (size_t)((MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1),
         sizeof(ValidSolutionsStatistics)
     );
     // allocate data structure for storing problem and solution bit strings
