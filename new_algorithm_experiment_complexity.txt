@@ -1,0 +1,25 @@
+6.4s to do 10 bits on RPi with compiler optimisations enabled
+
+rough complexity factor of 4 for each additional bit
+
+================================================================================
+
+Prediction for time completion of various bit sizes based on this measurement:
+
+bits time (s)  time context
+10 - 0000006.4
+11 - 0000025.6
+12 - 0000102.4
+13 - 0000409.6 (6.82 mins)
+14 - 0001638.4 (27.3 mins)
+15 - 0006553.6 (109 mins)
+16 - 0026214.4 (7.28 hours)
+17 - 0104857.6 (29.1 hours)
+18 - 0419430.4 (4.85 days) <--- STOP HERE!
+19 - 1677721.6 (19.4 days)
+20 - 6710886.4 (2.58 months)
+
+================================================================================
+
+Accounting for accuracy and accumulation, estimate that a 7-day window of
+uninterrupted computation is needed to explore problem space up to 18 bits.

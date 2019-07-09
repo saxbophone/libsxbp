@@ -39,7 +39,7 @@ typedef struct ValidSolutionsStatistics {
 
 // tweak these variables to change which range of problem sizes to test
 static const uint8_t MIN_PROBLEM_SIZE = 1;
-static const uint8_t MAX_PROBLEM_SIZE = 24;
+static const uint8_t MAX_PROBLEM_SIZE = 18;
 
 static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
