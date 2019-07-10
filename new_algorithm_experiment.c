@@ -42,6 +42,11 @@ typedef struct ValidSolutionsStatistics {
 static const uint8_t MIN_PROBLEM_SIZE = 1;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
+// this is my estimate of the factor of complexity increase of 1 additional bit
+static const double COMPLEXITY_FACTOR_ESTIMATE = 4.0;
+// config variable for timing logic --maximum duration to measure with CPU clock
+static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
+
 static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
 }
@@ -67,7 +72,7 @@ static bool is_solution_valid_for_problem(
     // create and allocate memory for a figure of the correct size
     sxbp_Figure figure = sxbp_blank_figure();
     figure.size = size + 1U; // inlcudes 1 additional starter line as orientation
-    if(!sxbp_success(sxbp_init_figure(&figure))) {
+    if (!sxbp_success(sxbp_init_figure(&figure))) {
         abort(); // XXX: Cheap allocation failure exit!
     }
     // hardcode the first line, which is always the same
@@ -87,7 +92,7 @@ static bool is_solution_valid_for_problem(
     }
     // check if figure collides and store result
     bool figure_collides = false;
-    if(!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
+    if (!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
         abort(); // XXX: Cheap allocation failure exit!
     }
 
@@ -105,12 +110,47 @@ static bool is_solution_valid_for_problem(
     return !figure_collides;
 }
 
-int main(void) {
+static FILE* open_file_for_appending(const char* filename) {
+    FILE* file_handle = fopen(filename, "a");
+    // abort if file couldn't be opened
+    if (file_handle == NULL) {
+        fprintf(stderr, "Can't open file for appending!\n");
+        abort();
+    }
+    return file_handle;
+}
+
+static FILE* close_file(FILE* file_handle) {
+    // try to close file, abort if unsuccessful
+    if (fclose(file_handle) != 0) {
+        fprintf(stderr, "Can't close open file!\n");
+        abort();
+    }
+}
+
+static double estimated_completion_time(
+    double latest_run_time,
+    uint8_t factors_left
+) {
+    double estimate = 0.0;
+    for (uint8_t f = 0; f < factors_left + 1; f++) {
+        estimate += latest_run_time * pow(COMPLEXITY_FACTOR_ESTIMATE, f);
+    }
+    return estimate;
+}
+
+int main(int argc, char const *argv[]) {
     // pre-conditional assertions
     assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
     assert(MIN_PROBLEM_SIZE <= MAX_PROBLEM_SIZE); // max mustn't be < min
     // this program works on problem sizes up to 32 bits
     assert(MAX_PROBLEM_SIZE <= 32);
+    // we need one additional argument --for the file name to output to
+    if (argc < 2) {
+        fprintf(stderr, "Need filename argument!\n");
+        return -1;
+    }
+    const char* filename = argv[1]; // grab filename out of arguments
     // allocate a data structure for tallying % of valid solutions / size
     ValidSolutionsStatistics* statistics = calloc(
         (size_t)((MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1),
@@ -123,8 +163,20 @@ int main(void) {
     assert(statistics != NULL);
     assert(problem != NULL);
     assert(solution != NULL);
-    // print out the CSV file row headings
-    printf("Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n");
+
+    /*
+     * by keeping track of how long previous runs take, we can estimate how long
+     * it will take to complete the entire experiment
+     */
+    double previous_time = 0.0;
+
+    // write out the CSV file row headings
+    FILE* csv_file = open_file_for_appending(filename);
+    fprintf(
+        csv_file,
+        "Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n"
+    );
+    csv_file = close_file(csv_file);
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
         // XXX: Timing logic
@@ -169,7 +221,10 @@ int main(void) {
          * this calculation produces the mean validity for this size
          */
         statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
-        printf(
+
+        FILE* csv_file = open_file_for_appending(filename);
+        fprintf(
+            csv_file,
             "%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
             z,
             two_to_the_power_of(statistics[z].problem_size),
@@ -177,14 +232,31 @@ int main(void) {
             statistics[z].highest_validity,
             statistics[z].mean_validity
         );
+        csv_file = close_file(csv_file);
+
         // XXX: Timing logic
-        double seconds_elapsed = difftime(time(NULL), start_time);
-        if (seconds_elapsed < 60.0) {
+        time_t now = time(NULL);
+        char time_buffer[21];
+        strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
+        printf("============================= %s =============================\n", time_buffer);
+        double seconds_elapsed = difftime(now, start_time);
+        if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
             seconds_elapsed = (double)(
                 clock() - sub_second_start_time
             ) / CLOCKS_PER_SEC;
         }
-        printf("Time: %f\n", seconds_elapsed);
+        // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
+        printf("Solved problem size: %" PRIu8 " - Time taken:\t%f\n", z, seconds_elapsed);
+        printf(
+            "Estimated time til completion:\t\t%f\n",
+            estimated_completion_time(seconds_elapsed, MAX_PROBLEM_SIZE - z - 1)
+        );
+        printf(
+            "Estimated time til next solved:\t\t%f\n",
+            estimated_completion_time(seconds_elapsed, 1)
+        );
+        printf("================================================================================\n\n");
+        // previous_time = seconds_elapsed;
     }
     // deallocate memory
     free(statistics);
