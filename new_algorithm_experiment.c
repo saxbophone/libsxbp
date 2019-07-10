@@ -43,7 +43,7 @@ static const uint8_t MIN_PROBLEM_SIZE = 1;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
 // this is my estimate of the factor of complexity increase of 1 additional bit
-static const double COMPLEXITY_FACTOR_ESTIMATE = 4.0;
+static const double COMPLEXITY_FACTOR_ESTIMATE = 4.15;
 // config variable for timing logic --maximum duration to measure with CPU clock
 static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
 
@@ -174,7 +174,7 @@ int main(int argc, char const *argv[]) {
     FILE* csv_file = open_file_for_appending(filename);
     fprintf(
         csv_file,
-        "Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n"
+        "Timestamp,Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n"
     );
     csv_file = close_file(csv_file);
     // for every size of problem...
@@ -222,10 +222,16 @@ int main(int argc, char const *argv[]) {
          */
         statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
 
+        // XXX: Timing logic
+        time_t now = time(NULL);
+        char time_buffer[21];
+        strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
+
         FILE* csv_file = open_file_for_appending(filename);
         fprintf(
             csv_file,
-            "%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
+            "%s,%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
+            time_buffer,
             z,
             two_to_the_power_of(statistics[z].problem_size),
             statistics[z].lowest_validity,
@@ -233,11 +239,6 @@ int main(int argc, char const *argv[]) {
             statistics[z].mean_validity
         );
         csv_file = close_file(csv_file);
-
-        // XXX: Timing logic
-        time_t now = time(NULL);
-        char time_buffer[21];
-        strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
         printf("============================= %s =============================\n", time_buffer);
         double seconds_elapsed = difftime(now, start_time);
         if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
