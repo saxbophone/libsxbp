@@ -21,5 +21,32 @@ bits time (s)  time context
 
 ================================================================================
 
+Time Estimate:
+
+Sum of all times up to and including 18 bits = 559238.4 (6.47 days)
+
+Generalised, for calculating how long it would take to calculate 1 bit more including this:
+
+6.4 + (4 * 6.4)
+
+for 2 bits more:
+
+6.4 + (4 * 6.4) + (4 * 4 * 6.4)
+
+for 3 bits more:
+
+6.4 + (4 * 6.4) + (4 * 4 * 4 * 6.4)
+
+Generalised further:
+
+where t is the time taken to compute a reference complexity r, and complexity c is the desired complexity to calculate time up to:
+
+total = 0.0
+for p in range 0..(c - r):
+    total += t * 4 ^ p
+
+
+**INVALID ORIGINAL ESTIMATE:**
+
 Accounting for accuracy and accumulation, estimate that a 7-day window of
 uninterrupted computation is needed to explore problem space up to 18 bits.

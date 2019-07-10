@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "sxbp/figure_collides.h"
 #include "sxbp/sxbp.h"
@@ -84,20 +85,20 @@ static bool is_solution_valid_for_problem(
         figure.lines[i + 1].length = problem[i] ? 2 : 1;
         figure.lines[i + 1].direction = current_direction;
     }
+    // check if figure collides and store result
+    bool figure_collides = false;
+    if(!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
+        abort(); // XXX: Cheap allocation failure exit!
+    }
 
     // XXX: DEBUGGING CODE FOR PRINTING EVERY SINGLE TESTED CANDIDATE
-    // {
+    // if (!figure_collides){
     //     sxbp_Bitmap bitmap = sxbp_blank_bitmap();
     //     sxbp_render_figure_to_bitmap(&figure, &bitmap);
     //     sxbp_print_bitmap(&bitmap, stdout);
     //     sxbp_free_bitmap(&bitmap);
     // }
 
-    // check if figure collides and store result
-    bool figure_collides = false;
-    if(!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
-        abort(); // XXX: Cheap allocation failure exit!
-    }
     // free memory for figure
     sxbp_free_figure(&figure);
     // return result
@@ -126,6 +127,9 @@ int main(void) {
     printf("Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n");
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
+        // XXX: Timing logic
+        clock_t sub_second_start_time = clock();
+        time_t start_time = time(NULL);
         // how many problems of that size exist
         uint32_t problem_size = two_to_the_power_of(z);
         // init highest, lowest and cumulative validity counters
@@ -173,6 +177,14 @@ int main(void) {
             statistics[z].highest_validity,
             statistics[z].mean_validity
         );
+        // XXX: Timing logic
+        double seconds_elapsed = difftime(time(NULL), start_time);
+        if (seconds_elapsed < 60.0) {
+            seconds_elapsed = (double)(
+                clock() - sub_second_start_time
+            ) / CLOCKS_PER_SEC;
+        }
+        printf("Time: %f\n", seconds_elapsed);
     }
     // deallocate memory
     free(statistics);
