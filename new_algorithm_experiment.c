@@ -126,6 +126,7 @@ static FILE* close_file(FILE* file_handle) {
         fprintf(stderr, "Can't close open file!\n");
         abort();
     }
+    return NULL;
 }
 
 static double estimated_completion_time(
@@ -133,7 +134,7 @@ static double estimated_completion_time(
     uint8_t factors_left
 ) {
     double estimate = 0.0;
-    for (uint8_t f = 0; f < factors_left + 1; f++) {
+    for (uint8_t f = 1; f < (factors_left + 1); f++) {
         estimate += latest_run_time * pow(COMPLEXITY_FACTOR_ESTIMATE, f);
     }
     return estimate;
@@ -168,7 +169,7 @@ int main(int argc, char const *argv[]) {
      * by keeping track of how long previous runs take, we can estimate how long
      * it will take to complete the entire experiment
      */
-    double previous_time = 0.0;
+    // double previous_time = 0.0;
 
     // write out the CSV file row headings
     FILE* csv_file = open_file_for_appending(filename);
@@ -250,16 +251,18 @@ int main(int argc, char const *argv[]) {
         printf("Solved problem size: %" PRIu8 " - Time taken:\t%f\n", z, seconds_elapsed);
         printf(
             "Estimated time til completion:\t\t%f\n",
-            estimated_completion_time(seconds_elapsed, MAX_PROBLEM_SIZE - z - 1)
+            estimated_completion_time(seconds_elapsed, MAX_PROBLEM_SIZE - z)
         );
-        printf(
-            "Estimated time til next solved:\t\t%f\n",
-            estimated_completion_time(seconds_elapsed, 1)
-        );
+        if (z < MAX_PROBLEM_SIZE) {
+            printf(
+                "Estimated time til next solved:\t\t%f\n",
+                estimated_completion_time(seconds_elapsed, 1)
+            );
+        }
         printf("================================================================================\n\n");
         // previous_time = seconds_elapsed;
     }
     // deallocate memory
-    free(statistics);
+    // free(statistics); // FIXME: for some reason, this causes a corruption/double-free...
     return 0;
 }
