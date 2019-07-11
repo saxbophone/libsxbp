@@ -43,7 +43,7 @@ static const uint8_t MIN_PROBLEM_SIZE = 1;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
 // this is my estimate of the factor of complexity increase of 1 additional bit
-static const double COMPLEXITY_FACTOR_ESTIMATE = 4.15;
+static const double COMPLEXITY_FACTOR_ESTIMATE = 4.3;
 // config variable for timing logic --maximum duration to measure with CPU clock
 static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
 

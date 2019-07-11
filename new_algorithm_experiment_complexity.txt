@@ -45,6 +45,7 @@ total = 0.0
 for p in range 0..(c - r):
     total += t * 4 ^ p
 
+TODO: Improve time estimates by deriving a more exact complexity factor that is variable between runs, taking into account a more precise model of the relative complexity of solving with regard to problem size (number of bits is n, a program complexity proportional to n can be derived). We can then divide the wall-clock execution time of each run by the respective value derived from proportionality to n (to get a pretty good measurement of how long the smallest chunk of the algo takes to run) and multiply this by the value derived from n-proportionality for the next-largest problem size, hence getting the most accurate time estimate possible.
 
 **INVALID ORIGINAL ESTIMATE:**
 
