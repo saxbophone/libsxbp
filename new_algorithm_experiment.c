@@ -45,6 +45,11 @@ static const uint8_t MAX_PROBLEM_SIZE = 18;
 // config variable for timing logic --maximum duration to measure with CPU clock
 static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
 
+static const double MINUTE_SECONDS = 60.0L;
+static const double HOUR_SECONDS = 60.0L * 60.0L;
+static const double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
+static const double MONTH_SECONDS = 60.0L * 60.0L * 24.0L * 30.44L;
+
 static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
 }
@@ -151,6 +156,36 @@ static long double estimated_completion_time(
         estimate += last_estimated;
     }
     return estimate;
+}
+
+// returns the most convenient way of describing a given time unit
+static const char* convenient_time_unit(long double seconds) {
+    if (seconds < MINUTE_SECONDS) {
+        return "s";
+    } else if (seconds < HOUR_SECONDS) {
+        return " mins";
+    } else if (seconds < DAY_SECONDS) {
+        return " hours";
+    } else if (seconds < MONTH_SECONDS) {
+        return " days";
+    } else {
+        return " months";
+    }
+}
+
+// returns the time in seconds, converted if needed to most convenient unit
+static long double convenient_time_value(long double seconds) {
+    if (seconds < MINUTE_SECONDS) {
+        return seconds;
+    } else if (seconds < HOUR_SECONDS) {
+        return seconds / MINUTE_SECONDS;
+    } else if (seconds < DAY_SECONDS) {
+        return seconds / HOUR_SECONDS;
+    } else if (seconds < MONTH_SECONDS) {
+        return seconds / DAY_SECONDS;
+    } else {
+        return seconds / MONTH_SECONDS;
+    }
 }
 
 int main(int argc, char const *argv[]) {
@@ -261,20 +296,24 @@ int main(int argc, char const *argv[]) {
         // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
         printf(
             "Solved problem size: %" PRIu8
-            " - Time taken:\t%Lf (%.2Lf%% of estimate)\n",
+            " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
             z,
-            seconds_elapsed,
+            convenient_time_value(seconds_elapsed),
+            convenient_time_unit(seconds_elapsed),
             ((seconds_elapsed / last_estimate) - 0.0L) * 100.0L
         );
+        long double completion_estimate = estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z);
         printf(
-            "Estimated time til completion:\t\t%Lf\n",
-            estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z)
+            "Estimated time til completion:\t\t%Lf%s\n",
+            convenient_time_value(completion_estimate),
+            convenient_time_unit(completion_estimate)
         );
         if (z < MAX_PROBLEM_SIZE) {
             last_estimate = estimated_completion_time(seconds_elapsed, z, 1);
             printf(
-                "Estimated time til next solved:\t\t%Lf\n",
-                last_estimate
+                "Estimated time til next solved:\t\t%Lf%s\n",
+                convenient_time_value(last_estimate),
+                convenient_time_unit(last_estimate)
             );
         }
         printf("================================================================================\n\n");
