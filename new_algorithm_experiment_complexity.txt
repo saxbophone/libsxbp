@@ -23,6 +23,26 @@ bits time (s)  time context
 
 Time Estimate:
 
+As the time complexity of the exhaustive search of the new algorithm's problem space is not directly linear, we need to find the largest approximately linear sub-component of the search.
+
+I believe this is the functions: `is_solution_valid_for_problem()`
+
+I believe this function is the most significant among those in the body of the main nested loops that iterate the search in terms of time complexity, aside from assembling and iterating through the test problems and solutions, this is where the bulk of the effort is done. This function is approximately proportional to `size` (problem size in bits) in a linear fashion, hence we just need to work out how the number of calls to this function relates to `size` to arrive at a suitable divisor with which we can divide the total time taken by a search through a problem space of a given size to get an estimate at the tiny number specifying execution time of testing *one* potential solution to a problem.
+
+The number of calls that a search of size N makes is:
+
+((2^N)^2)*N
+
+which can be simplified as:
+
+(4^N)*N
+
+Therefore, if a problem size of P takes F amount of time, to work out how long a problem size of P+1 (we'll call it Q) will take:
+
+Q = F/((4^P)*P) * ((4^Q)*Q)
+
+Old Time Estimate:
+
 Sum of all times up to and including 18 bits = 559238.4 (6.47 days)
 
 Generalised, for calculating how long it would take to calculate 1 bit more including this:

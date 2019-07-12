@@ -42,8 +42,6 @@ typedef struct ValidSolutionsStatistics {
 static const uint8_t MIN_PROBLEM_SIZE = 1;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
-// this is my estimate of the factor of complexity increase of 1 additional bit
-static const double COMPLEXITY_FACTOR_ESTIMATE = 4.3;
 // config variable for timing logic --maximum duration to measure with CPU clock
 static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
 
@@ -129,13 +127,28 @@ static FILE* close_file(FILE* file_handle) {
     return NULL;
 }
 
-static double estimated_completion_time(
-    double latest_run_time,
+static long double estimated_completion_time_of_next(
+    long double latest_run_time,
+    uint8_t completed_factor
+) {
+    uint8_t next_factor = completed_factor + 1;
+    return latest_run_time / (powl(4.0L, completed_factor) * completed_factor)
+                           * (powl(4.0L, next_factor) * next_factor);
+}
+
+static long double estimated_completion_time(
+    long double latest_run_time,
+    uint8_t completed_factor,
     uint8_t factors_left
 ) {
-    double estimate = 0.0;
-    for (uint8_t f = 1; f < (factors_left + 1); f++) {
-        estimate += latest_run_time * pow(COMPLEXITY_FACTOR_ESTIMATE, f);
+    long double estimate = 0.0L;
+    long double last_estimated = latest_run_time;
+    for (uint8_t f = 0; f < factors_left; f++) {
+        last_estimated = estimated_completion_time_of_next(
+            last_estimated,
+            completed_factor + f
+        );
+        estimate += last_estimated;
     }
     return estimate;
 }
@@ -179,7 +192,7 @@ int main(int argc, char const *argv[]) {
     );
     csv_file = close_file(csv_file);
     // for every size of problem...
-    for (uint8_t z = MIN_PROBLEM_SIZE; z < (MAX_PROBLEM_SIZE + 1); z++) {
+    for (uint8_t z = MIN_PROBLEM_SIZE; z <= (MAX_PROBLEM_SIZE); z++) {
         // XXX: Timing logic
         clock_t sub_second_start_time = clock();
         time_t start_time = time(NULL);
@@ -241,28 +254,34 @@ int main(int argc, char const *argv[]) {
         );
         csv_file = close_file(csv_file);
         printf("============================= %s =============================\n", time_buffer);
-        double seconds_elapsed = difftime(now, start_time);
+        long double seconds_elapsed = difftime(now, start_time);
         if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
-            seconds_elapsed = (double)(
+            seconds_elapsed = (long double)(
                 clock() - sub_second_start_time
             ) / CLOCKS_PER_SEC;
         }
         // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
-        printf("Solved problem size: %" PRIu8 " - Time taken:\t%f\n", z, seconds_elapsed);
+        printf("Solved problem size: %" PRIu8 " - Time taken:\t%Lf\n", z, seconds_elapsed);
         printf(
-            "Estimated time til completion:\t\t%f\n",
-            estimated_completion_time(seconds_elapsed, MAX_PROBLEM_SIZE - z)
+            "Estimated time til completion:\t\t%Lf\n",
+            estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z)
         );
         if (z < MAX_PROBLEM_SIZE) {
             printf(
-                "Estimated time til next solved:\t\t%f\n",
-                estimated_completion_time(seconds_elapsed, 1)
+                "Estimated time til next solved:\t\t%Lf\n",
+                estimated_completion_time(seconds_elapsed, z, 1)
             );
         }
         printf("================================================================================\n\n");
         // previous_time = seconds_elapsed;
     }
     // deallocate memory
-    // free(statistics); // FIXME: for some reason, this causes a corruption/double-free...
+    assert(statistics != NULL);
+    assert(problem != NULL);
+    assert(solution != NULL);
+    // FIXME: for some reason, all of these free()s cause memory error crashes!
+    // free(solution);
+    // free(problem);
+    // free(statistics);
     return 0;
 }
