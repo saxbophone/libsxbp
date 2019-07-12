@@ -178,11 +178,8 @@ int main(int argc, char const *argv[]) {
     assert(problem != NULL);
     assert(solution != NULL);
 
-    /*
-     * by keeping track of how long previous runs take, we can estimate how long
-     * it will take to complete the entire experiment
-     */
-    // double previous_time = 0.0;
+    // keep track of error rate between time estimates
+    long double last_estimate = 0.0;
 
     // write out the CSV file row headings
     FILE* csv_file = open_file_for_appending(filename);
@@ -253,23 +250,31 @@ int main(int argc, char const *argv[]) {
             statistics[z].mean_validity
         );
         csv_file = close_file(csv_file);
-        printf("============================= %s =============================\n", time_buffer);
         long double seconds_elapsed = difftime(now, start_time);
         if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
             seconds_elapsed = (long double)(
                 clock() - sub_second_start_time
             ) / CLOCKS_PER_SEC;
         }
+        // print error of estimate
+        printf("============================= %s =============================\n", time_buffer);
         // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
-        printf("Solved problem size: %" PRIu8 " - Time taken:\t%Lf\n", z, seconds_elapsed);
+        printf(
+            "Solved problem size: %" PRIu8
+            " - Time taken:\t%Lf (%.2Lf%% of estimate)\n",
+            z,
+            seconds_elapsed,
+            ((seconds_elapsed / last_estimate) - 0.0L) * 100.0L
+        );
         printf(
             "Estimated time til completion:\t\t%Lf\n",
             estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z)
         );
         if (z < MAX_PROBLEM_SIZE) {
+            last_estimate = estimated_completion_time(seconds_elapsed, z, 1);
             printf(
                 "Estimated time til next solved:\t\t%Lf\n",
-                estimated_completion_time(seconds_elapsed, z, 1)
+                last_estimate
             );
         }
         printf("================================================================================\n\n");
