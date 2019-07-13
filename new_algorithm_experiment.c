@@ -45,10 +45,11 @@ static const uint8_t MAX_PROBLEM_SIZE = 18;
 // config variable for timing logic --maximum duration to measure with CPU clock
 static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
 
-static const double MINUTE_SECONDS = 60.0L;
-static const double HOUR_SECONDS = 60.0L * 60.0L;
-static const double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
-static const double MONTH_SECONDS = 60.0L * 60.0L * 24.0L * 30.44L;
+static const long double MINUTE_SECONDS = 60.0L;
+static const long double HOUR_SECONDS = 60.0L * 60.0L;
+static const long double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
+static const long double MONTH_SECONDS = 60.0L * 60.0L * 24.0L * 30.44L;
+static const long double YEAR_SECONDS = 60.0L * 60.0L * 24.0L * 365.2425L;
 
 static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
@@ -168,8 +169,10 @@ static const char* convenient_time_unit(long double seconds) {
         return " hours";
     } else if (seconds < MONTH_SECONDS) {
         return " days";
-    } else {
+    } else if (seconds < YEAR_SECONDS) {
         return " months";
+    } else {
+        return " years";
     }
 }
 
@@ -183,8 +186,10 @@ static long double convenient_time_value(long double seconds) {
         return seconds / HOUR_SECONDS;
     } else if (seconds < MONTH_SECONDS) {
         return seconds / DAY_SECONDS;
-    } else {
+    } else if (seconds < YEAR_SECONDS) {
         return seconds / MONTH_SECONDS;
+    } else {
+        return seconds / YEAR_SECONDS;
     }
 }
 
