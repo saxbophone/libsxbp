@@ -81,7 +81,7 @@ static bool is_solution_valid_for_problem(
     }
     // hardcode the first line, which is always the same
     figure.lines[0].direction = SXBP_UP;
-    figure.lines[0].length = 4;
+    figure.lines[0].length = 3;
     // set the line lengths and directions from the problem and solution
     sxbp_Direction current_direction = SXBP_UP;
     for (uint8_t i = 0; i < size; i++) {
