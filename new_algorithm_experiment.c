@@ -291,8 +291,8 @@ int main(int argc, char *argv[]) {
         size_t problems_buffer_size = 0;
         // the master node populates the buffer
         if (world_rank == 0) {
-            problems_buffer = calloc(world_size, sizeof(uint32_t));
-            solutions_buffer = calloc(world_size, sizeof(uint32_t));
+            problems_buffer = calloc((size_t)world_size, sizeof(uint32_t));
+            solutions_buffer = calloc((size_t)world_size, sizeof(uint32_t));
             assert(problems_buffer != NULL);
             assert(solutions_buffer != NULL);
         }
@@ -307,7 +307,7 @@ int main(int argc, char *argv[]) {
             MPI_Barrier(MPI_COMM_WORLD);
             // whenever we have enough problems stored in the buffer, scatter them
             MPI_Barrier(MPI_COMM_WORLD);
-            if (problems_buffer_size == world_size) {
+            if (problems_buffer_size == (size_t)world_size) {
                 MPI_Barrier(MPI_COMM_WORLD);
                 // scatter the buffer contents to all nodes (including us)
                 uint32_t our_problem;
