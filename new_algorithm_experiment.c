@@ -41,7 +41,7 @@ typedef struct ValidSolutionsStatistics {
 } ValidSolutionsStatistics;
 
 // tweak these variables to change which range of problem sizes to test
-static const uint8_t MIN_PROBLEM_SIZE = 1;
+static const uint8_t MIN_PROBLEM_SIZE = 8;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
 // config variable for timing logic --maximum duration to measure with CPU clock
@@ -226,7 +226,6 @@ static uint32_t count_solutions_to_problem(
 }
 
 int main(int argc, char *argv[]) {
-    MPI_Init(&argc, &argv);
     // pre-conditional assertions
     assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
     assert(MIN_PROBLEM_SIZE <= MAX_PROBLEM_SIZE); // max mustn't be < min
@@ -238,29 +237,43 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     const char* filename = argv[1]; // grab filename out of arguments
-    // allocate a data structure for tallying % of valid solutions / size
-    ValidSolutionsStatistics* statistics = calloc(
-        (size_t)((MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1),
-        sizeof(ValidSolutionsStatistics)
-    );
+
+    // initialise MPI and discover our place in the world
+    MPI_Init(&argc, &argv);
+    int world_rank, world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    printf("Process %i of %i\n", world_rank, world_size);
+
+    ValidSolutionsStatistics* statistics = NULL;
+    // only master node has to keep track of statistics
+    if (world_rank == 0) {
+        // allocate a data structure for tallying % of valid solutions / size
+        statistics = calloc(
+            (size_t)((MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1),
+            sizeof(ValidSolutionsStatistics)
+        );
+        assert(statistics != NULL);
+    }
     // allocate data structure for storing problem and solution bit strings
     bool* problem = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
     bool* solution = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
     // let it abort if any memory allocations were refused
-    assert(statistics != NULL);
     assert(problem != NULL);
     assert(solution != NULL);
-
     // keep track of error rate between time estimates
     long double last_estimate = 0.0;
 
-    // write out the CSV file row headings
-    FILE* csv_file = open_file_for_appending(filename);
-    fprintf(
-        csv_file,
-        "Timestamp,Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n"
-    );
-    csv_file = close_file(csv_file);
+    // only the master node has to write out the results to file
+    if (world_rank == 0) {
+        // write out the CSV file row headings
+        FILE* csv_file = open_file_for_appending(filename);
+        fprintf(
+            csv_file,
+            "Timestamp,Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n"
+        );
+        csv_file = close_file(csv_file);
+    }
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z <= (MAX_PROBLEM_SIZE); z++) {
         // XXX: Timing logic
@@ -272,85 +285,145 @@ int main(int argc, char *argv[]) {
         uint64_t lowest_validity = UINT64_MAX;
         uint64_t highest_validity = 0;
         uint64_t cumulative_validity = 0;
+        // NOTE: we buffer problems to test in here until we have enough to scatter
+        uint32_t* problems_buffer = NULL;
+        uint32_t* solutions_buffer = NULL;
+        size_t problems_buffer_size = 0;
+        // the master node populates the buffer
+        if (world_rank == 0) {
+            problems_buffer = calloc(world_size, sizeof(uint32_t));
+            solutions_buffer = calloc(world_size, sizeof(uint32_t));
+            assert(problems_buffer != NULL);
+            assert(solutions_buffer != NULL);
+        }
+        MPI_Barrier(MPI_COMM_WORLD);
         // for every problem of that size...
         for (uint32_t p = 0; p < problem_size; p++) {
-            // TODO: This is the part where work is delegated to cluster nodes
-            uint32_t solutions_to_problem = count_solutions_to_problem(
+            // on the master node, add this problem to the end of the buffer
+            if (world_rank == 0) {
+                problems_buffer[problems_buffer_size] = p;
+            }
+            problems_buffer_size++;
+            MPI_Barrier(MPI_COMM_WORLD);
+            // whenever we have enough problems stored in the buffer, scatter them
+            MPI_Barrier(MPI_COMM_WORLD);
+            if (problems_buffer_size == world_size) {
+                MPI_Barrier(MPI_COMM_WORLD);
+                // scatter the buffer contents to all nodes (including us)
+                uint32_t our_problem;
+                MPI_Scatter(
+                    problems_buffer,
+                    1,
+                    MPI_UINT32_T,
+                    &our_problem,
+                    1,
+                    MPI_UINT32_T,
+                    0,
+                    MPI_COMM_WORLD
+                );
+                MPI_Barrier(MPI_COMM_WORLD);
+                // brute-force our problem
+                uint32_t solutions_to_problem = count_solutions_to_problem(
+                    z,
+                    problem_size,
+                    our_problem,
+                    problem,
+                    solution
+                );
+                MPI_Barrier(MPI_COMM_WORLD);
+                // gather, to return the data to the master node
+                MPI_Gather(
+                    &solutions_to_problem,
+                    1,
+                    MPI_UINT32_T,
+                    solutions_buffer,
+                    1,
+                    MPI_UINT32_T,
+                    0,
+                    MPI_COMM_WORLD
+                );
+                MPI_Barrier(MPI_COMM_WORLD);
+                // store results on master node only
+                if (world_rank == 0) {
+                    for (size_t i = 0; i < problems_buffer_size; i++) {
+                        // update lowest, highest and cumulative total validity values
+                        if (solutions_buffer[i] < lowest_validity) {
+                            lowest_validity = solutions_buffer[i];
+                        }
+                        if (solutions_buffer[i] > highest_validity) {
+                            highest_validity = solutions_buffer[i];
+                        }
+                        cumulative_validity += solutions_buffer[i];
+                        // TODO: store lowest, highest and mean validity values with problem size
+                    }
+                }
+                // reset buffer size
+                problems_buffer_size = 0;
+            }
+        }
+        // only collate data on master node
+        if (world_rank == 0) {
+            statistics[z].problem_size = z; // store size in bits, not raw size!
+            statistics[z].lowest_validity = lowest_validity;
+            statistics[z].highest_validity = highest_validity;
+            /*
+             * divide cumulative total validity by number of problems tested
+             * this calculation produces the mean validity for this size
+             */
+            statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
+
+            // XXX: Timing logic
+            time_t now = time(NULL);
+            char time_buffer[21];
+            strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
+
+            // update file (on master node only)
+            FILE* csv_file = open_file_for_appending(filename);
+            fprintf(
+                csv_file,
+                "%s,%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
+                time_buffer,
                 z,
-                problem_size,
-                p,
-                problem,
-                solution
+                two_to_the_power_of(statistics[z].problem_size),
+                statistics[z].lowest_validity,
+                statistics[z].highest_validity,
+                statistics[z].mean_validity
             );
-            // update lowest, highest and cumulative total validity values
-            if (solutions_to_problem < lowest_validity) {
-                lowest_validity = solutions_to_problem;
+            csv_file = close_file(csv_file);
+            long double seconds_elapsed = difftime(now, start_time);
+            if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
+                seconds_elapsed = (long double)(
+                    clock() - sub_second_start_time
+                ) / CLOCKS_PER_SEC;
             }
-            if (solutions_to_problem > highest_validity) {
-                highest_validity = solutions_to_problem;
-            }
-            cumulative_validity += solutions_to_problem;
-        }
-        // TODO: store lowest, highest and mean validity values with problem size
-        statistics[z].problem_size = z; // store size in bits, not raw size!
-        statistics[z].lowest_validity = lowest_validity;
-        statistics[z].highest_validity = highest_validity;
-        /*
-         * divide cumulative total validity by number of problems tested
-         * this calculation produces the mean validity for this size
-         */
-        statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
-
-        // XXX: Timing logic
-        time_t now = time(NULL);
-        char time_buffer[21];
-        strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
-
-        FILE* csv_file = open_file_for_appending(filename);
-        fprintf(
-            csv_file,
-            "%s,%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
-            time_buffer,
-            z,
-            two_to_the_power_of(statistics[z].problem_size),
-            statistics[z].lowest_validity,
-            statistics[z].highest_validity,
-            statistics[z].mean_validity
-        );
-        csv_file = close_file(csv_file);
-        long double seconds_elapsed = difftime(now, start_time);
-        if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
-            seconds_elapsed = (long double)(
-                clock() - sub_second_start_time
-            ) / CLOCKS_PER_SEC;
-        }
-        // print error of estimate
-        printf("============================= %s =============================\n", time_buffer);
-        // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
-        printf(
-            "Solved problem size: %" PRIu8
-            " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
-            z,
-            convenient_time_value(seconds_elapsed),
-            convenient_time_unit(seconds_elapsed),
-            ((seconds_elapsed / last_estimate) - 0.0L) * 100.0L
-        );
-        long double completion_estimate = estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z);
-        printf(
-            "Estimated time til completion:\t\t%Lf%s\n",
-            convenient_time_value(completion_estimate),
-            convenient_time_unit(completion_estimate)
-        );
-        if (z < MAX_PROBLEM_SIZE) {
-            last_estimate = estimated_completion_time(seconds_elapsed, z, 1);
+            // print error of estimate
+            printf("============================= %s =============================\n", time_buffer);
+            // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
             printf(
-                "Estimated time til next solved:\t\t%Lf%s\n",
-                convenient_time_value(last_estimate),
-                convenient_time_unit(last_estimate)
+                "Solved problem size: %" PRIu8
+                " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
+                z,
+                convenient_time_value(seconds_elapsed),
+                convenient_time_unit(seconds_elapsed),
+                ((seconds_elapsed / last_estimate) - 0.0L) * 100.0L
             );
+            long double completion_estimate = estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z);
+            printf(
+                "Estimated time til completion:\t\t%Lf%s\n",
+                convenient_time_value(completion_estimate),
+                convenient_time_unit(completion_estimate)
+            );
+            if (z < MAX_PROBLEM_SIZE) {
+                last_estimate = estimated_completion_time(seconds_elapsed, z, 1);
+                printf(
+                    "Estimated time til next solved:\t\t%Lf%s\n",
+                    convenient_time_value(last_estimate),
+                    convenient_time_unit(last_estimate)
+                );
+            }
+            printf("================================================================================\n\n");
+            // previous_time = seconds_elapsed;
         }
-        printf("================================================================================\n\n");
-        // previous_time = seconds_elapsed;
     }
     // deallocate memory
     assert(statistics != NULL);
