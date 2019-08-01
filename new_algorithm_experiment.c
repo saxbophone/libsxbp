@@ -41,7 +41,7 @@ typedef struct ValidSolutionsStatistics {
 } ValidSolutionsStatistics;
 
 // tweak these variables to change which range of problem sizes to test
-static const uint8_t MIN_PROBLEM_SIZE = 8;
+static const uint8_t MIN_PROBLEM_SIZE = 3;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
 // config variable for timing logic --maximum duration to measure with CPU clock
@@ -296,7 +296,6 @@ int main(int argc, char *argv[]) {
             assert(problems_buffer != NULL);
             assert(solutions_buffer != NULL);
         }
-        MPI_Barrier(MPI_COMM_WORLD);
         // for every problem of that size...
         for (uint32_t p = 0; p < problem_size; p++) {
             // on the master node, add this problem to the end of the buffer
@@ -304,11 +303,8 @@ int main(int argc, char *argv[]) {
                 problems_buffer[problems_buffer_size] = p;
             }
             problems_buffer_size++;
-            MPI_Barrier(MPI_COMM_WORLD);
             // whenever we have enough problems stored in the buffer, scatter them
-            MPI_Barrier(MPI_COMM_WORLD);
             if (problems_buffer_size == (size_t)world_size) {
-                MPI_Barrier(MPI_COMM_WORLD);
                 // scatter the buffer contents to all nodes (including us)
                 uint32_t our_problem;
                 MPI_Scatter(
@@ -321,7 +317,6 @@ int main(int argc, char *argv[]) {
                     0,
                     MPI_COMM_WORLD
                 );
-                MPI_Barrier(MPI_COMM_WORLD);
                 // brute-force our problem
                 uint32_t solutions_to_problem = count_solutions_to_problem(
                     z,
@@ -330,7 +325,6 @@ int main(int argc, char *argv[]) {
                     problem,
                     solution
                 );
-                MPI_Barrier(MPI_COMM_WORLD);
                 // gather, to return the data to the master node
                 MPI_Gather(
                     &solutions_to_problem,
@@ -342,7 +336,6 @@ int main(int argc, char *argv[]) {
                     0,
                     MPI_COMM_WORLD
                 );
-                MPI_Barrier(MPI_COMM_WORLD);
                 // store results on master node only
                 if (world_rank == 0) {
                     for (size_t i = 0; i < problems_buffer_size; i++) {
@@ -371,12 +364,10 @@ int main(int argc, char *argv[]) {
              * this calculation produces the mean validity for this size
              */
             statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
-
             // XXX: Timing logic
             time_t now = time(NULL);
             char time_buffer[21];
             strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
-
             // update file (on master node only)
             FILE* csv_file = open_file_for_appending(filename);
             fprintf(
