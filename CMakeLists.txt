@@ -136,6 +136,10 @@ else()
     message(STATUS "[sxbp] PNG output support disabled")
 endif()
 
+# MPI (for experimental exhaustive search for testing new algorithm)
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
+
 # Check (for unit tests)
 find_package(Check)
 if(CHECK_FOUND)
@@ -170,7 +174,7 @@ endif()
 
 # build the new algorithm experiments
 add_executable(new_algorithm_experiment "new_algorithm_experiment.c")
-target_link_libraries(new_algorithm_experiment sxbp m)
+target_link_libraries(new_algorithm_experiment sxbp ${MPI_C_LIBRARIES} m)
 
 # build unit tests if enabled
 if(BUILD_UNIT_TESTS)

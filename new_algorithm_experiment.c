@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <mpi.h>
+
 #include "sxbp/figure_collides.h"
 #include "sxbp/sxbp.h"
 
@@ -193,7 +195,38 @@ static long double convenient_time_value(long double seconds) {
     }
 }
 
-int main(int argc, char const *argv[]) {
+// counts how many valid solutions there are to a problem via brute-force search
+static uint32_t count_solutions_to_problem(
+    uint8_t problem_bits,
+    uint32_t problem_size,
+    uint32_t problem_number,
+    bool* problem_scratch_pad,
+    bool* solution_scratch_pad
+) {
+    uint32_t solutions_to_problem = 0;
+    // generate a problem for bit string p
+    integer_to_bit_string(problem_number, problem_scratch_pad, problem_bits);
+    // for every potential solution for a problem of that size...
+    for (uint32_t s = 0; s < problem_size; s++) {
+        // generate a solution for bit string s
+        integer_to_bit_string(s, solution_scratch_pad, problem_bits);
+        // check if the solution is valid for the problem
+        if (
+            is_solution_valid_for_problem(
+                problem_bits,
+                solution_scratch_pad,
+                problem_scratch_pad
+            )
+        ) {
+            // increment number of solutions if valid
+            solutions_to_problem++;
+        }
+    }
+    return solutions_to_problem;
+}
+
+int main(int argc, char *argv[]) {
+    MPI_Init(&argc, &argv);
     // pre-conditional assertions
     assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
     assert(MIN_PROBLEM_SIZE <= MAX_PROBLEM_SIZE); // max mustn't be < min
@@ -241,19 +274,14 @@ int main(int argc, char const *argv[]) {
         uint64_t cumulative_validity = 0;
         // for every problem of that size...
         for (uint32_t p = 0; p < problem_size; p++) {
-            uint64_t solutions_to_problem = 0;
-            // generate a problem for bit string p
-            integer_to_bit_string(p, problem, z);
-            // for every potential solution for a problem of that size...
-            for (uint32_t s = 0; s < problem_size; s++) {
-                // generate a solution for bit string s
-                integer_to_bit_string(s, solution, z);
-                // check if the solution is valid for the problem
-                if (is_solution_valid_for_problem(z, solution, problem)) {
-                    // increment number of solutions if valid
-                    solutions_to_problem++;
-                }
-            }
+            // TODO: This is the part where work is delegated to cluster nodes
+            uint32_t solutions_to_problem = count_solutions_to_problem(
+                z,
+                problem_size,
+                p,
+                problem,
+                solution
+            );
             // update lowest, highest and cumulative total validity values
             if (solutions_to_problem < lowest_validity) {
                 lowest_validity = solutions_to_problem;
@@ -332,5 +360,6 @@ int main(int argc, char const *argv[]) {
     // free(solution);
     // free(problem);
     // free(statistics);
+    MPI_Finalize();
     return 0;
 }
