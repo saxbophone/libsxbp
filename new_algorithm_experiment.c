@@ -27,6 +27,18 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
+// private data structure for maintaining state for problem generation
+typedef struct ProblemGenerator {
+    uint32_t next; // the id of the next problem that will be generated
+} ProblemGenerator;
+
+// private data structure for tracking program self-timing state
+typedef struct TimingData {
+    long double last_estimate; // the last time estimate we made
+    long double seconds_elapsed; // the amount of time elapsed in the current timing period
+    time_t start_time;
+} TimingData;
+
 // private data structure for storing proportion of valid solutions for problems
 typedef struct ValidSolutionsStatistics {
     uint8_t problem_size; // for what size of problem (in bits) is this data?
@@ -44,9 +56,6 @@ typedef struct ValidSolutionsStatistics {
 static const uint8_t MIN_PROBLEM_SIZE = 3;
 static const uint8_t MAX_PROBLEM_SIZE = 18;
 
-// config variable for timing logic --maximum duration to measure with CPU clock
-static const double MAX_CPU_CLOCK_TIME = 60.0; // 1 minute
-
 static const long double MINUTE_SECONDS = 60.0L;
 static const long double HOUR_SECONDS = 60.0L * 60.0L;
 static const long double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
@@ -55,6 +64,21 @@ static const long double YEAR_SECONDS = 60.0L * 60.0L * 24.0L * 365.2425L;
 
 static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
+}
+
+static ProblemGenerator init_problem_generator(uint8_t problem_size) {
+    ProblemGenerator generator = {
+        .next = 0,
+    };
+    return generator;
+}
+
+// picks the next problem out of the problem generator
+static uint32_t get_next_problem(ProblemGenerator* generator) {
+    uint32_t problem = generator->next;
+    // NOTE: this will overflow for problems larger than 32 bits!
+    generator->next++;
+    return problem;
 }
 
 // unpacks all the bits up to `size` from the given `source` integer into `dest`
@@ -133,6 +157,17 @@ static FILE* close_file(FILE* file_handle) {
         abort();
     }
     return NULL;
+}
+
+static void stopwatch_start(TimingData* timing_data) {
+    timing_data->start_time = time(NULL);
+    timing_data->seconds_elapsed = 1.0L / 0.0L; // NAN
+}
+
+static void stopwatch_stop(TimingData* timing_data) {
+    time_t now = time(NULL);
+    long double seconds_elapsed = difftime(now, timing_data->start_time);
+    timing_data->seconds_elapsed = seconds_elapsed;
 }
 
 static long double estimated_completion_time_of_next(
@@ -225,6 +260,39 @@ static uint32_t count_solutions_to_problem(
     return solutions_to_problem;
 }
 
+void update_and_print_completion_estimate(TimingData* timing_data, uint8_t last_solved) {
+    time_t now = time(NULL);
+    char time_buffer[21];
+    strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
+    // print error of estimate
+    printf("============================= %s =============================\n", time_buffer);
+    // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
+    printf(
+        "Solved problem size: %" PRIu8
+        " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
+        last_solved,
+        convenient_time_value(timing_data->seconds_elapsed),
+        convenient_time_unit(timing_data->seconds_elapsed),
+        ((timing_data->seconds_elapsed / timing_data->last_estimate) - 0.0L) * 100.0L
+    );
+    long double completion_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, MAX_PROBLEM_SIZE - last_solved);
+    printf(
+        "Estimated time til completion:\t\t%Lf%s\n",
+        convenient_time_value(completion_estimate),
+        convenient_time_unit(completion_estimate)
+    );
+    if (last_solved < MAX_PROBLEM_SIZE) {
+        timing_data->last_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, 1);
+        printf(
+            "Estimated time til next solved:\t\t%Lf%s\n",
+            convenient_time_value(timing_data->last_estimate),
+            convenient_time_unit(timing_data->last_estimate)
+        );
+    }
+    printf("================================================================================\n\n");
+    // previous_time = seconds_elapsed;
+}
+
 int main(int argc, char *argv[]) {
     // pre-conditional assertions
     assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
@@ -261,8 +329,8 @@ int main(int argc, char *argv[]) {
     // let it abort if any memory allocations were refused
     assert(problem != NULL);
     assert(solution != NULL);
-    // keep track of error rate between time estimates
-    long double last_estimate = 0.0;
+    // keep track of program self-timing data
+    TimingData timing_data = {0};
 
     // only the master node has to write out the results to file
     if (world_rank == 0) {
@@ -276,9 +344,8 @@ int main(int argc, char *argv[]) {
     }
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z <= (MAX_PROBLEM_SIZE); z++) {
-        // XXX: Timing logic
-        clock_t sub_second_start_time = clock();
-        time_t start_time = time(NULL);
+        // start the "stopwatch"
+        stopwatch_start(&timing_data);
         // how many problems of that size exist
         uint32_t problem_size = two_to_the_power_of(z);
         // init highest, lowest and cumulative validity counters
@@ -364,7 +431,8 @@ int main(int argc, char *argv[]) {
              * this calculation produces the mean validity for this size
              */
             statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
-            // XXX: Timing logic
+            // stop the "stopwatch"
+            stopwatch_stop(&timing_data);
             time_t now = time(NULL);
             char time_buffer[21];
             strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
@@ -381,39 +449,7 @@ int main(int argc, char *argv[]) {
                 statistics[z].mean_validity
             );
             csv_file = close_file(csv_file);
-            long double seconds_elapsed = difftime(now, start_time);
-            if (seconds_elapsed < MAX_CPU_CLOCK_TIME) {
-                seconds_elapsed = (long double)(
-                    clock() - sub_second_start_time
-                ) / CLOCKS_PER_SEC;
-            }
-            // print error of estimate
-            printf("============================= %s =============================\n", time_buffer);
-            // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
-            printf(
-                "Solved problem size: %" PRIu8
-                " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
-                z,
-                convenient_time_value(seconds_elapsed),
-                convenient_time_unit(seconds_elapsed),
-                ((seconds_elapsed / last_estimate) - 0.0L) * 100.0L
-            );
-            long double completion_estimate = estimated_completion_time(seconds_elapsed, z, MAX_PROBLEM_SIZE - z);
-            printf(
-                "Estimated time til completion:\t\t%Lf%s\n",
-                convenient_time_value(completion_estimate),
-                convenient_time_unit(completion_estimate)
-            );
-            if (z < MAX_PROBLEM_SIZE) {
-                last_estimate = estimated_completion_time(seconds_elapsed, z, 1);
-                printf(
-                    "Estimated time til next solved:\t\t%Lf%s\n",
-                    convenient_time_value(last_estimate),
-                    convenient_time_unit(last_estimate)
-                );
-            }
-            printf("================================================================================\n\n");
-            // previous_time = seconds_elapsed;
+            update_and_print_completion_estimate(&timing_data, z);
         }
     }
     // deallocate memory
