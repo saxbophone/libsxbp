@@ -454,7 +454,10 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if (extra > 0) {
+        if (
+            extra > 0
+            && ((unsigned)world_rank < extra) // NOTE: this bit is a bit iffy but seems to work
+        ) {
             // allocate an array of ints, which tell MPI_Scatterv which nodes to use
             int* send_counts = calloc((size_t)world_size, sizeof(int));
             // this array tells MPI_Scatterv the index of each item to send
@@ -484,8 +487,11 @@ int main(int argc, char *argv[]) {
                 MPI_COMM_WORLD
             );
             uint32_t solutions_to_problem;
+            // NOTE: this bit was previously only done for nodes that have work
+            // Now, the whole block is protected by this condition and no communication happens at all if no work for those nodes
             // Solve this node's problem (if it has one)
-            if ((unsigned)world_rank < extra) {
+            /*if ((unsigned)world_rank < extra)*/
+            {
                 // log_node_message("extra problem");
                 solutions_to_problem = count_solutions_to_problem(
                     z,
