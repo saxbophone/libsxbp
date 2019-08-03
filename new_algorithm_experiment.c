@@ -39,6 +39,13 @@ typedef struct TimingData {
     time_t start_time;
 } TimingData;
 
+// private structure used for tracking validity data before it has been finished
+typedef struct BookKeepingData {
+    uint64_t lowest_validity;
+    uint64_t highest_validity;
+    uint64_t cumulative_validity;
+} BookKeepingData;
+
 // private data structure for storing proportion of valid solutions for problems
 typedef struct ValidSolutionsStatistics {
     uint8_t problem_size; // for what size of problem (in bits) is this data?
@@ -66,7 +73,7 @@ static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
 }
 
-static ProblemGenerator init_problem_generator(uint8_t problem_size) {
+static ProblemGenerator init_problem_generator(void) {
     ProblemGenerator generator = {
         .next = 0,
     };
@@ -196,6 +203,30 @@ static long double estimated_completion_time(
     return estimate;
 }
 
+static void init_book_keeping_data(BookKeepingData* book_keeping_data) {
+    book_keeping_data->lowest_validity = UINT64_MAX;
+    book_keeping_data->highest_validity = 0;
+    book_keeping_data->cumulative_validity = 0;
+}
+
+static void update_book_keeping_data(
+    BookKeepingData* book_keeping_data,
+    uint32_t buffer[],
+    size_t buffer_size
+) {
+    for (size_t i = 0; i < buffer_size; i++) {
+        // update lowest, highest and cumulative total validity values
+        if (buffer[i] < book_keeping_data->lowest_validity) {
+            book_keeping_data->lowest_validity = buffer[i];
+        }
+        if (buffer[i] > book_keeping_data->highest_validity) {
+            book_keeping_data->highest_validity = buffer[i];
+        }
+        book_keeping_data->cumulative_validity += buffer[i];
+        // TODO: store lowest, highest and mean validity values with problem size
+    }
+}
+
 // returns the most convenient way of describing a given time unit
 static const char* convenient_time_unit(long double seconds) {
     if (seconds < MINUTE_SECONDS) {
@@ -260,7 +291,7 @@ static uint32_t count_solutions_to_problem(
     return solutions_to_problem;
 }
 
-void update_and_print_completion_estimate(TimingData* timing_data, uint8_t last_solved) {
+static void update_and_print_completion_estimate(TimingData* timing_data, uint8_t last_solved) {
     time_t now = time(NULL);
     char time_buffer[21];
     strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
@@ -292,6 +323,14 @@ void update_and_print_completion_estimate(TimingData* timing_data, uint8_t last_
     printf("================================================================================\n\n");
     // previous_time = seconds_elapsed;
 }
+
+// static void log_node_message(char* message) {
+//     int rank, name_length;
+//     char name[MPI_MAX_PROCESSOR_NAME];
+//     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//     MPI_Get_processor_name(name, &name_length);
+//     printf("%s:%d\t%s\n", name, rank, message);
+// }
 
 int main(int argc, char *argv[]) {
     // pre-conditional assertions
@@ -344,93 +383,145 @@ int main(int argc, char *argv[]) {
     }
     // for every size of problem...
     for (uint8_t z = MIN_PROBLEM_SIZE; z <= (MAX_PROBLEM_SIZE); z++) {
-        // start the "stopwatch"
-        stopwatch_start(&timing_data);
+        if (world_rank == 0) {
+            // start the "stopwatch"
+            stopwatch_start(&timing_data);
+        }
         // how many problems of that size exist
         uint32_t problem_size = two_to_the_power_of(z);
+        // "turns" is how many times we need all nodes to work to solve problems
+        uint32_t turns = problem_size / (unsigned)world_size;
+        // "extra" is the remainder of problems / nodes
+        uint32_t extra = problem_size % (unsigned)world_size;
+        if (world_rank == 0) printf("Turns: %d Extra: %d\n", turns, extra);
+        // this generates problems for us to solve
+        ProblemGenerator problem_generator = init_problem_generator();
         // init highest, lowest and cumulative validity counters
-        uint64_t lowest_validity = UINT64_MAX;
-        uint64_t highest_validity = 0;
-        uint64_t cumulative_validity = 0;
+        BookKeepingData book_keeping_data = {0};
+        init_book_keeping_data(&book_keeping_data);
         // NOTE: we buffer problems to test in here until we have enough to scatter
         uint32_t* problems_buffer = NULL;
         uint32_t* solutions_buffer = NULL;
-        size_t problems_buffer_size = 0;
-        // the master node populates the buffer
+        // only the master node needs to allocate these buffers
         if (world_rank == 0) {
             problems_buffer = calloc((size_t)world_size, sizeof(uint32_t));
             solutions_buffer = calloc((size_t)world_size, sizeof(uint32_t));
             assert(problems_buffer != NULL);
             assert(solutions_buffer != NULL);
         }
-        // for every problem of that size...
-        for (uint32_t p = 0; p < problem_size; p++) {
-            // on the master node, add this problem to the end of the buffer
+        // for every "turn", populate a full buffer of problems and distribute
+        for (uint32_t t = 0; t < turns; t++) {
             if (world_rank == 0) {
-                problems_buffer[problems_buffer_size] = p;
+                for (uint32_t n = 0; n < (unsigned)world_size; n++) {
+                    problems_buffer[n] = get_next_problem(&problem_generator);
+                }
             }
-            problems_buffer_size++;
-            // whenever we have enough problems stored in the buffer, scatter them
-            if (problems_buffer_size == (size_t)world_size) {
-                // scatter the buffer contents to all nodes (including us)
-                uint32_t our_problem;
-                MPI_Scatter(
-                    problems_buffer,
-                    1,
-                    MPI_UINT32_T,
-                    &our_problem,
-                    1,
-                    MPI_UINT32_T,
-                    0,
-                    MPI_COMM_WORLD
-                );
-                // brute-force our problem
-                uint32_t solutions_to_problem = count_solutions_to_problem(
+            // Scatter problems
+            uint32_t our_problem;
+            MPI_Scatter(
+                problems_buffer,
+                1,
+                MPI_UINT32_T,
+                &our_problem,
+                1,
+                MPI_UINT32_T,
+                0,
+                MPI_COMM_WORLD
+            );
+            // log_node_message("turn problem");
+            // Solve this node's problem
+            uint32_t solutions_to_problem = count_solutions_to_problem(
+                z,
+                problem_size,
+                our_problem,
+                problem,
+                solution
+            );
+            // Gather results
+            MPI_Gather(
+                &solutions_to_problem,
+                1,
+                MPI_UINT32_T,
+                solutions_buffer,
+                1,
+                MPI_UINT32_T,
+                0,
+                MPI_COMM_WORLD
+            );
+            if (world_rank == 0) {                
+                // Update book-keeping
+                update_book_keeping_data(&book_keeping_data, solutions_buffer, (size_t)world_size);
+            }
+        }
+
+        if (extra > 0) {
+            // allocate an array of ints, which tell MPI_Scatterv which nodes to use
+            int* send_counts = calloc((size_t)world_size, sizeof(int));
+            // this array tells MPI_Scatterv the index of each item to send
+            int* displacements = calloc((size_t)world_size, sizeof(int));
+            // lowly allocation failure handling!
+            assert(send_counts != NULL);
+            assert(displacements != NULL);
+            // for every "extra" turn, add an additional item to the buffer
+            for (uint32_t e = 0; e < extra; e++) {
+                if (world_rank == 0) {
+                    problems_buffer[e] = get_next_problem(&problem_generator);
+                }
+                send_counts[e] = 1; // send to this process!
+                displacements[e] = (int)e; // 0, 1, 2... etc...
+            }
+            // Scatter problems, with *Scatterv* so not all nodes receive one
+            uint32_t our_problem;
+            MPI_Scatterv(
+                problems_buffer,
+                send_counts,
+                displacements,
+                MPI_UINT32_T,
+                &our_problem,
+                send_counts[world_rank],
+                MPI_UINT32_T,
+                0,
+                MPI_COMM_WORLD
+            );
+            uint32_t solutions_to_problem;
+            // Solve this node's problem (if it has one)
+            if ((unsigned)world_rank < extra) {
+                // log_node_message("extra problem");
+                solutions_to_problem = count_solutions_to_problem(
                     z,
                     problem_size,
                     our_problem,
                     problem,
                     solution
                 );
-                // gather, to return the data to the master node
-                MPI_Gather(
-                    &solutions_to_problem,
-                    1,
-                    MPI_UINT32_T,
-                    solutions_buffer,
-                    1,
-                    MPI_UINT32_T,
-                    0,
-                    MPI_COMM_WORLD
-                );
-                // store results on master node only
-                if (world_rank == 0) {
-                    for (size_t i = 0; i < problems_buffer_size; i++) {
-                        // update lowest, highest and cumulative total validity values
-                        if (solutions_buffer[i] < lowest_validity) {
-                            lowest_validity = solutions_buffer[i];
-                        }
-                        if (solutions_buffer[i] > highest_validity) {
-                            highest_validity = solutions_buffer[i];
-                        }
-                        cumulative_validity += solutions_buffer[i];
-                        // TODO: store lowest, highest and mean validity values with problem size
-                    }
-                }
-                // reset buffer size
-                problems_buffer_size = 0;
+            }
+            // Gather problems with *Gatherv* because not all nodes send one
+            MPI_Gatherv(
+                &solutions_to_problem,
+                send_counts[world_rank],
+                MPI_UINT32_T,
+                solutions_buffer,
+                send_counts,
+                displacements,
+                MPI_UINT32_T,
+                0,
+                MPI_COMM_WORLD
+            );
+            if (world_rank == 0) {
+                // Update book-keeping
+                update_book_keeping_data(&book_keeping_data, solutions_buffer, extra);
             }
         }
-        // only collate data on master node
+        // update statistics on master node only
         if (world_rank == 0) {
             statistics[z].problem_size = z; // store size in bits, not raw size!
-            statistics[z].lowest_validity = lowest_validity;
-            statistics[z].highest_validity = highest_validity;
+            statistics[z].lowest_validity = book_keeping_data.lowest_validity;
+            statistics[z].highest_validity = book_keeping_data.highest_validity;
             /*
              * divide cumulative total validity by number of problems tested
              * this calculation produces the mean validity for this size
              */
-            statistics[z].mean_validity = (long double)cumulative_validity / problem_size;
+            statistics[z].mean_validity = (long double)book_keeping_data.cumulative_validity / problem_size;
             // stop the "stopwatch"
             stopwatch_stop(&timing_data);
             time_t now = time(NULL);
@@ -451,6 +542,9 @@ int main(int argc, char *argv[]) {
             csv_file = close_file(csv_file);
             update_and_print_completion_estimate(&timing_data, z);
         }
+
+
+        // XXX: end of new implementation (old one below)
     }
     // deallocate memory
     assert(statistics != NULL);
