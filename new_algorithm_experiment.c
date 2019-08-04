@@ -297,7 +297,6 @@ static void update_and_print_completion_estimate(TimingData* timing_data, uint8_
     strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
     // print error of estimate
     printf("============================= %s =============================\n", time_buffer);
-    // printf("Time Factor: %f\n", seconds_elapsed / previous_time);
     printf(
         "Solved problem size: %" PRIu8
         " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
@@ -321,7 +320,6 @@ static void update_and_print_completion_estimate(TimingData* timing_data, uint8_
         );
     }
     printf("================================================================================\n\n");
-    // previous_time = seconds_elapsed;
 }
 
 static void log_node_message(char* message) {
@@ -329,7 +327,9 @@ static void log_node_message(char* message) {
     char name[MPI_MAX_PROCESSOR_NAME];
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Get_processor_name(name, &name_length);
-    printf("%s:%d\t%s\n", name, rank, message);
+    MPI_Barrier(MPI_COMM_WORLD);
+    printf("[%s:%d] %s\n", name, rank, message);
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 int main(int argc, char *argv[]) {
@@ -351,7 +351,7 @@ int main(int argc, char *argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     // printf("Process %i of %i\n", world_rank, world_size);
-    log_node_message("Reporting for duty!");
+    log_node_message("START");
 
     ValidSolutionsStatistics* statistics = NULL;
     // only master node has to keep track of statistics
@@ -394,7 +394,6 @@ int main(int argc, char *argv[]) {
         uint32_t turns = problem_size / (unsigned)world_size;
         // "extra" is the remainder of problems / nodes
         uint32_t extra = problem_size % (unsigned)world_size;
-        if (world_rank == 0) printf("Turns: %d Extra: %d\n", turns, extra);
         // this generates problems for us to solve
         ProblemGenerator problem_generator = init_problem_generator();
         // init highest, lowest and cumulative validity counters
@@ -429,7 +428,6 @@ int main(int argc, char *argv[]) {
                 0,
                 MPI_COMM_WORLD
             );
-            // log_node_message("turn problem");
             // Solve this node's problem
             uint32_t solutions_to_problem = count_solutions_to_problem(
                 z,
@@ -457,7 +455,8 @@ int main(int argc, char *argv[]) {
 
         if (
             extra > 0
-            && ((unsigned)world_rank < extra) // NOTE: this bit is a bit iffy but seems to work
+            // NOTE: this bit is a bit iffy but seems to work with OR without it
+            // && ((unsigned)world_rank < extra)
         ) {
             // allocate an array of ints, which tell MPI_Scatterv which nodes to use
             int* send_counts = calloc((size_t)world_size, sizeof(int));
@@ -488,20 +487,13 @@ int main(int argc, char *argv[]) {
                 MPI_COMM_WORLD
             );
             uint32_t solutions_to_problem;
-            // NOTE: this bit was previously only done for nodes that have work
-            // Now, the whole block is protected by this condition and no communication happens at all if no work for those nodes
-            // Solve this node's problem (if it has one)
-            /*if ((unsigned)world_rank < extra)*/
-            {
-                // log_node_message("extra problem");
-                solutions_to_problem = count_solutions_to_problem(
-                    z,
-                    problem_size,
-                    our_problem,
-                    problem,
-                    solution
-                );
-            }
+            solutions_to_problem = count_solutions_to_problem(
+                z,
+                problem_size,
+                our_problem,
+                problem,
+                solution
+            );
             // Gather problems with *Gatherv* because not all nodes send one
             MPI_Gatherv(
                 &solutions_to_problem,
