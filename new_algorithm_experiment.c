@@ -327,6 +327,7 @@ static void log_node_message(char* message) {
     char name[MPI_MAX_PROCESSOR_NAME];
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Get_processor_name(name, &name_length);
+    // use of MPI_Barrier() makes it less likely for output to interleave
     MPI_Barrier(MPI_COMM_WORLD);
     printf("[%s:%d] %s\n", name, rank, message);
     MPI_Barrier(MPI_COMM_WORLD);
