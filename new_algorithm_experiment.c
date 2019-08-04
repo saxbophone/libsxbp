@@ -324,13 +324,13 @@ static void update_and_print_completion_estimate(TimingData* timing_data, uint8_
     // previous_time = seconds_elapsed;
 }
 
-// static void log_node_message(char* message) {
-//     int rank, name_length;
-//     char name[MPI_MAX_PROCESSOR_NAME];
-//     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//     MPI_Get_processor_name(name, &name_length);
-//     printf("%s:%d\t%s\n", name, rank, message);
-// }
+static void log_node_message(char* message) {
+    int rank, name_length;
+    char name[MPI_MAX_PROCESSOR_NAME];
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Get_processor_name(name, &name_length);
+    printf("%s:%d\t%s\n", name, rank, message);
+}
 
 int main(int argc, char *argv[]) {
     // pre-conditional assertions
@@ -350,7 +350,8 @@ int main(int argc, char *argv[]) {
     int world_rank, world_size;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    printf("Process %i of %i\n", world_rank, world_size);
+    // printf("Process %i of %i\n", world_rank, world_size);
+    log_node_message("Reporting for duty!");
 
     ValidSolutionsStatistics* statistics = NULL;
     // only master node has to keep track of statistics
