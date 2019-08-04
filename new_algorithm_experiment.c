@@ -60,8 +60,8 @@ typedef struct ValidSolutionsStatistics {
 } ValidSolutionsStatistics;
 
 // tweak these variables to change which range of problem sizes to test
-static const uint8_t MIN_PROBLEM_SIZE = 3;
-static const uint8_t MAX_PROBLEM_SIZE = 18;
+static const uint8_t MIN_PROBLEM_SIZE = 1;
+static const uint8_t MAX_PROBLEM_SIZE = 20;
 
 static const long double MINUTE_SECONDS = 60.0L;
 static const long double HOUR_SECONDS = 60.0L * 60.0L;
