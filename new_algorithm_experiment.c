@@ -362,14 +362,14 @@ int main(int argc, char *argv[]) {
             (size_t)((MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1),
             sizeof(ValidSolutionsStatistics)
         );
-        assert(statistics != NULL);
+        if (statistics == NULL) abort();
     }
     // allocate data structure for storing problem and solution bit strings
     bool* problem = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
     bool* solution = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
     // let it abort if any memory allocations were refused
-    assert(problem != NULL);
-    assert(solution != NULL);
+    if (problem == NULL) abort();
+    if (solution == NULL) abort();
     // keep track of program self-timing data
     TimingData timing_data = {0};
 
@@ -407,8 +407,8 @@ int main(int argc, char *argv[]) {
         if (world_rank == 0) {
             problems_buffer = calloc((size_t)world_size, sizeof(uint32_t));
             solutions_buffer = calloc((size_t)world_size, sizeof(uint32_t));
-            assert(problems_buffer != NULL);
-            assert(solutions_buffer != NULL);
+            if (problems_buffer == NULL) abort();
+            if (solutions_buffer == NULL) abort();
         }
         // for every "turn", populate a full buffer of problems and distribute
         for (uint32_t t = 0; t < turns; t++) {
@@ -454,18 +454,15 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        if (
-            extra > 0
-            // NOTE: this bit is a bit iffy but seems to work with OR without it
-            // && ((unsigned)world_rank < extra)
-        ) {
+        // only process "extra" problems if there are any
+        if (extra > 0) {
             // allocate an array of ints, which tell MPI_Scatterv which nodes to use
             int* send_counts = calloc((size_t)world_size, sizeof(int));
             // this array tells MPI_Scatterv the index of each item to send
             int* displacements = calloc((size_t)world_size, sizeof(int));
             // lowly allocation failure handling!
-            assert(send_counts != NULL);
-            assert(displacements != NULL);
+            if (send_counts == NULL) abort();
+            if (displacements == NULL) abort();
             // for every "extra" turn, add an additional item to the buffer
             for (uint32_t e = 0; e < extra; e++) {
                 if (world_rank == 0) {
@@ -475,7 +472,7 @@ int main(int argc, char *argv[]) {
                 displacements[e] = (int)e; // 0, 1, 2... etc...
             }
             // Scatter problems, with *Scatterv* so not all nodes receive one
-            uint32_t our_problem;
+            uint32_t our_problem = 0;
             MPI_Scatterv(
                 problems_buffer,
                 send_counts,
@@ -487,14 +484,17 @@ int main(int argc, char *argv[]) {
                 0,
                 MPI_COMM_WORLD
             );
-            uint32_t solutions_to_problem;
-            solutions_to_problem = count_solutions_to_problem(
-                z,
-                problem_size,
-                our_problem,
-                problem,
-                solution
-            );
+            uint32_t solutions_to_problem = 0;
+            // solve extra problems only on the nodes that were selected to do
+            if ((unsigned)world_rank < extra) {
+                solutions_to_problem = count_solutions_to_problem(
+                    z,
+                    problem_size,
+                    our_problem,
+                    problem,
+                    solution
+                );
+            }
             // Gather problems with *Gatherv* because not all nodes send one
             MPI_Gatherv(
                 &solutions_to_problem,
@@ -511,6 +511,9 @@ int main(int argc, char *argv[]) {
                 // Update book-keeping
                 update_book_keeping_data(&book_keeping_data, solutions_buffer, extra);
             }
+            // clean up allocated memory
+            free(send_counts);
+            free(displacements);
         }
         // update statistics on master node only
         if (world_rank == 0) {
@@ -547,7 +550,6 @@ int main(int argc, char *argv[]) {
         // XXX: end of new implementation (old one below)
     }
     // deallocate memory
-    assert(statistics != NULL);
     assert(problem != NULL);
     assert(solution != NULL);
     // FIXME: for some reason, all of these free()s cause memory error crashes!
