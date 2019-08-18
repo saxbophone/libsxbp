@@ -59,10 +59,6 @@ typedef struct ValidSolutionsStatistics {
     // divide validity count by 2^problem_size
 } ValidSolutionsStatistics;
 
-// tweak these variables to change which range of problem sizes to test
-static const uint8_t MIN_PROBLEM_SIZE = 1;
-static const uint8_t MAX_PROBLEM_SIZE = 20;
-
 static const long double MINUTE_SECONDS = 60.0L;
 static const long double HOUR_SECONDS = 60.0L * 60.0L;
 static const long double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
@@ -291,7 +287,7 @@ static uint32_t count_solutions_to_problem(
     return solutions_to_problem;
 }
 
-static void update_and_print_completion_estimate(TimingData* timing_data, uint8_t last_solved) {
+static void update_and_print_completion_estimate(TimingData* timing_data, uint8_t last_solved, uint8_t max_problem_size) {
     time_t now = time(NULL);
     char time_buffer[21];
     strftime(time_buffer, sizeof(time_buffer), "%FT%TZ", gmtime(&now));
@@ -305,13 +301,13 @@ static void update_and_print_completion_estimate(TimingData* timing_data, uint8_
         convenient_time_unit(timing_data->seconds_elapsed),
         ((timing_data->seconds_elapsed / timing_data->last_estimate) - 0.0L) * 100.0L
     );
-    long double completion_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, MAX_PROBLEM_SIZE - last_solved);
+    long double completion_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, max_problem_size - last_solved);
     printf(
         "Estimated time til completion:\t\t%Lf%s\n",
         convenient_time_value(completion_estimate),
         convenient_time_unit(completion_estimate)
     );
-    if (last_solved < MAX_PROBLEM_SIZE) {
+    if (last_solved < max_problem_size) {
         timing_data->last_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, 1);
         printf(
             "Estimated time til next solved:\t\t%Lf%s\n",
@@ -334,24 +330,39 @@ static void log_node_message(char* message) {
 }
 
 int main(int argc, char *argv[]) {
-    // pre-conditional assertions
-    assert(MIN_PROBLEM_SIZE > 0); // no point testing a problem of size 0
-    assert(MIN_PROBLEM_SIZE <= MAX_PROBLEM_SIZE); // max mustn't be < min
-    // this program works on problem sizes up to 32 bits
-    assert(MAX_PROBLEM_SIZE <= 32);
-    // we need one additional argument --for the file name to output to
-    if (argc < 2) {
-        fprintf(stderr, "Need filename argument!\n");
+    // initialise MPI and discover our place in the world
+    MPI_Init(&argc, &argv);
+    /*
+     * we need three additional arguments:
+     * - the filename to write output to
+     * - the minimum size of problem to solve (bits)
+     * - the maximum size of problem to solve (bits)
+     */
+    if (argc < 4) {
+        fprintf(stderr, "Need filename, min and max problem size arguments!\n");
         return -1;
     }
     const char* filename = argv[1]; // grab filename out of arguments
-
-    // initialise MPI and discover our place in the world
-    MPI_Init(&argc, &argv);
-    int world_rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    // printf("Process %i of %i\n", world_rank, world_size);
+    const uint8_t min_problem_size = strtoul(argv[2], NULL, 10);
+    const uint8_t max_problem_size = strtoul(argv[3], NULL, 10);
+    // sanity-checks on the chosen problem sizes
+    if (
+        !(min_problem_size > 0) || // no point testing a problem of size 0
+        !(min_problem_size <= max_problem_size) || // max mustn't be < min
+        !(max_problem_size <= 32) // this program works on problem sizes up to 32 bits
+    ) {
+        fprintf(stderr, "Invalid values or combination of min/max problem sizes!\n");
+        fprintf(stderr, "Min must be smaller than or equal to max and both must be no greater than 32\n");
+        return -1;
+    }
+    size_t world_rank, world_size;
+    {
+        int signed_world_rank, signed_world_size;
+        MPI_Comm_rank(MPI_COMM_WORLD, &signed_world_rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &signed_world_size);
+        world_rank = (size_t)signed_world_rank;
+        world_size = (size_t)signed_world_size;
+    }
     log_node_message("START");
 
     ValidSolutionsStatistics* statistics = NULL;
@@ -359,14 +370,14 @@ int main(int argc, char *argv[]) {
     if (world_rank == 0) {
         // allocate a data structure for tallying % of valid solutions / size
         statistics = calloc(
-            (size_t)((MAX_PROBLEM_SIZE - MIN_PROBLEM_SIZE) + 1),
+            (size_t)((max_problem_size - min_problem_size) + 1),
             sizeof(ValidSolutionsStatistics)
         );
         if (statistics == NULL) abort();
     }
     // allocate data structure for storing problem and solution bit strings
-    bool* problem = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
-    bool* solution = calloc(MAX_PROBLEM_SIZE, sizeof(bool));
+    bool* problem = calloc(max_problem_size, sizeof(bool));
+    bool* solution = calloc(max_problem_size, sizeof(bool));
     // let it abort if any memory allocations were refused
     if (problem == NULL) abort();
     if (solution == NULL) abort();
@@ -384,7 +395,7 @@ int main(int argc, char *argv[]) {
         csv_file = close_file(csv_file);
     }
     // for every size of problem...
-    for (uint8_t z = MIN_PROBLEM_SIZE; z <= (MAX_PROBLEM_SIZE); z++) {
+    for (uint8_t z = min_problem_size; z <= (max_problem_size); z++) {
         if (world_rank == 0) {
             // start the "stopwatch"
             stopwatch_start(&timing_data);
@@ -392,9 +403,9 @@ int main(int argc, char *argv[]) {
         // how many problems of that size exist
         uint32_t problem_size = two_to_the_power_of(z);
         // "turns" is how many times we need all nodes to work to solve problems
-        uint32_t turns = problem_size / (unsigned)world_size;
+        uint32_t turns = problem_size / world_size;
         // "extra" is the remainder of problems / nodes
-        uint32_t extra = problem_size % (unsigned)world_size;
+        uint32_t extra = problem_size % world_size;
         // this generates problems for us to solve
         ProblemGenerator problem_generator = init_problem_generator();
         // init highest, lowest and cumulative validity counters
@@ -405,15 +416,15 @@ int main(int argc, char *argv[]) {
         uint32_t* solutions_buffer = NULL;
         // only the master node needs to allocate these buffers
         if (world_rank == 0) {
-            problems_buffer = calloc((size_t)world_size, sizeof(uint32_t));
-            solutions_buffer = calloc((size_t)world_size, sizeof(uint32_t));
+            problems_buffer = calloc(world_size, sizeof(uint32_t));
+            solutions_buffer = calloc(world_size, sizeof(uint32_t));
             if (problems_buffer == NULL) abort();
             if (solutions_buffer == NULL) abort();
         }
         // for every "turn", populate a full buffer of problems and distribute
         for (uint32_t t = 0; t < turns; t++) {
             if (world_rank == 0) {
-                for (uint32_t n = 0; n < (unsigned)world_size; n++) {
+                for (uint32_t n = 0; n < world_size; n++) {
                     problems_buffer[n] = get_next_problem(&problem_generator);
                 }
             }
@@ -450,16 +461,16 @@ int main(int argc, char *argv[]) {
             );
             if (world_rank == 0) {                
                 // Update book-keeping
-                update_book_keeping_data(&book_keeping_data, solutions_buffer, (size_t)world_size);
+                update_book_keeping_data(&book_keeping_data, solutions_buffer, world_size);
             }
         }
 
         // only process "extra" problems if there are any
         if (extra > 0) {
             // allocate an array of ints, which tell MPI_Scatterv which nodes to use
-            int* send_counts = calloc((size_t)world_size, sizeof(int));
+            int* send_counts = calloc(world_size, sizeof(int));
             // this array tells MPI_Scatterv the index of each item to send
-            int* displacements = calloc((size_t)world_size, sizeof(int));
+            int* displacements = calloc(world_size, sizeof(int));
             // lowly allocation failure handling!
             if (send_counts == NULL) abort();
             if (displacements == NULL) abort();
@@ -486,7 +497,7 @@ int main(int argc, char *argv[]) {
             );
             uint32_t solutions_to_problem = 0;
             // solve extra problems only on the nodes that were selected to do
-            if ((unsigned)world_rank < extra) {
+            if (world_rank < extra) {
                 solutions_to_problem = count_solutions_to_problem(
                     z,
                     problem_size,
@@ -517,14 +528,14 @@ int main(int argc, char *argv[]) {
         }
         // update statistics on master node only
         if (world_rank == 0) {
-            statistics[z].problem_size = z; // store size in bits, not raw size!
-            statistics[z].lowest_validity = book_keeping_data.lowest_validity;
-            statistics[z].highest_validity = book_keeping_data.highest_validity;
+            statistics[z - min_problem_size].problem_size = z; // store size in bits, not raw size!
+            statistics[z - min_problem_size].lowest_validity = book_keeping_data.lowest_validity;
+            statistics[z - min_problem_size].highest_validity = book_keeping_data.highest_validity;
             /*
              * divide cumulative total validity by number of problems tested
              * this calculation produces the mean validity for this size
              */
-            statistics[z].mean_validity = (long double)book_keeping_data.cumulative_validity / problem_size;
+            statistics[z - min_problem_size].mean_validity = (long double)book_keeping_data.cumulative_validity / problem_size;
             // stop the "stopwatch"
             stopwatch_stop(&timing_data);
             time_t now = time(NULL);
@@ -537,25 +548,20 @@ int main(int argc, char *argv[]) {
                 "%s,%" PRIu8 ",%" PRIu32 ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
                 time_buffer,
                 z,
-                two_to_the_power_of(statistics[z].problem_size),
-                statistics[z].lowest_validity,
-                statistics[z].highest_validity,
-                statistics[z].mean_validity
+                two_to_the_power_of(statistics[z - min_problem_size].problem_size),
+                statistics[z - min_problem_size].lowest_validity,
+                statistics[z - min_problem_size].highest_validity,
+                statistics[z - min_problem_size].mean_validity
             );
             csv_file = close_file(csv_file);
-            update_and_print_completion_estimate(&timing_data, z);
+            update_and_print_completion_estimate(&timing_data, z, max_problem_size);
         }
 
 
         // XXX: end of new implementation (old one below)
     }
     // deallocate memory
-    assert(problem != NULL);
-    assert(solution != NULL);
-    // FIXME: for some reason, all of these free()s cause memory error crashes!
-    // free(solution);
-    // free(problem);
-    // free(statistics);
+    // TODO: unable to deallocate memory without crashing for some reason
     MPI_Finalize();
     return 0;
 }
