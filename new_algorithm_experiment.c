@@ -62,6 +62,7 @@ typedef struct ValidSolutionsStatistics {
 static const long double MINUTE_SECONDS = 60.0L;
 static const long double HOUR_SECONDS = 60.0L * 60.0L;
 static const long double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
+static const long double WEEK_SECONDS = 60.0L * 60.0L * 24.0L * 7.0L;
 static const long double MONTH_SECONDS = 60.0L * 60.0L * 24.0L * 30.44L;
 static const long double YEAR_SECONDS = 60.0L * 60.0L * 24.0L * 365.2425L;
 
@@ -231,8 +232,10 @@ static const char* convenient_time_unit(long double seconds) {
         return " mins";
     } else if (seconds < DAY_SECONDS) {
         return " hours";
-    } else if (seconds < MONTH_SECONDS) {
+    } else if (seconds < WEEK_SECONDS) {
         return " days";
+    } else if (seconds < MONTH_SECONDS) {
+        return " weeks";
     } else if (seconds < YEAR_SECONDS) {
         return " months";
     } else {
@@ -248,8 +251,10 @@ static long double convenient_time_value(long double seconds) {
         return seconds / MINUTE_SECONDS;
     } else if (seconds < DAY_SECONDS) {
         return seconds / HOUR_SECONDS;
-    } else if (seconds < MONTH_SECONDS) {
+    } else if (seconds < WEEK_SECONDS) {
         return seconds / DAY_SECONDS;
+    } else if (seconds < MONTH_SECONDS) {
+        return seconds / WEEK_SECONDS;
     } else if (seconds < YEAR_SECONDS) {
         return seconds / MONTH_SECONDS;
     } else {
