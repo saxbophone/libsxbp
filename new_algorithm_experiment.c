@@ -29,7 +29,10 @@
 
 // private data structure for maintaining state for problem generation
 typedef struct ProblemGenerator {
-    uint32_t next; // the id of the next problem that will be generated
+    uint32_t range; // the number of discrete values to pick from
+    uint32_t samples; // how many values we will pick from it
+    uint32_t next; // the next value we will attempt to pick
+    uint32_t chosen; // how many we have chosen so far
 } ProblemGenerator;
 
 // private data structure for tracking program self-timing state
@@ -56,7 +59,7 @@ typedef struct ValidSolutionsStatistics {
     // the mean number of valid solutions found across problems of this size
     long double mean_validity;
     // NOTE: to get validity rates as percentages:
-    // divide validity count by 2^problem_size
+    // divide validity count by the number of samples in the data
 } ValidSolutionsStatistics;
 
 static const long double MINUTE_SECONDS = 60.0L;
@@ -70,19 +73,50 @@ static uint32_t two_to_the_power_of(uint8_t power) {
     return (uint32_t)powl(2.0L, (long double)power);
 }
 
-static ProblemGenerator init_problem_generator(void) {
+static ProblemGenerator init_problem_generator(
+    uint32_t range, // the number of discrete values to pick from
+    uint32_t samples // how many values to pick
+) {
     ProblemGenerator generator = {
+        .range = range,
+        .samples = samples,
         .next = 0,
+        .chosen = 0,
     };
     return generator;
 }
 
 // picks the next problem out of the problem generator
 static uint32_t get_next_problem(ProblemGenerator* generator) {
-    uint32_t problem = generator->next;
-    // NOTE: this will overflow for problems larger than 32 bits!
-    generator->next++;
-    return problem;
+    // NOTE: cheap error-handling
+    if (generator->chosen == generator->samples) {
+        abort(); // run out of samples!
+    }
+    uint32_t picked_value = 0;
+    bool value_found = false;
+    do {
+        /*
+         * WHERE N is the total number of values to pick from and M the sample size:
+         * the probability of displaying each number starts at N/M, but changes
+         * depending on how many left we need to pick and how many we have left
+         * to pick from --it is this property which gaurantees we will pick
+         * exactly the right number of integers.
+         */
+        long double chance = (long double)(generator->samples - generator->chosen) / (generator->range - generator->next);
+        long double coin_flip = (long double)rand() / RAND_MAX;
+        if (coin_flip <= chance) {
+            // this number has been chosen!
+            picked_value = generator->next;
+            // increment chosen count
+            generator->chosen++;
+            // mark value as picked
+            value_found = true;
+        }
+        // always increment the value that comes next
+        generator->next++;
+    } while (!value_found);
+
+    return picked_value;
 }
 
 // unpacks all the bits up to `size` from the given `source` integer into `dest`
@@ -337,6 +371,8 @@ static void log_node_message(char* message) {
 int main(int argc, char *argv[]) {
     // initialise MPI and discover our place in the world
     MPI_Init(&argc, &argv);
+    // seed the mediocre random number generator for picking problems randomly
+    srand((unsigned int)time(NULL));
     /*
      * we need three additional arguments:
      * - the filename to write output to
@@ -350,6 +386,8 @@ int main(int argc, char *argv[]) {
     const char* filename = argv[1]; // grab filename out of arguments
     const uint8_t min_problem_size = strtoul(argv[2], NULL, 10);
     const uint8_t max_problem_size = strtoul(argv[3], NULL, 10);
+    // TODO: change sample proportion to be retrieved from the command-line
+    double sample_proportion = 1.0;
     // sanity-checks on the chosen problem sizes
     if (
         !(min_problem_size > 0) || // no point testing a problem of size 0
@@ -407,12 +445,13 @@ int main(int argc, char *argv[]) {
         }
         // how many problems of that size exist
         uint32_t problem_size = two_to_the_power_of(z);
+        uint32_t sample_size = problem_size * sample_proportion; // how many problems will we test?
         // "turns" is how many times we need all nodes to work to solve problems
-        uint32_t turns = problem_size / world_size;
+        uint32_t turns = sample_size / world_size;
         // "extra" is the remainder of problems / nodes
-        uint32_t extra = problem_size % world_size;
+        uint32_t extra = sample_size % world_size;
         // this generates problems for us to solve
-        ProblemGenerator problem_generator = init_problem_generator();
+        ProblemGenerator problem_generator = init_problem_generator(problem_size, sample_size);
         // init highest, lowest and cumulative validity counters
         BookKeepingData book_keeping_data = {0};
         init_book_keeping_data(&book_keeping_data);
@@ -540,7 +579,7 @@ int main(int argc, char *argv[]) {
              * divide cumulative total validity by number of problems tested
              * this calculation produces the mean validity for this size
              */
-            statistics[z - min_problem_size].mean_validity = (long double)book_keeping_data.cumulative_validity / problem_size;
+            statistics[z - min_problem_size].mean_validity = (long double)book_keeping_data.cumulative_validity / sample_size;
             // stop the "stopwatch"
             stopwatch_stop(&timing_data);
             time_t now = time(NULL);
