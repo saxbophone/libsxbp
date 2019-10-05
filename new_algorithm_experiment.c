@@ -379,15 +379,15 @@ int main(int argc, char *argv[]) {
      * - the minimum size of problem to solve (bits)
      * - the maximum size of problem to solve (bits)
      */
-    if (argc < 4) {
-        fprintf(stderr, "Need filename, min and max problem size arguments!\n");
+    if (argc < 5) {
+        fprintf(stderr, "Need filename, min and max problem size and sample percentage arguments!\n");
         return -1;
     }
     const char* filename = argv[1]; // grab filename out of arguments
     const uint8_t min_problem_size = strtoul(argv[2], NULL, 10);
     const uint8_t max_problem_size = strtoul(argv[3], NULL, 10);
     // TODO: change sample proportion to be retrieved from the command-line
-    double sample_proportion = 1.0;
+    const double sample_proportion = strtod(argv[4], NULL);
     // sanity-checks on the chosen problem sizes
     if (
         !(min_problem_size > 0) || // no point testing a problem of size 0
