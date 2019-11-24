@@ -1,0 +1,29 @@
+SXBP New Algorithm Exhaustive Parallelised Search - Psuedocode
+
+User Supplies following Parameters:
+    - Smallest Problem Size to start with (measured in Bits)
+    - Largest Problem Size to finish with (measured in Bits)
+    - Maximum Amount of Memory Usage allowed per Process for caching (MiB)
+
+With N = Smallest Problem Size:
+    Generate all possible problems of size N (2^N problems) and test them against all possible solutions of size N (2^N solutions), store all results in a structure which tells us for each problem, what all of the solutions are and their count.
+
+Increment N
+While storage per process required to store the largest expected number of solutions to all problems for size N is <= Maximum amount of memory per process allowed AND N is less than largest problem size + 1:
+    For each problem of size N:
+        For B in {0..1}:
+            Create a new problem with bit B appended to the bitstring for the current problem
+            For each solution to the problem our modified one is based on:
+                Test the problem with the solution appended with 0 and again with 1, add all valid solutions for new modified problem and with modified solutions
+    New problems and solutions become the current ones for the next run
+    Increment N
+Set L to N - 1
+While N is less than largest problem size + 1
+    Current problem size P = N - L
+    For each problem of size L (results of which are stored):
+        Generate all possible problems of size P (2^P problems)
+        For each of these problems:
+            Append bits of P to that of the current problem of L
+                Generate all possible solutions of size P (2^P solutions)
+                For each of these solutions:
+                    Test the solution against the problem and store statistics of results only (we don't store the actual solutions as we can't spare any more space for them)
