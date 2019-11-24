@@ -51,3 +51,5 @@ int main(int argc, char const *argv[]) {
  * a given size in bits
  */
 static long double mean_validity(uint8_t problem_size);
+
+// implementations of all private functions
