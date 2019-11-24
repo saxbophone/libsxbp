@@ -22,18 +22,37 @@ typedef struct CommandLineOptions {
     size_t max_ram_per_process; // max RAM allowed per process in bytes
 } CommandLineOptions;
 
+/*
+ * the data type used to store problems and solutions
+ * NOTE: this must be able to store at least 2^N values where N is the maximum
+ * desired problem size in bits
+ */
+typedef RepresentationBase uint64_t;
+typedef Problem RepresentationBase;
+typedef Solution RepresentationBase;
+
+/*
+ * stores all the valid solutions for a given problem
+ * (problem is not stored in this particular struct)
+ */
+typedef struct SolutionSet {
+    uint8_t bits; // how many bits wide these solutions are
+    size_t count; // how many solutions there are
+    Solution* solutions; // dynamically allocated array of count many solutions
+} SolutionSet;
+
+typedef struct ProblemSet {
+    uint8_t bits; // how many bits wide these problems are
+    size_t count; // how many problems there are
+    SolutionSet* problem_solutions; // dynamic array, problem is index number
+} ProblemSet;
+
 // private functions which are used directly by main()
 
 static CommandLineOptions parse_command_line_options(
     int argc,
     char const *argv[]
 );
-
-/*
- * returns the expected number of mean valid solutions per problem for the given
- * problem size in bits
- */
-static size_t predict_number_of_valid_solutions(uint8_t problem_size);
 
 int main(int argc, char const *argv[]) {
     CommandLineOptions options = parse_command_line_options(argc, argv);
@@ -44,6 +63,12 @@ int main(int argc, char const *argv[]) {
  * private functions which are used only by other private functions which are
  * used directly by main()
  */
+
+/*
+ * returns the expected number of mean valid solutions per problem for the given
+ * problem size in bits
+ */
+static size_t predict_number_of_valid_solutions(uint8_t problem_size);
 
 /*
  * uses A-B-exponential using magic constants derived from regression of
