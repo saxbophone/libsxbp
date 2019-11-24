@@ -8,6 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -52,6 +53,15 @@ typedef struct ProblemSet {
 static CommandLineOptions parse_command_line_options(
     int argc,
     char const *argv[]
+);
+
+/*
+ * generate all the problems and solutions of a given bit size and populate the
+ * given problem_set with them
+ */
+static bool generate_problems_and_solutions(
+    ProblemSet* problem_set,
+    uint8_t bits
 );
 
 int main(int argc, char const *argv[]) {
