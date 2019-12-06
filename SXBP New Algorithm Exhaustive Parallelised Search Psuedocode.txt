@@ -27,3 +27,18 @@ While N is less than largest problem size + 1
                 Generate all possible solutions of size P (2^P solutions)
                 For each of these solutions:
                     Test the solution against the problem and store statistics of results only (we don't store the actual solutions as we can't spare any more space for them)
+
+
+Program steps:
+
+- Find largest problem size that can be represented within the memory limits
+- If smallest problem size to solve is not greater than this:
+    - Solve all problems from smallest up to largest representable, outputting results to final ouput structure and cache results between iterations, PRESERVE cache for later
+- Else:
+    - Solve all problems from a reasonably fast small problem size up to the maximum storable, PRESERVE cache for later
+- Next:
+    - Solve all remaining problems up to largest problem size to solve, iterating only the latter bits needed to extend the size of the cached results in bits
+        (e.g. if we cached up to 5 bit problems and need to solve 12-bit, we need to iterate combos of 7 bits and append to each 5-bit combination)
+        - Store results each time into output structure
+- Finally:
+    - Output data stored in output structure to file (this can also be done on-the-fly if preffered)
