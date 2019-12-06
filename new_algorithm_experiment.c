@@ -53,8 +53,8 @@ typedef struct ProblemSet {
 // private constants
 
 // these constants are calculated from A-B-exponential regression on search data
-static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.5623606900;
-static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011;
+static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.56236069184829962203;
+static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011252032045966;
 
 // private functions which are used directly by main()
 
