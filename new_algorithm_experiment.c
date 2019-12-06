@@ -8,6 +8,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -48,6 +49,12 @@ typedef struct ProblemSet {
     SolutionSet* problem_solutions; // dynamic array, problem is index number
 } ProblemSet;
 
+// private constants
+
+// these constants are calculated from A-B-exponential regression on search data
+static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.5623606900;
+static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011;
+
 // private functions which are used directly by main()
 
 static CommandLineOptions parse_command_line_options(
@@ -81,10 +88,38 @@ int main(int argc, char const *argv[]) {
 static size_t predict_number_of_valid_solutions(uint8_t problem_size);
 
 /*
+ * almost too simple to put in a function, but added for readability.
+ * quickly calculate powers of two
+ * NOTE: this overflows without warning if a power greater than 1 less of the
+ * maximum bit width of integer supported by the system is given. (so a 64-bit
+ * system will overflow if 64 is passed).
+ */
+static uintmax_t two_to_the_power_of(uint8_t power);
+
+/*
  * uses A-B-exponential using magic constants derived from regression of
  * existing exhaustive test data to get the validity percentage for a problem of
  * a given size in bits
+ * float percentage is returned where 0.0 is 0% and 1.0% is 100%
  */
 static long double mean_validity(uint8_t problem_size);
 
 // implementations of all private functions
+
+static size_t predict_number_of_valid_solutions(uint8_t problem_size) {
+    return (size_t)ceill( // round up for a conservative estimate
+        two_to_the_power_of(problem_size) * mean_validity(problem_size)
+    );
+}
+
+static uintmax_t two_to_the_power_of(uint8_t power) {
+    return 1U << power;
+}
+
+static long double mean_validity(uint8_t problem_size) {
+    // A-B-exponential regression means that value is `A * B^problem_size`
+    return (
+        MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A *
+        powl(MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B, problem_size)
+    );
+}

@@ -92,10 +92,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wc99-c11-compat")
     # enable warnings about mistakes in Doxygen documentation
     enable_c_compiler_flag_if_supported("-Wdocumentation")
-    # there are some pragmas in tests/check_wrapper.h that are not for GCC
-    enable_c_compiler_flag_if_supported("-Wno-unknown-pragmas")
     # convert all warnings into errors
     enable_c_compiler_flag_if_supported("-Werror")
+    # exclude the following kinds of warnings from being converted into errors
+    # there are some pragmas in tests/check_wrapper.h that are not for GCC
+    enable_c_compiler_flag_if_supported("-Wno-error=unknown-pragmas")
+    # unused variable and function warnings are helpful but we don't need them as errors
+    enable_c_compiler_flag_if_supported("-Wno-error=unused-function")
+    enable_c_compiler_flag_if_supported("-Wno-error=unused-variable")
+    enable_c_compiler_flag_if_supported("-Wno-error=unused-parameter")
 endif()
 
 # begin dependencies
