@@ -28,9 +28,9 @@ typedef struct CommandLineOptions {
  * NOTE: this must be able to store at least 2^N values where N is the maximum
  * desired problem size in bits
  */
-typedef RepresentationBase uint64_t;
-typedef Problem RepresentationBase;
-typedef Solution RepresentationBase;
+typedef uint64_t RepresentationBase;
+typedef RepresentationBase Problem;
+typedef RepresentationBase Solution;
 
 /*
  * stores all the valid solutions for a given problem
