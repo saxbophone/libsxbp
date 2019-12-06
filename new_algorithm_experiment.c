@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 
 #ifdef __cplusplus
@@ -57,6 +58,7 @@ static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.83
 
 // private functions which are used directly by main()
 
+// attempts to parse command line and return options, calls exit() if bad args
 static CommandLineOptions parse_command_line_options(
     int argc,
     char const *argv[]
@@ -105,6 +107,25 @@ static uintmax_t two_to_the_power_of(uint8_t power);
 static long double mean_validity(uint8_t problem_size);
 
 // implementations of all private functions
+
+static CommandLineOptions parse_command_line_options(
+    int argc,
+    char const *argv[]
+) {
+    if (argc < 4) exit(-1); // we need 3 additional arguments besides file name
+    CommandLineOptions options = {0};
+    options.start_problem_size = strtoul(argv[1], NULL, 10);
+    options.end_problem_size = strtoul(argv[2], NULL, 10);
+    options.max_ram_per_process = strtoul(argv[3], NULL, 10);
+    if (
+        options.start_problem_size == 0
+        || options.end_problem_size == 0
+        || options.max_ram_per_process == 0
+    ) {
+        exit(-1); // none of them can be zero
+    }
+    return options;
+}
 
 static size_t predict_number_of_valid_solutions(uint8_t problem_size) {
     return (size_t)ceill( // round up for a conservative estimate
