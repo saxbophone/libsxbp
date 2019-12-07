@@ -71,6 +71,8 @@ typedef struct ProblemStatistics {
 // these constants are calculated from A-B-exponential regression on search data
 static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.56236069184829962203;
 static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011252032045966;
+// a size of problem that we can guarantee we can store and is fast to solve
+static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 4U;
 
 // private functions which are used directly by main()
 
@@ -124,10 +126,30 @@ int main(int argc, char const *argv[]) {
     if (options.start_problem_size <= largest_cacheable) {
         // solve all problems from smallest to largest cacheable
         // derive statistics from this process whilst doing it
-        // TODO: implement what is commented above
+        if (
+            !generate_problems_and_solutions(
+                &problem_cache,
+                options.start_problem_size,
+                options.end_problem_size,
+                problem_statistics
+            )
+        ) {
+            // if it failed for whatever reason
+            abort(); // more cheap error handling!
+        }
     } else { // otherwise if smallest problem is greater than cacheable size
         // solve all problems from a reasonably small and fast size and cache
-        // TODO: implement what is commented above
+        if (
+            !generate_problems_and_solutions(
+                &problem_cache,
+                SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE,
+                largest_cacheable,
+                NULL // don't output problems solved here to statistics
+            )
+        ) {
+            // if it failed for whatever reason
+            abort(); // more cheap error handling!
+        }
     }
     // free dynamically allocated memory
     free(problem_statistics);
