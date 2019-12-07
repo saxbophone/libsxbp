@@ -43,6 +43,7 @@ typedef RepresentationBase Solution;
  * (problem is not stored in this particular struct)
  */
 typedef struct SolutionSet {
+    size_t allocated_size; // how many solutions memory has been allocated for
     size_t count; // how many solutions there are
     Solution* solutions; // dynamically allocated array of count many solutions
 } SolutionSet;
@@ -73,6 +74,17 @@ static CommandLineOptions parse_command_line_options(
  */
 static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
 
+/*
+ * generate all the problems and solutions for problem sizes in a given range
+ * and populate the given problem_set with them
+ * returns whether this was done successfully or not
+ */
+static bool generate_problems_and_solutions(
+    ProblemSet* problem_set,
+    ProblemSize smallest_problem,
+    ProblemSize largest_problem
+);
+
 int main(int argc, char const *argv[]) {
     CommandLineOptions options = parse_command_line_options(argc, argv);
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
@@ -92,15 +104,6 @@ int main(int argc, char const *argv[]) {
  * given problem size
  */
 static size_t get_cache_size_of_problem(ProblemSize problem_size);
-
-/*
- * generate all the problems and solutions of a given bit size and populate the
- * given problem_set with them
- */
-static bool generate_problems_and_solutions(
-    ProblemSet* problem_set,
-    ProblemSize bits
-);
 
 /*
  * returns the expected number of mean valid solutions per problem for the given
@@ -166,6 +169,14 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
     }
     // probably will never be reached, but in case it is, return something
     return problem_size - 1;
+}
+
+static bool generate_problems_and_solutions(
+    ProblemSet* problem_set,
+    ProblemSize smallest_problem,
+    ProblemSize largest_problem
+) {
+    return false;
 }
 
 static size_t get_cache_size_of_problem(ProblemSize problem_size) {
