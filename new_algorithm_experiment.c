@@ -21,9 +21,11 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
+typedef uint8_t ProblemSize;
+
 typedef struct CommandLineOptions {
-    uint8_t start_problem_size; // size of problem to start with in bits
-    uint8_t end_problem_size; // size of problem to end with in bits
+    ProblemSize start_problem_size; // size of problem to start with in bits
+    ProblemSize end_problem_size; // size of problem to end with in bits
     size_t max_ram_per_process; // max RAM allowed per process in bytes
 } CommandLineOptions;
 
@@ -46,7 +48,7 @@ typedef struct SolutionSet {
 } SolutionSet;
 
 typedef struct ProblemSet {
-    uint8_t bits; // how many bits wide these problems are
+    ProblemSize bits; // how many bits wide these problems are
     size_t count; // how many problems there are
     SolutionSet* problem_solutions; // dynamic array, problem is index number
 } ProblemSet;
@@ -69,11 +71,11 @@ static CommandLineOptions parse_command_line_options(
  * finds the largest problem size (in bits) which can be represented with the
  * given RAM limit per-process
  */
-static uint8_t find_largest_cacheable_problem_size(size_t ram_limit);
+static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
 
 int main(int argc, char const *argv[]) {
     CommandLineOptions options = parse_command_line_options(argc, argv);
-    uint8_t largest_cacheable = find_largest_cacheable_problem_size(
+    ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
         options.max_ram_per_process
     );
     printf("Maximum cacheable problem size: %" PRIu8 " bits\n", largest_cacheable);
@@ -89,7 +91,7 @@ int main(int argc, char const *argv[]) {
  * returns the number of bytes needed to cache the solutions to all problems of
  * given problem size
  */
-static size_t get_cache_size_of_problem(uint8_t problem_size);
+static size_t get_cache_size_of_problem(ProblemSize problem_size);
 
 /*
  * generate all the problems and solutions of a given bit size and populate the
@@ -97,14 +99,14 @@ static size_t get_cache_size_of_problem(uint8_t problem_size);
  */
 static bool generate_problems_and_solutions(
     ProblemSet* problem_set,
-    uint8_t bits
+    ProblemSize bits
 );
 
 /*
  * returns the expected number of mean valid solutions per problem for the given
  * problem size in bits
  */
-static size_t predict_number_of_valid_solutions(uint8_t problem_size);
+static size_t predict_number_of_valid_solutions(ProblemSize problem_size);
 
 /*
  * almost too simple to put in a function, but added for readability.
@@ -121,7 +123,7 @@ static uintmax_t two_to_the_power_of(uint8_t power);
  * a given size in bits
  * float percentage is returned where 0.0 is 0% and 1.0% is 100%
  */
-static long double mean_validity(uint8_t problem_size);
+static long double mean_validity(ProblemSize problem_size);
 
 // implementations of all private functions
 
@@ -144,8 +146,8 @@ static CommandLineOptions parse_command_line_options(
     return options;
 }
 
-static uint8_t find_largest_cacheable_problem_size(size_t ram_limit) {
-    uint8_t problem_size;
+static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
+    ProblemSize problem_size;
     // this typically won't actually get to 32, 22 bits gives ~1TiB size!
     for (problem_size = 1; problem_size < 32; problem_size++) {
         /*
@@ -166,7 +168,7 @@ static uint8_t find_largest_cacheable_problem_size(size_t ram_limit) {
     return problem_size - 1;
 }
 
-static size_t get_cache_size_of_problem(uint8_t problem_size) {
+static size_t get_cache_size_of_problem(ProblemSize problem_size) {
     if (problem_size == 0) return 0;
     if (problem_size < 6) { // problem sizes below this do not follow the trend
         return (
@@ -197,7 +199,7 @@ static size_t get_cache_size_of_problem(uint8_t problem_size) {
     );
 }
 
-static size_t predict_number_of_valid_solutions(uint8_t problem_size) {
+static size_t predict_number_of_valid_solutions(ProblemSize problem_size) {
     return (size_t)ceill( // round up for a conservative estimate
         two_to_the_power_of(problem_size) * mean_validity(problem_size)
     );
@@ -207,7 +209,7 @@ static uintmax_t two_to_the_power_of(uint8_t power) {
     return 1U << power;
 }
 
-static long double mean_validity(uint8_t problem_size) {
+static long double mean_validity(ProblemSize problem_size) {
     // A-B-exponential regression means that value is `A * B^problem_size`
     return (
         MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A *
