@@ -148,9 +148,17 @@ static uint8_t find_largest_cacheable_problem_size(size_t ram_limit) {
     uint8_t problem_size;
     // this typically won't actually get to 32, 22 bits gives ~1TiB size!
     for (problem_size = 1; problem_size < 32; problem_size++) {
-        size_t cache_size = get_cache_size_of_problem(problem_size);
-        // XXX: debug
-        printf("%02" PRIu8 ": %10zu\n", problem_size, cache_size);
+        /*
+         * we need to add the cache size of two adjacent problems
+         * --the reason we need to calculate this is so that we can gaurantee
+         * that we have enough space to store a previous run and the next one,
+         * this greatly simplifies the process of generating future results from
+         * previous ones.
+         */
+        size_t cache_size = (
+            get_cache_size_of_problem(problem_size - 1) +
+            get_cache_size_of_problem(problem_size)
+        );
         // stop when we find a problem size that exceeds our ram limit
         if (cache_size > ram_limit) return problem_size - 1;
     }
@@ -159,6 +167,7 @@ static uint8_t find_largest_cacheable_problem_size(size_t ram_limit) {
 }
 
 static size_t get_cache_size_of_problem(uint8_t problem_size) {
+    if (problem_size == 0) return 0;
     if (problem_size < 6) { // problem sizes below this do not follow the trend
         return (
             sizeof(ProblemSet) + (
