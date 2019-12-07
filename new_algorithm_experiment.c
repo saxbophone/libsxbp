@@ -8,10 +8,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+#include <inttypes.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 
@@ -39,7 +41,6 @@ typedef RepresentationBase Solution;
  * (problem is not stored in this particular struct)
  */
 typedef struct SolutionSet {
-    uint8_t bits; // how many bits wide these solutions are
     size_t count; // how many solutions there are
     Solution* solutions; // dynamically allocated array of count many solutions
 } SolutionSet;
@@ -65,16 +66,17 @@ static CommandLineOptions parse_command_line_options(
 );
 
 /*
- * generate all the problems and solutions of a given bit size and populate the
- * given problem_set with them
+ * finds the largest problem size (in bits) which can be represented with the
+ * given RAM limit per-process
  */
-static bool generate_problems_and_solutions(
-    ProblemSet* problem_set,
-    uint8_t bits
-);
+static uint8_t find_largest_cacheable_problem_size(size_t ram_limit);
 
 int main(int argc, char const *argv[]) {
     CommandLineOptions options = parse_command_line_options(argc, argv);
+    uint8_t largest_cacheable = find_largest_cacheable_problem_size(
+        options.max_ram_per_process
+    );
+    printf("Maximum cacheable problem size: %" PRIu8 " bits\n", largest_cacheable);
     return 0;
 }
 
@@ -82,6 +84,21 @@ int main(int argc, char const *argv[]) {
  * private functions which are used only by other private functions which are
  * used directly by main()
  */
+
+/*
+ * returns the number of bytes needed to cache the solutions to all problems of
+ * given problem size
+ */
+static size_t get_cache_size_of_problem(uint8_t problem_size);
+
+/*
+ * generate all the problems and solutions of a given bit size and populate the
+ * given problem_set with them
+ */
+static bool generate_problems_and_solutions(
+    ProblemSet* problem_set,
+    uint8_t bits
+);
 
 /*
  * returns the expected number of mean valid solutions per problem for the given
@@ -125,6 +142,50 @@ static CommandLineOptions parse_command_line_options(
         exit(-1); // none of them can be zero
     }
     return options;
+}
+
+static uint8_t find_largest_cacheable_problem_size(size_t ram_limit) {
+    uint8_t problem_size;
+    // this typically won't actually get to 32, 22 bits gives ~1TiB size!
+    for (problem_size = 1; problem_size < 32; problem_size++) {
+        size_t cache_size = get_cache_size_of_problem(problem_size);
+        // XXX: debug
+        printf("%02" PRIu8 ": %10zu\n", problem_size, cache_size);
+        // stop when we find a problem size that exceeds our ram limit
+        if (cache_size > ram_limit) return problem_size - 1;
+    }
+    // probably will never be reached, but in case it is, return something
+    return problem_size - 1;
+}
+
+static size_t get_cache_size_of_problem(uint8_t problem_size) {
+    if (problem_size < 6) { // problem sizes below this do not follow the trend
+        return (
+            sizeof(ProblemSet) + (
+                two_to_the_power_of(problem_size) * // number of problems
+                (
+                    sizeof(SolutionSet) +
+                    (
+                        two_to_the_power_of(problem_size) * // solutions
+                        sizeof(Solution)
+                    )
+                )
+            )
+        );
+    }
+    // all problems of size 6 or above do follow the trend line we have plotted
+    return (
+        sizeof(ProblemSet) + (
+            two_to_the_power_of(problem_size) * // number of problems
+            (
+                sizeof(SolutionSet) +
+                (
+                    predict_number_of_valid_solutions(problem_size) * // solutions
+                    sizeof(Solution)
+                )
+            )
+        )
+    );
 }
 
 static size_t predict_number_of_valid_solutions(uint8_t problem_size) {
