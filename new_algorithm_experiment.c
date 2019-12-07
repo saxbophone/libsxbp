@@ -54,6 +54,18 @@ typedef struct ProblemSet {
     SolutionSet* problem_solutions; // dynamic array, problem is index number
 } ProblemSet;
 
+typedef struct ProblemStatistics {
+    ProblemSize bits; // what size of problem these statistics are for
+    // the fewest number of valid solutions found across problems of this size
+    RepresentationBase lowest_validity;
+    // the highest number of valid solutions found across problems of this size
+    RepresentationBase highest_validity;
+    // the mean number of valid solutions found across problems of this size
+    long double mean_validity;
+    // NOTE: to get validity rates as percentages:
+    // divide validity count by the number of samples in the data
+} ProblemStatistics;
+
 // private constants
 
 // these constants are calculated from A-B-exponential regression on search data
@@ -77,20 +89,48 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
 /*
  * generate all the problems and solutions for problem sizes in a given range
  * and populate the given problem_set with them
+ * if statistics is not NULL, then this should be an array of ProblemStatistics
+ * large enough to store on item for each problem size to be generated.
+ * Statistics about the generated problems and solutions will be stored in this.
  * returns whether this was done successfully or not
  */
 static bool generate_problems_and_solutions(
     ProblemSet* problem_set,
     ProblemSize smallest_problem,
-    ProblemSize largest_problem
+    ProblemSize largest_problem,
+    ProblemStatistics* statistics
 );
 
 int main(int argc, char const *argv[]) {
+    // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
+    // this is how many problems we have been requested to solve
+    size_t problems_count = (
+        (options.end_problem_size - options.start_problem_size) + 1U
+    );
+    // find the largest cacheable problem size for our specified RAM limit
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
         options.max_ram_per_process
     );
-    printf("Maximum cacheable problem size: %" PRIu8 " bits\n", largest_cacheable);
+    // this is our problem cache
+    ProblemSet problem_cache = {0};
+    // this is the data structure into which we store problem statistics
+    ProblemStatistics* problem_statistics = calloc(
+        problems_count, sizeof(ProblemStatistics)
+    );
+    // handle any memory allocation error
+    if (problem_statistics == NULL) abort(); // cheap error handling
+    // if smallest problem size to solve is not greater than cacheable size
+    if (options.start_problem_size <= largest_cacheable) {
+        // solve all problems from smallest to largest cacheable
+        // derive statistics from this process whilst doing it
+        // TODO: implement what is commented above
+    } else { // otherwise if smallest problem is greater than cacheable size
+        // solve all problems from a reasonably small and fast size and cache
+        // TODO: implement what is commented above
+    }
+    // free dynamically allocated memory
+    free(problem_statistics);
     return 0;
 }
 
@@ -174,7 +214,8 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
 static bool generate_problems_and_solutions(
     ProblemSet* problem_set,
     ProblemSize smallest_problem,
-    ProblemSize largest_problem
+    ProblemSize largest_problem,
+    ProblemStatistics* statistics
 ) {
     return false;
 }
