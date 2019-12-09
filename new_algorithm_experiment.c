@@ -82,6 +82,9 @@ static CommandLineOptions parse_command_line_options(
     char const *argv[]
 );
 
+// returns the number of problems that there are in the given inclusive range
+static size_t count_problems_in_range(ProblemSize start, ProblemSize end);
+
 /*
  * finds the largest problem size (in bits) which can be represented with the
  * given RAM limit per-process
@@ -95,6 +98,8 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
  * large enough to store on item for each problem size to be generated.
  * Statistics about the generated problems and solutions will be stored in this.
  * returns whether this was done successfully or not
+ * WARNING: if this function returns true, it means memory has been allocated
+ * for problem_set and this should be free()'ed once no longer required.
  */
 static bool generate_problems_and_solutions(
     ProblemSet* problem_set,
@@ -103,12 +108,15 @@ static bool generate_problems_and_solutions(
     ProblemStatistics* statistics
 );
 
+// deallocates any dynamically allocated memory in the given problem set
+static void deallocate_problem_set(ProblemSet* problem_set);
+
 int main(int argc, char const *argv[]) {
     // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
     // this is how many problems we have been requested to solve
-    size_t problems_count = (
-        (options.end_problem_size - options.start_problem_size) + 1U
+    size_t problems_count = count_problems_in_range(
+        options.end_problem_size, options.start_problem_size
     );
     // find the largest cacheable problem size for our specified RAM limit
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
@@ -152,6 +160,7 @@ int main(int argc, char const *argv[]) {
         }
     }
     // free dynamically allocated memory
+    deallocate_problem_set(&problem_cache);
     free(problem_statistics);
     return 0;
 }
@@ -211,6 +220,10 @@ static CommandLineOptions parse_command_line_options(
     return options;
 }
 
+static size_t count_problems_in_range(ProblemSize start, ProblemSize end) {
+    return start - end + 1U;
+}
+
 static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
     ProblemSize problem_size;
     // this typically won't actually get to 32, 22 bits gives ~1TiB size!
@@ -240,6 +253,21 @@ static bool generate_problems_and_solutions(
     ProblemStatistics* statistics
 ) {
     return false;
+}
+
+static void deallocate_problem_set(ProblemSet* problem_set) {
+    if (problem_set->problem_solutions != NULL) {
+        // deallocate all solutions
+        for (size_t i = 0; i < problem_set->count; i++) {
+            if (problem_set->problem_solutions[i].solutions != NULL) {
+                free(problem_set->problem_solutions[i].solutions);
+                problem_set->problem_solutions[i].solutions = NULL;
+            }
+        }
+        // finally, deallocate the main pointer
+        free(problem_set->problem_solutions);
+        problem_set->problem_solutions = NULL;
+    }
 }
 
 static size_t get_cache_size_of_problem(ProblemSize problem_size) {
