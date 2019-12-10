@@ -427,20 +427,16 @@ static bool add_solution_to_solution_set(
     solution_set->count++;
     // make sure there's always memory for at least one more item
     if (solution_set->count == solution_set->allocated_size) {
+        // allocate extra memory
+        size_t new_size = solution_set->count + SOLUTION_SET_OVER_ALLOCATE_AMOUNT;
         if (
-            realloc(
-                solution_set->solutions,
-                // allocate extra memory
-                (solution_set->count + SOLUTION_SET_OVER_ALLOCATE_AMOUNT) *
-                sizeof(Solution)
-            ) == NULL
+            realloc(solution_set->solutions, new_size * sizeof(Solution)) == NULL
         ) {
             // memory allocation failure
             return false;
         } else {
             // update allocated size
-            solution_set->allocated_size = solution_set->count +
-                SOLUTION_SET_OVER_ALLOCATE_AMOUNT;
+            solution_set->allocated_size = new_size;
         }
     }
     // success!
