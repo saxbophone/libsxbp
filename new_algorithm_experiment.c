@@ -252,6 +252,21 @@ static bool generate_problems_and_solutions(
     ProblemSize largest_problem,
     ProblemStatistics* statistics
 ) {
+    // TODO: for the first problem size:
+    // TODO:    allocate a problem set for that size
+    // TODO:    populate with all the problems of that size
+    // TODO:    for each problem:
+    // TODO:        find valid solutions and add to the list of problem solutions
+    // TODO:        resize solutions allocated memory as needed
+    // TODO:    update statistics if not NULL
+    // TODO: for each successive problem size after first (if any):
+    // TODO:    create new data structure to contain problem sets
+    // TODO:    for each problem in old problem set:
+    // TODO:        add a corresponding entry in new data structure
+    // TODO:        for each solution in problem's solution set
+    // TODO:            generate new solutions with 0 and 1 appended to solution
+    // TODO:            append new solutions to new structure if valid
+    // TODO:            resize solutions allocated memory as needed
     return false;
 }
 
