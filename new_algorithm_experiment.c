@@ -115,16 +115,39 @@ static bool generate_problems_and_cache_solutions(
 // deallocates any dynamically allocated memory in the given problem set
 static void deallocate_problem_set(ProblemSet* problem_set);
 
+/*
+ * private functions which are used only by other private functions which are
+ * used directly by main()
+ */
+
+/*
+ * returns the number of bytes needed to cache the solutions to all problems of
+ * given problem size
+ */
+static size_t get_cache_size_of_problem(ProblemSize problem_size);
+
 int main(int argc, char const *argv[]) {
     // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
+    printf(
+        "Start: %" PRIu8 " End: %" PRIu8 " RAM: %zu\n",
+        options.start_problem_size,
+        options.end_problem_size,
+        options.max_ram_per_process
+    );
     // this is how many problems we have been requested to solve
     size_t problems_count = count_problems_in_range(
-        options.end_problem_size, options.start_problem_size
+        options.start_problem_size, options.end_problem_size
     );
     // find the largest cacheable problem size for our specified RAM limit
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
         options.max_ram_per_process
+    );
+    printf(
+        "Can cache up to %" PRIu8 "bits (%zu bytes)\n",
+        largest_cacheable,
+        get_cache_size_of_problem(largest_cacheable - 1U) +
+        get_cache_size_of_problem(largest_cacheable)
     );
     // this is our problem cache
     ProblemSet problem_cache = {0};
@@ -168,17 +191,6 @@ int main(int argc, char const *argv[]) {
     free(problem_statistics);
     return 0;
 }
-
-/*
- * private functions which are used only by other private functions which are
- * used directly by main()
- */
-
-/*
- * returns the number of bytes needed to cache the solutions to all problems of
- * given problem size
- */
-static size_t get_cache_size_of_problem(ProblemSize problem_size);
 
 /*
  * returns the expected number of mean valid solutions per problem for the given
@@ -284,7 +296,7 @@ static CommandLineOptions parse_command_line_options(
 }
 
 static size_t count_problems_in_range(ProblemSize start, ProblemSize end) {
-    return start - end + 1U;
+    return (ProblemSize)(end - start) + 1U;
 }
 
 static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
@@ -296,7 +308,8 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
          * --the reason we need to calculate this is so that we can gaurantee
          * that we have enough space to store a previous run and the next one,
          * this greatly simplifies the process of generating future results from
-         * previous ones.
+         * previous ones because it means we can prove that we have enough RAM
+         * to hold them both in memory at once so we can copy between them
          */
         size_t cache_size = (
             get_cache_size_of_problem(problem_size - 1) +
@@ -329,11 +342,11 @@ static bool generate_problems_and_cache_solutions(
         return false;
     }
     // for each successive problem size after first (if any)
-    for (
-        size_t i = 1;
-        i < count_problems_in_range(smallest_problem, largest_problem);
-        i++
-    ) {
+    size_t problems_to_solve = count_problems_in_range(
+        smallest_problem, largest_problem
+    );
+    printf("Problems to solve: %zu\n", problems_to_solve);
+    for (size_t i = 1U; i < problems_to_solve; i++) {
         printf("start %zu\n", i);
         // generate subsequent cache levels from the previous ones, iteratively
         if (
@@ -475,8 +488,10 @@ static bool generate_new_problem_solutions_cache(
             statistics->mean_validity += solutions_count;
         }
     }
-    // divide cumulative mean validity by problems count
-    statistics->mean_validity /= problem_set->count;
+    if (statistics != NULL) {
+        // divide cumulative mean validity by problems count
+        statistics->mean_validity /= problem_set->count;
+    }
     return true; // success
 }
 
