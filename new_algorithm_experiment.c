@@ -313,7 +313,7 @@ static bool generate_problems_and_solutions(
                 }
             }
         }
-        // TODO: resize solutions allocated memory as needed
+        // TODO: make and call shrinking function to shrink solution set down
         // TODO: update statistics if not NULL
     }
     // TODO: for each successive problem size after first (if any):
