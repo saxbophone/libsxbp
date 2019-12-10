@@ -203,6 +203,20 @@ static uintmax_t two_to_the_power_of(uint8_t power);
 static long double mean_validity(ProblemSize problem_size);
 
 /*
+ * Allocates memory for and initialises the given problem set with a cache of
+ * all the valid solutions to problems within that set, for the given problem
+ * size.
+ * If statistics is not NULL, it will be populated with the statistics for this
+ * problem.
+ * Returns false if this failed (because memory allocation failed)
+ */
+static bool generate_new_problem_solutions_cache(
+    ProblemSet* problem_set,
+    ProblemSize problem_size,
+    ProblemStatistics* statistics
+);
+
+/*
  * allocates memory for the dynamic members of the given problem set
  * returns false if memory allocation failed
  * NOTE: this does not allocate memory for the nested solution set members
@@ -286,66 +300,19 @@ static bool generate_problems_and_cache_solutions(
     ProblemSize largest_problem,
     ProblemStatistics* statistics
 ) {
-    // for the first problem size, allocate a problem set for that size
-    if (!allocate_problem_set(problem_set, smallest_problem)) return false;
-    // estimated mean number of solutions per problem
-    size_t estimated_solutions = predict_number_of_valid_solutions(
-        smallest_problem
-    );
-    // for our tracking of min validity to work, init it to max size_t
-    if (statistics != NULL) {
-        statistics[0].lowest_validity = SIZE_MAX;
+    // generate the first problem cache
+    if (
+        !generate_new_problem_solutions_cache(
+            problem_set,
+            smallest_problem,
+            statistics != NULL ? &statistics[0] : NULL
+        )
+    ) {
+        // deallocate any memory and return failure
+        deallocate_problem_set(problem_set);
+        return false;
     }
-    // populate with all the problems of that size
-    for (Problem p = 0; p < problem_set->count; p++) {
-        problem_set->problem_solutions[p].problem = p;
-        // try and allocate memory for the solutions --allocate estimated number
-        problem_set->problem_solutions[p].solutions = calloc(
-            estimated_solutions, sizeof(Solution)
-        );
-        if (problem_set->problem_solutions[p].solutions == NULL) {
-            // memory allocation failure, deallocate the rest of the structure
-            deallocate_problem_set(problem_set);
-            return false;
-        }
-        // set number allocated for memory book-keeping purposes
-        problem_set->problem_solutions[p].allocated_size = estimated_solutions;
-        // find valid solutions and add to the list of problem solutions
-        for (Solution s = 0; s < problem_set->count; s++) {
-            if (solution_is_valid_for_problem(p, s, problem_set->bits)) {
-                if (
-                    !add_solution_to_solution_set(
-                        &problem_set->problem_solutions[p], s
-                    )
-                ) {
-                    // memory allocation failure, deallocate structure
-                    deallocate_problem_set(problem_set);
-                    return false;
-                }
-            }
-        }
-        // shrink solution set down to waste less memory
-        if (!shrink_solution_set(&problem_set->problem_solutions[p])) {
-            // memory allocation failure, deallocate structure
-            deallocate_problem_set(problem_set);
-            return false;
-        }
-        // update statistics if not NULL
-        if (statistics != NULL) {
-            statistics[0].bits = problem_set->bits;
-            size_t solutions_count = problem_set->problem_solutions[p].count;
-            if (solutions_count < statistics[0].lowest_validity) {
-                statistics[0].lowest_validity = solutions_count;
-            }
-            if (solutions_count > statistics[0].highest_validity) {
-                statistics[0].highest_validity = solutions_count;
-            }
-            // mean validity is cumulative until we finish at which point divide
-            statistics[0].mean_validity += solutions_count;
-        }
-    }
-    // divide cumulative mean validity by problems count
-    statistics[0].mean_validity /= problem_set->count;
+    // TODO: generate subsequent cache levels from the previous ones, iteratively
     // TODO: for each successive problem size after first (if any):
     // TODO:    create new data structure to contain problem sets
     // TODO:    for each problem in old problem set:
@@ -420,6 +387,71 @@ static long double mean_validity(ProblemSize problem_size) {
         MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A *
         powl(MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B, problem_size)
     );
+}
+
+static bool generate_new_problem_solutions_cache(
+    ProblemSet* problem_set,
+    ProblemSize problem_size,
+    ProblemStatistics* statistics
+) {
+    // for the first problem size, allocate a problem set for that size
+    if (!allocate_problem_set(problem_set, problem_size)) return false;
+    // estimated mean number of solutions per problem
+    size_t estimated_solutions = predict_number_of_valid_solutions(
+        problem_size
+    );
+    // for our tracking of min validity to work, init it to max size_t
+    if (statistics != NULL) {
+        statistics->lowest_validity = SIZE_MAX;
+    }
+    // populate with all the problems of that size
+    for (Problem p = 0; p < problem_set->count; p++) {
+        problem_set->problem_solutions[p].problem = p;
+        // try and allocate memory for the solutions --allocate estimated number
+        problem_set->problem_solutions[p].solutions = calloc(
+            estimated_solutions, sizeof(Solution)
+        );
+        if (problem_set->problem_solutions[p].solutions == NULL) {
+            // memory allocation failure
+            return false;
+        }
+        // set number allocated for memory book-keeping purposes
+        problem_set->problem_solutions[p].allocated_size = estimated_solutions;
+        // find valid solutions and add to the list of problem solutions
+        for (Solution s = 0; s < problem_set->count; s++) {
+            if (solution_is_valid_for_problem(p, s, problem_set->bits)) {
+                if (
+                    !add_solution_to_solution_set(
+                        &problem_set->problem_solutions[p], s
+                    )
+                ) {
+                    // memory allocation failure
+                    return false;
+                }
+            }
+        }
+        // shrink solution set down to waste less memory
+        if (!shrink_solution_set(&problem_set->problem_solutions[p])) {
+            // memory allocation failure
+            return false;
+        }
+        // update statistics if not NULL
+        if (statistics != NULL) {
+            statistics->bits = problem_set->bits;
+            size_t solutions_count = problem_set->problem_solutions[p].count;
+            if (solutions_count < statistics->lowest_validity) {
+                statistics->lowest_validity = solutions_count;
+            }
+            if (solutions_count > statistics->highest_validity) {
+                statistics->highest_validity = solutions_count;
+            }
+            // mean validity is cumulative until we finish at which point divide
+            statistics->mean_validity += solutions_count;
+        }
+    }
+    // divide cumulative mean validity by problems count
+    statistics->mean_validity /= problem_set->count;
+    return true; // success
 }
 
 static bool allocate_problem_set(
