@@ -104,7 +104,7 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
  * WARNING: if this function returns true, it means memory has been allocated
  * for problem_set and this should be free()'ed once no longer required.
  */
-static bool generate_problems_and_solutions(
+static bool generate_problems_and_cache_solutions(
     ProblemSet* problem_set,
     ProblemSize smallest_problem,
     ProblemSize largest_problem,
@@ -138,7 +138,7 @@ int main(int argc, char const *argv[]) {
         // solve all problems from smallest to largest cacheable
         // derive statistics from this process whilst doing it
         if (
-            !generate_problems_and_solutions(
+            !generate_problems_and_cache_solutions(
                 &problem_cache,
                 options.start_problem_size,
                 options.end_problem_size,
@@ -151,7 +151,7 @@ int main(int argc, char const *argv[]) {
     } else { // otherwise if smallest problem is greater than cacheable size
         // solve all problems from a reasonably small and fast size and cache
         if (
-            !generate_problems_and_solutions(
+            !generate_problems_and_cache_solutions(
                 &problem_cache,
                 SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE,
                 largest_cacheable,
@@ -280,7 +280,7 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
     return problem_size - 1;
 }
 
-static bool generate_problems_and_solutions(
+static bool generate_problems_and_cache_solutions(
     ProblemSet* problem_set,
     ProblemSize smallest_problem,
     ProblemSize largest_problem,
