@@ -142,7 +142,7 @@ int main(int argc, char const *argv[]) {
             !generate_problems_and_cache_solutions(
                 &problem_cache,
                 options.start_problem_size,
-                options.end_problem_size,
+                largest_cacheable,
                 problem_statistics
             )
         ) {
@@ -315,6 +315,7 @@ static bool generate_problems_and_cache_solutions(
     ProblemSize largest_problem,
     ProblemStatistics* statistics
 ) {
+    printf("start 0\n");
     // generate the first problem cache
     if (
         !generate_new_problem_solutions_cache(
@@ -327,14 +328,13 @@ static bool generate_problems_and_cache_solutions(
         deallocate_problem_set(problem_set);
         return false;
     }
-    printf("0\n");
     // for each successive problem size after first (if any)
     for (
         size_t i = 1;
         i < count_problems_in_range(smallest_problem, largest_problem);
         i++
     ) {
-        printf("%zu\n", i);
+        printf("start %zu\n", i);
         // generate subsequent cache levels from the previous ones, iteratively
         if (
             !generate_next_problem_solutions_from_current(
@@ -345,7 +345,6 @@ static bool generate_problems_and_cache_solutions(
             deallocate_problem_set(problem_set);
             return false;
         }
-        printf("%zu\n", i);
     }
     return true;
 }
@@ -397,6 +396,8 @@ static size_t get_cache_size_of_problem(ProblemSize problem_size) {
 }
 
 static size_t predict_number_of_valid_solutions(ProblemSize problem_size) {
+    // problem sizes below 6 bits do not follow the trend
+    if (problem_size < 6) return two_to_the_power_of(problem_size * 2U);
     return (size_t)ceill( // round up for a conservative estimate
         two_to_the_power_of(problem_size) * mean_validity(problem_size)
     );
@@ -502,7 +503,7 @@ static bool solution_is_valid_for_problem(
      * problem size --this makes it acceptable for memory-allocation testing
      * but makes the actual results recorded meaningless
      */
-    long double probability = mean_validity(size);
+    long double probability = mean_validity(size - 1U) / mean_validity(size);
     int coin_flip = rand();
     return (((long double)coin_flip / RAND_MAX) < probability);
 }
@@ -516,12 +517,15 @@ static bool add_solution_to_solution_set(
     if (solution_set->count == solution_set->allocated_size) {
         // allocate extra memory
         size_t new_size = solution_set->count + SOLUTION_SET_OVER_ALLOCATE_AMOUNT;
-        if (
-            realloc(solution_set->solutions, new_size * sizeof(Solution)) == NULL
-        ) {
+        void* set = realloc(
+            solution_set->solutions, new_size * sizeof(Solution)
+        );
+        if (set == NULL) {
             // memory allocation failure
             return false;
         } else {
+            // store the new pointer
+            solution_set->solutions = set;
             // update allocated size
             solution_set->allocated_size = new_size;
         }
@@ -538,7 +542,7 @@ static bool shrink_solution_set(SolutionSet* solution_set) {
      * problem size has been reached for which it can't be gauranteed that there
      * will always be at least one solution.
      */
-    size_t shrink_size = solution_set->count > 1 ? solution_set->count : 1;
+    size_t shrink_size = solution_set->count > 0U ? solution_set->count : 1U;
     // resize (should be shrinking) down to the exact size needed to store items
     void* set = realloc(
         solution_set->solutions, shrink_size * sizeof(Solution)
@@ -550,7 +554,7 @@ static bool shrink_solution_set(SolutionSet* solution_set) {
         // store the new pointer
         solution_set->solutions = set;
         // update allocated size
-        solution_set->allocated_size = solution_set->count;
+        solution_set->allocated_size = shrink_size;
         return true;
     }
 }
@@ -600,6 +604,8 @@ static bool generate_next_problem_solutions_from_current(
                 deallocate_problem_set(&old_set);
                 return false;
             }
+            // set number allocated for memory book-keeping purposes
+            problem_set->problem_solutions[k].allocated_size = estimated_solutions;
             /*
              * we now need to iterate over all the valid solutions to the
              * original problem, create extended versions with zero and one
