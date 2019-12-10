@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 #ifdef __cplusplus
@@ -221,6 +222,7 @@ static bool generate_new_problem_solutions_cache(
  * returns false if memory allocation failed
  * NOTE: this does not allocate memory for the nested solution set members
  * this functionality is provided separately
+ * NOTE: this function also sets the members `count` and `bits`
  */
 static bool allocate_problem_set(
     ProblemSet* problem_set, ProblemSize problem_size
@@ -246,6 +248,19 @@ static bool add_solution_to_solution_set(SolutionSet* solution_set, Solution s);
  * so is unlikely to fail, but if it does this function returns false
  */
 static bool shrink_solution_set(SolutionSet* solution_set);
+
+/*
+ * Using cached data in the given problem set, generate the problems and valid
+ * solutions to them for the next problem size.
+ * Modifies problem_set in-place to place the problems and solutions of the next
+ * problem size directly into that structure.
+ * If statistics is not NULL, it will be updated with the statistics about the
+ * next problem size.
+ * Returns false if it fails (due to memory allocation issues)
+ */
+static bool generate_next_problem_solutions_from_current(
+    ProblemSet* problem_set, ProblemStatistics* statistics
+);
 
 // implementations of all private functions
 
@@ -312,16 +327,26 @@ static bool generate_problems_and_cache_solutions(
         deallocate_problem_set(problem_set);
         return false;
     }
-    // TODO: generate subsequent cache levels from the previous ones, iteratively
-    // TODO: for each successive problem size after first (if any):
-    // TODO:    create new data structure to contain problem sets
-    // TODO:    for each problem in old problem set:
-    // TODO:        add a corresponding 0 and 1 entry in new data structure
-    // TODO:        for each solution in problem's solution set
-    // TODO:            generate new solutions with 0 and 1 appended to solution
-    // TODO:            append new solutions to new structure if valid
-    // TODO:            resize solutions allocated memory as needed
-    // TODO:    update statistics if not NULL
+    printf("0\n");
+    // for each successive problem size after first (if any)
+    for (
+        size_t i = 1;
+        i < count_problems_in_range(smallest_problem, largest_problem);
+        i++
+    ) {
+        printf("%zu\n", i);
+        // generate subsequent cache levels from the previous ones, iteratively
+        if (
+            !generate_next_problem_solutions_from_current(
+                problem_set, statistics
+            )
+        ) {
+            // deallocate any memory and return failure
+            deallocate_problem_set(problem_set);
+            return false;
+        }
+        printf("%zu\n", i);
+    }
     return true;
 }
 
@@ -506,17 +531,119 @@ static bool add_solution_to_solution_set(
 }
 
 static bool shrink_solution_set(SolutionSet* solution_set) {
+    /*
+     * because realloc()'ing zero bytes will free the memory, always allocate at
+     * least 1 item, even if there are none for some reason
+     * NOTE: this should never actually be the case, as that would mean a
+     * problem size has been reached for which it can't be gauranteed that there
+     * will always be at least one solution.
+     */
+    size_t shrink_size = solution_set->count > 1 ? solution_set->count : 1;
     // resize (should be shrinking) down to the exact size needed to store items
-    if (
-        realloc(
-            solution_set->solutions, solution_set->count * sizeof(Solution)
-        ) == NULL
-    ) {
+    void* set = realloc(
+        solution_set->solutions, shrink_size * sizeof(Solution)
+    );
+    if (set == NULL) {
         // memory allocation failure
         return false;
     } else {
+        // store the new pointer
+        solution_set->solutions = set;
         // update allocated size
         solution_set->allocated_size = solution_set->count;
         return true;
     }
+}
+
+static bool generate_next_problem_solutions_from_current(
+    ProblemSet* problem_set, ProblemStatistics* statistics
+) {
+    /*
+     * copy the problem set passed to us --this doesn't copy pointers but that's
+     * ok because we don't want to copy the dynamically allocated sections, but
+     * we do need to retain the pointers so we can free them after as we shall
+     * replace the original problem set object with the new one
+     */
+    ProblemSet old_set = *problem_set;
+    // reset the members of the original
+    *problem_set = (ProblemSet){0};
+    // create new data structure to contain problem sets
+    if (!allocate_problem_set(problem_set, old_set.bits + 1U)) {
+        // allocation failure --deallocate old set before returning
+        deallocate_problem_set(&old_set);
+        return false;
+    }
+    // generate and test new problems and new valid solutions from the old ones
+    for (size_t i = 0; i < old_set.count; i++) {
+        // copy the problem but shift it one bit left --we are extending it
+        Problem old_problem = old_set.problem_solutions[i].problem << 1;
+        /*
+         * deposit two copies of old problem number into array, one with a zero
+         * appended and another with a one appended
+         */
+        for (uint8_t j = 0; j < 2; j++) {
+            /*
+             * we deposit problems appended with zero at the front and deposit
+             * problems appended with one starting halfway through the new set
+             */
+            size_t k = i + (old_set.count * j);
+            problem_set->problem_solutions[k].problem = old_problem | j;
+            // allocate memory for the solutions to this problem
+            size_t estimated_solutions = predict_number_of_valid_solutions(
+                problem_set->bits
+            );
+            problem_set->problem_solutions[k].solutions = calloc(
+                estimated_solutions, sizeof(Solution)
+            );
+            if (problem_set->problem_solutions[k].solutions == NULL) {
+                // allocation failure --deallocate old set before returning
+                deallocate_problem_set(&old_set);
+                return false;
+            }
+            /*
+             * we now need to iterate over all the valid solutions to the
+             * original problem, create extended versions with zero and one
+             * appended and test thes against the new problem
+             */
+            for (size_t l = 0; l < old_set.problem_solutions[i].count; l++) {
+                // as with the problem, shift one bit left to extend
+                Solution old_solution = old_set.problem_solutions[i].solutions[l] << 1;
+                for (uint8_t m = 0; m < 2; m++) {
+                    Problem p = problem_set->problem_solutions[k].problem;
+                    // append the zero or one and validate the new solution
+                    Solution s = old_solution | m;
+                    if (
+                        solution_is_valid_for_problem(p, s, problem_set->bits)
+                    ) {
+                        if (
+                            !add_solution_to_solution_set(
+                                &problem_set->problem_solutions[k], s
+                            )
+                        ) {
+                            // allocation failure --deallocate before returning
+                            deallocate_problem_set(&old_set);
+                            return false;
+                        }
+                    }
+                }
+            }
+            // shrink solution set down to waste less memory
+            if (!shrink_solution_set(&problem_set->problem_solutions[k])) {
+                // allocation failure --deallocate old set before returning
+                deallocate_problem_set(&old_set);
+                return false;
+            }
+            // TODO: update statistics
+        }
+    }
+    // TODO:for each problem in old problem set:
+    // TODO:    add a corresponding 0 and 1 entry in new data structure
+    // TODO:    for each solution in problem's solution set
+    // TODO:        generate new solutions with 0 and 1 appended to solution
+    // TODO:        append new solutions to new structure if valid
+    // TODO:        resize solutions allocated memory as needed
+    // TODO:update statistics if not NULL
+    // free the original version before exiting (otherwise memory will leak)
+    deallocate_problem_set(&old_set);
+    return true;
 }
