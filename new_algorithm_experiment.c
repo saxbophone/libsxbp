@@ -226,6 +226,13 @@ static bool solution_is_valid_for_problem(
  */
 static bool add_solution_to_solution_set(SolutionSet* solution_set, Solution s);
 
+/*
+ * reallocates the memory of a solution set to be exactly the size it needs
+ * this typically implies a shrinking from over-allocated size to exact size,
+ * so is unlikely to fail, but if it does this function returns false
+ */
+static bool shrink_solution_set(SolutionSet* solution_set);
+
 // implementations of all private functions
 
 static CommandLineOptions parse_command_line_options(
@@ -285,6 +292,10 @@ static bool generate_problems_and_solutions(
     size_t estimated_solutions = predict_number_of_valid_solutions(
         smallest_problem
     );
+    // for our tracking of min validity to work, init it to max size_t
+    if (statistics != NULL) {
+        statistics[0].lowest_validity = SIZE_MAX;
+    }
     // populate with all the problems of that size
     for (Problem p = 0; p < problem_set->count; p++) {
         problem_set->problem_solutions[p].problem = p;
@@ -313,9 +324,28 @@ static bool generate_problems_and_solutions(
                 }
             }
         }
-        // TODO: make and call shrinking function to shrink solution set down
-        // TODO: update statistics if not NULL
+        // shrink solution set down to waste less memory
+        if (!shrink_solution_set(&problem_set->problem_solutions[p])) {
+            // memory allocation failure, deallocate structure
+            deallocate_problem_set(problem_set);
+            return false;
+        }
+        // update statistics if not NULL
+        if (statistics != NULL) {
+            statistics[0].bits = problem_set->bits;
+            size_t solutions_count = problem_set->problem_solutions[p].count;
+            if (solutions_count < statistics[0].lowest_validity) {
+                statistics[0].lowest_validity = solutions_count;
+            }
+            if (solutions_count > statistics[0].highest_validity) {
+                statistics[0].highest_validity = solutions_count;
+            }
+            // mean validity is cumulative until we finish at which point divide
+            statistics[0].mean_validity += solutions_count;
+        }
     }
+    // divide cumulative mean validity by problems count
+    statistics[0].mean_validity /= problem_set->count;
     // TODO: for each successive problem size after first (if any):
     // TODO:    create new data structure to contain problem sets
     // TODO:    for each problem in old problem set:
@@ -441,4 +471,20 @@ static bool add_solution_to_solution_set(
     }
     // success!
     return true;
+}
+
+static bool shrink_solution_set(SolutionSet* solution_set) {
+    // resize (should be shrinking) down to the exact size needed to store items
+    if (
+        realloc(
+            solution_set->solutions, solution_set->count * sizeof(Solution)
+        ) == NULL
+    ) {
+        // memory allocation failure
+        return false;
+    } else {
+        // update allocated size
+        solution_set->allocated_size = solution_set->count;
+        return true;
+    }
 }
