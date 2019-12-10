@@ -45,13 +45,14 @@ typedef RepresentationBase Solution;
 typedef struct SolutionSet {
     size_t allocated_size; // how many solutions memory has been allocated for
     size_t count; // how many solutions there are
+    Problem problem; // the problem bit string that these solutions are for
     Solution* solutions; // dynamically allocated array of count many solutions
 } SolutionSet;
 
 typedef struct ProblemSet {
     ProblemSize bits; // how many bits wide these problems are
     size_t count; // how many problems there are
-    SolutionSet* problem_solutions; // dynamic array, problem is index number
+    SolutionSet* problem_solutions; // dynamic array of solutions to problems
 } ProblemSet;
 
 typedef struct ProblemStatistics {
@@ -199,6 +200,24 @@ static uintmax_t two_to_the_power_of(uint8_t power);
  */
 static long double mean_validity(ProblemSize problem_size);
 
+/*
+ * allocates memory for the dynamic members of the given problem set
+ * returns false if memory allocation failed
+ * NOTE: this does not allocate memory for the nested solution set members
+ * this functionality is provided separately
+ */
+static bool allocate_problem_set(
+    ProblemSet* problem_set, ProblemSize problem_size
+);
+
+/*
+ * returns true if the given solution is valid for the given problem, both of
+ * given size in bits
+ */
+static bool solution_is_valid_for_problem(
+    Problem problem, Solution solution, ProblemSize size
+);
+
 // implementations of all private functions
 
 static CommandLineOptions parse_command_line_options(
@@ -252,13 +271,61 @@ static bool generate_problems_and_solutions(
     ProblemSize largest_problem,
     ProblemStatistics* statistics
 ) {
-    // TODO: for the first problem size:
-    // TODO:    allocate a problem set for that size
-    // TODO:    populate with all the problems of that size
-    // TODO:    for each problem:
-    // TODO:        find valid solutions and add to the list of problem solutions
-    // TODO:        resize solutions allocated memory as needed
-    // TODO:    update statistics if not NULL
+    // for the first problem size, allocate a problem set for that size
+    if (!allocate_problem_set(problem_set, smallest_problem)) return false;
+    // estimated mean number of solutions per problem
+    size_t estimated_solutions = predict_number_of_valid_solutions(
+        smallest_problem
+    );
+    // populate with all the problems of that size
+    for (Problem p = 0; p < problem_set->count; p++) {
+        problem_set->problem_solutions[p].problem = p;
+        // try and allocate memory for the solutions --allocate estimated number
+        problem_set->problem_solutions[p].solutions = calloc(
+            estimated_solutions, sizeof(Solution)
+        );
+        if (problem_set->problem_solutions[p].solutions == NULL) {
+            // memory allocation failure, deallocate the rest of the structure
+            deallocate_problem_set(problem_set);
+            return false;
+        }
+        // set number allocated for memory book-keeping purposes
+        problem_set->problem_solutions[p].allocated_size = estimated_solutions;
+        // find valid solutions and add to the list of problem solutions
+        for (Solution s = 0; s < problem_set->count; s++) {
+            // TODO: this whole block needs to put into an 'add solution' func
+            if (solution_is_valid_for_problem(p, s, problem_set->bits)) {
+                problem_set->problem_solutions[p]
+                            .solutions[problem_set->problem_solutions[p].count]
+                            = s;
+                problem_set->problem_solutions[p].count++;
+                // make sure there's always memory for at least one more item
+                if (
+                    problem_set->problem_solutions[p].count ==
+                    problem_set->problem_solutions[p].allocated_size
+                ) {
+                    if (
+                        realloc(
+                            problem_set->problem_solutions[p].solutions,
+                            // TODO: consider changing +1 to a tunable constant
+                            (problem_set->problem_solutions[p].count + 1) *
+                            sizeof(Solution)
+                        ) == NULL
+                    ) {
+                        // memory allocation failure, deallocate structure
+                        deallocate_problem_set(problem_set);
+                        return false;
+                    } else {
+                        // update allocated size
+                        problem_set->problem_solutions[p].allocated_size =
+                            problem_set->problem_solutions[p].count + 1;
+                    }
+                }
+            }
+        }
+        // TODO: resize solutions allocated memory as needed
+        // TODO: update statistics if not NULL
+    }
     // TODO: for each successive problem size after first (if any):
     // TODO:    create new data structure to contain problem sets
     // TODO:    for each problem in old problem set:
@@ -268,7 +335,7 @@ static bool generate_problems_and_solutions(
     // TODO:            append new solutions to new structure if valid
     // TODO:            resize solutions allocated memory as needed
     // TODO:    update statistics if not NULL
-    return false;
+    return true;
 }
 
 static void deallocate_problem_set(ProblemSet* problem_set) {
@@ -333,4 +400,31 @@ static long double mean_validity(ProblemSize problem_size) {
         MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A *
         powl(MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B, problem_size)
     );
+}
+
+static bool allocate_problem_set(
+    ProblemSet* problem_set, ProblemSize problem_size
+) {
+    size_t problems_count = two_to_the_power_of(problem_size);
+    // first off, try to allocate memory for all the problems
+    problem_set->problem_solutions = calloc(problems_count, sizeof(SolutionSet));
+    // catch calloc() failure
+    if (problem_set->problem_solutions == NULL) return false;
+    // now that we have allocated, set the number of problems and bit size
+    problem_set->count = problems_count;
+    problem_set->bits = problem_size;
+    return true;
+}
+
+static bool solution_is_valid_for_problem(
+    Problem problem, Solution solution, ProblemSize size
+) {
+    /*
+     * XXX: Dummy implementation, doesn't return truthful results
+     * simply returns true/false with the expected probability for the given
+     * problem size
+     */
+    long double probability = mean_validity(size);
+    int coin_flip = rand();
+    return (((long double)coin_flip / RAND_MAX) < probability);
 }
