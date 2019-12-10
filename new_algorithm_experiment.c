@@ -74,6 +74,8 @@ static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.56
 static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011252032045966;
 // a size of problem that we can guarantee we can store and is fast to solve
 static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 4U;
+// how much extra memory we allocate for solution sets when they require more space
+static const size_t SOLUTION_SET_OVER_ALLOCATE_AMOUNT = 1024U;
 
 // private functions which are used directly by main()
 
@@ -218,6 +220,12 @@ static bool solution_is_valid_for_problem(
     Problem problem, Solution solution, ProblemSize size
 );
 
+/*
+ * tries to append the given solution to the given solution set
+ * returns false if unsuccessful (this will be because of memory allocation fail)
+ */
+static bool add_solution_to_solution_set(SolutionSet* solution_set, Solution s);
+
 // implementations of all private functions
 
 static CommandLineOptions parse_command_line_options(
@@ -293,33 +301,15 @@ static bool generate_problems_and_solutions(
         problem_set->problem_solutions[p].allocated_size = estimated_solutions;
         // find valid solutions and add to the list of problem solutions
         for (Solution s = 0; s < problem_set->count; s++) {
-            // TODO: this whole block needs to put into an 'add solution' func
             if (solution_is_valid_for_problem(p, s, problem_set->bits)) {
-                problem_set->problem_solutions[p]
-                            .solutions[problem_set->problem_solutions[p].count]
-                            = s;
-                problem_set->problem_solutions[p].count++;
-                // make sure there's always memory for at least one more item
                 if (
-                    problem_set->problem_solutions[p].count ==
-                    problem_set->problem_solutions[p].allocated_size
+                    !add_solution_to_solution_set(
+                        &problem_set->problem_solutions[p], s
+                    )
                 ) {
-                    if (
-                        realloc(
-                            problem_set->problem_solutions[p].solutions,
-                            // TODO: consider changing +1 to a tunable constant
-                            (problem_set->problem_solutions[p].count + 1) *
-                            sizeof(Solution)
-                        ) == NULL
-                    ) {
-                        // memory allocation failure, deallocate structure
-                        deallocate_problem_set(problem_set);
-                        return false;
-                    } else {
-                        // update allocated size
-                        problem_set->problem_solutions[p].allocated_size =
-                            problem_set->problem_solutions[p].count + 1;
-                    }
+                    // memory allocation failure, deallocate structure
+                    deallocate_problem_set(problem_set);
+                    return false;
                 }
             }
         }
@@ -422,9 +412,37 @@ static bool solution_is_valid_for_problem(
     /*
      * XXX: Dummy implementation, doesn't return truthful results
      * simply returns true/false with the expected probability for the given
-     * problem size
+     * problem size --this makes it acceptable for memory-allocation testing
+     * but makes the actual results recorded meaningless
      */
     long double probability = mean_validity(size);
     int coin_flip = rand();
     return (((long double)coin_flip / RAND_MAX) < probability);
+}
+
+static bool add_solution_to_solution_set(
+    SolutionSet* solution_set, Solution s
+) {
+    solution_set->solutions[solution_set->count] = s;
+    solution_set->count++;
+    // make sure there's always memory for at least one more item
+    if (solution_set->count == solution_set->allocated_size) {
+        if (
+            realloc(
+                solution_set->solutions,
+                // allocate extra memory
+                (solution_set->count + SOLUTION_SET_OVER_ALLOCATE_AMOUNT) *
+                sizeof(Solution)
+            ) == NULL
+        ) {
+            // memory allocation failure
+            return false;
+        } else {
+            // update allocated size
+            solution_set->allocated_size = solution_set->count +
+                SOLUTION_SET_OVER_ALLOCATE_AMOUNT;
+        }
+    }
+    // success!
+    return true;
 }
