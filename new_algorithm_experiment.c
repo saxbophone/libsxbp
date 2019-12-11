@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "sxbp/figure_collides.h"
+#include "sxbp/sxbp.h"
 
 #ifdef __cplusplus
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
@@ -240,12 +242,17 @@ static bool allocate_problem_set(
     ProblemSet* problem_set, ProblemSize problem_size
 );
 
+// unpacks all the bits up to `size` from the given `source` integer into `dest`
+static void integer_to_bit_string(
+    ProblemSize size, RepresentationBase source, bool dest[size]
+);
+
 /*
  * returns true if the given solution is valid for the given problem, both of
  * given size in bits
  */
 static bool solution_is_valid_for_problem(
-    Problem problem, Solution solution, ProblemSize size
+    ProblemSize size, Problem problem, Solution solution
 );
 
 /*
@@ -458,7 +465,7 @@ static bool generate_new_problem_solutions_cache(
         problem_set->problem_solutions[p].allocated_size = estimated_solutions;
         // find valid solutions and add to the list of problem solutions
         for (Solution s = 0; s < problem_set->count; s++) {
-            if (solution_is_valid_for_problem(p, s, problem_set->bits)) {
+            if (solution_is_valid_for_problem(problem_set->bits, p, s)) {
                 if (
                     !add_solution_to_solution_set(
                         &problem_set->problem_solutions[p], s
@@ -509,18 +516,68 @@ static bool allocate_problem_set(
     return true;
 }
 
-static bool solution_is_valid_for_problem(
-    Problem problem, Solution solution, ProblemSize size
+static void integer_to_bit_string(
+    ProblemSize size, RepresentationBase source, bool dest[size]
 ) {
-    /*
-     * XXX: Dummy implementation, doesn't return truthful results
-     * simply returns true/false with the expected probability for the given
-     * problem size --this makes it acceptable for memory-allocation testing
-     * but makes the actual results recorded meaningless
-     */
-    long double probability = mean_validity(size - 1U) / mean_validity(size);
-    int coin_flip = rand();
-    return (((long double)coin_flip / RAND_MAX) < probability);
+    // NOTE: we handle integers big-endian, but only handle the x lowest bits
+    for (ProblemSize i = 0; i < size; i++) {
+        RepresentationBase mask = 1U << (size - i - 1);
+        if ((source & mask) != 0) {
+            dest[i] = true;
+        } else {
+            dest[i] = false;
+        }
+    }
+}
+
+static bool solution_is_valid_for_problem(
+    ProblemSize size, Problem problem, Solution solution
+) {
+    // yes, these are C99 variable-length arrays
+    bool problem_bits[size];
+    bool solution_bits[size];
+    // get bits of problem and solution
+    integer_to_bit_string(size, problem, problem_bits);
+    integer_to_bit_string(size, solution, solution_bits);
+    // create and allocate memory for a figure of the correct size
+    sxbp_Figure figure = sxbp_blank_figure();
+    figure.size = size + 1U; // inlcudes 1 additional starter line as orientation
+    if (!sxbp_success(sxbp_init_figure(&figure))) {
+        abort(); // XXX: Cheap allocation failure exit!
+    }
+    // hardcode the first line, which is always the same
+    figure.lines[0].direction = SXBP_UP;
+    figure.lines[0].length = 3;
+    // set the line lengths and directions from the problem and solution
+    sxbp_Direction current_direction = SXBP_UP;
+    for (ProblemSize i = 0; i < size; i++) {
+        // if bit is 1, turn right, otherwise, turn left
+        if (solution_bits[i]) {
+            current_direction = (current_direction - 1) % 4;
+        } else {
+            current_direction = (current_direction + 1) % 4;
+        }
+        figure.lines[i + 1].length = problem_bits[i] ? 2 : 1;
+        figure.lines[i + 1].direction = current_direction;
+    }
+    // check if figure collides and store result
+    bool figure_collides = false;
+    if (!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
+        abort(); // XXX: Cheap allocation failure exit!
+    }
+
+    // XXX: DEBUGGING CODE FOR PRINTING EVERY SINGLE TESTED CANDIDATE
+    // if (!figure_collides){
+    //     sxbp_Bitmap bitmap = sxbp_blank_bitmap();
+    //     sxbp_render_figure_to_bitmap(&figure, &bitmap);
+    //     sxbp_print_bitmap(&bitmap, stdout);
+    //     sxbp_free_bitmap(&bitmap);
+    // }
+
+    // free memory for figure
+    sxbp_free_figure(&figure);
+    // return result
+    return !figure_collides;
 }
 
 static bool add_solution_to_solution_set(
@@ -634,7 +691,7 @@ static bool generate_next_problem_solutions_from_current(
                     // append the zero or one and validate the new solution
                     Solution s = old_solution | m;
                     if (
-                        solution_is_valid_for_problem(p, s, problem_set->bits)
+                        solution_is_valid_for_problem(problem_set->bits, p, s)
                     ) {
                         if (
                             !add_solution_to_solution_set(
@@ -655,6 +712,7 @@ static bool generate_next_problem_solutions_from_current(
                 return false;
             }
             // TODO: update statistics
+            // printf("Count: %zu\n", problem_set->problem_solutions[k].count);
         }
     }
     // TODO:for each problem in old problem set:
