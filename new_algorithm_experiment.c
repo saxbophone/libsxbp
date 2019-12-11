@@ -22,7 +22,7 @@
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
 
-typedef uint8_t ProblemSize;
+typedef uint_fast8_t ProblemSize;
 
 typedef struct CommandLineOptions {
     ProblemSize start_problem_size; // size of problem to start with in bits
@@ -35,7 +35,7 @@ typedef struct CommandLineOptions {
  * NOTE: this must be able to store at least 2^N values where N is the maximum
  * desired problem size in bits
  */
-typedef uint64_t RepresentationBase;
+typedef uint_fast64_t RepresentationBase;
 typedef RepresentationBase Problem;
 typedef RepresentationBase Solution;
 
@@ -130,7 +130,7 @@ int main(int argc, char const *argv[]) {
     // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
     printf(
-        "Start: %" PRIu8 " End: %" PRIu8 " RAM: %zu\n",
+        "Start: %" PRIuFAST8 " End: %" PRIuFAST8 " RAM: %zu\n",
         options.start_problem_size,
         options.end_problem_size,
         options.max_ram_per_process
@@ -144,7 +144,7 @@ int main(int argc, char const *argv[]) {
         options.max_ram_per_process
     );
     printf(
-        "Can cache up to %" PRIu8 "bits (%zu bytes)\n",
+        "Can cache up to %" PRIuFAST8 "bits (%zu bytes)\n",
         largest_cacheable,
         get_cache_size_of_problem(largest_cacheable - 1U) +
         get_cache_size_of_problem(largest_cacheable)
@@ -205,7 +205,7 @@ static size_t predict_number_of_valid_solutions(ProblemSize problem_size);
  * maximum bit width of integer supported by the system is given. (so a 64-bit
  * system will overflow if 64 is passed).
  */
-static uintmax_t two_to_the_power_of(uint8_t power);
+static uintmax_t two_to_the_power_of(uint_fast8_t power);
 
 /*
  * uses A-B-exponential using magic constants derived from regression of
@@ -416,7 +416,7 @@ static size_t predict_number_of_valid_solutions(ProblemSize problem_size) {
     );
 }
 
-static uintmax_t two_to_the_power_of(uint8_t power) {
+static uintmax_t two_to_the_power_of(uint_fast8_t power) {
     return 1U << power;
 }
 
@@ -600,7 +600,7 @@ static bool generate_next_problem_solutions_from_current(
          * deposit two copies of old problem number into array, one with a zero
          * appended and another with a one appended
          */
-        for (uint8_t j = 0; j < 2; j++) {
+        for (uint_fast8_t j = 0; j < 2; j++) {
             /*
              * we deposit problems appended with zero at the front and deposit
              * problems appended with one starting halfway through the new set
@@ -629,7 +629,7 @@ static bool generate_next_problem_solutions_from_current(
             for (size_t l = 0; l < old_set.problem_solutions[i].count; l++) {
                 // as with the problem, shift one bit left to extend
                 Solution old_solution = old_set.problem_solutions[i].solutions[l] << 1;
-                for (uint8_t m = 0; m < 2; m++) {
+                for (uint_fast8_t m = 0; m < 2; m++) {
                     Problem p = problem_set->problem_solutions[k].problem;
                     // append the zero or one and validate the new solution
                     Solution s = old_solution | m;
