@@ -61,9 +61,9 @@ typedef struct ProblemSet {
 typedef struct ProblemStatistics {
     ProblemSize bits; // what size of problem these statistics are for
     // the fewest number of valid solutions found across problems of this size
-    RepresentationBase lowest_validity;
+    size_t lowest_validity;
     // the highest number of valid solutions found across problems of this size
-    RepresentationBase highest_validity;
+    size_t highest_validity;
     // the mean number of valid solutions found across problems of this size
     long double mean_validity;
     // NOTE: to get validity rates as percentages:
@@ -118,11 +118,6 @@ static bool generate_problems_and_cache_solutions(
 static void deallocate_problem_set(ProblemSet* problem_set);
 
 /*
- * private functions which are used only by other private functions which are
- * used directly by main()
- */
-
-/*
  * returns the number of bytes needed to cache the solutions to all problems of
  * given problem size
  */
@@ -167,7 +162,9 @@ int main(int argc, char const *argv[]) {
             !generate_problems_and_cache_solutions(
                 &problem_cache,
                 options.start_problem_size,
-                largest_cacheable,
+                // use smallest of end problem or largest cacheable
+                largest_cacheable < options.end_problem_size ?
+                    largest_cacheable : options.end_problem_size,
                 problem_statistics
             )
         ) {
@@ -190,9 +187,24 @@ int main(int argc, char const *argv[]) {
     }
     // free dynamically allocated memory
     deallocate_problem_set(&problem_cache);
+    // XXX: debug, until rest of implementation, just log out cached statistics
+    for (size_t i = 0; i < problems_count; i++) {
+        printf(
+            "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
+            problem_statistics[i].bits,
+            problem_statistics[i].lowest_validity,
+            problem_statistics[i].highest_validity,
+            problem_statistics[i].mean_validity
+        );
+    }
     free(problem_statistics);
     return 0;
 }
+
+/*
+ * private functions which are used only by other private functions which are
+ * used directly by main()
+ */
 
 /*
  * returns the expected number of mean valid solutions per problem for the given
@@ -216,6 +228,25 @@ static uintmax_t two_to_the_power_of(uint_fast8_t power);
  * float percentage is returned where 0.0 is 0% and 1.0% is 100%
  */
 static long double mean_validity(ProblemSize problem_size);
+
+// initialises the given statistics object if given, does nothing if NULL
+static void init_statistics(ProblemStatistics* statistics, ProblemSize bits);
+
+/*
+ * updates the given statistics object (if not NULL) with the given solutions
+ * count of a problem that has finished testing
+ * this will update lowest and highest validity if needed, and accumulate the
+ * mean validity
+ */
+static void update_statistics(
+    ProblemStatistics* statistics, size_t solutions_count
+);
+
+/*
+ * calculates the mean validity statistics if not NULL, to be called once after
+ * testing of a given problem is finished
+ */
+static void finalise_statistics(ProblemStatistics* statistics);
 
 /*
  * Allocates memory for and initialises the given problem set with a cache of
@@ -358,7 +389,7 @@ static bool generate_problems_and_cache_solutions(
         // generate subsequent cache levels from the previous ones, iteratively
         if (
             !generate_next_problem_solutions_from_current(
-                problem_set, statistics
+                problem_set, &statistics[i]
             )
         ) {
             // deallocate any memory and return failure
@@ -435,6 +466,38 @@ static long double mean_validity(ProblemSize problem_size) {
     );
 }
 
+static void init_statistics(ProblemStatistics* statistics, ProblemSize bits) {
+    if (statistics != NULL) {
+        // set the problem size bits
+        statistics->bits = bits;
+        // for our tracking of min validity to work, init it to max size_t
+        statistics->lowest_validity = SIZE_MAX;
+    }
+}
+
+static void update_statistics(
+    ProblemStatistics* statistics, size_t solutions_count
+) {
+    // update statistics if not NULL
+    if (statistics != NULL) {
+        if (solutions_count < statistics->lowest_validity) {
+            statistics->lowest_validity = solutions_count;
+        }
+        if (solutions_count > statistics->highest_validity) {
+            statistics->highest_validity = solutions_count;
+        }
+        // mean validity is cumulative until we finish at which point divide
+        statistics->mean_validity += solutions_count;
+    }
+}
+
+static void finalise_statistics(ProblemStatistics* statistics) {
+    if (statistics != NULL) {
+        // divide cumulative mean validity by problems count
+        statistics->mean_validity /= two_to_the_power_of(statistics->bits);
+    }
+}
+
 static bool generate_new_problem_solutions_cache(
     ProblemSet* problem_set,
     ProblemSize problem_size,
@@ -446,10 +509,8 @@ static bool generate_new_problem_solutions_cache(
     size_t estimated_solutions = predict_number_of_valid_solutions(
         problem_size
     );
-    // for our tracking of min validity to work, init it to max size_t
-    if (statistics != NULL) {
-        statistics->lowest_validity = SIZE_MAX;
-    }
+    // init statistics
+    init_statistics(statistics, problem_set->bits);
     // populate with all the problems of that size
     for (Problem p = 0; p < problem_set->count; p++) {
         problem_set->problem_solutions[p].problem = p;
@@ -481,24 +542,10 @@ static bool generate_new_problem_solutions_cache(
             // memory allocation failure
             return false;
         }
-        // update statistics if not NULL
-        if (statistics != NULL) {
-            statistics->bits = problem_set->bits;
-            size_t solutions_count = problem_set->problem_solutions[p].count;
-            if (solutions_count < statistics->lowest_validity) {
-                statistics->lowest_validity = solutions_count;
-            }
-            if (solutions_count > statistics->highest_validity) {
-                statistics->highest_validity = solutions_count;
-            }
-            // mean validity is cumulative until we finish at which point divide
-            statistics->mean_validity += solutions_count;
-        }
+        // update statistics
+        update_statistics(statistics, problem_set->problem_solutions[p].count);
     }
-    if (statistics != NULL) {
-        // divide cumulative mean validity by problems count
-        statistics->mean_validity /= problem_set->count;
-    }
+    finalise_statistics(statistics);
     return true; // success
 }
 
@@ -649,6 +696,8 @@ static bool generate_next_problem_solutions_from_current(
         deallocate_problem_set(&old_set);
         return false;
     }
+    // init statistics
+    init_statistics(statistics, problem_set->bits);
     // generate and test new problems and new valid solutions from the old ones
     for (size_t i = 0; i < old_set.count; i++) {
         // copy the problem but shift it one bit left --we are extending it
@@ -711,17 +760,11 @@ static bool generate_next_problem_solutions_from_current(
                 deallocate_problem_set(&old_set);
                 return false;
             }
-            // TODO: update statistics
-            // printf("Count: %zu\n", problem_set->problem_solutions[k].count);
+            // update statistics
+            update_statistics(statistics, problem_set->problem_solutions[k].count);
         }
     }
-    // TODO:for each problem in old problem set:
-    // TODO:    add a corresponding 0 and 1 entry in new data structure
-    // TODO:    for each solution in problem's solution set
-    // TODO:        generate new solutions with 0 and 1 appended to solution
-    // TODO:        append new solutions to new structure if valid
-    // TODO:        resize solutions allocated memory as needed
-    // TODO:update statistics if not NULL
+    finalise_statistics(statistics);
     // free the original version before exiting (otherwise memory will leak)
     deallocate_problem_set(&old_set);
     return true;
