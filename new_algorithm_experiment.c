@@ -123,6 +123,24 @@ static void deallocate_problem_set(ProblemSet* problem_set);
  */
 static size_t get_cache_size_of_problem(ProblemSize problem_size);
 
+/*
+ * given a range of problem sizes to solve, a cache of solutions to some
+ * previous problems (can be within the range of problems to solve), and a
+ * pointer to an array of problem statistics objects (must be of sufficient
+ * length to store the range of problems to solve), solve all the remaining
+ * problems within the range, using the problem cache given to speed this up.
+ * NOTE: if the problem cache bit size is equal to largest_problem to solve,
+ * this function does nothing.
+ * returns true if this was completed successfully
+ * returns false if a memory error occurred
+ */
+static bool search_remaining_problem_solutions(
+    ProblemSize smallest_problem,
+    ProblemSize largest_problem,
+    const ProblemSet* problem_cache,
+    ProblemStatistics* problem_statistics
+);
+
 int main(int argc, char const *argv[]) {
     // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
@@ -184,6 +202,18 @@ int main(int argc, char const *argv[]) {
             // if it failed for whatever reason
             abort(); // more cheap error handling!
         }
+    }
+    // now, use the problem cache to do a faster search for all other solutions
+    if (
+        !search_remaining_problem_solutions(
+            options.start_problem_size,
+            options.end_problem_size,
+            &problem_cache,
+            problem_statistics
+        )
+    ) {
+        fprintf(stderr, "Error searching remaining problems\n");
+        // the only remaining code does cleanup, so we continue and let it run
     }
     // free dynamically allocated memory
     deallocate_problem_set(&problem_cache);
@@ -312,6 +342,19 @@ static bool generate_next_problem_solutions_from_current(
     ProblemSet* problem_set, ProblemStatistics* statistics
 );
 
+/*
+ * finds all the solutions for the given problem size, taking advantage of the
+ * given problem cache to speed up the process if possible
+ * statistics about the solutions that were found are written to the statistics
+ * object given.
+ * returns true/false for if this process succeeded or failed
+ */
+static bool find_solutions_for_problem(
+    ProblemSize size,
+    const ProblemSet* problem_cache,
+    ProblemStatistics* statistics
+);
+
 // implementations of all private functions
 
 static CommandLineOptions parse_command_line_options(
@@ -366,7 +409,6 @@ static bool generate_problems_and_cache_solutions(
     ProblemSize largest_problem,
     ProblemStatistics* statistics
 ) {
-    printf("start 0\n");
     // generate the first problem cache
     if (
         !generate_new_problem_solutions_cache(
@@ -383,9 +425,7 @@ static bool generate_problems_and_cache_solutions(
     size_t problems_to_solve = count_problems_in_range(
         smallest_problem, largest_problem
     );
-    printf("Problems to solve: %zu\n", problems_to_solve);
     for (size_t i = 1U; i < problems_to_solve; i++) {
-        printf("start %zu\n", i);
         // generate subsequent cache levels from the previous ones, iteratively
         if (
             !generate_next_problem_solutions_from_current(
@@ -446,6 +486,28 @@ static size_t get_cache_size_of_problem(ProblemSize problem_size) {
     );
 }
 
+static bool search_remaining_problem_solutions(
+    ProblemSize smallest_problem,
+    ProblemSize largest_problem,
+    const ProblemSet* problem_cache,
+    ProblemStatistics* problem_statistics
+) {
+    // we need to work out how many problems we have left to solve w/r to cache
+    size_t problems_count = count_problems_in_range(
+        smallest_problem, largest_problem
+    );
+    size_t problems_left = problem_cache->bits < smallest_problem ?
+        problems_count :
+        count_problems_in_range(problem_cache->bits + 1, largest_problem);
+    for (size_t i = problems_count - problems_left; i < problems_count; i++) {
+        // find solutions for the particular problem
+        find_solutions_for_problem(
+            smallest_problem + i, problem_cache, &problem_statistics[i]
+        );
+    }
+    return true; // hmmm, if it can't error, why did I make it return bool?
+}
+
 static size_t predict_number_of_valid_solutions(ProblemSize problem_size) {
     // problem sizes below 6 bits do not follow the trend
     if (problem_size < 6) return two_to_the_power_of(problem_size * 2U);
@@ -503,6 +565,7 @@ static bool generate_new_problem_solutions_cache(
     ProblemSize problem_size,
     ProblemStatistics* statistics
 ) {
+    printf("Caching %2" PRIuFAST8 "...", problem_size);
     // for the first problem size, allocate a problem set for that size
     if (!allocate_problem_set(problem_set, problem_size)) return false;
     // estimated mean number of solutions per problem
@@ -546,6 +609,7 @@ static bool generate_new_problem_solutions_cache(
         update_statistics(statistics, problem_set->problem_solutions[p].count);
     }
     finalise_statistics(statistics);
+    printf("CACHED\n");
     return true; // success
 }
 
@@ -681,6 +745,8 @@ static bool shrink_solution_set(SolutionSet* solution_set) {
 static bool generate_next_problem_solutions_from_current(
     ProblemSet* problem_set, ProblemStatistics* statistics
 ) {
+    ProblemSize current_problem = problem_set->bits + 1U;
+    printf("Caching %2" PRIuFAST8 "...", current_problem);
     /*
      * copy the problem set passed to us --this doesn't copy pointers but that's
      * ok because we don't want to copy the dynamically allocated sections, but
@@ -691,7 +757,7 @@ static bool generate_next_problem_solutions_from_current(
     // reset the members of the original
     *problem_set = (ProblemSet){0};
     // create new data structure to contain problem sets
-    if (!allocate_problem_set(problem_set, old_set.bits + 1U)) {
+    if (!allocate_problem_set(problem_set, current_problem)) {
         // allocation failure --deallocate old set before returning
         deallocate_problem_set(&old_set);
         return false;
@@ -767,5 +833,51 @@ static bool generate_next_problem_solutions_from_current(
     finalise_statistics(statistics);
     // free the original version before exiting (otherwise memory will leak)
     deallocate_problem_set(&old_set);
+    printf("CACHED\n");
     return true;
+}
+
+static bool find_solutions_for_problem(
+    ProblemSize size,
+    const ProblemSet* problem_cache,
+    ProblemStatistics* statistics
+) {
+    printf("Searching %2" PRIuFAST8 "...", size);
+    // initialise the statistics first
+    init_statistics(statistics, size);
+    // work out how many bits we have to shift/mask
+    ProblemSize shift = size - problem_cache->bits;
+    // for each problem in the cache (this is our bitmask)
+    for (size_t i = 0; i < problem_cache->count; i++) {
+        // retrieve the problem and shift it up to turn it into a mask
+        Problem p_mask = problem_cache->problem_solutions[i].problem << shift;
+        // now, we iterate the non-mask bits to generate individual problems
+        for (size_t j = 0; j < two_to_the_power_of(shift); j++) {
+            Problem p = p_mask | j; // combine mask and tail
+            size_t solutions_found = 0; // how many solutions for this problem
+            // iterate all the solutions for this problem
+            for (
+                size_t k = 0;
+                k < problem_cache->problem_solutions[i].count;
+                k++
+            ) {
+                // get the solution mask
+                Solution s_mask = problem_cache->problem_solutions[i]
+                                                .solutions[k] << shift;
+                // now, we iterate the non-mask bits of the solution
+                for (size_t l = 0; l < two_to_the_power_of(shift); l++) {
+                    Solution s = s_mask | l; // combine mask and tail
+                    // now finally, test this solution against the problem
+                    if (solution_is_valid_for_problem(size, p, s)) {
+                        solutions_found++;
+                    }
+                }
+            }
+            // now update the statistics
+            update_statistics(statistics, solutions_found);
+        }
+    }
+    finalise_statistics(statistics);
+    printf("CACHED\n");
+    return true; // hmmm, if it can't error, why did I make it return bool?
 }
