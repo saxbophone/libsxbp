@@ -36,14 +36,14 @@ typedef struct CommandLineOptions {
  * the data type used to store problems and solutions
  * NOTE: this must be able to store at least 2^N values where N is the maximum
  * desired problem size in bits
+ * XXX: Changed to exact 32-bit to use less memory
  */
-typedef uint_fast64_t RepresentationBase;
+typedef uint32_t RepresentationBase;
 typedef RepresentationBase Problem;
 typedef RepresentationBase Solution;
 
 /*
  * stores all the valid solutions for a given problem
- * (problem is not stored in this particular struct)
  */
 typedef struct SolutionSet {
     size_t allocated_size; // how many solutions memory has been allocated for
