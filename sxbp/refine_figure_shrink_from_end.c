@@ -48,7 +48,9 @@ static sxbp_Result sxbp_attempt_line_shorten(
         sxbp_CollisionResult result = SXBP_COLLISION_RESULT_CONTINUES;
         // we'll store any errors encountered by this function here
         sxbp_Result status = SXBP_RESULT_UNKNOWN;
-        if (!sxbp_check(sxbp_figure_collides(figure, &result), &status)) {
+        if (
+            !sxbp_check(sxbp_figure_collides(figure, &result, false), &status)
+        ) {
             // handle error
             return status;
         } else {
@@ -65,7 +67,7 @@ static sxbp_Result sxbp_attempt_line_shorten(
                 // check again if it colldes and handle any errors
                 if (
                     !sxbp_check(
-                        sxbp_figure_collides(figure, &result), &status
+                        sxbp_figure_collides(figure, &result, false), &status
                     )
                 ) {
                     // handle error

@@ -57,7 +57,8 @@ static bool sxbp_figure_collides_callback(sxbp_CoOrd location, void* data) {
 // private, sets status to true if the figure's line collides with itself
 sxbp_Result sxbp_figure_collides(
     const sxbp_Figure* figure,
-    sxbp_CollisionResult* status
+    sxbp_CollisionResult* status,
+    bool detect_terminals
 ) {
     // get figure bounds
     sxbp_Bounds bounds = sxbp_get_bounds(figure, 1);
@@ -80,8 +81,10 @@ sxbp_Result sxbp_figure_collides(
             false, // don't plot vertices only, we need all 1-unit sub-lines
             sxbp_figure_collides_callback, (void*)&data
         );
-        // if it didn't collide, do an additional check to see if it terminates
-        if (*data.status != SXBP_COLLISION_RESULT_COLLIDES) {
+        if (
+            detect_terminals && // we've been asked to detect terminals
+            *data.status != SXBP_COLLISION_RESULT_COLLIDES // it didn't collide
+        ) {
             // get the direction of the last line, so we know which axis to check
             sxbp_Direction last_direction = figure->lines[figure->size - 1].direction;
             bool neighbours[2] = {false};

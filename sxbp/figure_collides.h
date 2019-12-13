@@ -42,8 +42,12 @@ typedef enum sxbp_CollisionResult {
  * given figure collides currently, or does not currently but is guaranteed to
  * collide if another line is plotted, or does not currently and cannot be
  * guaranteed to collide if another line is plotted.
+ * if detect_terminals is true, will enable the detection of terminal solutions,
+ * in which case status may be set to TERMINATES. If not, then terminals are
+ * classed as CONTINUES
  */
 sxbp_Result sxbp_figure_collides(
     const sxbp_Figure* figure,
-    sxbp_CollisionResult* status
+    sxbp_CollisionResult* status,
+    bool detect_terminals
 );

@@ -315,7 +315,7 @@ static void integer_to_bit_string(
  * given size in bits
  */
 static sxbp_CollisionResult solution_is_valid_for_problem(
-    ProblemSize size, Problem problem, Solution solution
+    ProblemSize size, Problem problem, Solution solution, bool detect_terminals
 );
 
 /*
@@ -592,7 +592,9 @@ static bool generate_new_problem_solutions_cache(
         problem_set->problem_solutions[p].allocated_size = estimated_solutions;
         // find valid solutions and add to the list of problem solutions
         for (Solution s = 0; s < problem_set->count; s++) {
-            switch (solution_is_valid_for_problem(problem_set->bits, p, s)) {
+            switch (
+                solution_is_valid_for_problem(problem_set->bits, p, s, true)
+            ) {
             case SXBP_COLLISION_RESULT_COLLIDES:
                 break;
             case SXBP_COLLISION_RESULT_CONTINUES:
@@ -615,7 +617,9 @@ static bool generate_new_problem_solutions_cache(
             return false;
         }
         // update statistics
-        update_statistics(statistics, problem_set->problem_solutions[p].all_count);
+        update_statistics(
+            statistics, problem_set->problem_solutions[p].all_count
+        );
     }
     finalise_statistics(statistics);
     printf("CACHED\n");
@@ -651,7 +655,7 @@ static void integer_to_bit_string(
 }
 
 static sxbp_CollisionResult solution_is_valid_for_problem(
-    ProblemSize size, Problem problem, Solution solution
+    ProblemSize size, Problem problem, Solution solution, bool detect_terminals
 ) {
     // yes, these are C99 variable-length arrays
     bool problem_bits[size];
@@ -682,7 +686,11 @@ static sxbp_CollisionResult solution_is_valid_for_problem(
     }
     // check if figure collides and store result
     sxbp_CollisionResult collision_result = SXBP_COLLISION_RESULT_CONTINUES;
-    if (!sxbp_success(sxbp_figure_collides(&figure, &collision_result))) {
+    if (
+        !sxbp_success(
+            sxbp_figure_collides(&figure, &collision_result, detect_terminals)
+        )
+    ) {
         abort(); // XXX: Cheap allocation failure exit!
     }
 
@@ -811,13 +819,16 @@ static bool generate_next_problem_solutions_from_current(
              */
             for (size_t l = 0; l < old_set.problem_solutions[i].count; l++) {
                 // as with the problem, shift one bit left to extend
-                Solution old_solution = old_set.problem_solutions[i].solutions[l] << 1;
+                Solution old_solution = old_set.problem_solutions[i]
+                                                .solutions[l] << 1;
                 for (uint_fast8_t m = 0; m < 2; m++) {
                     Problem p = problem_set->problem_solutions[k].problem;
                     // append the zero or one and validate the new solution
                     Solution s = old_solution | m;
                     switch (
-                        solution_is_valid_for_problem(problem_set->bits, p, s)
+                        solution_is_valid_for_problem(
+                            problem_set->bits, p, s, true
+                        )
                     ) {
                     case SXBP_COLLISION_RESULT_COLLIDES:
                         break;
@@ -844,7 +855,9 @@ static bool generate_next_problem_solutions_from_current(
                 return false;
             }
             // update statistics
-            update_statistics(statistics, problem_set->problem_solutions[k].all_count);
+            update_statistics(
+                statistics, problem_set->problem_solutions[k].all_count
+            );
         }
     }
     finalise_statistics(statistics);
@@ -875,9 +888,7 @@ static bool find_solutions_for_problem(
             size_t solutions_found = 0; // how many solutions for this problem
             // iterate all the solutions for this problem
             for (
-                size_t k = 0;
-                k < problem_cache->problem_solutions[i].count;
-                k++
+                size_t k = 0; k < problem_cache->problem_solutions[i].count; k++
             ) {
                 // get the solution mask
                 Solution s_mask = problem_cache->problem_solutions[i]
@@ -887,7 +898,7 @@ static bool find_solutions_for_problem(
                     Solution s = s_mask | l; // combine mask and tail
                     // now finally, test this solution against the problem
                     if (
-                        solution_is_valid_for_problem(size, p, s)
+                        solution_is_valid_for_problem(size, p, s, false)
                         != SXBP_COLLISION_RESULT_COLLIDES
                     ) {
                         solutions_found++;
