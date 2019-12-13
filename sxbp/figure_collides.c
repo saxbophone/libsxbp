@@ -30,13 +30,16 @@
 // private datatype for passing context data into sxbp_walk_figure() callback
 typedef struct figure_collides_context {
     sxbp_Bitmap* image;
-    bool* collided;
+    sxbp_CollisionResult* status;
+    sxbp_CoOrd last_location;
 } figure_collides_context;
 
 // private, callback function for sxbp_figure_collides()
 static bool sxbp_figure_collides_callback(sxbp_CoOrd location, void* data) {
     // cast void pointer to a pointer to our context structure
     figure_collides_context* callback_data = (figure_collides_context*)data;
+    // set last_location to our current one
+    callback_data->last_location = location;
     // check if there's already a pixel here
     if (callback_data->image->pixels[location.x][location.y] == false) {
         // if not, plot it
@@ -44,19 +47,19 @@ static bool sxbp_figure_collides_callback(sxbp_CoOrd location, void* data) {
         // return true to tell the walk function that we want to continue
         return true;
     } else {
-        // otherwise, set collided to true to mark collision
-        *callback_data->collided = true;
+        // otherwise, set status to COLLIDES to mark collision
+        *callback_data->status = SXBP_COLLISION_RESULT_COLLIDES;
         // return false to tell the walk function to stop early
         return false;
     }
 }
 
-// private, sets collided to true if the figure's line collides with itself
+// private, sets status to true if the figure's line collides with itself
 sxbp_Result sxbp_figure_collides(
     const sxbp_Figure* figure,
-    bool* collided
+    sxbp_CollisionResult* status
 ) {
-    // get figure bounds first
+    // get figure bounds
     sxbp_Bounds bounds = sxbp_get_bounds(figure, 1);
     // build bitmap for bounds
     sxbp_Bitmap bitmap = sxbp_blank_bitmap();
@@ -66,10 +69,10 @@ sxbp_Result sxbp_figure_collides(
     } else {
         // construct callback context data
         figure_collides_context data = {
-            .image = &bitmap, .collided = collided,
+            .image = &bitmap, .status = status, .last_location = {0},
         };
-        // set collided to false initially
-        *data.collided = false;
+        // assume it doesn't collide at all or terminate until proven otherwise
+        *data.status = SXBP_COLLISION_RESULT_CONTINUES;
         // begin walking the figure, use our callback function to handle points
         sxbp_walk_figure(
             figure,
@@ -77,6 +80,36 @@ sxbp_Result sxbp_figure_collides(
             false, // don't plot vertices only, we need all 1-unit sub-lines
             sxbp_figure_collides_callback, (void*)&data
         );
+        // if it didn't collide, do an additional check to see if it terminates
+        if (*data.status != SXBP_COLLISION_RESULT_COLLIDES) {
+            // get the direction of the last line, so we know which axis to check
+            sxbp_Direction last_direction = figure->lines[figure->size - 1].direction;
+            bool neighbours[2] = {false};
+            if (last_direction % 2U == 0U) { // even == UP, DOWN
+                // if last direction is vertical, we check horizontal neighbours
+                sxbp_TupleItem left = data.last_location.x + SXBP_VECTOR_DIRECTIONS[SXBP_LEFT].x;
+                sxbp_TupleItem right = data.last_location.x + SXBP_VECTOR_DIRECTIONS[SXBP_RIGHT].x;
+                if (left >= 0 && left < (sxbp_TupleItem)bitmap.width) {
+                    neighbours[0] = bitmap.pixels[left][data.last_location.y];
+                }
+                if (right >= 0 && right < (sxbp_TupleItem)bitmap.width) {
+                    neighbours[1] = bitmap.pixels[right][data.last_location.y];
+                }
+            } else { // odd = LEFT, RIGHT
+                // if last direction is horizontal, we check vertical neighbours
+                sxbp_TupleItem up = data.last_location.y + SXBP_VECTOR_DIRECTIONS[SXBP_UP].y;
+                sxbp_TupleItem down = data.last_location.y + SXBP_VECTOR_DIRECTIONS[SXBP_DOWN].y;
+                if (up >= 0 && up < (sxbp_TupleItem)bitmap.height) {
+                    neighbours[0] = bitmap.pixels[data.last_location.x][up];
+                }
+                if (down >= 0 && down < (sxbp_TupleItem)bitmap.height) {
+                    neighbours[1] = bitmap.pixels[data.last_location.x][down];
+                }
+            }
+            if (neighbours[0] && neighbours[1]) {
+                *data.status = SXBP_COLLISION_RESULT_TERMINATES;
+            }
+        }
         // free the memory allocated for the bitmap
         sxbp_free_bitmap(&bitmap);
         return SXBP_RESULT_OK;

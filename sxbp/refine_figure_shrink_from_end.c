@@ -45,10 +45,10 @@ static sxbp_Result sxbp_attempt_line_shorten(
         // as an ambitious first step, set to 1 (try best case scenario first)
         line->length = 1;
         // check if it collided
-        bool collided = false;
+        sxbp_CollisionResult result = SXBP_COLLISION_RESULT_CONTINUES;
         // we'll store any errors encountered by this function here
         sxbp_Result status = SXBP_RESULT_UNKNOWN;
-        if (!sxbp_check(sxbp_figure_collides(figure, &collided), &status)) {
+        if (!sxbp_check(sxbp_figure_collides(figure, &result), &status)) {
             // handle error
             return status;
         } else {
@@ -57,12 +57,15 @@ static sxbp_Result sxbp_attempt_line_shorten(
              * collides (or we reach the original length)
              * --we can quit in that case as we already know it doesn't collide
              */
-            while (line->length < original_length && collided) {
+            while (
+                line->length < original_length &&
+                result == SXBP_COLLISION_RESULT_COLLIDES
+            ) {
                 line->length++;
                 // check again if it colldes and handle any errors
                 if (
                     !sxbp_check(
-                        sxbp_figure_collides(figure, &collided), &status
+                        sxbp_figure_collides(figure, &result), &status
                     )
                 ) {
                     // handle error

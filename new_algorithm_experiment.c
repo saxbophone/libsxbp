@@ -43,11 +43,13 @@ typedef RepresentationBase Problem;
 typedef RepresentationBase Solution;
 
 /*
- * stores all the valid solutions for a given problem
+ * stores all the valid solutions for a given problem, excluding terminals,
+ * however terminals are still counted
  */
 typedef struct SolutionSet {
     size_t allocated_size; // how many solutions memory has been allocated for
-    size_t count; // how many solutions there are
+    size_t count; // how many non-terminal solutions there are
+    size_t all_count; // how many solutions there are (terminals included)
     Problem problem; // the problem bit string that these solutions are for
     Solution* solutions; // dynamically allocated array of count many solutions
 } SolutionSet;
@@ -309,10 +311,10 @@ static void integer_to_bit_string(
 );
 
 /*
- * returns true if the given solution is valid for the given problem, both of
+ * returns collision result of given solution for the given problem, both of
  * given size in bits
  */
-static bool solution_is_valid_for_problem(
+static sxbp_CollisionResult solution_is_valid_for_problem(
     ProblemSize size, Problem problem, Solution solution
 );
 
@@ -590,7 +592,10 @@ static bool generate_new_problem_solutions_cache(
         problem_set->problem_solutions[p].allocated_size = estimated_solutions;
         // find valid solutions and add to the list of problem solutions
         for (Solution s = 0; s < problem_set->count; s++) {
-            if (solution_is_valid_for_problem(problem_set->bits, p, s)) {
+            switch (solution_is_valid_for_problem(problem_set->bits, p, s)) {
+            case SXBP_COLLISION_RESULT_COLLIDES:
+                break;
+            case SXBP_COLLISION_RESULT_CONTINUES:
                 if (
                     !add_solution_to_solution_set(
                         &problem_set->problem_solutions[p], s
@@ -599,6 +604,9 @@ static bool generate_new_problem_solutions_cache(
                     // memory allocation failure
                     return false;
                 }
+            case SXBP_COLLISION_RESULT_TERMINATES:
+                problem_set->problem_solutions[p].all_count++;
+                break;
             }
         }
         // shrink solution set down to waste less memory
@@ -607,7 +615,7 @@ static bool generate_new_problem_solutions_cache(
             return false;
         }
         // update statistics
-        update_statistics(statistics, problem_set->problem_solutions[p].count);
+        update_statistics(statistics, problem_set->problem_solutions[p].all_count);
     }
     finalise_statistics(statistics);
     printf("CACHED\n");
@@ -642,7 +650,7 @@ static void integer_to_bit_string(
     }
 }
 
-static bool solution_is_valid_for_problem(
+static sxbp_CollisionResult solution_is_valid_for_problem(
     ProblemSize size, Problem problem, Solution solution
 ) {
     // yes, these are C99 variable-length arrays
@@ -673,23 +681,24 @@ static bool solution_is_valid_for_problem(
         figure.lines[i + 1].direction = current_direction;
     }
     // check if figure collides and store result
-    bool figure_collides = false;
-    if (!sxbp_success(sxbp_figure_collides(&figure, &figure_collides))) {
+    sxbp_CollisionResult collision_result = SXBP_COLLISION_RESULT_CONTINUES;
+    if (!sxbp_success(sxbp_figure_collides(&figure, &collision_result))) {
         abort(); // XXX: Cheap allocation failure exit!
     }
 
     // XXX: DEBUGGING CODE FOR PRINTING EVERY SINGLE TESTED CANDIDATE
-    // if (!figure_collides){
+    // if (collision_result == SXBP_COLLISION_RESULT_TERMINATES){
     //     sxbp_Bitmap bitmap = sxbp_blank_bitmap();
     //     sxbp_render_figure_to_bitmap(&figure, &bitmap);
     //     sxbp_print_bitmap(&bitmap, stdout);
     //     sxbp_free_bitmap(&bitmap);
+    //     getchar();
     // }
 
     // free memory for figure
     sxbp_free_figure(&figure);
     // return result
-    return !figure_collides;
+    return collision_result;
 }
 
 static bool add_solution_to_solution_set(
@@ -807,9 +816,12 @@ static bool generate_next_problem_solutions_from_current(
                     Problem p = problem_set->problem_solutions[k].problem;
                     // append the zero or one and validate the new solution
                     Solution s = old_solution | m;
-                    if (
+                    switch (
                         solution_is_valid_for_problem(problem_set->bits, p, s)
                     ) {
+                    case SXBP_COLLISION_RESULT_COLLIDES:
+                        break;
+                    case SXBP_COLLISION_RESULT_CONTINUES:
                         if (
                             !add_solution_to_solution_set(
                                 &problem_set->problem_solutions[k], s
@@ -819,6 +831,9 @@ static bool generate_next_problem_solutions_from_current(
                             deallocate_problem_set(&old_set);
                             return false;
                         }
+                    case SXBP_COLLISION_RESULT_TERMINATES:
+                        problem_set->problem_solutions[k].all_count++;
+                        break;
                     }
                 }
             }
@@ -829,7 +844,7 @@ static bool generate_next_problem_solutions_from_current(
                 return false;
             }
             // update statistics
-            update_statistics(statistics, problem_set->problem_solutions[k].count);
+            update_statistics(statistics, problem_set->problem_solutions[k].all_count);
         }
     }
     finalise_statistics(statistics);
@@ -871,7 +886,10 @@ static bool find_solutions_for_problem(
                 for (size_t l = 0; l < two_to_the_power_of(shift); l++) {
                     Solution s = s_mask | l; // combine mask and tail
                     // now finally, test this solution against the problem
-                    if (solution_is_valid_for_problem(size, p, s)) {
+                    if (
+                        solution_is_valid_for_problem(size, p, s)
+                        != SXBP_COLLISION_RESULT_COLLIDES
+                    ) {
                         solutions_found++;
                     }
                 }
