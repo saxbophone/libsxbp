@@ -748,6 +748,7 @@ static bool generate_next_problem_solutions_from_current(
 ) {
     ProblemSize current_problem = problem_set->bits + 1U;
     printf("Caching %2" PRIuFAST8 "...", current_problem);
+    fflush(stdout);
     /*
      * copy the problem set passed to us --this doesn't copy pointers but that's
      * ok because we don't want to copy the dynamically allocated sections, but
