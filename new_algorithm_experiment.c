@@ -566,6 +566,7 @@ static bool generate_new_problem_solutions_cache(
     ProblemStatistics* statistics
 ) {
     printf("Caching %2" PRIuFAST8 "...", problem_size);
+    fflush(stdout);
     // for the first problem size, allocate a problem set for that size
     if (!allocate_problem_set(problem_set, problem_size)) return false;
     // estimated mean number of solutions per problem
@@ -843,6 +844,7 @@ static bool find_solutions_for_problem(
     ProblemStatistics* statistics
 ) {
     printf("Searching %2" PRIuFAST8 "...", size);
+    fflush(stdout);
     // initialise the statistics first
     init_statistics(statistics, size);
     // work out how many bits we have to shift/mask
@@ -878,6 +880,6 @@ static bool find_solutions_for_problem(
         }
     }
     finalise_statistics(statistics);
-    printf("CACHED\n");
+    printf("SEARCHED\n");
     return true; // hmmm, if it can't error, why did I make it return bool?
 }
