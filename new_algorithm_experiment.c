@@ -78,7 +78,7 @@ typedef struct ProblemStatistics {
 static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.56236069184829962203;
 static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011252032045966;
 // a size of problem that we can guarantee we can store and is fast to solve
-static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 4U;
+static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 10U;
 // how much extra memory we allocate for solution sets when they require more space
 static const size_t SOLUTION_SET_OVER_ALLOCATE_AMOUNT = 1024U;
 
@@ -431,7 +431,8 @@ static bool generate_problems_and_cache_solutions(
         // generate subsequent cache levels from the previous ones, iteratively
         if (
             !generate_next_problem_solutions_from_current(
-                problem_set, &statistics[i]
+                problem_set,
+                statistics != NULL ? &statistics[i] : NULL
             )
         ) {
             // deallocate any memory and return failure
