@@ -10,6 +10,7 @@
  */
 #include <inttypes.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -83,6 +84,16 @@ static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 10U;
 static const size_t SOLUTION_SET_OVER_ALLOCATE_AMOUNT = 1024U;
 
 // private functions which are used directly by main()
+
+/*
+ * these are our custom wrappers of the stdio printf() family functions
+ * --wrapping them allows us to prefix output with the node name and rank to
+ * allow log messages to be made better sense of
+ */
+static int cluster_printf(const char*restrict format, ...);
+static int cluster_fprintf(
+    FILE*restrict stream, const char*restrict format, ...
+);
 
 // attempts to parse command line and return options, calls exit() if bad args
 static CommandLineOptions parse_command_line_options(
@@ -358,6 +369,34 @@ static bool find_solutions_for_problem(
 );
 
 // implementations of all private functions
+
+static int cluster_printf(const char*restrict format, ...) {
+    // begin handling variadic arguments
+    va_list args;
+    va_start(args, format);
+    // TODO: replace this with printing out the node name and rank when known
+    fputs("[<processor name>:<rank>] ", stdout);
+    // now print out what was actually requested of the function
+    int result = vprintf(format, args);
+    // finally, finish handling variadic arguments
+    va_end(args);
+    return result;
+}
+
+static int cluster_fprintf(
+    FILE*restrict stream, const char*restrict format, ...
+) {
+    // begin handling variadic arguments
+    va_list args;
+    va_start(args, format);
+    // TODO: replace this with printing out the node name and rank when known
+    fputs("[<processor name>:<rank>] ", stream);
+    // now print out what was actually requested of the function
+    int result = vfprintf(stream, format, args);
+    // finally, finish handling variadic arguments
+    va_end(args);
+    return result;
+}
 
 static CommandLineOptions parse_command_line_options(
     int argc,
