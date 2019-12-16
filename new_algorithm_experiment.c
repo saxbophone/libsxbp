@@ -157,7 +157,7 @@ static bool search_remaining_problem_solutions(
 int main(int argc, char const *argv[]) {
     // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
-    printf(
+    cluster_printf(
         "Start: %" PRIuFAST8 " End: %" PRIuFAST8 " RAM: %zu\n",
         options.start_problem_size,
         options.end_problem_size,
@@ -171,7 +171,7 @@ int main(int argc, char const *argv[]) {
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
         options.max_ram_per_process
     );
-    printf(
+    cluster_printf(
         "Can cache up to %" PRIuFAST8 "bits (%zu bytes)\n",
         largest_cacheable,
         get_cache_size_of_problem(largest_cacheable - 1U) +
@@ -225,14 +225,14 @@ int main(int argc, char const *argv[]) {
             problem_statistics
         )
     ) {
-        fprintf(stderr, "Error searching remaining problems\n");
+        cluster_fprintf(stderr, "Error searching remaining problems\n");
         // the only remaining code does cleanup, so we continue and let it run
     }
     // free dynamically allocated memory
     deallocate_problem_set(&problem_cache);
     // XXX: debug, until rest of implementation, just log out cached statistics
     for (size_t i = 0; i < problems_count; i++) {
-        printf(
+        cluster_printf(
             "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
             problem_statistics[i].bits,
             problem_statistics[i].lowest_validity,
@@ -607,7 +607,7 @@ static bool generate_new_problem_solutions_cache(
     ProblemSize problem_size,
     ProblemStatistics* statistics
 ) {
-    printf("Caching %2" PRIuFAST8 "...", problem_size);
+    cluster_printf("Caching %2" PRIuFAST8 "...", problem_size);
     fflush(stdout);
     // for the first problem size, allocate a problem set for that size
     if (!allocate_problem_set(problem_set, problem_size)) return false;
@@ -662,7 +662,7 @@ static bool generate_new_problem_solutions_cache(
         );
     }
     finalise_statistics(statistics);
-    printf("CACHED\n");
+    cluster_printf("CACHED\n");
     return true; // success
 }
 
@@ -804,7 +804,7 @@ static bool generate_next_problem_solutions_from_current(
     ProblemSet* problem_set, ProblemStatistics* statistics
 ) {
     ProblemSize current_problem = problem_set->bits + 1U;
-    printf("Caching %2" PRIuFAST8 "...", current_problem);
+    cluster_printf("Caching %2" PRIuFAST8 "...", current_problem);
     fflush(stdout);
     /*
      * copy the problem set passed to us --this doesn't copy pointers but that's
@@ -903,7 +903,7 @@ static bool generate_next_problem_solutions_from_current(
     finalise_statistics(statistics);
     // free the original version before exiting (otherwise memory will leak)
     deallocate_problem_set(&old_set);
-    printf("CACHED\n");
+    cluster_printf("CACHED\n");
     return true;
 }
 
@@ -912,7 +912,7 @@ static bool find_solutions_for_problem(
     const ProblemSet* problem_cache,
     ProblemStatistics* statistics
 ) {
-    printf("Searching %2" PRIuFAST8 "...", size);
+    cluster_printf("Searching %2" PRIuFAST8 "...", size);
     fflush(stdout);
     // initialise the statistics first
     init_statistics(statistics, size);
@@ -950,6 +950,6 @@ static bool find_solutions_for_problem(
         }
     }
     finalise_statistics(statistics);
-    printf("SEARCHED\n");
+    cluster_printf("SEARCHED\n");
     return true; // hmmm, if it can't error, why did I make it return bool?
 }
