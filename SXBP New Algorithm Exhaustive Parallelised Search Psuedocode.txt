@@ -42,3 +42,8 @@ Program steps:
         - Store results each time into output structure
 - Finally:
     - Output data stored in output structure to file (this can also be done on-the-fly if preffered)
+
+Where to Parallelise:
+
+- Parallelise at the Cache generation and searching steps
+- Work can be divided at the point where the first entry in the cache is generated --no communication between nodes is needed to divide the work here, as each node can work out which problems it is to solve of the initial set by floor division of the set size with the number of nodes. The only issue with this approach is that if the starting problem size is small, this will likely lead ot inefficient distribution of the work among the nodes, it is likely that work redistribution will be needed to compensate for this. Thankfully, because the work distribution can always be calculated without group coördination, it should be possible for all nodes to redsitribute work between eachother easily as all of them should know which bits of work (the cache data) need transferring from which nodes.
