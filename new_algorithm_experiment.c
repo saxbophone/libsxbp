@@ -135,48 +135,26 @@ static size_t count_problems_in_range(ProblemSize start, ProblemSize end);
 static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
 
 /*
- * generate all the problems and solutions for problem sizes in a given range
- * and populate the given problem_set with them
- * if statistics is not NULL, then this should be an array of ProblemStatistics
- * large enough to store on item for each problem size to be generated.
- * Statistics about the generated problems and solutions will be stored in this.
- * returns whether this was done successfully or not
- * WARNING: if this function returns true, it means memory has been allocated
- * for problem_set and this should be free()'ed once no longer required.
- */
-static bool generate_problems_and_cache_solutions(
-    ProblemSet* problem_set,
-    ProblemSize smallest_problem,
-    ProblemSize largest_problem,
-    ProblemStatistics* statistics
-);
-
-// deallocates any dynamically allocated memory in the given problem set
-static void deallocate_problem_set(ProblemSet* problem_set);
-
-/*
  * returns the number of bytes needed to cache the solutions to all problems of
  * given problem size
  */
 static size_t get_cache_size_of_problem(ProblemSize problem_size);
 
 /*
- * given a range of problem sizes to solve, a cache of solutions to some
- * previous problems (can be within the range of problems to solve), and a
- * pointer to an array of problem statistics objects (must be of sufficient
- * length to store the range of problems to solve), solve all the remaining
- * problems within the range, using the problem cache given to speed this up.
- * NOTE: if the problem cache bit size is equal to largest_problem to solve,
- * this function does nothing.
- * returns true if this was completed successfully
- * returns false if a memory error occurred
+ * populates the given problem set with this process' share of the problems and
+ * solutions for the given problem size.
+ * if statistics is not NULL, this will be populated with the statistics for
+ * this part of the problem
+ * returns false if error, this will be due to memory allocation failing
  */
-static bool search_remaining_problem_solutions(
-    ProblemSize smallest_problem,
-    ProblemSize largest_problem,
-    const ProblemSet* problem_cache,
-    ProblemStatistics* problem_statistics
+static bool generate_initial_cache(
+    ProblemSet* problem_cache,
+    ProblemSize problem_size,
+    ProblemStatistics* statistics
 );
+
+// deallocates any dynamically allocated memory in the given problem set
+static void deallocate_problem_set(ProblemSet* problem_set);
 
 int main(int argc, char *argv[]) {
     // initialise MPI before anything else is done
@@ -197,78 +175,64 @@ int main(int argc, char *argv[]) {
     );
     // find the largest cacheable problem size for our specified RAM limit
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
-        options.max_ram_per_process
+        options.max_ram_per_process * CLUSTER_METADATA.world_size
     );
-    cluster_printf(
-        "Can cache up to %" PRIuFAST8 "bits (%zu bytes)\n",
-        largest_cacheable,
-        get_cache_size_of_problem(largest_cacheable - 1U) +
-        get_cache_size_of_problem(largest_cacheable)
-    );
-    // this is our problem cache
-    ProblemSet problem_cache = {0};
-    // this is the data structure into which we store problem statistics
-    ProblemStatistics* problem_statistics = calloc(
-        problems_count, sizeof(ProblemStatistics)
-    );
-    // handle any memory allocation error
-    if (problem_statistics == NULL) abort(); // cheap error handling
+    // barrier to synchronise output
+    MPI_Barrier(MPI_COMM_WORLD);
+    if (CLUSTER_METADATA.rank == 0) {
+        cluster_printf(
+            "Can cache up to %" PRIuFAST8 "bits (%zu bytes)\n",
+            largest_cacheable,
+            get_cache_size_of_problem(largest_cacheable - 1U) +
+            get_cache_size_of_problem(largest_cacheable)
+        );
+    }
+    // barrier to synchronise output
+    MPI_Barrier(MPI_COMM_WORLD);
+    // work out what the options passed to the program require us to do
+    ProblemSize cache_start_size, cache_end_size;
     // if smallest problem size to solve is not greater than cacheable size
     if (options.start_problem_size <= largest_cacheable) {
         // solve all problems from smallest to largest cacheable
-        // derive statistics from this process whilst doing it
-        if (
-            !generate_problems_and_cache_solutions(
-                &problem_cache,
-                options.start_problem_size,
-                // use smallest of end problem or largest cacheable
-                largest_cacheable < options.end_problem_size ?
-                    largest_cacheable : options.end_problem_size,
-                problem_statistics
-            )
-        ) {
-            // if it failed for whatever reason
-            abort(); // more cheap error handling!
-        }
+        cache_start_size = options.start_problem_size;
+        // use smallest of end problem or largest cacheable
+        cache_end_size = largest_cacheable < options.end_problem_size ?
+                                                    largest_cacheable :
+                                                    options.end_problem_size;
     } else { // otherwise if smallest problem is greater than cacheable size
         // solve all problems from a reasonably small and fast size and cache
-        if (
-            !generate_problems_and_cache_solutions(
-                &problem_cache,
-                SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE,
-                largest_cacheable,
-                NULL // don't output problems solved here to statistics
-            )
-        ) {
-            // if it failed for whatever reason
-            abort(); // more cheap error handling!
-        }
+        cache_start_size = SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE;
+        cache_end_size = largest_cacheable;
     }
-    // now, use the problem cache to do a faster search for all other solutions
+    // NOTE: work splits in a parallel fashion at this point
+    // this is the problem cache for this processor
+    ProblemSet problem_cache = {0};
+    // this is the statistics store for this processor
+    ProblemStatistics statistics = {0};
+    // TODO: generate the initial cache for our share of the problem
     if (
-        !search_remaining_problem_solutions(
-            options.start_problem_size,
-            options.end_problem_size,
+        !generate_initial_cache(
             &problem_cache,
-            problem_statistics
+            cache_start_size,
+            // only include pointer to statistics if we want stats from problem
+            cache_start_size < options.start_problem_size ? NULL : &statistics
         )
     ) {
-        cluster_fprintf(stderr, "Error searching remaining problems\n");
-        // the only remaining code does cleanup, so we continue and let it run
+        abort(); // cheap error-handling
     }
-    // free dynamically allocated memory
+    // TODO: send our own part of the statistics to master if required
+    // TODO: master collates all statistics and writes to file if required
+    // TODO: then until max problems are cached:
+    // TODO:     generate extension problems from our own problems and solve
+    // TODO:     send statistics to master if required
+    // TODO:     master collates statistics and writes to file if required
+    // TODO:     rebalance cache among processes
+    // TODO: then until max problem size is searched:
+    // TODO:     search our share of the problem space and collect statistics
+    // TODO:     send statistics to master
+    // TODO:     master collates statistics and writes to file
+    // free dynamically-allocated memory
     deallocate_problem_set(&problem_cache);
-    // XXX: debug, until rest of implementation, just log out cached statistics
-    for (size_t i = 0; i < problems_count; i++) {
-        cluster_printf(
-            "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
-            problem_statistics[i].bits,
-            problem_statistics[i].lowest_validity,
-            problem_statistics[i].highest_validity,
-            problem_statistics[i].mean_validity
-        );
-    }
-    free(problem_statistics);
     // close down MPI
     MPI_Finalize();
     return 0;
@@ -322,20 +286,6 @@ static void update_statistics(
 static void finalise_statistics(ProblemStatistics* statistics);
 
 /*
- * Allocates memory for and initialises the given problem set with a cache of
- * all the valid solutions to problems within that set, for the given problem
- * size.
- * If statistics is not NULL, it will be populated with the statistics for this
- * problem.
- * Returns false if this failed (because memory allocation failed)
- */
-static bool generate_new_problem_solutions_cache(
-    ProblemSet* problem_set,
-    ProblemSize problem_size,
-    ProblemStatistics* statistics
-);
-
-/*
  * allocates memory for the dynamic members of the given problem set
  * returns false if memory allocation failed
  * NOTE: this does not allocate memory for the nested solution set members
@@ -343,7 +293,12 @@ static bool generate_new_problem_solutions_cache(
  * NOTE: this function also sets the members `count` and `bits`
  */
 static bool allocate_problem_set(
-    ProblemSet* problem_set, ProblemSize problem_size
+    ProblemSet* problem_set, ProblemSize problem_size, size_t problems_count
+);
+
+// retrieves the range of problems this processor has to solve
+static void get_problem_share(
+    ProblemSize problem_size, Problem* start, Problem* end
 );
 
 // unpacks all the bits up to `size` from the given `source` integer into `dest`
@@ -485,59 +440,6 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
     return problem_size - 1;
 }
 
-static bool generate_problems_and_cache_solutions(
-    ProblemSet* problem_set,
-    ProblemSize smallest_problem,
-    ProblemSize largest_problem,
-    ProblemStatistics* statistics
-) {
-    // generate the first problem cache
-    if (
-        !generate_new_problem_solutions_cache(
-            problem_set,
-            smallest_problem,
-            statistics != NULL ? &statistics[0] : NULL
-        )
-    ) {
-        // deallocate any memory and return failure
-        deallocate_problem_set(problem_set);
-        return false;
-    }
-    // for each successive problem size after first (if any)
-    size_t problems_to_solve = count_problems_in_range(
-        smallest_problem, largest_problem
-    );
-    for (size_t i = 1U; i < problems_to_solve; i++) {
-        // generate subsequent cache levels from the previous ones, iteratively
-        if (
-            !generate_next_problem_solutions_from_current(
-                problem_set,
-                statistics != NULL ? &statistics[i] : NULL
-            )
-        ) {
-            // deallocate any memory and return failure
-            deallocate_problem_set(problem_set);
-            return false;
-        }
-    }
-    return true;
-}
-
-static void deallocate_problem_set(ProblemSet* problem_set) {
-    if (problem_set->problem_solutions != NULL) {
-        // deallocate all solutions
-        for (size_t i = 0; i < problem_set->count; i++) {
-            if (problem_set->problem_solutions[i].solutions != NULL) {
-                free(problem_set->problem_solutions[i].solutions);
-                problem_set->problem_solutions[i].solutions = NULL;
-            }
-        }
-        // finally, deallocate the main pointer
-        free(problem_set->problem_solutions);
-        problem_set->problem_solutions = NULL;
-    }
-}
-
 static size_t get_cache_size_of_problem(ProblemSize problem_size) {
     if (problem_size == 0) return 0;
     if (problem_size < 6) { // problem sizes below this do not follow the trend
@@ -569,27 +471,153 @@ static size_t get_cache_size_of_problem(ProblemSize problem_size) {
     );
 }
 
-static bool search_remaining_problem_solutions(
-    ProblemSize smallest_problem,
-    ProblemSize largest_problem,
-    const ProblemSet* problem_cache,
-    ProblemStatistics* problem_statistics
+static bool generate_initial_cache(
+    ProblemSet* problem_cache,
+    ProblemSize problem_size,
+    ProblemStatistics* statistics
 ) {
-    // we need to work out how many problems we have left to solve w/r to cache
-    size_t problems_count = count_problems_in_range(
-        smallest_problem, largest_problem
-    );
-    size_t problems_left = problem_cache->bits < smallest_problem ?
-        problems_count :
-        count_problems_in_range(problem_cache->bits + 1, largest_problem);
-    for (size_t i = problems_count - problems_left; i < problems_count; i++) {
-        // find solutions for the particular problem
-        find_solutions_for_problem(
-            smallest_problem + i, problem_cache, &problem_statistics[i]
+    // work out this process' share of the problems
+    Problem start, end;
+    get_problem_share(problem_size, &start, &end);
+    size_t problems_count = end - start;
+    // for the first problem size, allocate a problem set for that size
+    if (!allocate_problem_set(problem_cache, problem_size, problems_count)) {
+        return false;
+    }
+    // estimated mean number of solutions per problem
+    size_t estimated_solutions = predict_number_of_valid_solutions(problem_size);
+    // init statistics
+    init_statistics(statistics, problem_cache->bits);
+    // populate with all the problems in our share
+    for (Problem p = 0; p < problems_count; p++) {
+        problem_cache->problem_solutions[p].problem = p + start;
+        // try and allocate memory for the solutions --allocate estimated number
+        problem_cache->problem_solutions[p].solutions = calloc(
+            estimated_solutions, sizeof(Solution)
+        );
+        if (problem_cache->problem_solutions[p].solutions == NULL) {
+            // memory allocation failure
+            return false;
+        }
+        // set number allocated for memory book-keeping purposes
+        problem_cache->problem_solutions[p].allocated_size = estimated_solutions;
+        // find valid solutions and add to the list of problem solutions
+        for (Solution s = 0; s < problem_cache->count; s++) {
+            switch (
+                solution_is_valid_for_problem(
+                    problem_cache->bits,
+                    problem_cache->problem_solutions[p].problem,
+                    s,
+                    true
+                )
+            ) {
+            case SXBP_COLLISION_RESULT_COLLIDES:
+                break;
+            case SXBP_COLLISION_RESULT_CONTINUES:
+                if (
+                    !add_solution_to_solution_set(
+                        &problem_cache->problem_solutions[p], s
+                    )
+                ) {
+                    // memory allocation failure
+                    return false;
+                }
+            case SXBP_COLLISION_RESULT_TERMINATES:
+                problem_cache->problem_solutions[p].all_count++;
+                break;
+            }
+        }
+        // shrink solution set down to waste less memory
+        if (!shrink_solution_set(&problem_cache->problem_solutions[p])) {
+            // memory allocation failure
+            return false;
+        }
+        // update statistics
+        update_statistics(
+            statistics, problem_cache->problem_solutions[p].all_count
         );
     }
-    return true; // hmmm, if it can't error, why did I make it return bool?
+    return true; // success
 }
+
+static void deallocate_problem_set(ProblemSet* problem_set) {
+    if (problem_set->problem_solutions != NULL) {
+        // deallocate all solutions
+        for (size_t i = 0; i < problem_set->count; i++) {
+            if (problem_set->problem_solutions[i].solutions != NULL) {
+                free(problem_set->problem_solutions[i].solutions);
+                problem_set->problem_solutions[i].solutions = NULL;
+            }
+        }
+        // finally, deallocate the main pointer
+        free(problem_set->problem_solutions);
+        problem_set->problem_solutions = NULL;
+    }
+}
+
+// XXX: old stuff that might not be resued ahead
+
+// static bool generate_problems_and_cache_solutions(
+//     ProblemSet* problem_set,
+//     ProblemSize smallest_problem,
+//     ProblemSize largest_problem,
+//     ProblemStatistics* statistics
+// ) {
+//     // generate the first problem cache
+//     if (
+//         !generate_new_problem_solutions_cache(
+//             problem_set,
+//             smallest_problem,
+//             statistics != NULL ? &statistics[0] : NULL
+//         )
+//     ) {
+//         // deallocate any memory and return failure
+//         deallocate_problem_set(problem_set);
+//         return false;
+//     }
+//     // for each successive problem size after first (if any)
+//     size_t problems_to_solve = count_problems_in_range(
+//         smallest_problem, largest_problem
+//     );
+//     for (size_t i = 1U; i < problems_to_solve; i++) {
+//         // generate subsequent cache levels from the previous ones, iteratively
+//         if (
+//             !generate_next_problem_solutions_from_current(
+//                 problem_set,
+//                 statistics != NULL ? &statistics[i] : NULL
+//             )
+//         ) {
+//             // deallocate any memory and return failure
+//             deallocate_problem_set(problem_set);
+//             return false;
+//         }
+//     }
+//     return true;
+// }
+
+// static bool search_remaining_problem_solutions(
+//     ProblemSize smallest_problem,
+//     ProblemSize largest_problem,
+//     const ProblemSet* problem_cache,
+//     ProblemStatistics* problem_statistics
+// ) {
+//     // we need to work out how many problems we have left to solve w/r to cache
+//     size_t problems_count = count_problems_in_range(
+//         smallest_problem, largest_problem
+//     );
+//     size_t problems_left = problem_cache->bits < smallest_problem ?
+//         problems_count :
+//         count_problems_in_range(problem_cache->bits + 1, largest_problem);
+//     for (size_t i = problems_count - problems_left; i < problems_count; i++) {
+//         // find solutions for the particular problem
+//         find_solutions_for_problem(
+//             smallest_problem + i, problem_cache, &problem_statistics[i]
+//         );
+//     }
+//     return true; // hmmm, if it can't error, why did I make it return bool?
+// }
+
+// XXX: end of old stuff that might not be reused
 
 static size_t predict_number_of_valid_solutions(ProblemSize problem_size) {
     // problem sizes below 6 bits do not follow the trend
@@ -643,74 +671,9 @@ static void finalise_statistics(ProblemStatistics* statistics) {
     }
 }
 
-static bool generate_new_problem_solutions_cache(
-    ProblemSet* problem_set,
-    ProblemSize problem_size,
-    ProblemStatistics* statistics
-) {
-    cluster_printf("Caching %2" PRIuFAST8 "...", problem_size);
-    fflush(stdout);
-    // for the first problem size, allocate a problem set for that size
-    if (!allocate_problem_set(problem_set, problem_size)) return false;
-    // estimated mean number of solutions per problem
-    size_t estimated_solutions = predict_number_of_valid_solutions(
-        problem_size
-    );
-    // init statistics
-    init_statistics(statistics, problem_set->bits);
-    // populate with all the problems of that size
-    for (Problem p = 0; p < problem_set->count; p++) {
-        problem_set->problem_solutions[p].problem = p;
-        // try and allocate memory for the solutions --allocate estimated number
-        problem_set->problem_solutions[p].solutions = calloc(
-            estimated_solutions, sizeof(Solution)
-        );
-        if (problem_set->problem_solutions[p].solutions == NULL) {
-            // memory allocation failure
-            return false;
-        }
-        // set number allocated for memory book-keeping purposes
-        problem_set->problem_solutions[p].allocated_size = estimated_solutions;
-        // find valid solutions and add to the list of problem solutions
-        for (Solution s = 0; s < problem_set->count; s++) {
-            switch (
-                solution_is_valid_for_problem(problem_set->bits, p, s, true)
-            ) {
-            case SXBP_COLLISION_RESULT_COLLIDES:
-                break;
-            case SXBP_COLLISION_RESULT_CONTINUES:
-                if (
-                    !add_solution_to_solution_set(
-                        &problem_set->problem_solutions[p], s
-                    )
-                ) {
-                    // memory allocation failure
-                    return false;
-                }
-            case SXBP_COLLISION_RESULT_TERMINATES:
-                problem_set->problem_solutions[p].all_count++;
-                break;
-            }
-        }
-        // shrink solution set down to waste less memory
-        if (!shrink_solution_set(&problem_set->problem_solutions[p])) {
-            // memory allocation failure
-            return false;
-        }
-        // update statistics
-        update_statistics(
-            statistics, problem_set->problem_solutions[p].all_count
-        );
-    }
-    finalise_statistics(statistics);
-    cluster_printf("CACHED\n");
-    return true; // success
-}
-
 static bool allocate_problem_set(
-    ProblemSet* problem_set, ProblemSize problem_size
+    ProblemSet* problem_set, ProblemSize problem_size, size_t problems_count
 ) {
-    size_t problems_count = two_to_the_power_of(problem_size);
     // first off, try to allocate memory for all the problems
     problem_set->problem_solutions = calloc(problems_count, sizeof(SolutionSet));
     // catch calloc() failure
@@ -719,6 +682,22 @@ static bool allocate_problem_set(
     problem_set->count = problems_count;
     problem_set->bits = problem_size;
     return true;
+}
+
+static void get_problem_share(
+    ProblemSize problem_size, Problem* start, Problem* end
+) {
+    size_t problem_count = two_to_the_power_of(problem_size);
+    *start = (Problem)floorl(
+        (long double)problem_count /
+        CLUSTER_METADATA.world_size *
+        CLUSTER_METADATA.rank
+    );
+    *end = (Problem)floorl(
+        (long double)problem_count /
+        CLUSTER_METADATA.world_size *
+        (CLUSTER_METADATA.rank + 1U)
+    );
 }
 
 static void integer_to_bit_string(
@@ -841,112 +820,112 @@ static bool shrink_solution_set(SolutionSet* solution_set) {
     }
 }
 
-static bool generate_next_problem_solutions_from_current(
-    ProblemSet* problem_set, ProblemStatistics* statistics
-) {
-    ProblemSize current_problem = problem_set->bits + 1U;
-    cluster_printf("Caching %2" PRIuFAST8 "...", current_problem);
-    fflush(stdout);
-    /*
-     * copy the problem set passed to us --this doesn't copy pointers but that's
-     * ok because we don't want to copy the dynamically allocated sections, but
-     * we do need to retain the pointers so we can free them after as we shall
-     * replace the original problem set object with the new one
-     */
-    ProblemSet old_set = *problem_set;
-    // reset the members of the original
-    *problem_set = (ProblemSet){0};
-    // create new data structure to contain problem sets
-    if (!allocate_problem_set(problem_set, current_problem)) {
-        // allocation failure --deallocate old set before returning
-        deallocate_problem_set(&old_set);
-        return false;
-    }
-    // init statistics
-    init_statistics(statistics, problem_set->bits);
-    // generate and test new problems and new valid solutions from the old ones
-    for (size_t i = 0; i < old_set.count; i++) {
-        // copy the problem but shift it one bit left --we are extending it
-        Problem old_problem = old_set.problem_solutions[i].problem << 1;
-        /*
-         * deposit two copies of old problem number into array, one with a zero
-         * appended and another with a one appended
-         */
-        for (uint_fast8_t j = 0; j < 2; j++) {
-            /*
-             * we deposit problems appended with zero at the front and deposit
-             * problems appended with one starting halfway through the new set
-             */
-            size_t k = i + (old_set.count * j);
-            problem_set->problem_solutions[k].problem = old_problem | j;
-            // allocate memory for the solutions to this problem
-            size_t estimated_solutions = predict_number_of_valid_solutions(
-                problem_set->bits
-            );
-            problem_set->problem_solutions[k].solutions = calloc(
-                estimated_solutions, sizeof(Solution)
-            );
-            if (problem_set->problem_solutions[k].solutions == NULL) {
-                // allocation failure --deallocate old set before returning
-                deallocate_problem_set(&old_set);
-                return false;
-            }
-            // set number allocated for memory book-keeping purposes
-            problem_set->problem_solutions[k].allocated_size = estimated_solutions;
-            /*
-             * we now need to iterate over all the valid solutions to the
-             * original problem, create extended versions with zero and one
-             * appended and test thes against the new problem
-             */
-            for (size_t l = 0; l < old_set.problem_solutions[i].count; l++) {
-                // as with the problem, shift one bit left to extend
-                Solution old_solution = old_set.problem_solutions[i]
-                                                .solutions[l] << 1;
-                for (uint_fast8_t m = 0; m < 2; m++) {
-                    Problem p = problem_set->problem_solutions[k].problem;
-                    // append the zero or one and validate the new solution
-                    Solution s = old_solution | m;
-                    switch (
-                        solution_is_valid_for_problem(
-                            problem_set->bits, p, s, true
-                        )
-                    ) {
-                    case SXBP_COLLISION_RESULT_COLLIDES:
-                        break;
-                    case SXBP_COLLISION_RESULT_CONTINUES:
-                        if (
-                            !add_solution_to_solution_set(
-                                &problem_set->problem_solutions[k], s
-                            )
-                        ) {
-                            // allocation failure --deallocate before returning
-                            deallocate_problem_set(&old_set);
-                            return false;
-                        }
-                    case SXBP_COLLISION_RESULT_TERMINATES:
-                        problem_set->problem_solutions[k].all_count++;
-                        break;
-                    }
-                }
-            }
-            // shrink solution set down to waste less memory
-            if (!shrink_solution_set(&problem_set->problem_solutions[k])) {
-                // allocation failure --deallocate old set before returning
-                deallocate_problem_set(&old_set);
-                return false;
-            }
-            // update statistics
-            update_statistics(
-                statistics, problem_set->problem_solutions[k].all_count
-            );
-        }
-    }
-    finalise_statistics(statistics);
-    // free the original version before exiting (otherwise memory will leak)
-    deallocate_problem_set(&old_set);
-    cluster_printf("CACHED\n");
-    return true;
-}
+// static bool generate_next_problem_solutions_from_current(
+//     ProblemSet* problem_set, ProblemStatistics* statistics
+// ) {
+//     ProblemSize current_problem = problem_set->bits + 1U;
+//     cluster_printf("Caching %2" PRIuFAST8 "...", current_problem);
+//     fflush(stdout);
+//     /*
+//      * copy the problem set passed to us --this doesn't copy pointers but that's
+//      * ok because we don't want to copy the dynamically allocated sections, but
+//      * we do need to retain the pointers so we can free them after as we shall
+//      * replace the original problem set object with the new one
+//      */
+//     ProblemSet old_set = *problem_set;
+//     // reset the members of the original
+//     *problem_set = (ProblemSet){0};
+//     // create new data structure to contain problem sets
+//     if (!allocate_problem_set(problem_set, current_problem)) {
+//         // allocation failure --deallocate old set before returning
+//         deallocate_problem_set(&old_set);
+//         return false;
+//     }
+//     // init statistics
+//     init_statistics(statistics, problem_set->bits);
+//     // generate and test new problems and new valid solutions from the old ones
+//     for (size_t i = 0; i < old_set.count; i++) {
+//         // copy the problem but shift it one bit left --we are extending it
+//         Problem old_problem = old_set.problem_solutions[i].problem << 1;
+//         /*
+//          * deposit two copies of old problem number into array, one with a zero
+//          * appended and another with a one appended
+//          */
+//         for (uint_fast8_t j = 0; j < 2; j++) {
+//             /*
+//              * we deposit problems appended with zero at the front and deposit
+//              * problems appended with one starting halfway through the new set
+//              */
+//             size_t k = i + (old_set.count * j);
+//             problem_set->problem_solutions[k].problem = old_problem | j;
+//             // allocate memory for the solutions to this problem
+//             size_t estimated_solutions = predict_number_of_valid_solutions(
+//                 problem_set->bits
+//             );
+//             problem_set->problem_solutions[k].solutions = calloc(
+//                 estimated_solutions, sizeof(Solution)
+//             );
+//             if (problem_set->problem_solutions[k].solutions == NULL) {
+//                 // allocation failure --deallocate old set before returning
+//                 deallocate_problem_set(&old_set);
+//                 return false;
+//             }
+//             // set number allocated for memory book-keeping purposes
+//             problem_set->problem_solutions[k].allocated_size = estimated_solutions;
+//             /*
+//              * we now need to iterate over all the valid solutions to the
+//              * original problem, create extended versions with zero and one
+//              * appended and test thes against the new problem
+//              */
+//             for (size_t l = 0; l < old_set.problem_solutions[i].count; l++) {
+//                 // as with the problem, shift one bit left to extend
+//                 Solution old_solution = old_set.problem_solutions[i]
+//                                                 .solutions[l] << 1;
+//                 for (uint_fast8_t m = 0; m < 2; m++) {
+//                     Problem p = problem_set->problem_solutions[k].problem;
+//                     // append the zero or one and validate the new solution
+//                     Solution s = old_solution | m;
+//                     switch (
+//                         solution_is_valid_for_problem(
+//                             problem_set->bits, p, s, true
+//                         )
+//                     ) {
+//                     case SXBP_COLLISION_RESULT_COLLIDES:
+//                         break;
+//                     case SXBP_COLLISION_RESULT_CONTINUES:
+//                         if (
+//                             !add_solution_to_solution_set(
+//                                 &problem_set->problem_solutions[k], s
+//                             )
+//                         ) {
+//                             // allocation failure --deallocate before returning
+//                             deallocate_problem_set(&old_set);
+//                             return false;
+//                         }
+//                     case SXBP_COLLISION_RESULT_TERMINATES:
+//                         problem_set->problem_solutions[k].all_count++;
+//                         break;
+//                     }
+//                 }
+//             }
+//             // shrink solution set down to waste less memory
+//             if (!shrink_solution_set(&problem_set->problem_solutions[k])) {
+//                 // allocation failure --deallocate old set before returning
+//                 deallocate_problem_set(&old_set);
+//                 return false;
+//             }
+//             // update statistics
+//             update_statistics(
+//                 statistics, problem_set->problem_solutions[k].all_count
+//             );
+//         }
+//     }
+//     finalise_statistics(statistics);
+//     // free the original version before exiting (otherwise memory will leak)
+//     deallocate_problem_set(&old_set);
+//     cluster_printf("CACHED\n");
+//     return true;
+// }
 
 static bool find_solutions_for_problem(
     ProblemSize size,

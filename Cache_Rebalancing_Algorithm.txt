@@ -1,0 +1,19 @@
+An algorithm for redistributing elements from K arrays of varing sizes such that each have as close to the same number of elements as possible
+
+given A = array of length K consisting of arrays of various sizes, all of which add up to M
+given M = the total number of elements across all K arrays
+given V = array of length K containing the count of elements in each array of A
+
+subroutine get_size(I, K, M) --where I is array index and K the array size and M total count of elements across all arrays, return the required size of this array
+
+This method should be followed by all participating processes:
+
+for I in 0..(K-1):
+    i_required_size = get_size(I, K, M)
+    if length of A[I] is greater than i_required_size:
+        for J in 0..(K-1):
+            j_required_size = get_size(J, K, M)
+            if length of A[J] is less than j_required_size:
+                overflow = length of A[I] - i_required_size
+                underflow = j_required_size - length of A[J]
+                transfer MIN(overflow, underflow) elements from the tail of A[I] to the tail of A[J]

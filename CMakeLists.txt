@@ -101,6 +101,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "")
     enable_c_compiler_flag_if_supported("-Wno-error=unused-function")
     enable_c_compiler_flag_if_supported("-Wno-error=unused-variable")
     enable_c_compiler_flag_if_supported("-Wno-error=unused-parameter")
+    enable_c_compiler_flag_if_supported("-Wno-error=unused-but-set-variable")
 endif()
 
 # begin dependencies
