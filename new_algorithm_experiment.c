@@ -18,12 +18,26 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <mpi.h>
+
 #include "sxbp/figure_collides.h"
 #include "sxbp/sxbp.h"
 
 #ifdef __cplusplus
 #error "This file is ISO C99. It should not be compiled with a C++ Compiler."
 #endif
+
+/*
+ * stores book-keeping data about the MPI cluster this process is operating in,
+ * and about this process itself. The data stored in here is specific to the MPI
+ * cluster computing library that this search program uses.
+ */
+typedef struct ClusterBookKeeping {
+    size_t world_size; // the total number of processes in this cluster
+    size_t rank; // our process' rank number in this cluster
+    char name[MPI_MAX_PROCESSOR_NAME]; // the name of this processor
+    size_t name_length; // the length of this processor's name
+} ClusterBookKeeping;
 
 typedef uint_fast8_t ProblemSize;
 
@@ -83,7 +97,17 @@ static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 10U;
 // how much extra memory we allocate for solution sets when they require more space
 static const size_t SOLUTION_SET_OVER_ALLOCATE_AMOUNT = 1024U;
 
+// this one is not constant, but it is private --MPI book-keeping data
+ClusterBookKeeping CLUSTER_METADATA = {0};
+
 // private functions which are used directly by main()
+
+/*
+ * retrieves data about this cluster and this process, stores it in a private
+ * global variable for book-keeping purposes
+ * NOTE: it is unsafe to call this function before MPI_Init() has been called.
+ */
+static void init_cluster_book_keeping(void);
 
 /*
  * these are our custom wrappers of the stdio printf() family functions
@@ -98,7 +122,7 @@ static int cluster_fprintf(
 // attempts to parse command line and return options, calls exit() if bad args
 static CommandLineOptions parse_command_line_options(
     int argc,
-    char const *argv[]
+    char *argv[]
 );
 
 // returns the number of problems that there are in the given inclusive range
@@ -154,7 +178,11 @@ static bool search_remaining_problem_solutions(
     ProblemStatistics* problem_statistics
 );
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *argv[]) {
+    // initialise MPI before anything else is done
+    MPI_Init(&argc, &argv);
+    // retrieve the metadata about this cluster
+    init_cluster_book_keeping();
     // get the options on command line. program will exit if these are not valid
     CommandLineOptions options = parse_command_line_options(argc, argv);
     cluster_printf(
@@ -241,6 +269,8 @@ int main(int argc, char const *argv[]) {
         );
     }
     free(problem_statistics);
+    // close down MPI
+    MPI_Finalize();
     return 0;
 }
 
@@ -370,12 +400,23 @@ static bool find_solutions_for_problem(
 
 // implementations of all private functions
 
+static void init_cluster_book_keeping(void) {
+    // collect all metadata about the cluster and store in private global
+    int world_size = 0, rank = -1, name_length = 0;
+    MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    CLUSTER_METADATA.world_size = (size_t)world_size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    CLUSTER_METADATA.rank = (size_t)rank;
+    MPI_Get_processor_name(CLUSTER_METADATA.name, &name_length);
+    CLUSTER_METADATA.name_length = (size_t)name_length;
+}
+
 static int cluster_printf(const char*restrict format, ...) {
     // begin handling variadic arguments
     va_list args;
     va_start(args, format);
-    // TODO: replace this with printing out the node name and rank when known
-    fputs("[<processor name>:<rank>] ", stdout);
+    // print out the processor name and rank preceding the rest of the output
+    printf("[%s:%02zu] ", CLUSTER_METADATA.name, CLUSTER_METADATA.rank);
     // now print out what was actually requested of the function
     int result = vprintf(format, args);
     // finally, finish handling variadic arguments
@@ -389,8 +430,8 @@ static int cluster_fprintf(
     // begin handling variadic arguments
     va_list args;
     va_start(args, format);
-    // TODO: replace this with printing out the node name and rank when known
-    fputs("[<processor name>:<rank>] ", stream);
+    // print out the processor name and rank preceding the rest of the output
+    fprintf(stream, "[%s:%02zu] ", CLUSTER_METADATA.name, CLUSTER_METADATA.rank);
     // now print out what was actually requested of the function
     int result = vfprintf(stream, format, args);
     // finally, finish handling variadic arguments
@@ -400,7 +441,7 @@ static int cluster_fprintf(
 
 static CommandLineOptions parse_command_line_options(
     int argc,
-    char const *argv[]
+    char *argv[]
 ) {
     if (argc < 4) exit(-1); // we need 3 additional arguments besides file name
     CommandLineOptions options = {0};
