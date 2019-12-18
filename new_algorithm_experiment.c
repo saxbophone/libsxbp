@@ -205,6 +205,7 @@ int main(int argc, char *argv[]) {
         cache_end_size = largest_cacheable;
     }
     // NOTE: work splits in a parallel fashion at this point
+    ProblemSize current_size = cache_start_size; 
     // this is the problem cache for this processor
     ProblemSet problem_cache = {0};
     // this is the statistics store for this processor
@@ -213,7 +214,7 @@ int main(int argc, char *argv[]) {
     if (
         !generate_initial_cache(
             &problem_cache,
-            cache_start_size,
+            current_size,
             // only include pointer to statistics if we want stats from problem
             cache_start_size < options.start_problem_size ? NULL : &statistics
         )
@@ -222,15 +223,26 @@ int main(int argc, char *argv[]) {
     }
     // TODO: send our own part of the statistics to master if required
     // TODO: master collates all statistics and writes to file if required
-    // TODO: then until max problems are cached:
-    // TODO:     generate extension problems from our own problems and solve
-    // TODO:     send statistics to master if required
-    // TODO:     master collates statistics and writes to file if required
-    // TODO:     rebalance cache among processes
-    // TODO: then until max problem size is searched:
-    // TODO:     search our share of the problem space and collect statistics
-    // TODO:     send statistics to master
-    // TODO:     master collates statistics and writes to file
+    current_size++;
+    // FIXME: until statistics-collation is implemented, MPI_Barrier() is used
+    MPI_Barrier(MPI_COMM_WORLD);
+    // then until max problems are cached
+    while (current_size <= cache_end_size) {
+        // TODO: generate extension problems from our own problems and solve
+        // TODO: send statistics to master if required
+        // TODO: master collates statistics and writes to file if required
+        // TODO: rebalance cache among processes
+        current_size++;
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+    // then until max problem size is searched:
+    while (current_size <= options.end_problem_size) {
+        // TODO: search our share of the problem space and collect statistics
+        // TODO: send statistics to master
+        // TODO: master collates statistics and writes to file
+        current_size++;
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
     // free dynamically-allocated memory
     deallocate_problem_set(&problem_cache);
     // close down MPI
