@@ -180,6 +180,12 @@ static bool generate_next_problem_solutions_from_current(
     ProblemSet* problem_set, ProblemStatistics* statistics
 );
 
+/*
+ * given this process' problem cache, compares the amount of contents in it with
+ * those of all other processes and redistributes among them if necessary
+ */
+static void rebalance_cache(ProblemSet* problem_set);
+
 // deallocates any dynamically allocated memory in the given problem set
 static void deallocate_problem_set(ProblemSet* problem_set);
 
@@ -279,11 +285,19 @@ int main(int argc, char *argv[]) {
         }
         // TODO: master collates statistics and writes to file if required
         // TODO: rebalance cache among processes
+        /*
+         * XXX: This won't work properly until
+         * transfer_problems_between_processes() has been finished
+         */
+        rebalance_cache(&problem_cache);
         current_size++;
         MPI_Barrier(MPI_COMM_WORLD);
     }
     // then until max problem size is searched:
     while (current_size <= options.end_problem_size) {
+        // reset statistics
+        statistics = (ProblemStatistics){0};
+        all_statistics = (ProblemStatistics){0};
         // TODO: search our share of the problem space and collect statistics
         // TODO: send statistics to master
         // TODO: master collates statistics and writes to file
@@ -389,6 +403,20 @@ static void integer_to_bit_string(
 static bool generate_next_problem_solutions_from_current(
     ProblemSet* problem_set, ProblemStatistics* statistics
 );
+
+/*
+ * transfers count number of problems from the problem cache of process with
+ * rank *from* to rank *to*
+ */
+static void transfer_problems_between_processes(
+    ProblemSet* problem_set, size_t from, size_t to, size_t count
+);
+
+/*
+ * shrinks the given solution set by trim amount, deallocating and discarding
+ * the latter items in the set
+ */
+static void trim_solution_set(ProblemSet* set, size_t trim_amount);
 
 /*
  * finds all the solutions for the given problem size, taking advantage of the
@@ -1044,6 +1072,124 @@ static bool generate_next_problem_solutions_from_current(
     // free the original version before exiting (otherwise memory will leak)
     deallocate_problem_set(&old_set);
     return true;
+}
+
+static void rebalance_cache(ProblemSet* problem_set) {
+    // use MPI All-gather to allow all processes to know eachother's cache size
+    uint64_t* cache_sizes = calloc(CLUSTER_METADATA.world_size, sizeof(uint64_t));
+    if (cache_sizes == NULL) abort(); // cheap error-handling
+    uint64_t* expected_cache_sizes = calloc(
+        CLUSTER_METADATA.world_size, sizeof(uint64_t)
+    );
+    if (expected_cache_sizes == NULL) abort(); // cheap error-handling
+    MPI_Allgather(
+        &problem_set->count, 1, MPI_UINT64_T,
+        cache_sizes, 1, MPI_UINT64_T,
+        MPI_COMM_WORLD
+    );
+    // calculate how many problems each processor *should* have
+    uint64_t our_expected;
+    {
+        Problem start, end;
+        get_problem_share(problem_set->bits, &start, &end);
+        our_expected = end - start;
+    }
+    MPI_Allgather(
+        &our_expected, 1, MPI_UINT64_T,
+        expected_cache_sizes, 1, MPI_UINT64_T,
+        MPI_COMM_WORLD
+    );
+    // check each process in turn to see if it has too many elements in cache
+    for (size_t i = 0; i < CLUSTER_METADATA.world_size; i++) {
+        if (cache_sizes[i] > expected_cache_sizes[i]) {
+            // it has too many elements, so now find a process to give them to
+            for (size_t j = 0; j < CLUSTER_METADATA.world_size; j++) {
+                if (i == j) continue; // never transfer items to ourself
+                // we need to check both conditions again as it may change
+                if (
+                    cache_sizes[i] > expected_cache_sizes[i] &&
+                    cache_sizes[j] < expected_cache_sizes[j]
+                ) {
+                    // this is how much extra there is
+                    size_t overflow = cache_sizes[i] - expected_cache_sizes[i];
+                    // this process has at least *some* space to accept extra
+                    size_t underflow = expected_cache_sizes[j] - cache_sizes[j];
+                    // transfer the smallest of overflow and underflow
+                    size_t transfer = overflow < underflow ? overflow : underflow;
+                    transfer_problems_between_processes(
+                        problem_set, i, j, transfer
+                    );
+                    cache_sizes[i] -= transfer;
+                    cache_sizes[j] += transfer;
+                    if (CLUSTER_METADATA.rank == 0) {
+                        cluster_printf(
+                            "O = %zu U = %zu Transfer %zu elements from %zu to %zu\n",
+                            overflow,
+                            underflow,
+                            transfer,
+                            i,
+                            j
+                        );
+                    }
+                }
+            }
+        }
+    }
+    // free memory
+    free(cache_sizes);
+    free(expected_cache_sizes);
+    return;
+}
+
+static void transfer_problems_between_processes(
+    ProblemSet* problem_set, size_t from, size_t to, size_t count
+) {
+    // check if we are either of *from* or *to*
+    if (CLUSTER_METADATA.rank == from) {
+        // we are the sender
+        for (size_t c = 0; c < count; c++) {
+            size_t buffer_size = 3U + problem_set->problem_solutions[c].count;
+            // allocate memory for a buffer of 64-bit uints
+            uint64_t* buffer = calloc(buffer_size, sizeof(uint64_t));
+            if (buffer == NULL) abort(); // cheap error-handling
+            // fill the buffer with the problem and solutions
+            buffer[0] = problem_set->problem_solutions[c].count;
+            buffer[1] = problem_set->problem_solutions[c].all_count;
+            buffer[2] = problem_set->problem_solutions[c].problem;
+            for (size_t s = 0; s < problem_set->problem_solutions[c].count; s++) {
+                buffer[3 + s] = problem_set->problem_solutions[c].solutions[s];
+            }
+            // send the buffer to the other process
+            MPI_Send(buffer, buffer_size, MPI_UINT64_T, to, 0, MPI_COMM_WORLD);
+            // free memory
+            free(buffer);
+        }
+        // remove the *count* last items from this problem set
+        trim_solution_set(problem_set, count);
+    } else if (CLUSTER_METADATA.rank == to) {
+        // we are the receiver
+        // TODO: grow our problem set by *count* items
+        for (size_t c = 0; c < count; c++) {
+            // TODO: Use MPI_Probe() to count how large the incoming buffer is
+            // TODO: allocate memory for the incoming buffer and the problem set
+            // TODO: Use MPI_Recv() to read into our buffer
+            // TODO: Extract the data out of the buffer into our problem set
+            // TODO: free any temporary memory allocated here
+        }
+    }
+    // otherwise, we are neither, so there's nothing to do
+}
+
+static void trim_solution_set(ProblemSet* set, size_t trim_amount) {
+    for (size_t i = set->count - trim_amount; i < set->count; i++) {
+        // deallocate memory
+        free(set->problem_solutions[i].solutions);
+    }
+    set->count -= trim_amount;
+    // now shrink the problem solutions
+    set->problem_solutions = realloc(
+        set->problem_solutions, set->count * sizeof(SolutionSet)
+    );
 }
 
 static bool find_solutions_for_problem(
