@@ -125,9 +125,6 @@ static CommandLineOptions parse_command_line_options(
     char *argv[]
 );
 
-// returns the number of problems that there are in the given inclusive range
-static size_t count_problems_in_range(ProblemSize start, ProblemSize end);
-
 /*
  * finds the largest problem size (in bits) which can be represented with the
  * given RAM limit per-process
@@ -214,10 +211,6 @@ int main(int argc, char *argv[]) {
         options.start_problem_size,
         options.end_problem_size,
         options.max_ram_per_process
-    );
-    // this is how many problems we have been requested to solve
-    size_t problems_count = count_problems_in_range(
-        options.start_problem_size, options.end_problem_size
     );
     // find the largest cacheable problem size for our specified RAM limit
     ProblemSize largest_cacheable = find_largest_cacheable_problem_size(
@@ -488,10 +481,6 @@ static CommandLineOptions parse_command_line_options(
     return options;
 }
 
-static size_t count_problems_in_range(ProblemSize start, ProblemSize end) {
-    return (ProblemSize)(end - start) + 1U;
-}
-
 static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit) {
     ProblemSize problem_size;
     // this typically won't actually get to 32, 22 bits gives ~1TiB size!
@@ -699,70 +688,6 @@ static void deallocate_problem_set(ProblemSet* problem_set) {
         problem_set->problem_solutions = NULL;
     }
 }
-
-// XXX: old stuff that might not be resued ahead
-
-// static bool generate_problems_and_cache_solutions(
-//     ProblemSet* problem_set,
-//     ProblemSize smallest_problem,
-//     ProblemSize largest_problem,
-//     ProblemStatistics* statistics
-// ) {
-//     // generate the first problem cache
-//     if (
-//         !generate_new_problem_solutions_cache(
-//             problem_set,
-//             smallest_problem,
-//             statistics != NULL ? &statistics[0] : NULL
-//         )
-//     ) {
-//         // deallocate any memory and return failure
-//         deallocate_problem_set(problem_set);
-//         return false;
-//     }
-//     // for each successive problem size after first (if any)
-//     size_t problems_to_solve = count_problems_in_range(
-//         smallest_problem, largest_problem
-//     );
-//     for (size_t i = 1U; i < problems_to_solve; i++) {
-//         // generate subsequent cache levels from the previous ones, iteratively
-//         if (
-//             !generate_next_problem_solutions_from_current(
-//                 problem_set,
-//                 statistics != NULL ? &statistics[i] : NULL
-//             )
-//         ) {
-//             // deallocate any memory and return failure
-//             deallocate_problem_set(problem_set);
-//             return false;
-//         }
-//     }
-//     return true;
-// }
-
-// static bool search_remaining_problem_solutions(
-//     ProblemSize smallest_problem,
-//     ProblemSize largest_problem,
-//     const ProblemSet* problem_cache,
-//     ProblemStatistics* problem_statistics
-// ) {
-//     // we need to work out how many problems we have left to solve w/r to cache
-//     size_t problems_count = count_problems_in_range(
-//         smallest_problem, largest_problem
-//     );
-//     size_t problems_left = problem_cache->bits < smallest_problem ?
-//         problems_count :
-//         count_problems_in_range(problem_cache->bits + 1, largest_problem);
-//     for (size_t i = problems_count - problems_left; i < problems_count; i++) {
-//         // find solutions for the particular problem
-//         find_solutions_for_problem(
-//             smallest_problem + i, problem_cache, &problem_statistics[i]
-//         );
-//     }
-//     return true; // hmmm, if it can't error, why did I make it return bool?
-// }
-
-// XXX: end of old stuff that might not be reused
 
 static size_t predict_number_of_valid_solutions(ProblemSize problem_size) {
     // problem sizes below 6 bits do not follow the trend
