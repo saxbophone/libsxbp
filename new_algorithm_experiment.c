@@ -186,6 +186,19 @@ static bool generate_next_problem_solutions_from_current(
  */
 static void rebalance_cache(ProblemSet* problem_set);
 
+/*
+ * finds all the solutions for the given problem size, taking advantage of the
+ * given problem cache to speed up the process if possible
+ * statistics about the solutions that were found are written to the statistics
+ * object given.
+ * returns true/false for if this process succeeded or failed
+ */
+static bool find_solutions_for_problem(
+    ProblemSize size,
+    const ProblemSet* problem_cache,
+    ProblemStatistics* statistics
+);
+
 // deallocates any dynamically allocated memory in the given problem set
 static void deallocate_problem_set(ProblemSet* problem_set);
 
@@ -260,10 +273,8 @@ int main(int argc, char *argv[]) {
     if (current_size >= options.start_problem_size) {
         collect_statistics(&statistics, &all_statistics);
     }
-    // TODO: master collates statistics and writes to file if required
+    // TODO: master writes statistics to file if required
     current_size++;
-    // FIXME: until statistics-collation is implemented, MPI_Barrier() is used
-    MPI_Barrier(MPI_COMM_WORLD);
     // then until max problems are cached
     while (current_size <= cache_end_size) {
         // reset statistics
@@ -283,23 +294,22 @@ int main(int argc, char *argv[]) {
         if (current_size >= options.start_problem_size) {
             collect_statistics(&statistics, &all_statistics);
         }
-        // TODO: master collates statistics and writes to file if required
-        // TODO: rebalance cache among processes
-        /*
-         * XXX: This won't work properly until
-         * transfer_problems_between_processes() has been finished
-         */
+        // TODO: master writes statistics to file if required
+        // rebalance cache among processes to keep work shared roughly evenly
         rebalance_cache(&problem_cache);
         current_size++;
-        MPI_Barrier(MPI_COMM_WORLD);
     }
     // then until max problem size is searched:
     while (current_size <= options.end_problem_size) {
         // reset statistics
         statistics = (ProblemStatistics){0};
         all_statistics = (ProblemStatistics){0};
-        // TODO: search our share of the problem space and collect statistics
-        // TODO: send statistics to master
+        // search our share of the problem space and collect statistics
+        find_solutions_for_problem(current_size, &problem_cache, &statistics);
+        // send our own part of the statistics to master if required
+        if (current_size >= options.start_problem_size) {
+            collect_statistics(&statistics, &all_statistics);
+        }
         // TODO: master collates statistics and writes to file
         current_size++;
         MPI_Barrier(MPI_COMM_WORLD);
@@ -417,19 +427,6 @@ static void transfer_problems_between_processes(
  * the latter items in the set
  */
 static void trim_solution_set(ProblemSet* set, size_t trim_amount);
-
-/*
- * finds all the solutions for the given problem size, taking advantage of the
- * given problem cache to speed up the process if possible
- * statistics about the solutions that were found are written to the statistics
- * object given.
- * returns true/false for if this process succeeded or failed
- */
-static bool find_solutions_for_problem(
-    ProblemSize size,
-    const ProblemSet* problem_cache,
-    ProblemStatistics* statistics
-);
 
 // implementations of all private functions
 
@@ -673,6 +670,7 @@ static void collect_statistics(
             all_statistics->mean_validity += all_mean_validities[i];
         }
         finalise_statistics(all_statistics);
+        // XXX: debug
         cluster_printf(
             "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
             all_statistics->bits,
@@ -1136,7 +1134,6 @@ static void transfer_problems_between_processes(
 ) {
     // check if we are either of *from* or *to*
     if (CLUSTER_METADATA.rank == from) {
-        cluster_printf("Transfer %zu elements to %zu\n", count, to);
         // we are the sender
         for (size_t c = 0; c < count; c++) {
             size_t buffer_size = 3U + problem_set->problem_solutions[problem_set->count - count + c].count;
@@ -1211,7 +1208,6 @@ static void transfer_problems_between_processes(
             free(buffer);
         }
         problem_set->count += count;
-        cluster_printf("Receive %zu elements from %zu\n", count, from);
     }
     // otherwise, we are neither, so there's nothing to do
 }
@@ -1233,8 +1229,6 @@ static bool find_solutions_for_problem(
     const ProblemSet* problem_cache,
     ProblemStatistics* statistics
 ) {
-    cluster_printf("Searching %2" PRIuFAST8 "...", size);
-    fflush(stdout);
     // initialise the statistics first
     init_statistics(statistics, size);
     // work out how many bits we have to shift/mask
@@ -1270,7 +1264,5 @@ static bool find_solutions_for_problem(
             update_statistics(statistics, solutions_found);
         }
     }
-    finalise_statistics(statistics);
-    cluster_printf("SEARCHED\n");
     return true; // hmmm, if it can't error, why did I make it return bool?
 }
