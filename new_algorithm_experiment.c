@@ -40,6 +40,13 @@ typedef struct ClusterBookKeeping {
     size_t name_length; // the length of this processor's name
 } ClusterBookKeeping;
 
+// private data structure for tracking program self-timing state
+typedef struct TimingData {
+    long double last_estimate; // the last time estimate we made
+    long double seconds_elapsed; // the amount of time elapsed in the current timing period
+    time_t start_time;
+} TimingData;
+
 typedef uint_fast8_t ProblemSize;
 
 typedef struct CommandLineOptions {
@@ -90,6 +97,14 @@ typedef struct ProblemStatistics {
 } ProblemStatistics;
 
 // private constants
+
+// timing output constants
+static const long double MINUTE_SECONDS = 60.0L;
+static const long double HOUR_SECONDS = 60.0L * 60.0L;
+static const long double DAY_SECONDS = 60.0L * 60.0L * 24.0L;
+static const long double WEEK_SECONDS = 60.0L * 60.0L * 24.0L * 7.0L;
+static const long double MONTH_SECONDS = 60.0L * 60.0L * 24.0L * 30.44L;
+static const long double YEAR_SECONDS = 60.0L * 60.0L * 24.0L * 365.2425L;
 
 // these constants are calculated from A-B-exponential regression on search data
 static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.56236069184829962203;
@@ -147,6 +162,9 @@ static size_t get_cache_size_of_problem(ProblemSize problem_size);
  */
 static bool write_statistics_header(const CommandLineOptions* options);
 
+// starts the stopwatch used for self-timing and completion estimates
+static void stopwatch_start(TimingData* timing_data);
+
 /*
  * populates the given problem set with this process' share of the problems and
  * solutions for the given problem size.
@@ -177,6 +195,16 @@ static void collect_statistics(
 static bool write_out_statistics(
     const ProblemStatistics* statistics,
     const CommandLineOptions* options
+);
+
+// stops the stopwatch
+static void stopwatch_stop(TimingData* timing_data);
+
+// updates completion time estimate based on stopwatch and displays the estimate
+static void update_and_print_completion_estimate(
+    TimingData* timing_data,
+    ProblemSize last_solved,
+    ProblemSize last_to_solve
 );
 
 // initialises the given statistics object if given, does nothing if NULL
@@ -273,12 +301,15 @@ int main(int argc, char *argv[]) {
     ProblemStatistics statistics = {0};
     // these variables are used by master only for collating statistics
     ProblemStatistics all_statistics = {0};
+    // this variable is used only by master for time-completion estimates
+    TimingData stopwatch = {0};
+    if (CLUSTER_METADATA.rank == 0) stopwatch_start(&stopwatch);
     // generate the initial cache for our share of the problem
     if (
         !generate_initial_cache(
             &problem_cache,
             current_size,
-            // only include pointer to statistics if we want stats from problem
+            // only include pointer to statistics if we want stats
             current_size < options.start_problem_size ? NULL : &statistics
         )
     ) {
@@ -290,12 +321,20 @@ int main(int argc, char *argv[]) {
         // master writes statistics to file
         if (!write_out_statistics(&all_statistics, &options)) abort();
     }
+    if (CLUSTER_METADATA.rank == 0) {
+        stopwatch_stop(&stopwatch);
+        // estimate completion of next and log this to console
+        update_and_print_completion_estimate(
+            &stopwatch, current_size, options.end_problem_size
+        );
+    }
     current_size++;
     // then until max problems are cached
     while (current_size <= cache_end_size) {
         // reset statistics
         statistics = (ProblemStatistics){0};
         all_statistics = (ProblemStatistics){0};
+        if (CLUSTER_METADATA.rank == 0) stopwatch_start(&stopwatch);
         // generate extension problems from our own problems and solve
         if (
             !generate_next_problem_solutions_from_current(
@@ -314,6 +353,13 @@ int main(int argc, char *argv[]) {
         }
         // rebalance cache among processes to keep work shared roughly evenly
         rebalance_cache(&problem_cache);
+        if (CLUSTER_METADATA.rank == 0) {
+            stopwatch_stop(&stopwatch);
+            // estimate completion of next and log this to console
+            update_and_print_completion_estimate(
+                &stopwatch, current_size, options.end_problem_size
+            );
+        }
         current_size++;
     }
     // then until max problem size is searched:
@@ -321,6 +367,7 @@ int main(int argc, char *argv[]) {
         // reset statistics
         statistics = (ProblemStatistics){0};
         all_statistics = (ProblemStatistics){0};
+        if (CLUSTER_METADATA.rank == 0) stopwatch_start(&stopwatch);
         // search our share of the problem space and collect statistics
         find_solutions_for_problem(current_size, &problem_cache, &statistics);
         // send our own part of the statistics to master if required
@@ -328,6 +375,13 @@ int main(int argc, char *argv[]) {
             collect_statistics(&statistics, &all_statistics);
             // master writes statistics to file
             if (!write_out_statistics(&all_statistics, &options)) abort();
+        }
+        if (CLUSTER_METADATA.rank == 0) {
+            stopwatch_stop(&stopwatch);
+            // estimate completion of next and log this to console
+            update_and_print_completion_estimate(
+                &stopwatch, current_size, options.end_problem_size
+            );
         }
         current_size++;
     }
@@ -403,6 +457,27 @@ static bool shrink_solution_set(SolutionSet* solution_set);
  */
 static void update_statistics(
     ProblemStatistics* statistics, size_t solutions_count
+);
+
+// returns the time in seconds, converted if needed to most convenient unit
+static long double convenient_time_value(long double seconds);
+
+// returns the most convenient way of describing a given time unit
+static const char* convenient_time_unit(long double seconds);
+
+/*
+ * returns estimated completion time of search based on run time of last
+ * completed factor and the number of factors left to complete
+ */
+static long double estimated_completion_time(
+    long double latest_run_time,
+    ProblemSize completed_factor,
+    ProblemSize factors_left
+);
+
+// returns estimated completion time of the next problem size based on current
+static long double estimated_completion_time_of_next(
+    long double latest_run_time, ProblemSize completed_factor
 );
 
 /*
@@ -574,6 +649,11 @@ static bool write_statistics_header(const CommandLineOptions* options) {
     return true;
 }
 
+static void stopwatch_start(TimingData* timing_data) {
+    timing_data->start_time = time(NULL);
+    timing_data->seconds_elapsed = 1.0L / 0.0L; // NAN
+}
+
 static bool generate_initial_cache(
     ProblemSet* problem_cache,
     ProblemSize problem_size,
@@ -698,14 +778,6 @@ static void collect_statistics(
             all_statistics->mean_validity += all_mean_validities[i];
         }
         finalise_statistics(all_statistics);
-        // XXX: debug
-        cluster_printf(
-            "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
-            all_statistics->bits,
-            all_statistics->lowest_validity,
-            all_statistics->highest_validity,
-            all_statistics->mean_validity
-        );
         // free allocated memory
         free(all_lowest_validities);
         free(all_highest_validities);
@@ -740,6 +812,47 @@ static bool write_out_statistics(
         fclose(csv_file);
     }
     return true;
+}
+
+static void stopwatch_stop(TimingData* timing_data) {
+    time_t now = time(NULL);
+    long double seconds_elapsed = difftime(now, timing_data->start_time);
+    timing_data->seconds_elapsed = seconds_elapsed;
+}
+
+static void update_and_print_completion_estimate(
+    TimingData* timing_data,
+    ProblemSize last_solved,
+    ProblemSize last_to_solve
+) {
+    time_t now = time(NULL);
+    char time_string[21];
+    strftime(time_string, sizeof(time_string), "%FT%TZ", gmtime(&now));
+    // print error of estimate
+    cluster_printf("============================= %s =============================\n", time_string);
+    cluster_printf(
+        "Solved problem size: %" PRIuFAST8
+        " - Time taken:\t%Lf%s (%.2Lf%% of estimate)\n",
+        last_solved,
+        convenient_time_value(timing_data->seconds_elapsed),
+        convenient_time_unit(timing_data->seconds_elapsed),
+        ((timing_data->seconds_elapsed / timing_data->last_estimate) - 0.0L) * 100.0L
+    );
+    long double completion_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, last_to_solve - last_solved);
+    cluster_printf(
+        "Estimated time til completion:\t\t%Lf%s\n",
+        convenient_time_value(completion_estimate),
+        convenient_time_unit(completion_estimate)
+    );
+    if (last_solved < last_to_solve) {
+        timing_data->last_estimate = estimated_completion_time(timing_data->seconds_elapsed, last_solved, 1);
+        cluster_printf(
+            "Estimated time til next solved:\t\t%Lf%s\n",
+            convenient_time_value(timing_data->last_estimate),
+            convenient_time_unit(timing_data->last_estimate)
+        );
+    }
+    cluster_printf("================================================================================\n\n");
 }
 
 static void deallocate_problem_set(ProblemSet* problem_set) {
@@ -800,6 +913,67 @@ static void update_statistics(
         // mean validity is cumulative until we finish at which point divide
         statistics->mean_validity += solutions_count;
     }
+}
+
+static long double convenient_time_value(long double seconds) {
+    if (seconds < MINUTE_SECONDS) {
+        return seconds;
+    } else if (seconds < HOUR_SECONDS) {
+        return seconds / MINUTE_SECONDS;
+    } else if (seconds < DAY_SECONDS) {
+        return seconds / HOUR_SECONDS;
+    } else if (seconds < WEEK_SECONDS) {
+        return seconds / DAY_SECONDS;
+    } else if (seconds < MONTH_SECONDS) {
+        return seconds / WEEK_SECONDS;
+    } else if (seconds < YEAR_SECONDS) {
+        return seconds / MONTH_SECONDS;
+    } else {
+        return seconds / YEAR_SECONDS;
+    }
+}
+
+static const char* convenient_time_unit(long double seconds) {
+    if (seconds < MINUTE_SECONDS) {
+        return "s";
+    } else if (seconds < HOUR_SECONDS) {
+        return " mins";
+    } else if (seconds < DAY_SECONDS) {
+        return " hours";
+    } else if (seconds < WEEK_SECONDS) {
+        return " days";
+    } else if (seconds < MONTH_SECONDS) {
+        return " weeks";
+    } else if (seconds < YEAR_SECONDS) {
+        return " months";
+    } else {
+        return " years";
+    }
+}
+
+static long double estimated_completion_time(
+    long double latest_run_time,
+    ProblemSize completed_factor,
+    ProblemSize factors_left
+) {
+    long double estimate = 0.0L;
+    long double last_estimated = latest_run_time;
+    for (ProblemSize f = 0; f < factors_left; f++) {
+        last_estimated = estimated_completion_time_of_next(
+            last_estimated,
+            completed_factor + f
+        );
+        estimate += last_estimated;
+    }
+    return estimate;
+}
+
+static long double estimated_completion_time_of_next(
+    long double latest_run_time, ProblemSize completed_factor
+) {
+    ProblemSize next_factor = completed_factor + 1;
+    return latest_run_time / (powl(4.0L, completed_factor) * completed_factor)
+                           * (powl(4.0L, next_factor) * next_factor);
 }
 
 static void finalise_statistics(ProblemStatistics* statistics) {
