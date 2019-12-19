@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include <mpi.h>
 
@@ -42,6 +43,7 @@ typedef struct ClusterBookKeeping {
 typedef uint_fast8_t ProblemSize;
 
 typedef struct CommandLineOptions {
+    char* csv_file_name; // name of file to write out CSV statistics to
     ProblemSize start_problem_size; // size of problem to start with in bits
     ProblemSize end_problem_size; // size of problem to end with in bits
     size_t max_ram_per_process; // max RAM allowed per process in bytes
@@ -138,6 +140,14 @@ static ProblemSize find_largest_cacheable_problem_size(size_t ram_limit);
 static size_t get_cache_size_of_problem(ProblemSize problem_size);
 
 /*
+ * writes out the CSV header for the statistics of this search
+ * uses the given options object to defermine which file to write this to
+ * files are truncated on open
+ * returns whether this succeeded or not
+ */
+static bool write_statistics_header(const CommandLineOptions* options);
+
+/*
  * populates the given problem set with this process' share of the problems and
  * solutions for the given problem size.
  * if statistics is not NULL, this will be populated with the statistics for
@@ -157,6 +167,16 @@ static bool generate_initial_cache(
 static void collect_statistics(
     const ProblemStatistics* statistics,
     ProblemStatistics* all_statistics
+);
+
+/*
+ * writes out the given statistics object to CSV file, using options object to
+ * determine which file this should be
+ * returns whether this succeeded or not
+ */
+static bool write_out_statistics(
+    const ProblemStatistics* statistics,
+    const CommandLineOptions* options
 );
 
 // initialises the given statistics object if given, does nothing if NULL
@@ -226,6 +246,8 @@ int main(int argc, char *argv[]) {
             get_cache_size_of_problem(largest_cacheable)
         );
     }
+    // write CSV header out to file
+    if (!write_statistics_header(&options)) abort(); // cheap error-handling
     // barrier to synchronise output
     MPI_Barrier(MPI_COMM_WORLD);
     // work out what the options passed to the program require us to do
@@ -265,8 +287,9 @@ int main(int argc, char *argv[]) {
     // send our own part of the statistics to master if required
     if (current_size >= options.start_problem_size) {
         collect_statistics(&statistics, &all_statistics);
+        // master writes statistics to file
+        if (!write_out_statistics(&all_statistics, &options)) abort();
     }
-    // TODO: master writes statistics to file if required
     current_size++;
     // then until max problems are cached
     while (current_size <= cache_end_size) {
@@ -286,8 +309,9 @@ int main(int argc, char *argv[]) {
         // send our own part of the statistics to master if required
         if (current_size >= options.start_problem_size) {
             collect_statistics(&statistics, &all_statistics);
+            // master writes statistics to file
+            if (!write_out_statistics(&all_statistics, &options)) abort();
         }
-        // TODO: master writes statistics to file if required
         // rebalance cache among processes to keep work shared roughly evenly
         rebalance_cache(&problem_cache);
         current_size++;
@@ -302,8 +326,9 @@ int main(int argc, char *argv[]) {
         // send our own part of the statistics to master if required
         if (current_size >= options.start_problem_size) {
             collect_statistics(&statistics, &all_statistics);
+            // master writes statistics to file
+            if (!write_out_statistics(&all_statistics, &options)) abort();
         }
-        // TODO: master writes statistics to file if required
         current_size++;
     }
     // free dynamically-allocated memory
@@ -465,11 +490,12 @@ static CommandLineOptions parse_command_line_options(
     int argc,
     char *argv[]
 ) {
-    if (argc < 4) exit(-1); // we need 3 additional arguments besides file name
+    if (argc < 5) exit(-1); // we need 4 additional arguments besides file name
     CommandLineOptions options = {0};
-    options.start_problem_size = strtoul(argv[1], NULL, 10);
-    options.end_problem_size = strtoul(argv[2], NULL, 10);
-    options.max_ram_per_process = strtoul(argv[3], NULL, 10);
+    options.csv_file_name = argv[1];
+    options.start_problem_size = strtoul(argv[2], NULL, 10);
+    options.end_problem_size = strtoul(argv[3], NULL, 10);
+    options.max_ram_per_process = strtoul(argv[4], NULL, 10);
     if (
         options.start_problem_size == 0
         || options.end_problem_size == 0
@@ -532,6 +558,20 @@ static size_t get_cache_size_of_problem(ProblemSize problem_size) {
             )
         )
     );
+}
+
+static bool write_statistics_header(const CommandLineOptions* options) {
+    // only the master process does this
+    if (CLUSTER_METADATA.rank == 0) {
+        FILE* csv_file = fopen(options->csv_file_name, "w");
+        if (csv_file == NULL) return false;
+        fprintf(
+            csv_file,
+            "Timestamp,Bits,Problem Size,Lowest Validity,Highest Validity,Mean Validity\n"
+        );
+        fclose(csv_file);
+    }
+    return true;
 }
 
 static bool generate_initial_cache(
@@ -671,6 +711,35 @@ static void collect_statistics(
         free(all_highest_validities);
         free(all_mean_validities);
     }
+}
+
+static bool write_out_statistics(
+    const ProblemStatistics* statistics,
+    const CommandLineOptions* options
+) {
+    // only do this on the master process
+    if (CLUSTER_METADATA.rank == 0) {
+        // get ISO time string
+        time_t now = time(NULL);
+        char time_string[21];
+        strftime(time_string, sizeof(time_string), "%FT%TZ", gmtime(&now));
+        // open file for appending
+        FILE* csv_file = fopen(options->csv_file_name, "a");
+        if (csv_file == NULL) return false;
+        // write out statistics row to CSV file
+        fprintf(
+            csv_file,
+            "%s,%" PRIuFAST8 ",%" PRIuMAX ",%" PRIu64 ",%" PRIu64 ",%Lf\n",
+            time_string,
+            statistics->bits,
+            two_to_the_power_of(statistics->bits),
+            statistics->lowest_validity,
+            statistics->highest_validity,
+            statistics->mean_validity
+        );
+        fclose(csv_file);
+    }
+    return true;
 }
 
 static void deallocate_problem_set(ProblemSet* problem_set) {
