@@ -154,6 +154,24 @@ static bool generate_initial_cache(
 );
 
 /*
+ * collates statistics across nodes from statistics, into all_statistics on the
+ * master node
+ */
+static void collect_statistics(
+    const ProblemStatistics* statistics,
+    ProblemStatistics* all_statistics
+);
+
+// initialises the given statistics object if given, does nothing if NULL
+static void init_statistics(ProblemStatistics* statistics, ProblemSize bits);
+
+/*
+ * calculates the mean validity statistics if not NULL, to be called once after
+ * testing of a given problem is finished
+ */
+static void finalise_statistics(ProblemStatistics* statistics);
+
+/*
  * using the existing problem cache, generates additional problems deriving from
  * them and finds all their solutions, counting all the valid ones but storing
  * only those that are guaranteed to have at least one child
@@ -219,7 +237,9 @@ int main(int argc, char *argv[]) {
     ProblemSet problem_cache = {0};
     // this is the statistics store for this processor
     ProblemStatistics statistics = {0};
-    // TODO: generate the initial cache for our share of the problem
+    // these variables are used by master only for collating statistics
+    ProblemStatistics all_statistics = {0};
+    // generate the initial cache for our share of the problem
     if (
         !generate_initial_cache(
             &problem_cache,
@@ -230,16 +250,11 @@ int main(int argc, char *argv[]) {
     ) {
         abort(); // cheap error-handling
     }
-    // XXX: debug
-    cluster_printf(
-        "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
-        statistics.bits,
-        statistics.lowest_validity,
-        statistics.highest_validity,
-        statistics.mean_validity
-    );
-    // TODO: send our own part of the statistics to master if required
-    // TODO: master collates all statistics and writes to file if required
+    // send our own part of the statistics to master if required
+    if (current_size >= options.start_problem_size) {
+        collect_statistics(&statistics, &all_statistics);
+    }
+    // TODO: master collates statistics and writes to file if required
     current_size++;
     // FIXME: until statistics-collation is implemented, MPI_Barrier() is used
     MPI_Barrier(MPI_COMM_WORLD);
@@ -247,6 +262,7 @@ int main(int argc, char *argv[]) {
     while (current_size <= cache_end_size) {
         // reset statistics
         statistics = (ProblemStatistics){0};
+        all_statistics = (ProblemStatistics){0};
         // generate extension problems from our own problems and solve
         if (
             !generate_next_problem_solutions_from_current(
@@ -257,15 +273,10 @@ int main(int argc, char *argv[]) {
         ) {
             abort(); // cheap error-handling
         }
-        // XXX: debug
-        cluster_printf(
-            "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
-            statistics.bits,
-            statistics.lowest_validity,
-            statistics.highest_validity,
-            statistics.mean_validity
-        );
-        // TODO: send statistics to master if required
+        // send our own part of the statistics to master if required
+        if (current_size >= options.start_problem_size) {
+            collect_statistics(&statistics, &all_statistics);
+        }
         // TODO: master collates statistics and writes to file if required
         // TODO: rebalance cache among processes
         current_size++;
@@ -322,9 +333,6 @@ static bool allocate_problem_set(
     ProblemSet* problem_set, ProblemSize problem_size, size_t problems_count
 );
 
-// initialises the given statistics object if given, does nothing if NULL
-static void init_statistics(ProblemStatistics* statistics, ProblemSize bits);
-
 /*
  * returns collision result of given solution for the given problem, both of
  * given size in bits
@@ -368,12 +376,6 @@ static long double mean_validity(ProblemSize problem_size);
 static void integer_to_bit_string(
     ProblemSize size, RepresentationBase source, bool dest[size]
 );
-
-/*
- * calculates the mean validity statistics if not NULL, to be called once after
- * testing of a given problem is finished
- */
-static void finalise_statistics(ProblemStatistics* statistics);
 
 /*
  * Using cached data in the given problem set, generate the problems and valid
@@ -586,6 +588,75 @@ static bool generate_initial_cache(
         );
     }
     return true; // success
+}
+
+static void collect_statistics(
+    const ProblemStatistics* statistics,
+    ProblemStatistics* all_statistics
+) {
+    size_t* all_lowest_validities;
+    size_t* all_highest_validities;
+    long double* all_mean_validities;
+    if (CLUSTER_METADATA.rank == 0) {
+        // on the master only, allocate memory for the validity arrays
+        all_lowest_validities = calloc(
+            CLUSTER_METADATA.world_size, sizeof(size_t)
+        );
+        all_highest_validities = calloc(
+            CLUSTER_METADATA.world_size, sizeof(size_t)
+        );
+        all_mean_validities = calloc(
+            CLUSTER_METADATA.world_size, sizeof(long double)
+        );
+        if (
+            all_lowest_validities == NULL ||
+            all_highest_validities == NULL ||
+            all_mean_validities == NULL
+        ) {
+            abort(); // cheap error-handling
+        }
+    }
+    // gather lowest validity, highest validity and mean validity
+    MPI_Gather(
+        &statistics->lowest_validity, 1, MPI_UINT64_T,
+        all_lowest_validities, 1, MPI_UINT64_T,
+        0, MPI_COMM_WORLD
+    );
+    MPI_Gather(
+        &statistics->highest_validity, 1, MPI_UINT64_T,
+        all_highest_validities, 1, MPI_UINT64_T,
+        0, MPI_COMM_WORLD
+    );
+    MPI_Gather(
+        &statistics->mean_validity, 1, MPI_LONG_DOUBLE,
+        all_mean_validities, 1, MPI_LONG_DOUBLE,
+        0, MPI_COMM_WORLD
+    );
+    // master collates all statistics and writes to file if required
+    if (CLUSTER_METADATA.rank == 0) {
+        init_statistics(all_statistics, statistics->bits);
+        for (size_t i = 0; i < CLUSTER_METADATA.world_size; i++) {
+            if (all_lowest_validities[i] < all_statistics->lowest_validity) {
+                all_statistics->lowest_validity = all_lowest_validities[i];
+            }
+            if (all_highest_validities[i] > all_statistics->highest_validity) {
+                all_statistics->highest_validity = all_highest_validities[i];
+            }
+            all_statistics->mean_validity += all_mean_validities[i];
+        }
+        finalise_statistics(all_statistics);
+        cluster_printf(
+            "Bits: %2" PRIuFAST8 "\tLowest: %4zu\tHighest: %4zu\tMean: %10.6LF\n",
+            all_statistics->bits,
+            all_statistics->lowest_validity,
+            all_statistics->highest_validity,
+            all_statistics->mean_validity
+        );
+        // free allocated memory
+        free(all_lowest_validities);
+        free(all_highest_validities);
+        free(all_mean_validities);
+    }
 }
 
 static void deallocate_problem_set(ProblemSet* problem_set) {
