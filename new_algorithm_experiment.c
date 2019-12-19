@@ -1121,16 +1121,6 @@ static void rebalance_cache(ProblemSet* problem_set) {
                     );
                     cache_sizes[i] -= transfer;
                     cache_sizes[j] += transfer;
-                    if (CLUSTER_METADATA.rank == 0) {
-                        cluster_printf(
-                            "O = %zu U = %zu Transfer %zu elements from %zu to %zu\n",
-                            overflow,
-                            underflow,
-                            transfer,
-                            i,
-                            j
-                        );
-                    }
                 }
             }
         }
@@ -1146,18 +1136,20 @@ static void transfer_problems_between_processes(
 ) {
     // check if we are either of *from* or *to*
     if (CLUSTER_METADATA.rank == from) {
+        cluster_printf("Transfer %zu elements to %zu\n", count, to);
         // we are the sender
         for (size_t c = 0; c < count; c++) {
-            size_t buffer_size = 3U + problem_set->problem_solutions[c].count;
+            size_t buffer_size = 3U + problem_set->problem_solutions[problem_set->count - count + c].count;
+            // cluster_printf("Send size %zu\n", buffer_size);
             // allocate memory for a buffer of 64-bit uints
             uint64_t* buffer = calloc(buffer_size, sizeof(uint64_t));
             if (buffer == NULL) abort(); // cheap error-handling
             // fill the buffer with the problem and solutions
-            buffer[0] = problem_set->problem_solutions[c].count;
-            buffer[1] = problem_set->problem_solutions[c].all_count;
-            buffer[2] = problem_set->problem_solutions[c].problem;
-            for (size_t s = 0; s < problem_set->problem_solutions[c].count; s++) {
-                buffer[3 + s] = problem_set->problem_solutions[c].solutions[s];
+            buffer[0] = problem_set->problem_solutions[problem_set->count - count + c].count;
+            buffer[1] = problem_set->problem_solutions[problem_set->count - count + c].all_count;
+            buffer[2] = problem_set->problem_solutions[problem_set->count - count + c].problem;
+            for (size_t s = 0; s < problem_set->problem_solutions[problem_set->count - count + c].count; s++) {
+                buffer[3 + s] = problem_set->problem_solutions[problem_set->count - count + c].solutions[s];
             }
             // send the buffer to the other process
             MPI_Send(buffer, buffer_size, MPI_UINT64_T, to, 0, MPI_COMM_WORLD);
@@ -1168,14 +1160,58 @@ static void transfer_problems_between_processes(
         trim_solution_set(problem_set, count);
     } else if (CLUSTER_METADATA.rank == to) {
         // we are the receiver
-        // TODO: grow our problem set by *count* items
+        // grow our problem set by *count* items
+        problem_set->problem_solutions = realloc(
+            problem_set->problem_solutions,
+            (problem_set->count + count) * sizeof(SolutionSet)
+        );
+        if (problem_set->problem_solutions == NULL) abort();
         for (size_t c = 0; c < count; c++) {
-            // TODO: Use MPI_Probe() to count how large the incoming buffer is
-            // TODO: allocate memory for the incoming buffer and the problem set
-            // TODO: Use MPI_Recv() to read into our buffer
-            // TODO: Extract the data out of the buffer into our problem set
-            // TODO: free any temporary memory allocated here
+            // Use MPI_Probe() to count how large the incoming buffer is
+            MPI_Status status;
+            MPI_Probe(from, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            int buffer_size = 0;
+            MPI_Get_count(&status, MPI_UINT64_T, &buffer_size);
+            // allocate memory for the incoming buffer and the problem set
+            uint64_t* buffer = calloc((size_t)buffer_size, sizeof(uint64_t));
+            if (buffer == NULL) abort(); // cheap error-handling
+            // number of solutions is 3 less the total size due to other vars
+            size_t solutions_count = (size_t)(buffer_size - 3);
+            problem_set->problem_solutions[problem_set->count + c]
+                        .solutions = calloc(solutions_count, sizeof(Solution));
+            if (
+                problem_set->problem_solutions[problem_set->count + c].solutions
+                == NULL
+            ) {
+                abort(); // cheap error-handling
+            }
+            // Use MPI_Recv() to read into our buffer
+            MPI_Recv(
+                buffer, buffer_size, MPI_UINT64_T, from, MPI_ANY_TAG,
+                MPI_COMM_WORLD, MPI_STATUS_IGNORE
+            );
+            // cluster_printf("Receive size %i\n", buffer_size);
+            // validation
+            if (buffer[0] != solutions_count) abort();
+            // Extract the data out of the buffer into our problem set
+            problem_set->problem_solutions[problem_set->count + c]
+                        .allocated_size = solutions_count;
+            problem_set->problem_solutions[problem_set->count + c]
+                        .count = solutions_count;
+            problem_set->problem_solutions[problem_set->count + c]
+                        .all_count = buffer[1];
+            problem_set->problem_solutions[problem_set->count + c]
+                        .problem = buffer[2];
+            // extract out all the solutions
+            for (size_t s = 0; s < solutions_count; s++) {
+                problem_set->problem_solutions[problem_set->count + c]
+                            .solutions[s] = buffer[3 + s];
+            }
+            // free memory
+            free(buffer);
         }
+        problem_set->count += count;
+        cluster_printf("Receive %zu elements from %zu\n", count, from);
     }
     // otherwise, we are neither, so there's nothing to do
 }
