@@ -303,9 +303,8 @@ int main(int argc, char *argv[]) {
         if (current_size >= options.start_problem_size) {
             collect_statistics(&statistics, &all_statistics);
         }
-        // TODO: master collates statistics and writes to file
+        // TODO: master writes statistics to file if required
         current_size++;
-        MPI_Barrier(MPI_COMM_WORLD);
     }
     // free dynamically-allocated memory
     deallocate_problem_set(&problem_cache);
@@ -1044,6 +1043,14 @@ static void rebalance_cache(ProblemSet* problem_set) {
                     );
                     cache_sizes[i] -= transfer;
                     cache_sizes[j] += transfer;
+                    /*
+                     * not actually required, but mark a synchronisation point
+                     * for programmer's benefit --this is useful because we can
+                     * then guarantee that all processes are on the same page,
+                     * although this might induce a small performance penalty
+                     * and this should be reviewed
+                     */
+                    MPI_Barrier(MPI_COMM_WORLD);
                 }
             }
         }
