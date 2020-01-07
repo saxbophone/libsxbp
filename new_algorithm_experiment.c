@@ -107,8 +107,8 @@ static const long double MONTH_SECONDS = 60.0L * 60.0L * 24.0L * 30.44L;
 static const long double YEAR_SECONDS = 60.0L * 60.0L * 24.0L * 365.2425L;
 
 // these constants are calculated from A-B-exponential regression on search data
-static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.56236069184829962203;
-static const long double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.8329257011252032045966;
+static const double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_A = 1.579354269601670;
+static const double MEAN_VALIDITY_A_B_EXPONENTIAL_REGRESSION_CURVE_B = 0.832119117570787;
 // a size of problem that we can guarantee we can store and is fast to solve
 static const ProblemSize SMALL_REASONABLY_FAST_CACHEABLE_PROBLEM_SIZE = 10U;
 // how much extra memory we allocate for solution sets when they require more space
