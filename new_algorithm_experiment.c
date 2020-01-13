@@ -1243,6 +1243,12 @@ static void rebalance_cache(ProblemSet* problem_set) {
     // use MPI All-gather to allow all processes to know eachother's cache size
     uint64_t* cache_sizes = calloc(CLUSTER_METADATA.world_size, sizeof(uint64_t));
     if (cache_sizes == NULL) abort(); // cheap error-handling
+    // XXX: Count how many SOLUTIONS we have in total and log to console
+    uint64_t solutions_count = 0;
+    for (size_t i = 0; i < problem_set->count; i++) {
+        solutions_count += problem_set->problem_solutions[i].count;
+    }
+    cluster_printf("Solutions = %" PRIu64 "\n", solutions_count);
     uint64_t* expected_cache_sizes = calloc(
         CLUSTER_METADATA.world_size, sizeof(uint64_t)
     );
