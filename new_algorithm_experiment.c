@@ -315,6 +315,8 @@ int main(int argc, char *argv[]) {
     ) {
         abort(); // cheap error-handling
     }
+    // XXX: Debug
+    cluster_printf("Solutions = %.0Lf\n", statistics.mean_validity);
     // send our own part of the statistics to master if required
     if (current_size >= options.start_problem_size) {
         collect_statistics(&statistics, &all_statistics);
@@ -345,6 +347,8 @@ int main(int argc, char *argv[]) {
         ) {
             abort(); // cheap error-handling
         }
+        // XXX: Debug
+        cluster_printf("Solutions = %.0Lf\n", statistics.mean_validity);
         // send our own part of the statistics to master if required
         if (current_size >= options.start_problem_size) {
             collect_statistics(&statistics, &all_statistics);
@@ -370,6 +374,8 @@ int main(int argc, char *argv[]) {
         if (CLUSTER_METADATA.rank == 0) stopwatch_start(&stopwatch);
         // search our share of the problem space and collect statistics
         find_solutions_for_problem(current_size, &problem_cache, &statistics);
+        // XXX: Debug
+        cluster_printf("Solutions = %.0Lf\n", statistics.mean_validity);
         // send our own part of the statistics to master if required
         if (current_size >= options.start_problem_size) {
             collect_statistics(&statistics, &all_statistics);
@@ -1243,12 +1249,6 @@ static void rebalance_cache(ProblemSet* problem_set) {
     // use MPI All-gather to allow all processes to know eachother's cache size
     uint64_t* cache_sizes = calloc(CLUSTER_METADATA.world_size, sizeof(uint64_t));
     if (cache_sizes == NULL) abort(); // cheap error-handling
-    // XXX: Count how many SOLUTIONS we have in total and log to console
-    uint64_t solutions_count = 0;
-    for (size_t i = 0; i < problem_set->count; i++) {
-        solutions_count += problem_set->problem_solutions[i].count;
-    }
-    cluster_printf("Solutions = %" PRIu64 "\n", solutions_count);
     uint64_t* expected_cache_sizes = calloc(
         CLUSTER_METADATA.world_size, sizeof(uint64_t)
     );
