@@ -15,6 +15,11 @@
 # begin basic metadata
 cmake_minimum_required(VERSION 3.0)
 
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 project(sxbp VERSION 0.54.0 LANGUAGES C)
 
 # set default C standard to use (C99) if not already set
