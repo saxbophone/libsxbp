@@ -36,6 +36,26 @@
 extern "C" {
 #endif
 
+// these concatenation macros are needed to properly concatenate other macros
+#define CAT(prefix, major, minor, patch, symbol) CAT_(prefix, major, minor, patch, symbol)
+#define CAT_(prefix, major, minor, patch, symbol) prefix ## _ ## major ## minor ## patch ## _ ## symbol
+// a cheap "private" symbol generator, which uses version number as a prefix
+#define SXBP_PRIVATE(symbol) CAT(SXBP_PRIVATE, SXBP_VERSION_MAJOR, SXBP_VERSION_MINOR, SXBP_VERSION_PATCH, symbol)
+
+// the following symbols need to be external, but "private"
+#define SXBP_VECTOR_DIRECTIONS SXBP_PRIVATE(VECTOR_DIRECTIONS)
+#define sxbp_update_bounds SXBP_PRIVATE(update_bounds)
+#define sxbp_move_location SXBP_PRIVATE(move_location)
+#define sxbp_move_location_along_line SXBP_PRIVATE(move_location_along_line)
+#define sxbp_get_bounds SXBP_PRIVATE(get_bounds)
+#define sxbp_get_origin_from_bounds SXBP_PRIVATE(get_origin_from_bounds)
+#define sxbp_walk_figure SXBP_PRIVATE(walk_figure)
+#define sxbp_get_size_from_bounds SXBP_PRIVATE(get_size_from_bounds)
+#define sxbp_dimension_to_string SXBP_PRIVATE(dimension_to_string)
+#define sxbp_make_bitmap_for_bounds SXBP_PRIVATE(make_bitmap_for_bounds)
+#define sxbp_print_bitmap SXBP_PRIVATE(print_bitmap)
+#define sxbp_refine_figure_shrink_from_end SXBP_PRIVATE(refine_figure_shrink_from_end)
+
 // private type for storing one of the items of a tuple
 typedef int32_t sxbp_TupleItem;
 
