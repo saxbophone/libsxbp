@@ -1,3 +1,4 @@
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://stand-with-ukraine.pp.ua)
 # libsxbp ![libsxbp](libsxbp.png "libsxbp")
 
 [![Build Status](https://travis-ci.org/saxbophone/libsxbp.svg?branch=develop)](https://travis-ci.org/saxbophone/libsxbp) [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0) [![Documentation: http://saxbophone.github.io/libsxbp/](https://img.shields.io/badge/Documentation-Doxygen-2C4AA8.svg)](http://saxbophone.github.io/libsxbp/)
